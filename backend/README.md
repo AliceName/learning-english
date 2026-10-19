@@ -25,7 +25,7 @@ API kiểm tra SQL Server trả `200` khi kết nối thành công và `503` khi
 
 `EnglishLearning.Api/appsettings.Development.json` dùng cấu hình local đã kiểm tra:
 
-- Server: `MSI\MSSQLSERVER01`
+- Server: ``
 - Database: `EnglishLearningDB`
 - Xác thực Windows: tài khoản chạy ứng dụng phải có quyền truy cập database.
 
