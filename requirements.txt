@@ -1,0 +1,14 @@
+# Python AI service foundation (Python 3.13).
+# Install in the repository's .venv with: python -m pip install -r requirements.txt
+# .NET dependencies live in backend/EnglishLearning.Api/EnglishLearning.Api.csproj.
+# SQL Server access belongs to the .NET API, so Python database packages are not needed.
+
+# HTTP API, configuration, file/audio uploads, and calls to external AI services.
+fastapi==0.148.0
+uvicorn[standard]==0.54.0
+pydantic-settings==2.16.0
+python-multipart==0.0.32
+httpx==0.28.1
+
+# Add model-specific dependencies when implementing each AI engine.
+# PyTorch/CUDA, Transformers, OCR, and document processing are not installed here.

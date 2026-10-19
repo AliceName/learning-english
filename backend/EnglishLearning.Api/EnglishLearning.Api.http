@@ -1,0 +1,9 @@
+@HostAddress = http://localhost:5000
+
+### Application health
+GET {{HostAddress}}/api/v1/health
+Accept: application/json
+
+### SQL Server connection (read only)
+GET {{HostAddress}}/api/v1/health/database
+Accept: application/json
