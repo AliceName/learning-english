@@ -7,3 +7,42 @@ Accept: application/json
 ### SQL Server connection (read only)
 GET {{HostAddress}}/api/v1/health/database
 Accept: application/json
+
+### Register an account (creates a real user)
+POST {{HostAddress}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "learner@example.com",
+  "fullName": "Người học tiếng Anh",
+  "password": "Learning@2026",
+  "confirmPassword": "Learning@2026",
+  "targetLevel": "B1"
+}
+
+### Login (copy accessToken into the variable below to test /me)
+POST {{HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "learner@example.com",
+  "password": "Learning@2026"
+}
+
+### Current account requires a valid Bearer token
+@AccessToken = paste-a-local-test-token-here
+GET {{HostAddress}}/api/v1/auth/me
+Authorization: Bearer {{AccessToken}}
+
+### Course catalog (published system courses and your own uploads)
+GET {{HostAddress}}/api/v1/courses?sort=updated&page=1&pageSize=6
+Authorization: Bearer {{AccessToken}}
+
+### Combined filters (level + skill match the same active lesson)
+GET {{HostAddress}}/api/v1/courses?search=English&level=B1&skill=speaking&status=in_progress&source=system&sort=popular
+Authorization: Bearer {{AccessToken}}
+
+### Course details (use an ID from the list)
+@CourseId = 1
+GET {{HostAddress}}/api/v1/courses/{{CourseId}}
+Authorization: Bearer {{AccessToken}}

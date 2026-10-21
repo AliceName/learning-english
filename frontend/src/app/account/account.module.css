@@ -1,0 +1,14 @@
+.panel { max-width: 760px; margin: 32px auto; padding: 42px; background: #fff; border: 1px solid #e6eaf5; border-radius: 24px; box-shadow: 0 12px 50px #26355f08; }
+.avatar { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 20px; background: #e8eeff; color: #315de8; font-size: 26px; font-weight: 700; margin-bottom: 25px; }
+.panel h1 { font-size: 30px; font-weight: 750; letter-spacing: -.9px; line-height: 1.4; margin-bottom: 12px; overflow-wrap: anywhere; }
+.panel p { color: #657089; font-size: 14px; line-height: 1.8; }
+.details { display: grid; gap: 16px; padding: 26px; margin: 28px 0; border-radius: 15px; background: #f7f8fd; }
+.details div { display: grid; grid-template-columns: 150px 1fr; gap: 16px; font-size: 13px; line-height: 1.7; }
+.details dt { color: #657089; }
+.details dd { color: #18233c; font-weight: 550; overflow-wrap: anywhere; }
+.logout { color: #315de8; border: 1px solid #d8e1fc; border-radius: 10px; background: #fff; font: inherit; font-size: 12px; font-weight: 600; padding: 10px 18px; cursor: pointer; }
+.logout:disabled { opacity: .6; cursor: wait; }
+.logout:hover { background: #eaf0ff; }
+.homeLink { color: #315de8; font-size: 13px; text-decoration: none; }
+@media (max-width: 720px) { .panel { margin: 10px 18px; padding: 28px 24px; border-radius: 18px; } .panel h1 { font-size: 25px; } .details { padding: 20px; } .details div { grid-template-columns: 1fr; gap: 2px; } }
+.details { scroll-margin-top: 100px; }

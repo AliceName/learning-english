@@ -1,6 +1,6 @@
 # DATABASE_SCHEMA.md — English Learning System
 
-> **Nguồn duy nhất cho Code First:** `ThietKeHeThong(2).doc`, mục **THIẾT KẾ CƠ SỞ DỮ LIỆU**, trang 14–27. Tài liệu này chép lại danh sách bảng/cột và các ràng buộc được mô tả; không phải đề xuất thêm trường.
+> **Nguồn cho Code First:** `ThietKeHeThong(2).doc`, mục **THIẾT KẾ CƠ SỞ DỮ LIỆU**, trang 14–27, cùng các thay đổi được người dùng phê duyệt ghi trong file này.
 >
 > **BẮT BUỘC:** Đọc cùng `DATABASE_RULES.md`. Không tự thêm/xóa/đổi tên bảng hoặc cột. Khi tài liệu không nói rõ, báo `CHƯA XÁC ĐỊNH` và hỏi người dùng trước khi quyết định.
 
@@ -22,6 +22,7 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | Email | NVARCHAR(255) | NN, UQ |
 | PasswordHash | NVARCHAR(255) | NN |
 | FullName | NVARCHAR(150) | NN |
+| Role | NVARCHAR(20) | NN, DEFAULT 'user', CHECK admin/user (phân biệt hoa thường) |
 | AvatarUrl | NVARCHAR(500) | NULL |
 | TargetLevel | NVARCHAR(10) | NULL, CHECK A1/A2/B1/B2/C1/C2 |
 | CurrentStreak | INT | NN, DEFAULT 0 |
@@ -30,6 +31,8 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | IsActive | BIT | NN, DEFAULT 1 |
 | CreatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |
 | UpdatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |
+
+**Thay đổi được duyệt ngày 2026-10-21:** người dùng yêu cầu thêm role `admin`/`user` và tạo một admin mặc định. Migration `002_add_user_role.sql` thêm `Users.Role`, default `user` cho tài khoản hiện có và tài khoản mới; CHECK chỉ chấp nhận hai role chữ thường. PK/FK/UQ và các cột khác giữ nguyên. Admin được tạo bằng lệnh bootstrap riêng, mật khẩu băm PBKDF2; không lưu mật khẩu trong SQL hoặc repository.
 
 ### 2.2. Courses (trang 16)
 
@@ -209,18 +212,18 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 ## 3. Các ràng buộc Code First không được vi phạm
 
 1. **Giữ nguyên tên bảng số nhiều và tên PK theo tài liệu**, ví dụ `Users.UserId`, `Courses.CourseId`. Không tự đổi thành `User.Id` hoặc `Course.Id` theo quy ước chung.
-2. Dùng SQLAlchemy 2.x và Alembic cho SQL Server; `NVARCHAR(MAX)` phải tương thích SQL Server, `DATETIME2` giữ độ chính xác kiểu dữ liệu theo tài liệu.
+2. Dùng Entity Framework Core 9 cho SQL Server theo lựa chọn backend ASP.NET Core của dự án; `NVARCHAR(MAX)` và `DATETIME2` giữ nguyên kiểu dữ liệu theo tài liệu. Baseline CSDL được lưu trong `backend/database/001_initial_schema.sql`.
 3. Chỉ tạo `CHECK`, `UNIQUE`, `DEFAULT`, `FOREIGN KEY`, `CASCADE` đã được tài liệu xác định. Không tự thêm `ON DELETE CASCADE` cho FK khác.
-4. `CreatedAt` và `UpdatedAt` chỉ có ở những bảng đã liệt kê. Không tự thêm `DeletedAt`, `RowVersion`, `Role`, `Level`, `Slug`, `TotalLessons`, `IsDeleted` hay trường nào khác.
+4. `CreatedAt` và `UpdatedAt` chỉ có ở những bảng đã liệt kê. Không tự thêm `DeletedAt`, `RowVersion`, `Level`, `Slug`, `TotalLessons`, `IsDeleted` hay trường nào khác. `Users.Role` là ngoại lệ đã được duyệt tại mục 2.1.
 5. Không tự thêm `Questions`, `Options`, `AnswerKeys` để hỗ trợ bài nghe/đọc. Nếu cần cấu trúc câu hỏi chưa được tài liệu mô tả, **dừng và xin duyệt**.
-6. Không tự thêm trường `Role` vào `Users` dù tài liệu chức năng nhắc đến Admin. Đây là khoảng trống cần nhóm quyết định.
+6. Chỉ dùng `Users.Role` với hai giá trị `admin`/`user` đã được duyệt. Không tự thêm bảng Roles/Permissions hoặc quan hệ phân quyền khác.
 7. Không tạo FK từ `Bookmarks.TargetId` đến một bảng cố định; quan hệ polymorphic cần kiểm tra trong logic ứng dụng.
 8. Không biến các trường JSON text (`PhonemeScores`, `ErrorsJson`, `WrongAnswersJson`) thành bảng riêng hoặc cột bổ sung khi chưa duyệt.
-9. Mọi migration autogenerate phải được kiểm tra bằng tay trước khi chạy `alembic upgrade head`. Không tự chạy migration thay đổi DB nếu người dùng chưa yêu cầu.
+9. Mọi migration hoặc script SQL sinh từ model phải được kiểm tra bằng tay trước khi áp dụng. Không tự chạy migration thay đổi DB nếu người dùng chưa yêu cầu.
 
 ## 4. Điểm tài liệu chưa xác định hoặc cần xác nhận
 
-- **Phân quyền Admin:** Use Case có Admin nhưng bảng `Users` chưa có cột role và không có bảng Roles. **Không tự bổ sung.**
+- **Phân quyền Admin:** đã được người dùng duyệt ngày 2026-10-21 bằng cột `Users.Role` (mục 2.1); không cần bảng Roles.
 - **Nội dung câu hỏi Listening/Reading:** tài liệu có `Lessons.Content` và `ExerciseResults`, nhưng không định nghĩa cấu trúc câu hỏi/đáp án dưới dạng bảng riêng. **Không tự tạo bảng.**
 - **Bookmark `TargetType=vocabulary`:** không có bảng `Vocabulary` trong 13 bảng. Cần xác nhận cách tham chiếu trước khi triển khai chức năng đó.
 - **`UpdatedAt`:** tài liệu nêu default khi tạo bản ghi, không quy định trigger hoặc tự cập nhật mỗi lần sửa. **Không tự thêm trigger hoặc `onupdate` nếu chưa được duyệt.**

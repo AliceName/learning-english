@@ -1,0 +1,18 @@
+.card { min-height: 560px; }
+.story { background: linear-gradient(145deg, #355fe8, #2546b1 65%, #1e356e); color: white; }
+.story h1 span { color: #bde6ff; }
+.story > div > span { color: #c6d4ff; }
+.story p { color: #d5dfff; }
+.formPanel { display: flex; flex-direction: column; justify-content: center; }
+.visual { margin-top: 28px; padding: 22px; border: 1px solid #ffffff22; background: #ffffff0b; border-radius: 18px; }
+.visual > svg { height: 24px; width: 24px; color: #9fe1ff; margin-bottom: 8px; }
+.visual > span { font-size: 9px; letter-spacing: 2px; color: #d5e0ff; }
+.wave { height: 78px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; }
+.wave i { width: 7px; background: linear-gradient(#a1dcff, #a1dcff44); border-radius: 5px; }
+.note { display: flex; gap: 12px; align-items: center; margin-top: 26px; }
+.note svg { flex-shrink: 0; width: 24px; height: 24px; padding: 4px; background: #ffffff18; border-radius: 50%; color: #bde6ff; }
+.note p { font-size: 11px; line-height: 1.7; }
+.registerLink { font-size: 12px; line-height: 1.7; text-align: center; margin: 26px 0 4px; color: #657089; }
+.registerLink a { color: #315de8; font-weight: 650; text-decoration: none; }
+.registerLink a:hover { text-decoration: underline; }
+@media (max-width: 720px) { .card { min-height: 0; } .visual, .note { display: none; } .formPanel { padding-top: 30px; padding-bottom: 35px; } }
