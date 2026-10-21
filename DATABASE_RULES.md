@@ -2,7 +2,7 @@
 
 > **BẮT BUỘC ĐỌC TRƯỚC KHI SINH HOẶC SỬA DATABASE.**
 >
-> Phạm vi: FastAPI + SQLAlchemy 2.x + Alembic + Microsoft SQL Server (Code First).
+> Phạm vi: ASP.NET Core 9 + Entity Framework Core 9 + Microsoft SQL Server. Baseline CSDL được quản lý bằng migration SQL có lưu phiên bản; dịch vụ AI Python không quản lý schema CSDL.
 >
 > **Nguồn sự thật (source of truth):** ERD, data dictionary và danh sách bảng/cột/quan hệ **đã được nhóm phê duyệt**. Tài liệu này chỉ đặt ra quy tắc kiểm soát thay đổi, **không phải bản thiết kế schema**.
 
@@ -13,7 +13,7 @@
 3. **Không tự thay đổi** tên, kiểu dữ liệu, độ dài, nullable, default, precision/scale, khóa chính, khóa ngoại, cardinality, cascade rule hoặc tên bảng/cột đã được duyệt.
 4. **Không suy diễn** cấu trúc database từ giao diện, API, user story hoặc tên tính năng. Một màn hình có thể sử dụng dữ liệu tính toán, DTO, truy vấn hoặc mock data mà không cần thêm cột.
 5. **Không tự tách/gộp bảng**, chuẩn hóa/phi chuẩn hóa, hoặc chuyển quan hệ 1–N thành N–N. Nếu thiết kế thiếu hoặc mâu thuẫn, phải hỏi trước.
-6. **Không tự chạy migration** hoặc thao tác làm thay đổi schema/dữ liệu khi chưa có yêu cầu rõ ràng. Không dùng `drop_all()`, `create_all()` khi dự án đã quản lý schema bằng Alembic.
+6. **Không tự chạy migration** hoặc thao tác làm thay đổi schema/dữ liệu khi chưa có yêu cầu rõ ràng. Không dùng `EnsureDeleted()` hoặc `EnsureCreated()` để thay thế quy trình migration đã thống nhất.
 7. **Không tự sửa migration đã được áp dụng/chia sẻ**. Tạo migration mới sau khi được phê duyệt.
 8. **Không tự tạo bảng/cột phục vụ AI** (điểm phát âm, CEFR, feedback, file OCR, lịch sử chấm điểm...) khi chưa có thiết kế tương ứng. Có thể định nghĩa response schema hoặc mock object mà không thay đổi database.
 9. **Không được lấy ví dụ minh họa trong câu trả lời AI làm schema chính thức**. Chỉ tài liệu schema được phê duyệt mới có hiệu lực.
@@ -24,7 +24,7 @@
 1. Yêu cầu thay đổi schema được người dùng phê duyệt rõ ràng gần nhất.
 2. Data dictionary / schema specification chính thức của dự án.
 3. ERD đã phê duyệt.
-4. SQLAlchemy Models và Alembic Migrations hiện có (để kiểm tra trạng thái triển khai; không mặc nhiên coi chúng đúng nếu mâu thuẫn tài liệu chính thức).
+4. EF Core Entities, Fluent API mappings và các migration/script SQL hiện có (để kiểm tra trạng thái triển khai; không mặc nhiên coi chúng đúng nếu mâu thuẫn tài liệu chính thức).
 5. Tài liệu chức năng, API contract, mock data, thiết kế UI — **chỉ để tham khảo, không tự cấp quyền thêm cột**.
 
 Nếu hai nguồn chính thức mâu thuẫn, dừng thay đổi liên quan và nêu rõ điểm mâu thuẫn để người dùng quyết định.
@@ -44,11 +44,11 @@ Nếu hai nguồn chính thức mâu thuẫn, dừng thay đổi liên quan và 
 
 ## 4. Phân biệt các lớp dữ liệu
 
-- **SQLAlchemy Model:** Ánh xạ **chính xác** các bảng/cột/quan hệ đã được duyệt trong SQL Server.
-- **Pydantic Schema (Request/Response):** Có thể có trường tổng hợp, trường hiển thị, giá trị tính toán hoặc dữ liệu từ nhiều bảng. **Không được mặc định tạo cột tương ứng**.
+- **EF Core Entity và Fluent API:** Ánh xạ **chính xác** các bảng/cột/quan hệ đã được duyệt trong SQL Server.
+- **C# DTO (Request/Response):** Có thể có trường tổng hợp, trường hiển thị, giá trị tính toán hoặc dữ liệu từ nhiều bảng. **Không được mặc định tạo cột tương ứng**.
 - **Frontend TypeScript type / Mock data:** Phục vụ giao diện và demo. **Không được xem là lệnh thay đổi database**.
 - **Service / Repository:** Thực hiện truy vấn và nghiệp vụ dựa trên schema hiện có. Nếu cần dữ liệu chưa có, phải nêu yêu cầu thay đổi trước.
-- **Alembic Migration:** Chỉ phản ánh thay đổi schema **đã được phê duyệt**.
+- **Migration/script SQL:** Chỉ phản ánh thay đổi schema **đã được phê duyệt**.
 
 Ví dụ: API trả về `completionPercentage` không đồng nghĩa phải thêm cột `CompletionPercentage` vào database; giá trị có thể được tính từ dữ liệu hiện có, tùy thiết kế được duyệt.
 
@@ -80,13 +80,13 @@ Không có nguồn phê duyệt thì **không triển khai thay đổi schema**.
 - Chỉ sửa các model và migration trong phạm vi đã duyệt.
 - Không thêm trường “cho tương lai”, “để dễ mở rộng” hoặc “best practice”.
 - Không tạo migration có thay đổi ngoài phạm vi.
-- Không tự chạy `alembic upgrade head` nếu người dùng chỉ yêu cầu viết code.
+- Không tự áp dụng migration/script SQL nếu người dùng chỉ yêu cầu viết code.
 
 ### Bước D — Kiểm tra migration
 
-1. Chạy `alembic revision --autogenerate` **chỉ khi được yêu cầu tạo migration**.
+1. Sinh migration EF Core hoặc script SQL **chỉ khi được yêu cầu tạo migration/CSDL**.
 2. **Đọc và rà soát file migration** trước khi áp dụng: autogenerate có thể tạo khác biệt ngoài ý muốn, không phải kết quả luôn chính xác.
-3. Đối chiếu từng `op.create_table`, `op.add_column`, `op.drop_column`, `op.alter_column`, `op.create_foreign_key`, `op.create_index`... với thay đổi được duyệt.
+3. Đối chiếu từng thao tác tạo/sửa/xóa bảng, cột, khóa, index và constraint với thay đổi được duyệt.
 4. Nếu migration chứa thao tác lạ, **dừng lại, không chạy upgrade**.
 5. Không tự sửa dữ liệu hiện hữu hoặc thực hiện migration phá hủy dữ liệu.
 
@@ -108,7 +108,7 @@ Khi người dùng yêu cầu tính năng mới (ví dụ: bookmark, streak, l�
 - Tự tạo bảng `Role`, `Permission`, `UserRole`, `RefreshToken`, `Notification`, `ActivityLog`, `File`, `AIResult` hoặc bảng khác chỉ dựa trên suy đoán.
 - Tự thêm index, unique constraint, default hoặc cascade delete.
 - Tự đổi kiểu `NVARCHAR` thành `VARCHAR`, thay `DECIMAL` bằng `FLOAT`, thay đổi timezone hoặc precision.
-- Tự dùng `Base.metadata.create_all()` để đồng bộ schema khi đã áp dụng Alembic.
+- Tự dùng `EnsureCreated()` hoặc chạy migration trong lúc khởi động ứng dụng để đồng bộ schema.
 - Tự xóa và tạo lại database để sửa lỗi migration.
 - Tự chỉnh trực tiếp SQL Server ngoài quy trình migration đã thống nhất.
 
@@ -122,7 +122,7 @@ Danh sách trên là ví dụ về **hành động không được tự ý thự
 >
 > **Đề xuất (chưa triển khai):** [nếu người dùng yêu cầu đề xuất].
 >
-> Vui lòng cung cấp ERD/data dictionary hoặc xác nhận thay đổi trước khi tôi viết SQLAlchemy Model và Alembic Migration.
+> Vui lòng cung cấp ERD/data dictionary hoặc xác nhận thay đổi trước khi tôi viết EF Core Entity, mapping hoặc migration/script SQL.
 
 ## 9. Checklist trước khi bàn giao
 
@@ -130,7 +130,7 @@ Danh sách trên là ví dụ về **hành động không được tự ý thự
 - [ ] Không có cột dư thừa do AI tự suy diễn.
 - [ ] Tên, kiểu, độ dài, nullable, default, PK/FK và quan hệ khớp thiết kế.
 - [ ] Không tự thêm audit fields, status fields hoặc soft delete.
-- [ ] Không lấy Pydantic Schema / UI Mock làm nguồn sinh database.
+- [ ] Không lấy DTO / UI Mock làm nguồn sinh database.
 - [ ] Migration chỉ chứa thay đổi được duyệt và đã được rà soát.
 - [ ] Không có thao tác phá hủy dữ liệu ngoài phạm vi.
 - [ ] Các điểm chưa rõ đã được hỏi, không tự quyết định.
@@ -139,6 +139,6 @@ Danh sách trên là ví dụ về **hành động không được tự ý thự
 
 Trước mỗi tác vụ liên quan database, yêu cầu AI:
 
-> Đọc `DATABASE_RULES.md` và schema/ERD đã được phê duyệt trước khi sửa bất kỳ SQLAlchemy Model hoặc Alembic Migration nào. Không tự thêm bảng, cột, khóa ngoại hay constraint. Nếu tài liệu chưa quy định, hãy hỏi tôi trước. Báo cáo diff schema dự kiến và nguồn phê duyệt trước khi triển khai.
+> Đọc `DATABASE_RULES.md` và schema/ERD đã được phê duyệt trước khi sửa bất kỳ EF Core Entity, mapping hoặc migration/script SQL nào. Không tự thêm bảng, cột, khóa ngoại hay constraint. Nếu tài liệu chưa quy định, hãy hỏi tôi trước. Báo cáo diff schema dự kiến và nguồn phê duyệt trước khi triển khai.
 
 **Tài liệu schema chính thức cần được nhóm cung cấp và duy trì riêng. Không được suy diễn rằng file quy tắc này đã mô tả đầy đủ cấu trúc database.**
