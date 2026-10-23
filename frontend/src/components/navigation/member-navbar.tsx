@@ -34,6 +34,7 @@ export default function MemberNavbar({ user, variant = "workspace" }: { user?: P
   const navigation = <>
     <div className={styles.brand}><Brand /></div><span className={styles.navLabel}>KHÔNG GIAN HỌC TẬP</span>
     <nav aria-label="Điều hướng học tập" className={styles.navigation}>
+      {user?.role === "admin" && <Link href="/admin/courses"><Icon name="shield"/><span>Quản trị khóa học</span></Link>}
       {links.map(item => item.href ? <Link key={item.label} href={item.href}
         aria-current={pathname === item.href || item.href === "/courses" && pathname.startsWith("/courses/") ? "page" : undefined}
         onClick={() => drawer.current?.close()}><Icon name={item.icon} /><span>{item.label}</span></Link>

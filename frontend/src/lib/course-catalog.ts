@@ -1,5 +1,5 @@
 export const levels = ["A1", "A2", "B1", "B2", "C1", "C2"] as const;
-export const skills = { speaking: "Luyện nói", writing: "Luyện viết", listening: "Nghe hiểu", reading: "Đọc hiểu" } as const;
+export const skills = { speaking: "Luyện nói", writing: "Luyện viết", listening: "Nghe hiểu", reading: "Đọc hiểu", grammar:"Ngữ pháp" } as const;
 export type CourseQuery = { search: string; level: string; skill: string; source: string; status: string; sort: string; page: number };
 export const defaultCourseQuery: CourseQuery = { search: "", level: "", skill: "", source: "", status: "all", sort: "updated", page: 1 };
 export type CourseItem = {

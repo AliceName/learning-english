@@ -46,6 +46,7 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
     private SqlTransaction transaction = null!;
     private WebApplicationFactory<Program> factory = null!;
     private HttpClient client = null!;
+    private readonly string mediaRoot = Path.Combine(Path.GetTempPath(), "englishlearning-tests-" + Guid.NewGuid().ToString("N"));
 
     public async Task InitializeAsync()
     {
@@ -55,7 +56,7 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.UseEnvironment("Development")
                 .ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-                    new Dictionary<string, string?> { ["Jwt:SigningKey"] = TestJwt.SigningKey }))
+                    new Dictionary<string, string?> { ["Jwt:SigningKey"] = TestJwt.SigningKey, ["MediaStorage:RootPath"] = mediaRoot }))
                 .ConfigureServices(services =>
             {
                 services.RemoveAll<EnglishLearningDbContext>();
@@ -76,6 +77,14 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
         if (factory is not null) await factory.DisposeAsync();
         if (transaction is not null) { await transaction.RollbackAsync(); await transaction.DisposeAsync(); }
         if (connection is not null) await connection.DisposeAsync();
+        if (Directory.Exists(mediaRoot))
+        {
+            var absoluteRoot = Path.GetFullPath(mediaRoot);
+            var tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            if (!absoluteRoot.StartsWith(tempRoot, StringComparison.OrdinalIgnoreCase) || !Path.GetFileName(absoluteRoot).StartsWith("englishlearning-tests-", StringComparison.Ordinal))
+                throw new InvalidOperationException("Refusing to clean up a media path outside the test folder.");
+            Directory.Delete(absoluteRoot, recursive: true);
+        }
     }
 
     private static object Payload(string email, string password = "Learning@2026", string? targetLevel = "B1") =>

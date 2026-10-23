@@ -75,7 +75,7 @@ internal static class EnglishLearningModel
         {
             entity.ToTable("Lessons", "dbo", table =>
             {
-                table.HasCheckConstraint("CK_Lessons_SkillType", "[SkillType] IN (N'speaking', N'writing', N'listening', N'reading')");
+                table.HasCheckConstraint("CK_Lessons_SkillType", "[SkillType] IN (N'speaking', N'writing', N'listening', N'reading', N'grammar')");
                 table.HasCheckConstraint("CK_Lessons_DifficultyLevel", "[DifficultyLevel] IN (N'A1', N'A2', N'B1', N'B2', N'C1', N'C2')");
             });
             entity.HasKey(item => item.LessonId);
