@@ -120,7 +120,7 @@ Bootstrap dùng `PasswordHasher<User>` như đăng ký thường. Chạy lại k
 dotnet run --project backend/EnglishLearning.Api --configuration Release --no-launch-profile -- --bootstrap-admin=true
 ```
 
-API đăng ký công khai luôn gán `user`, bỏ qua trường role do client tự thêm. Đăng ký, đăng nhập và `/auth/me` trả `role` công khai; JWT có claim `role`, cấu hình `RoleClaimType = "role"` để hỗ trợ `[Authorize(Roles = UserRoles.Admin)]` cho API quản trị sau này. Chưa có màn hình/API quản trị trong thay đổi này. Role trong JWT phản ánh thời điểm đăng nhập; sau khi thay role trực tiếp trong SQL cần đăng nhập lại, token cũ còn hiệu lực tối đa 30 phút theo cấu hình hiện tại.
+API đăng ký công khai luôn gán `user`, bỏ qua trường role do client tự thêm. Đăng ký, đăng nhập và `/auth/me` trả `role` công khai; JWT có claim `role`, cấu hình `RoleClaimType = "role"`. Các API quản trị khóa học dùng `[Authorize(Roles = UserRoles.Admin)]` và kiểm tra lại Role/IsActive từ database cho mỗi request để chặn tài khoản đã bị hạ quyền. Role trong JWT phản ánh thời điểm đăng nhập; đăng nhập lại để nhận claim mới sau khi đổi role.
 
 ## Đăng ký tài khoản
 
@@ -184,9 +184,36 @@ dotnet test EnglishLearningSystem.sln --configuration Release
 
 Các kiểm thử tích hợp chạy trong transaction riêng và rollback sau mỗi test. Nếu không đặt biến môi trường, chúng được báo skipped; các kiểm thử còn lại vẫn chạy bình thường.
 
+## Admin tạo và biên soạn khóa học
+
+Các API `/api/v1/admin/*` yêu cầu JWT role `admin` **và** kiểm tra lại Users.Role/IsActive trong database. Tài khoản thường hoặc admin đã bị hạ quyền trả `403`; tài khoản không hoạt động trả `401`. Không thêm bảng/cột hoặc seed dữ liệu. Riêng loại Grammar cần mở rộng ràng buộc bằng script 003 như hướng dẫn bên dưới.
+
+| API | Chức năng |
+|---|---|
+| `GET /api/v1/admin/courses?search=&page=1&pageSize=12` | Danh sách khóa học hệ thống, gồm bản nháp và đã xuất bản |
+| `POST /api/v1/admin/courses` | Tạo nháp với Title, Description, CoverImageUrl, DifficultyLevel, EstimatedMinutes, Skills (`speaking`/`listening`/`reading`/`writing`/`grammar`) |
+| `GET /api/v1/admin/courses/{id}` | Nội dung biên soạn, gồm các bài học và JSON đã giải mã |
+| `PUT /api/v1/admin/courses/{id}` | Lưu tên, mô tả, ảnh bìa bản nháp |
+| `POST /api/v1/admin/courses/{id}/lessons` | Thêm bài Speaking/Listening/Reading/Writing/Grammar |
+| `PUT /api/v1/admin/courses/{id}/lessons/{lessonId}` | Lưu bài học thuộc đúng khóa học |
+| `POST /api/v1/admin/courses/{id}/publish` | Kiểm tra và xuất bản |
+| `POST /api/v1/admin/uploads` | Multipart `file` + `kind=cover/audio`; trả URL dùng trong frontend |
+| `POST /api/v1/admin/pronunciation/ipa` | Tạo IPA Mỹ từ `{ "text": "câu tiếng Anh" }`, tối đa 1000 ký tự; không lưu dữ liệu |
+| `GET /api/v1/media/{fileName}` | Đọc ảnh/audio, hỗ trợ Range/206; cần JWT và quyền đọc nội dung |
+
+Tạo khóa học luôn đặt SourceType=system, CreatedBy từ JWT, IsPublished=false; không lấy các giá trị này từ client. Mỗi kỹ năng được chọn khởi tạo một Lesson trống với cấp độ/thời lượng mặc định, vì schema lưu CEFR, thời lượng và kỹ năng ở Lessons. Tiếp tục chỉnh riêng từng bài ở bước 2. Các request ghi dùng transaction; không cho chỉnh khóa học đã xuất bản qua trình tạo này (`409`). Không chỉnh nội dung user_upload bằng các API quản trị khóa học hệ thống.
+
+`Lessons.Content` lưu JSON version 1 `{ version, speaking, listening, grammar }`. Speaking gồm `goals`, `sentences[{text,ipa,audioUrl}]`. Listening gồm `transcript`, `hideTranscriptFirstListen`, `questions[]` hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank]/answer/caseSensitive) và matching (pairs left/right); mỗi câu có explanation/atSeconds tùy chọn. Audio chính lưu ở Lessons.AudioUrl. Bản nháp được phép chưa có câu/audio; xuất bản yêu cầu mô tả, ảnh bìa và ít nhất một bài active hoàn chỉnh. Audio Listening, transcript và câu hỏi phải đủ; Speaking phải có câu luyện nói. Chưa có TTS AI hoặc chấm điểm phát âm. API học viên hiện chỉ trả tóm tắt bài học, không trả JSON đáp án quản trị.
+
+IPA được sinh offline từ 125.927 mục từ Mỹ của ipa-dict/CMUdict, đóng gói trong assembly (không cần Python/API key hoặc kết nối Internet). API trả `ipa`, `accent: en-US`, `unknownWords`, `alternatives`. Mặc định chọn cách đọc đầu tiên; đây là phiên âm theo từ, chưa phân biệt nghĩa/ngữ cảnh hoặc nối âm cả câu. Từ chưa biết, số và ký hiệu không hỗ trợ trả `ipa: null` và danh sách cần kiểm tra, không trả câu phiên âm bị thiếu. Khi lưu Speaking, backend tự điền IPA còn trống nếu tra được toàn bộ câu; giữ nguyên bản sửa thủ công. IPA tối đa 8000 ký tự trong JSON hiện có, không thay đổi schema. Nguồn dữ liệu, checksum và giấy phép ở `EnglishLearning.Api/Resources/Pronunciation/README.md`. Tests bao gồm câu thường, contractions, từ ghép, nhiều cách đọc, input bounds, unknown words, quyền admin bị thu hồi và lưu/tải lại IPA.
+
+Upload ảnh tối đa 5 MB (JPG/PNG/WebP), audio tối đa 25 MB (MP3/WAV/AAC/M4A). Server kiểm tra phần mở rộng và magic bytes, đổi tên GUID; không dùng tên tệp của client để tạo đường dẫn. Tệp lưu ngoài wwwroot tại `App_Data/uploads` (gitignored); có thể cấu hình `MediaStorage:RootPath`. Cần lưu giữ thư mục này khi triển khai/sao lưu. Tệp nháp chỉ Admin được đọc; học viên chỉ đọc tệp được tham chiếu bởi khóa học đã xuất bản mà họ có quyền xem. Chưa có cơ chế dọn tệp tải lên nhưng không còn được dùng.
+
+Kiểm thử `CourseAuthoringTests.cs` bao gồm quyền Admin, role bị thu hồi, nháp → Speaking/Listening → xuất bản, validation, truy cập bài thuộc khóa khác, định dạng upload và HTTP Range. Tất cả dữ liệu SQL dùng transaction rollback; tệp kiểm thử nằm trong thư mục temp riêng và được dọn sau test.
+
 ## Danh sách khóa học
 
-- `GET /api/v1/courses`: danh sách có phân trang. Query: `search` (tên/mô tả, tối đa 200 ký tự), `level` (A1–C2), `skill` (speaking/writing/listening/reading), `source` (system/user_upload), `status` (all/in_progress/completed/not_started), `sort` (updated/newest/popular/title), `page` (1–10000), `pageSize` (1–24, mặc định 6). Query không hợp lệ trả `400`.
+- `GET /api/v1/courses`: danh sách có phân trang. Query: `search` (tên/mô tả, tối đa 200 ký tự), `level` (A1–C2), `skill` (speaking/writing/listening/reading/grammar), `source` (system/user_upload), `status` (all/in_progress/completed/not_started), `sort` (updated/newest/popular/title), `page` (1–10000), `pageSize` (1–24, mặc định 6). Query không hợp lệ trả `400`.
 - Response có `items`, `totalCount`, `page`, `pageSize`, `totalPages` và `summary` tổng khóa học/đang học/hoàn thành trước khi áp dụng bộ lọc. Trang vượt phạm vi trả danh sách trống. Sort luôn có CourseId để giữ thứ tự ổn định khi các giá trị bằng nhau.
 - `GET /api/v1/courses/{courseId}`: thông tin khóa học và danh sách bài học đang hoạt động, sắp theo OrderIndex rồi LessonId. Không trả nội dung bài học hoặc dữ liệu học viên khác.
 - Cả hai API yêu cầu JWT của tài khoản còn hoạt động (`401` khi thiếu/hết hạn/vô hiệu hóa), trả `Cache-Control: no-store`. Chỉ trả khóa học đã xuất bản: khóa học hệ thống và khóa học `user_upload` do chính người đăng nhập tạo. Khóa học nháp, khóa học của người khác hoặc ID không tồn tại trả `404` ở endpoint chi tiết. Database lỗi/timed out trả `503`; request bị hủy trả `499`.
@@ -194,8 +221,32 @@ Các kiểm thử tích hợp chạy trong transaction riêng và rollback sau m
 - Database chưa có dữ liệu sẽ trả `200` với items trống. Không tạo số liệu đánh giá sao, giá hoặc gia sư AI từ giao diện mẫu. Chưa triển khai API đăng ký học, học bài, bookmark hoặc tạo khóa học AI trong phạm vi danh sách này.
 - Kiểm thử trong `CourseCatalogTests.cs` dùng SQL Server thật trong transaction và rollback khi kết thúc; chạy cùng nhóm `RegistrationSqlServerTests` với biến `ENGLISHLEARNING_TEST_CONNECTION_STRING` như hướng dẫn trên.
 
+## Bài học Grammar
+
+Áp dụng `database/003_add_grammar_lesson_type.sql` sau hai script trước khi triển khai phiên bản hỗ trợ Grammar. Script chỉ mở rộng `CK_Lessons_SkillType` thêm `grammar`, có transaction và kiểm tra định nghĩa trước khi sửa; chạy lại được. Không thêm bảng/cột, không sửa dữ liệu bài học, không tự chạy lúc API khởi động. Database local `EnglishLearningDB` đã được cập nhật ngày 2026-10-22.
+
+Các API tạo/sửa bài hiện có nhận `skillType: "grammar"` và `grammar: { topic, rules, commonMistakes, questions }`; các nội dung của loại khác và `audioUrl` phải là null. API tạo khóa học nhận Skills gồm Speaking, Listening, Reading, Writing, Grammar (1–5 loại, không trùng). Nội dung Grammar nằm trong Lessons.Content JSON version 1; các bài Speaking/Listening cũ vẫn đọc được.
+
+Grammar có tối đa 30 câu hỏi với `type` là `multiple_choice`, `fill_blank`, `error_correction`. Mỗi câu có prompt, explanation và tag. Trắc nghiệm/sửa lỗi có 2–4 options và correctOptionIndex; sửa lỗi cần correction. Điền từ cần `[blank]`, answer, acceptedAnswers (tối đa 10 đáp án thay thế) và caseSensitive. Backend kiểm tra null, độ dài, số lựa chọn và chỉ số đáp án. Có thể lưu lý thuyết trống khi còn nháp; xuất bản cần topic, rules và ít nhất một câu hỏi hợp lệ. Chỉ Admin còn hoạt động được ghi; bài đã xuất bản không sửa ở luồng này.
+
+Danh sách/chi tiết khóa học hiển thị loại Grammar; `GET /api/v1/courses?skill=grammar` lọc khóa học có bài Grammar active. API học viên vẫn chỉ trả tóm tắt bài, không lộ đáp án quản trị. Chưa triển khai lưu điểm/bài nộp Grammar hay ErrorLogs cho học viên. `GrammarAuthoringTests.cs` kiểm tra migration chạy lại trong transaction rollback, khởi tạo/thêm/sửa, validation, xuất bản, lọc khóa học và quyền ghi; không để lại dữ liệu kiểm thử.
+
+## Bài học Writing và Reading
+
+Đã hỗ trợ biên soạn đủ 5 loại Speaking, Listening, Reading, Writing và Grammar. `writing`/`reading` đã nằm trong CHECK Lessons.SkillType; chức năng này chỉ mở rộng DTO và JSON Lessons.Content, không có migration hay thay đổi schema mới. Skills lúc tạo khóa học nhận 1–5 loại không trùng. Các API POST/PUT lessons dùng chung và kiểm tra quyền Admin hiện tại trong database như trước.
+
+Writing: `writing: { taskType, topic, prompt, instructions, minWords, maxWords, sampleAnswer, rubric }`. TaskType nhận essay/email/paragraph/report/proposal. Topic là chủ đề riêng, tối đa 255 ký tự; bài cũ không có topic vẫn đọc được. MinWords/MaxWords từ 1–5000 và min ≤ max. Rubric tối đa 8 tiêu chí `{name,description,weight}`; khi có tiêu chí, tổng weight phải bằng 100. Có thể lưu nháp chưa có đề hoặc rubric; xuất bản cần đề bài và ít nhất một tiêu chí, tổng trọng số 100%. Bài mẫu không bắt buộc. Xem trước nhập bài thử và kiểm tra số từ; chưa có chấm điểm/nhận xét AI hoặc lưu bài nộp học viên.
+
+Reading: `reading: { passageTitle, category, passage, translation, instructions, vocabulary, questions }`. Category tối đa 255 ký tự; passage/translation tối đa 30000 ký tự mỗi trường, translation là bản dịch admin nhập tùy chọn. Vocabulary tối đa 30 mục `{word,meaning,example}`. Questions tối đa 30, hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank], answer, acceptedAnswers, caseSensitive), short_answer (answer, acceptedAnswers, caseSensitive; không yêu cầu [blank]), true_false_not_given (answer true/false/not_given), matching (pairs left/right). Mỗi câu có focus (skimming/scanning/inference/vocabulary, mặc định scanning) và points (0.1–10, mặc định 1), explanation/reference cho dẫn chứng. Xuất bản cần bài đọc và ít nhất một câu hỏi. Preview hiển thị [blank] thành dấu chấm, giữ nguyên marker trong bản biên soạn và JSON lưu trữ.
+
+Mỗi bài chỉ được gửi đúng một nội dung tương ứng skillType; audioUrl của Reading/Writing phải null. GET quản trị trả nội dung Reading/Writing đã lưu; API danh mục/chi tiết học viên chỉ trả tóm tắt và hỗ trợ lọc skill=reading/writing, không lộ đáp án/bài mẫu/rubric qua danh mục. `ReadingWritingAuthoringTests.cs` kiểm tra khởi tạo 5 loại, thêm vào khóa hiện có, save/reload/publish/filter, validation, giới hạn từ/trọng số, quyền ghi và isolation giữa khóa học. Dữ liệu test được rollback. `ReadingWritingDemoTests.cs` kiểm tra các trường của demo mới, short_answer, validation điểm/kỹ năng và tương thích JSON version 1 cũ.
+
+Writing/Reading hỗ trợ định dạng Markdown giới hạn: tiêu đề H2/H3, đậm, nghiêng, gạch chân (++), tô sáng (==), danh sách, trích dẫn và inline code. HTML/links/embeds không được thực thi. Frontend Reading mô phỏng chia đôi màn hình, chú giải từ vựng tại chỗ, song ngữ từ bản dịch nhập sẵn và Review tiến độ kiểm tra. Chưa kết nối dịch vụ chấm bài, dịch tự động hoặc sinh câu hỏi AI.
+
 ## Kiểm tra build
 
 ```powershell
 dotnet build EnglishLearningSystem.sln
 ```
+
+Câu trắc nghiệm Reading/Listening/Grammar (và chọn phần sai của Grammar) có 2–4 lựa chọn không trống, mỗi lựa chọn tối đa 500 ký tự và một correctOptionIndex hợp lệ. API từ chối ít hơn 2 hoặc nhiều hơn 4 lựa chọn. Không thay đổi schema database.

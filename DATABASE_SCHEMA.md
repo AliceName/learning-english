@@ -68,7 +68,7 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | LessonId | INT | PK, IDENTITY(1,1), NN |
 | CourseId | INT | NN, FK → Courses.CourseId, ON DELETE CASCADE |
 | Title | NVARCHAR(255) | NN |
-| SkillType | NVARCHAR(20) | NN, CHECK speaking/writing/listening/reading |
+| SkillType | NVARCHAR(20) | NN, CHECK speaking/writing/listening/reading/grammar |
 | Content | NVARCHAR(MAX) | NULL |
 | AudioUrl | NVARCHAR(500) | NULL |
 | OrderIndex | INT | NN, DEFAULT 0 |
@@ -76,6 +76,8 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | EstimatedMinutes | INT | NULL |
 | IsActive | BIT | NN, DEFAULT 1 |
 | CreatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |
+
+**Thay đổi theo yêu cầu ngày 2026-10-22:** bổ sung loại bài học `grammar`. Script `003_add_grammar_lesson_type.sql` mở rộng riêng `CK_Lessons_SkillType`; giữ nguyên cột, kiểu dữ liệu, PK/FK, default và dữ liệu hiện có. Nội dung Grammar lưu JSON trong `Lessons.Content`. Không mở rộng `ErrorLogs.SkillType` trong phạm vi biên soạn bài học này. Script được áp dụng riêng, không chạy khi API khởi động.
 
 ### 2.5. SpeakingAttempts (trang 19)
 

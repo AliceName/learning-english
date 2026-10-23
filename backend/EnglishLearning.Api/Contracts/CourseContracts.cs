@@ -10,7 +10,7 @@ public sealed class CourseListQuery
     [RegularExpression("^(A1|A2|B1|B2|C1|C2)$")]
     public string? Level { get; init; }
 
-    [RegularExpression("^(speaking|writing|listening|reading)$")]
+    [RegularExpression("^(speaking|writing|listening|reading|grammar)$")]
     public string? Skill { get; init; }
 
     [RegularExpression("^(system|user_upload)$")]

@@ -44,5 +44,62 @@ Authorization: Bearer {{AccessToken}}
 
 ### Course details (use an ID from the list)
 @CourseId = 1
+
+### Admin: create a draft with initial Speaking and Listening lessons
+POST {{HostAddress}}/api/v1/admin/courses
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "title": "Workplace English",
+  "description": "Speaking and listening for everyday meetings.",
+  "coverImageUrl": "https://example.com/cover.jpg",
+  "difficultyLevel": "B2",
+  "estimatedMinutes": 25,
+  "skills": ["speaking", "listening"]
+}
+
+### Admin: generate American IPA without storing a lesson
+POST {{HostAddress}}/api/v1/admin/pronunciation/ipa
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "text": "Could you tell me how to get to the library?"
+}
+
+### Admin: inspect saved draft and lesson IDs
+GET {{HostAddress}}/api/v1/admin/courses/{{CourseId}}
+Authorization: Bearer {{AccessToken}}
+
+### Admin: publish after completing active lessons
+POST {{HostAddress}}/api/v1/admin/courses/{{CourseId}}/publish
+Authorization: Bearer {{AccessToken}}
+
+### Admin: add a Grammar lesson (after database script 003)
+POST {{HostAddress}}/api/v1/admin/courses/{{CourseId}}/lessons
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "title": "Present Perfect",
+  "skillType": "grammar",
+  "difficultyLevel": "B1",
+  "estimatedMinutes": 20,
+  "grammar": {
+    "topic": "Present Perfect",
+    "rules": "S + have/has + V3/ed",
+    "commonMistakes": "Do not use with yesterday.",
+    "questions": [{
+      "type": "fill_blank",
+      "prompt": "She [blank] (work) here since 2020.",
+      "answer": "has worked",
+      "acceptedAnswers": ["'s worked"],
+      "explanation": "Use present perfect with since + a starting point."
+    }]
+  }
+}
+
+### Student: course details
 GET {{HostAddress}}/api/v1/courses/{{CourseId}}
 Authorization: Bearer {{AccessToken}}

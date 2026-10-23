@@ -46,7 +46,7 @@ export default function LoginForm() {
         return;
       }
       form.reset();
-      router.replace("/account");
+      router.replace(result.user?.role === "admin" ? "/admin/courses" : "/account");
       router.refresh();
     } catch {
       setNotice("Kết nối bị gián đoạn. Vui lòng thử lại sau ít phút.");
