@@ -4,11 +4,7 @@
 .shell a, .shell button, .shell input, .shell textarea, .shell select { -webkit-tap-highlight-color: transparent; }
 .shell a:focus-visible, .shell button:focus-visible, .shell summary:focus-visible { outline: 3px solid #78adff; outline-offset: 3px; }
 .sidebar { position: fixed; inset: 0 auto 0 0; width: 264px; display: flex; flex-direction: column; background: #fff; border-right: 1px solid #e9eaf5; z-index: 50; overflow-y: auto; }
-.brand { display: flex; align-items: center; gap: 11px; height: 72px; padding: 0 25px; text-decoration: none; background: #f8f9ff; }
-.brand > span { width: 36px; height: 36px; display: grid; place-items: center; color: white; background: #004ac6; border-radius: 10px; }
-.brand > span svg { width: 23px; height: 23px; }
-.brand strong { display: block; color: #18223b; font-size: 17px; font-weight: 800; letter-spacing: -.5px; }
-.brand small { display: block; color: #477d9a; font-size: 10px; letter-spacing: 1.2px; font-weight: 700; margin-top: 2px; }
+.brand { display: flex; justify-content: center; gap: 0; min-height: 72px; padding: 4px 25px; background: #f8f9ff; }
 .sidebarNav { padding: 28px 17px; }
 .navCaption { display: block; font-size: 11px; font-weight: 750; color: #9295a5; letter-spacing: 1px; padding: 0 12px 15px; }
 .sidebarNav nav { display: grid; gap: 8px; }
@@ -377,3 +373,98 @@
 @media(max-width:1000px) { .sidebar { display: none; } .topbar { left: 0; padding: 0 24px; } .menuButton { display: block; } .main { margin-left: 0; padding: 96px 24px 30px; } .steps strong { font-size: 12px; } .builderGrid { grid-template-columns: 220px minmax(0,1fr); } .skipLink { left: 50px; } }
 @media(max-width:700px) { .main { padding: 94px 17px 28px; } .topbar { gap: 12px; padding: 0 17px; height: 68px; } .topbar form { width: 100%; } .topbarRight { gap: 8px; } .userName, .studentLink { display: none; } .steps { grid-template-columns: 1fr 1fr; gap: 7px; padding: 9px; } .steps > a, .steps > span { gap: 10px; padding: 11px; } .steps strong { font-size: 12px; } .steps small { font-size: 9px; } .pageHeader { flex-direction: column; align-items: flex-start; gap: 15px; } .pageHeader h1 { font-size: 24px; } .twoColumns { grid-template-columns: 1fr; gap: 18px; } .uploadGrid { grid-template-columns: 1fr; } .mediaPreview > div { height: 180px; min-height: 180px; } .labelRow { align-items: flex-start; } .mutedBadge { font-size: 9px; } .formFooter { flex-direction: column; align-items: stretch; } .formFooter > div { gap: 8px; } .formFooter > div > button, .formFooter > div > a { flex: 1; font-size: 11px; } .listHeading { flex-direction: column; align-items: stretch; } .listSearch input { width: 100%; } .builderToolbar { align-items: flex-start; flex-direction: column; gap: 15px; } .builderGrid { grid-template-columns: 1fr; } .lessonSidebar nav { display: flex; overflow-x: auto; padding-bottom: 10px; } .lessonSidebar nav > a { min-width: 215px; } .addLesson { grid-template-columns: 1fr 1fr; margin-top: 10px; } .lessonTitleRow { flex-direction: column; } .sectionHeader { gap: 10px; flex-wrap: wrap; } .sectionHeader h2 { font-size: 14px; } .sectionHeader p { font-size: 11px; } .sectionHeader > button { margin-left: 0; } .exerciseCard { padding: 15px; } .coursePreviewHero { grid-template-columns: 1fr; } .coursePreviewHero > div:first-child { height: 180px; } .previewColumns { grid-template-columns: 1fr; } .publishPanel { padding: 28px 20px; } .checklist li { font-size: 11px; } .checklist li > span { font-size: 9px; } }
 @media(prefers-reduced-motion:reduce) { .shell * { scroll-behavior: auto; } }
+
+/* Readable typography throughout the course creation and authoring wizard. */
+.authoring { --authoring-text: 16px; --authoring-label: 15px; --authoring-small: 14px; --authoring-caption: 12px; color: #253650; font-size: var(--authoring-text); font-weight: 500; line-height: 1.65; }
+.authoring .breadcrumb, .authoring .back { color: #64738d; font-size: 13px; font-weight: 600; }
+.authoring .breadcrumb a { color: #586d90; }
+.authoring .pageHeader h1 { font-size: clamp(28px, 2.4vw, 36px); font-weight: 800; color: #1e304e; }
+.authoring .builderToolbar h2 { font-size: 25px; font-weight: 750; color: #263b5b; }
+.authoring .pageHeader p, .authoring .builderToolbar p { color: #63718a; font-size: var(--authoring-small); font-weight: 500; }
+.authoring :is(.draft, .published) { font-size: 13px; font-weight: 650; }
+.authoring :is(.eyebrow, .idBadge) { font-size: var(--authoring-caption); font-weight: 750; }
+.authoring .steps small { font-size: 11px; font-weight: 700; }
+.authoring .steps strong { color: #425674; font-size: var(--authoring-small); font-weight: 750; line-height: 1.5; }
+.authoring .steps > :is(a, span) > span:last-child { min-width: 0; }
+.authoring .stepNumber { font-size: 15px; font-weight: 750; }
+.authoring :is(.sectionHeader, .studioHeading) h2, .authoring .panel > h2 { color: #263c5a; font-size: 20px; font-weight: 750; line-height: 1.5; }
+.authoring :is(.sectionHeader, .studioHeading) > div { min-width: 0; flex: 1; }
+.authoring :is(.sectionHeader, .studioHeading) p { color: #63718a; font-size: var(--authoring-small); font-weight: 500; }
+.authoring :is(.field, .mediaField, .editorLabel, .studioSectionLabel) { color: #344865; font-size: var(--authoring-label); font-weight: 650; }
+.authoring .field > label, .authoring .mediaField > label, .authoring .labelRow > label, .authoring .ipaLabel label { color: #304561; font-size: var(--authoring-label); font-weight: 700; }
+.authoring .labelRow, .authoring .ipaLabel { flex-wrap: wrap; }
+.authoring :is(.labelRow small, .mutedBadge, .skillChoices small, .studioBadge, .studioHeading > span, .studioSectionLabel > span) { font-size: var(--authoring-caption); font-weight: 600; }
+.authoring :is(.labelRow small, .mutedBadge) { color: #65758c; }
+.authoring :is(.field, .urlRow, .options, .matchingPairs) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea), .authoring .formattedEditor > textarea, .authoring .questionPreview > input, .authoring .matchingPreview select { font-size: var(--authoring-text); font-weight: 500; color: #2c405f; }
+.authoring .field textarea, .authoring .formattedEditor > textarea { line-height: 1.75; }
+.authoring :is(.field input, .field textarea, .urlRow input)::placeholder { color: #7a869a; font-weight: 400; }
+.authoring :is(.hint, .editorHelp) { color: #61718a; font-size: var(--authoring-small); font-weight: 500; line-height: 1.75; }
+.authoring .ipaAlternatives { font-size: var(--authoring-small); color: #526887; }
+.authoring .ipaAlternatives summary { font-weight: 650; }
+.authoring :is(.primaryButton, .secondaryButton, .textButton, .addButton, .skillChoices > button) { min-height: 42px; max-width: 100%; font-size: var(--authoring-small); font-weight: 700; line-height: 1.5; white-space: normal; text-align: center; }
+.authoring .ipaButton { min-height: 34px; font-size: 13px; font-weight: 650; }
+.authoring :is(.textToolbar button, .editorLabel button) { font-size: 13px; font-weight: 600; }
+.authoring .textToolbar button:nth-child(4) { font-weight: 800; }
+.authoring .textToolbar button { min-height: 34px; }
+.authoring .editorLabel button[aria-pressed="true"] { font-weight: 700; }
+.authoring .checkboxLine { color: #526883; font-size: var(--authoring-small); font-weight: 600; }
+.authoring .skillTabs > :is(a, span) { font-size: var(--authoring-small); font-weight: 650; }
+.authoring .skillTabs > a:not([aria-current]) { color: #61728d; }
+.authoring .lessonSidebarHeading { color: #405875; font-size: var(--authoring-label); font-weight: 700; }
+.authoring .lessonSidebarHeading > span { font-size: 13px; }
+.authoring .lessonSidebar nav > a > strong { color: #435b7c; font-size: var(--authoring-small); font-weight: 700; line-height: 1.6; }
+.authoring .lessonSidebar nav > a > small { font-size: var(--authoring-caption); font-weight: 550; }
+.authoring .lessonSkill { font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.authoring .lessonSkill small { color: #627ca4; font-size: 11px; font-weight: 600; }
+.authoring .addLesson a { color: #4d6b98; font-size: 13px; font-weight: 650; }
+.authoring .studioBuilder .lessonSidebar nav > a[aria-current] strong { color: #f0f5ff; }
+.authoring .exerciseHeading { color: #415b80; font-size: var(--authoring-label); }
+.authoring .exerciseHeading strong { font-weight: 750; }
+.authoring .exerciseNumber { font-size: 13px; font-weight: 700; }
+.authoring :is(.options legend, .options label, .choiceOptionRow, .matchingPairs, .questionTypes button) { color: #526986; font-size: var(--authoring-small); font-weight: 600; }
+.authoring :is(.error, .success, .notice) { font-size: var(--authoring-label); font-weight: 550; }
+.authoring .dropzone strong { color: #405a7f; font-size: var(--authoring-label); font-weight: 700; }
+.authoring .dropzone > span, .authoring .audioPreview p { color: #687891; font-size: 13px; font-weight: 500; }
+.authoring .studioDetails > summary, .authoring .simulatorDetails { font-size: var(--authoring-label); }
+.authoring .studioDetails > summary { font-weight: 750; }
+.authoring .studioDetails > summary > span { font-size: 13px; font-weight: 500; }
+.authoring .rubricSummary li { font-size: var(--authoring-small); font-weight: 550; }
+.authoring .aiAssistantCard h3, .authoring .guidingTips .sectionHeader h2 { font-size: 17px; font-weight: 700; }
+.authoring .aiAssistantCard > span { font-size: 11px; }
+.authoring .aiAssistantCard p, .authoring .aiUnavailable { font-size: var(--authoring-small); font-weight: 500; }
+.authoring :is(.simulatorBar, .readingTools, .questionPaneHeading) { font-size: var(--authoring-small); font-weight: 600; }
+.authoring .readingTools button { font-size: 13px; font-weight: 650; }
+.authoring .simulatorPrompt h3 { font-size: 21px; font-weight: 750; }
+.authoring .simulatorPrompt .guidingTips > strong { font-size: var(--authoring-label); font-weight: 700; }
+.authoring .lessonRichText, .authoring .grammarRules, .authoring .readingPassage { font-size: var(--authoring-text); font-weight: 500; line-height: 1.85; }
+.authoring .lessonRichText h2 { font-size: 23px; font-weight: 750; }
+.authoring .lessonRichText h3 { font-size: 20px; font-weight: 700; }
+.authoring .passagePane .lessonRichText { font-size: 1em; }
+.authoring .passageHeading h3 { font-size: 1.25em; }
+.authoring .passageHeading p { font-size: .875em; color: #627591; font-weight: 500; }
+.authoring .readingQuestionNav a { font-size: 13px; font-weight: 650; width: 32px; height: 32px; }
+.authoring :is(.previewTop, .previewPager, .previewGoals, .transcriptPreview, .matchingPreview) { color: #597293; font-size: var(--authoring-small); font-weight: 550; }
+.authoring .previewTop small, .authoring .previewDisclaimer { font-size: var(--authoring-caption); font-weight: 500; }
+.authoring .previewDisclaimer { color: #6a7c94; }
+.authoring .learnerPreview h3, .authoring .grammarTopic h4 { color: #365274; font-size: 18px; font-weight: 750; }
+.authoring .learnerPreview blockquote { color: #304f77; font-size: 22px; font-weight: 650; }
+.authoring .ipa { color: #5f7597; font-size: var(--authoring-text); font-weight: 550; }
+.authoring .questionPreview h4 { color: #435e80; font-size: 17px; font-weight: 700; }
+.authoring .previewOption { font-size: var(--authoring-label); font-weight: 550; }
+.authoring .questionPreview p, .authoring .previewRubric p, .authoring .learnerPreview details, .authoring .translation { font-size: var(--authoring-small); font-weight: 500; }
+.authoring .coursePreviewHero h2, .authoring .publishPanel h2 { color: #344e73; font-size: 28px; font-weight: 750; }
+.authoring .coursePreviewHero p, .authoring .publishPanel > p { color: #5c6f8a; font-size: var(--authoring-text); font-weight: 500; }
+.authoring .previewStats, .authoring .previewLessonList strong { font-size: var(--authoring-label); font-weight: 650; }
+.authoring .previewLessonList strong { color: #456285; }
+.authoring .previewLessonList small { color: #6c809b; font-size: 13px; font-weight: 500; }
+.authoring .checklist li { flex-wrap: wrap; color: #526a8a; font-size: var(--authoring-label); font-weight: 600; }
+.authoring .checklist li > span { color: #667b98; font-size: 13px; font-weight: 600; }
+@media (max-width: 700px) {
+  .authoring .pageHeader h1 { font-size: 28px; }
+  .authoring .builderToolbar h2 { font-size: 23px; }
+  .authoring .sectionHeader h2, .authoring .studioHeading h2 { font-size: 18px; }
+  .authoring .coursePreviewHero h2, .authoring .publishPanel h2 { font-size: 25px; }
+  .authoring .formFooter > div { width: 100%; }
+  .authoring .stepNumber { width: 30px; height: 30px; }
+  .authoring .steps > a, .authoring .steps > span { padding: 10px 8px; gap: 8px; }
+}

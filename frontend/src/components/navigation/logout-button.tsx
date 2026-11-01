@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/site-icon";
 import styles from "./navbar.module.css";
+import { notifySessionChanged } from "@/lib/session-events";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function LogoutButton() {
     try {
       const response = await fetch("/api/auth/logout", { method: "POST" });
       if (!response.ok) throw new Error("Logout failed");
+      notifySessionChanged();
       router.replace("/login");
       router.refresh();
     } catch {

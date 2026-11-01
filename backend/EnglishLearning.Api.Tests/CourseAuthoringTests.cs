@@ -35,10 +35,10 @@ public sealed partial class RegistrationSqlServerTests
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return (await response.Content.ReadFromJsonAsync<AdminCourseResponse>())!;
     }
-    private static SaveLessonRequest SpeakingLesson(string title = "Daily communication") => new()
+    private static SaveLessonRequest SpeakingLesson(string title = "Daily communication", string? audioUrl = null, string goals = "Practice final sounds.") => new()
     {
         Title = title, SkillType = "speaking", DifficultyLevel = "B2", EstimatedMinutes = 25,
-        Speaking = new SpeakingContent { Goals = "Practice final sounds.", Sentences = [new SpeakingSentence { Text = "Could you tell me the way?", Ipa = "/kʊd juː/" }] }
+        Speaking = new SpeakingContent { Goals = goals, Sentences = [new SpeakingSentence { Text = "Could you tell me the way?", Ipa = "/kʊd juː/", AudioUrl = audioUrl }] }
     };
     private static SaveLessonRequest ListeningLesson(string? audioUrl = "https://example.com/meeting.mp3") => new()
     {

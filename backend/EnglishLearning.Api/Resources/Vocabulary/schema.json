@@ -1,0 +1,65 @@
+{
+  "bsonType": "object",
+  "required": ["_id", "language", "normalizedWord", "entries", "fetchedAtUtc"],
+  "additionalProperties": false,
+  "properties": {
+    "_id": { "bsonType": "string", "pattern": "^en:.+$", "maxLength": 103 },
+    "language": { "enum": ["en"] },
+    "normalizedWord": { "bsonType": "string", "minLength": 1, "maxLength": 100 },
+    "fetchedAtUtc": { "bsonType": "date" },
+    "entries": {
+      "bsonType": "array", "minItems": 1,
+      "items": {
+        "bsonType": "object", "required": ["word", "meanings"],
+        "properties": {
+          "word": { "bsonType": "string", "pattern": "\\S" },
+          "phonetic": { "bsonType": ["string", "null"] },
+          "origin": { "bsonType": ["string", "null"] },
+          "sourceUrls": { "bsonType": ["array", "null"], "items": { "bsonType": "string" } },
+          "license": {
+            "bsonType": ["object", "null"],
+            "properties": { "name": { "bsonType": ["string", "null"] }, "url": { "bsonType": ["string", "null"] } }
+          },
+          "phonetics": {
+            "bsonType": ["array", "null"],
+            "items": {
+              "bsonType": "object",
+              "properties": {
+                "text": { "bsonType": ["string", "null"] },
+                "audio": { "bsonType": ["string", "null"] },
+                "sourceUrl": { "bsonType": ["string", "null"] },
+                "license": {
+                  "bsonType": ["object", "null"],
+                  "properties": { "name": { "bsonType": ["string", "null"] }, "url": { "bsonType": ["string", "null"] } }
+                }
+              }
+            }
+          },
+          "meanings": {
+            "bsonType": "array", "minItems": 1,
+            "items": {
+              "bsonType": "object", "required": ["partOfSpeech", "definitions"],
+              "properties": {
+                "partOfSpeech": { "bsonType": "string", "pattern": "\\S" },
+                "synonyms": { "bsonType": ["array", "null"], "items": { "bsonType": "string" } },
+                "antonyms": { "bsonType": ["array", "null"], "items": { "bsonType": "string" } },
+                "definitions": {
+                  "bsonType": "array", "minItems": 1,
+                  "items": {
+                    "bsonType": "object", "required": ["definition"],
+                    "properties": {
+                      "definition": { "bsonType": "string", "pattern": "\\S" },
+                      "example": { "bsonType": ["string", "null"] },
+                      "synonyms": { "bsonType": ["array", "null"], "items": { "bsonType": "string" } },
+                      "antonyms": { "bsonType": ["array", "null"], "items": { "bsonType": "string" } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

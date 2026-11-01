@@ -1,26 +1,33 @@
 "use client";
 
-import Link from "next/link";
 import Icon from "@/components/auth-icon";
-import { useRef, useState, type FormEvent } from "react";
-import styles from "./register.module.css";
+import { useRef, useState, type CSSProperties, type FormEvent } from "react";
+import type { AuthReaction } from "@/components/auth/auth-mascot";
+import styles from "@/components/auth/auth-screen.module.css";
 
 type Field = "fullName" | "email" | "password" | "confirmPassword" | "targetLevel";
 type FieldErrors = Partial<Record<Field, string>>;
 type ApiResponse = { detail?: string; title?: string; errors?: Record<string, string[]>; user?: { fullName: string; email: string } };
 
-export default function RegistrationForm({ initialEmail = "" }: { initialEmail?: string }) {
+export default function RegistrationForm({ initialEmail = "", onReaction, onBusyChange, onLogin }: {
+  initialEmail?: string;
+  onReaction: (reaction: AuthReaction) => void;
+  onBusyChange: (busy: boolean) => void;
+  onLogin: () => void;
+}) {
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [notice, setNotice] = useState("");
+  const [password, setPassword] = useState("");
   const [registered, setRegistered] = useState<ApiResponse["user"]>();
   const inFlight = useRef(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current) return;
+    onReaction("sparkle");
     const form = event.currentTarget;
     const values = new FormData(form);
     const fullName = String(values.get("fullName") ?? "").trim();
@@ -41,6 +48,7 @@ export default function RegistrationForm({ initialEmail = "" }: { initialEmail?:
     }
     inFlight.current = true;
     setSubmitting(true);
+    onBusyChange(true);
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -68,6 +76,7 @@ export default function RegistrationForm({ initialEmail = "" }: { initialEmail?:
     } finally {
       inFlight.current = false;
       setSubmitting(false);
+      onBusyChange(false);
     }
   }
 
@@ -75,58 +84,43 @@ export default function RegistrationForm({ initialEmail = "" }: { initialEmail?:
     return errors[field] ? <p className={styles.fieldError} id={`${field}-error`}>{errors[field]}</p> : null;
   }
 
-  return (
-    <div className={styles.shell}>
-      <header className={styles.header}>
-        <Link href="/" className={styles.brand} aria-label="LinguaAI — Trang chủ"><span className={styles.brandMark}><Icon name="book" /></span>LinguaAI</Link>
-        <Link href="/" className={styles.backLink}>← <span>Quay lại trang chủ</span></Link>
-      </header>
-      <main className={styles.main}>
-        <div className={styles.card}>
-          <aside className={styles.story}>
-            <div>
-              <span className={styles.eyebrow}>MỖI NGÀY MỘT BƯỚC TIẾN</span>
-              <h1>Khởi đầu hành trình.<br /><span>Bứt phá cùng tiếng Anh.</span></h1>
-              <p className={styles.intro}>Một tài khoản, một hành trình học tập dành riêng cho bạn. Bắt đầu từ mục tiêu hôm nay.</p>
-              <div className={styles.features}>
-                <div className={styles.feature}><span className={styles.featureIcon}><Icon name="sound" /></span><div><h2>Tự tin với bốn kỹ năng</h2><p>Nói, nghe, đọc và viết trên cùng một nền tảng.</p></div></div>
-                <div className={styles.feature}><span className={styles.featureIcon}><Icon name="target" /></span><div><h2>Đặt mục tiêu rõ ràng</h2><p>Chọn trình độ CEFR bạn muốn chinh phục, từ A1 đến C2.</p></div></div>
-                <div className={styles.feature}><span className={styles.featureIcon}><Icon name="book" /></span><div><h2>Học theo nhịp của bạn</h2><p>Dành thời gian mỗi ngày cho một điều mới.</p></div></div>
-              </div>
-            </div>
-            <div className={styles.quote}><span className={styles.quoteMark}>“</span><p>Hành trình ngàn dặm bắt đầu<br />từ một bước chân.</p><span className={styles.quoteCaption}>BƯỚC ĐẦU TIÊN LÀ CỦA BẠN</span></div>
-          </aside>
-          <section className={styles.formPanel} aria-labelledby="register-heading">
-            {registered ? (
-              <div className={styles.success} role="status">
-                <span className={styles.successIcon}><Icon name="check" /></span>
-                <span className={styles.eyebrow}>CHÀO MỪNG BẠN ĐẾN VỚI LINGUAAI</span>
-                <h2 id="register-heading">Tạo tài khoản thành công!</h2>
-                <p>Xin chào <strong>{registered.fullName}</strong>. Tài khoản với email <strong>{registered.email}</strong> của bạn đã được tạo.</p>
-                <Link href="/login" className={styles.submit}>Đăng nhập ngay <Icon name="arrow" /></Link>
-              </div>
-            ) : (
-              <>
-                <div className={styles.formHeading}><span className={styles.eyebrow}>BẮT ĐẦU CÙNG LINGUAAI</span><h2 id="register-heading">Tạo tài khoản miễn phí<span aria-hidden="true"> ✨</span></h2><p>Chỉ một bước nhỏ cho hành trình học tập mới.</p></div>
-                {notice && <div className={styles.notice} role="alert">{notice}</div>}
-                <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
-                  <fieldset className={styles.fields} disabled={submitting}>
-                    <div><label htmlFor="fullName">Họ và tên</label><div className={styles.inputWrap}><Icon name="person" /><input id="fullName" name="fullName" autoComplete="name" placeholder="Nguyễn Minh Anh" maxLength={150} required aria-invalid={!!errors.fullName} aria-describedby={errors.fullName ? "fullName-error" : undefined} /></div>{fieldError("fullName")}</div>
-                    <div><label htmlFor="email">Địa chỉ email</label><div className={styles.inputWrap}><Icon name="mail" /><input id="email" name="email" type="email" autoComplete="email" placeholder="ban@example.com" defaultValue={initialEmail} maxLength={255} required aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-error" : undefined} /></div>{fieldError("email")}</div>
-                    <div><label htmlFor="password">Mật khẩu</label><div className={styles.inputWrap}><Icon name="lock" /><input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Tạo mật khẩu của bạn" minLength={8} maxLength={128} required aria-invalid={!!errors.password} aria-describedby={errors.password ? "password-error" : "password-hint"} className={styles.passwordInput} /><button type="button" className={styles.reveal} aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}><Icon name={showPassword ? "hidden" : "eye"} /></button></div>{fieldError("password")}<p id="password-hint" className={styles.hint}>Sử dụng từ 8 đến 128 ký tự.</p></div>
-                    <div><label htmlFor="confirmPassword">Xác nhận mật khẩu</label><div className={styles.inputWrap}><Icon name="lock" /><input id="confirmPassword" name="confirmPassword" type={showConfirmation ? "text" : "password"} autoComplete="new-password" placeholder="Nhập lại mật khẩu" maxLength={128} required aria-invalid={!!errors.confirmPassword} aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined} className={styles.passwordInput} /><button type="button" className={styles.reveal} aria-label={showConfirmation ? "Ẩn mật khẩu xác nhận" : "Hiện mật khẩu xác nhận"} aria-pressed={showConfirmation} onClick={() => setShowConfirmation(!showConfirmation)}><Icon name={showConfirmation ? "hidden" : "eye"} /></button></div>{fieldError("confirmPassword")}</div>
-                    <div><label htmlFor="targetLevel">Mục tiêu trình độ CEFR <span className={styles.optional}>(không bắt buộc)</span></label><select id="targetLevel" name="targetLevel" defaultValue="" aria-invalid={!!errors.targetLevel}><option value="">Tôi sẽ chọn sau</option>{["A1", "A2", "B1", "B2", "C1", "C2"].map(level => <option value={level} key={level}>{level}</option>)}</select>{fieldError("targetLevel")}</div>
-                    <button type="submit" className={styles.submit}>{submitting ? "Đang tạo tài khoản…" : "Tạo tài khoản"}{!submitting && <Icon name="arrow" />}</button>
-                  </fieldset>
-                </form>
-                <p className={styles.authLink}>Đã có tài khoản? <Link href="/login">Đăng nhập</Link></p>
-                <p className={styles.privacy}><Icon name="lock" /> Mật khẩu của bạn được bảo vệ và không hiển thị công khai.</p>
-              </>
-            )}
-          </section>
-        </div>
-      </main>
-      <footer className={styles.footer}>LinguaAI · Học tiếng Anh theo cách của bạn.</footer>
+  const strength = !password ? 0 : password.length < 8 ? 1 : Math.min(4, 1 + Number(/[a-z]/.test(password) && /[A-Z]/.test(password)) + Number(/[0-9]/.test(password)) + Number(/[^A-Za-z0-9]/.test(password)));
+  const strengthLabel = ["Chưa nhập", "Yếu", "Trung bình", "Khá mạnh", "Mạnh"][strength];
+  const strengthColor = ["#e2e7ff", "#ba1a1a", "#b77900", "#2563eb", "#00668a"][strength];
+
+  if (registered) return (
+    <div className={styles.success} role="status">
+      <span className={styles.successIcon}><Icon name="check" /></span>
+      <h1>Tạo tài khoản thành công!</h1>
+      <p>Xin chào <strong>{registered.fullName}</strong>. Tài khoản với email <strong>{registered.email}</strong> của bạn đã được tạo.</p>
+      <button type="button" onClick={onLogin} className={styles.submit}>Đăng nhập ngay <Icon name="arrow" /></button>
     </div>
+  );
+
+  return (
+    <>
+      <div className={styles.formHeading}><h1>Khởi đầu miễn phí</h1><p>Đánh giá phát âm chuẩn AI và trải nghiệm lộ trình cá nhân hóa</p></div>
+      {notice && <div className={styles.notice} role="alert">{notice}</div>}
+      <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
+        <fieldset className={styles.fields} disabled={submitting}>
+          <div><label htmlFor="fullName">Họ và tên</label><div className={styles.inputWrap}><input id="fullName" name="fullName" autoComplete="name" placeholder="Nguyễn Văn A" maxLength={150} required aria-invalid={!!errors.fullName} aria-describedby={errors.fullName ? "fullName-error" : undefined} /></div>{fieldError("fullName")}</div>
+          <div><label htmlFor="email">Địa chỉ email</label><div className={styles.inputWrap}><input id="email" name="email" type="email" autoComplete="email" placeholder="name@example.com" defaultValue={initialEmail} maxLength={255} required aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-error" : undefined} /></div>{fieldError("email")}</div>
+          <div>
+            <label htmlFor="password">Mật khẩu mới</label>
+            <div className={styles.inputWrap}><input id="password" name="password" type={showPassword ? "text" : "password"} autoComplete="new-password" placeholder="Tối thiểu 8 ký tự" minLength={8} maxLength={128} onChange={event => setPassword(event.target.value)} required aria-invalid={!!errors.password} aria-describedby={errors.password ? "password-error password-hint" : "password-hint"} className={styles.passwordInput} /><button type="button" className={styles.reveal} aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}><Icon name={showPassword ? "hidden" : "eye"} /></button></div>
+            {fieldError("password")}
+            <div className={styles.strength} style={{ "--strength-color": strengthColor } as CSSProperties}>
+              <div className={styles.strengthBars} role="meter" aria-label="Độ mạnh mật khẩu" aria-valuemin={0} aria-valuemax={4} aria-valuenow={strength} aria-valuetext={strengthLabel}>{[1, 2, 3, 4].map(level => <i key={level} data-filled={level <= strength} />)}</div>
+              <span>{strengthLabel}</span>
+            </div>
+            <p id="password-hint" className={styles.hint}>Sử dụng từ 8 đến 128 ký tự.</p>
+          </div>
+          <div><label htmlFor="confirmPassword">Xác nhận lại mật khẩu</label><div className={styles.inputWrap}><input id="confirmPassword" name="confirmPassword" type={showConfirmation ? "text" : "password"} autoComplete="new-password" placeholder="Nhập lại mật khẩu" maxLength={128} required aria-invalid={!!errors.confirmPassword} aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined} className={styles.passwordInput} /><button type="button" className={styles.reveal} aria-label={showConfirmation ? "Ẩn mật khẩu xác nhận" : "Hiện mật khẩu xác nhận"} aria-pressed={showConfirmation} onClick={() => setShowConfirmation(!showConfirmation)}><Icon name={showConfirmation ? "hidden" : "eye"} /></button></div>{fieldError("confirmPassword")}</div>
+          <div><label htmlFor="targetLevel">Mục tiêu trình độ CEFR <span className={styles.optional}>(không bắt buộc)</span></label><select id="targetLevel" name="targetLevel" defaultValue="" aria-invalid={!!errors.targetLevel} aria-describedby={errors.targetLevel ? "targetLevel-error" : undefined}><option value="">Tôi sẽ chọn sau</option>{["A1", "A2", "B1", "B2", "C1", "C2"].map(level => <option value={level} key={level}>{level}</option>)}</select>{fieldError("targetLevel")}</div>
+          <button type="submit" className={styles.submit}>{submitting ? "Đang tạo tài khoản…" : "Tạo tài khoản miễn phí"}</button>
+        </fieldset>
+      </form>
+      <p className={styles.privacy}><Icon name="lock" /> Mật khẩu của bạn được bảo vệ và không hiển thị công khai.</p>
+    </>
   );
 }

@@ -19,13 +19,22 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
   try {
     let body: BodyInit | undefined;
     if (method !== "GET") {
-      if (upload) body = await request.formData();
+      if (upload) {
+        const form = await request.formData();
+        let size = 0;
+        for (const value of form.values()) size += typeof value === "string" ? Buffer.byteLength(value) : value.size;
+        if (size > limit) return Response.json({title:"Yêu cầu quá lớn."},{status:413});
+        body = form;
+      }
       else { body = await request.text(); if (Buffer.byteLength(body) > limit) return Response.json({title:"Yêu cầu quá lớn."},{status:413}); }
     }
     const target = backendUrl(`/api/v1/admin/${path}`);
     if (method === "GET") target.search = new URL(request.url).search;
-    const response = await fetch(target, {method,body,headers:{Authorization:`Bearer ${token}`,...(!upload && body ? {"Content-Type":"application/json"} : {})},cache:"no-store",signal:backendRequestSignal(request.signal)});
-    return new Response(response.body,{status:response.status,headers:{"Content-Type":response.headers.get("content-type") ?? "application/json","Cache-Control":"no-store"}});
+    const cloudOperation = upload || path.endsWith("/publish");
+    const response = await fetch(target, {method,body,headers:{Authorization:`Bearer ${token}`,...(!upload && body ? {"Content-Type":"application/json"} : {})},cache:"no-store",signal:cloudOperation ? AbortSignal.any([request.signal, AbortSignal.timeout(120_000)]) : backendRequestSignal(request.signal)});
+    const headers = new Headers({"Content-Type":response.headers.get("content-type") ?? "application/json","Cache-Control":"no-store"});
+    const retry = response.headers.get("retry-after"); if (retry) headers.set("Retry-After", retry);
+    return new Response(response.body,{status:response.status,headers});
   } catch(error) {
     if (request.signal.aborted) return new Response(null,{status:499});
     return Response.json({title:isBackendTimeout(error)?"Máy chủ phản hồi quá lâu. Vui lòng thử lại.":"Không kết nối được máy chủ. Vui lòng thử lại."},{status:isBackendTimeout(error)?504:503});

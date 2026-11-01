@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -12,7 +13,7 @@ import { getCourses } from "@/lib/server-courses";
 import { catalogHref, parseCourseQuery } from "@/lib/course-catalog";
 import styles from "@/components/courses/courses.module.css";
 
-export const metadata: Metadata = { title: "Khám phá khóa học | LinguaAI", description: "Khám phá khóa học tiếng Anh theo trình độ CEFR và kỹ năng của bạn." };
+export const metadata: Metadata = { title: "Khám phá khóa học | LEWA", description: "Khám phá khóa học tiếng Anh theo trình độ CEFR và kỹ năng của bạn." };
 
 async function Catalog({ searchParams }: PageProps<"/courses">) {
   const session = await getCurrentUser();
@@ -23,11 +24,20 @@ async function Catalog({ searchParams }: PageProps<"/courses">) {
   const data = result?.status === "ok" ? result.data : null;
   const filtered = !!(query.search || query.level || query.skill || query.source || query.status !== "all" || query.page > 1);
   const pages = data ? Array.from(new Set([1, data.page - 1, data.page, data.page + 1, data.totalPages])).filter(page => page >= 1 && page <= data.totalPages).sort((a, b) => a - b) : [];
-  return <MemberShell user={session.status === "authenticated" ? session.user : undefined}>
+  return <MemberShell user={session.status === "authenticated" ? session.user : undefined} variant="catalog">
     <main id="main-content" tabIndex={-1} className={styles.catalog}>
-      <div className={styles.breadcrumb}>KHÔNG GIAN HỌC TẬP <Icon name="chevron" /><span>KHÓA HỌC</span></div>
-      <div className={styles.pageHeading}><div><span className={styles.eyebrow}>LEARN SOMETHING NEW EVERY DAY</span><h1>Khám phá & Danh mục <span>Khóa học</span></h1><p>Học theo cách của bạn. Khám phá lộ trình tiếng Anh từ A1 đến C2.</p></div><div className={styles.aiPromo}><Icon name="sparkles" /><div><strong>Tạo khóa học AI <small>SẮP CÓ</small></strong><span>Từ tài liệu, theo mục tiêu của bạn</span></div></div></div>
-      {data && <div className={styles.summary}><span><Icon name="book" /><strong>{data.summary.totalCourses}</strong> khóa học</span><span><i className={styles.blueDot} /><strong>{data.summary.inProgress}</strong> đang học</span><span><i className={styles.greenDot} /><strong>{data.summary.completed}</strong> đã hoàn thành</span></div>}
+      <section className={styles.catalogHero} aria-labelledby="catalog-title">
+        <nav className={styles.catalogBreadcrumb} aria-label="Đường dẫn trang"><Link href="/" aria-label="Trang chủ"><Icon name="home" /></Link><Icon name="chevron" /><span>Khám phá khóa học</span></nav>
+        <div className={styles.catalogHeroGrid}>
+          <div className={styles.catalogIntro}>
+            <h1 id="catalog-title">Khám phá &amp; Danh mục <span>Khóa học<i className={styles.titleDoodle} aria-hidden="true" /></span></h1>
+            <p>Học theo cách của bạn. Khám phá lộ trình tiếng Anh từ A1 đến C2.</p>
+            {data && <div className={`${styles.summary} ${styles.heroSummary}`}><span><i className={styles.heroStatIcon}><Icon name="book" /></i><strong>{data.summary.totalCourses}</strong> khóa học</span><span><i className={styles.heroStatIcon}><Icon name="play" /></i><strong>{data.summary.inProgress}</strong> đang học</span><span><i className={styles.heroStatIcon} data-tone="completed"><Icon name="check" /></i><strong>{data.summary.completed}</strong> đã hoàn thành</span></div>}
+          </div>
+          <div className={styles.catalogArtwork} aria-hidden="true"><Image src="/illustrations/course-discovery-cat.png" width={1536} height={1024} alt="" sizes="(max-width: 600px) 100px, (max-width: 1100px) 180px, 260px" loading="eager" /></div>
+          <div className={styles.aiPromo}><Icon name="sparkles" /><div><strong>Tạo khóa học AI <small>SẮP CÓ</small></strong><span>Từ tài liệu, theo mục tiêu của bạn</span></div></div>
+        </div>
+      </section>
       <CourseFilters key={catalogHref(query, { page: query.page })} query={query} />
       <div className={styles.resultsHeading}><div><h2>{query.status === "in_progress" ? "Khóa học đang học" : query.status === "completed" ? "Khóa học đã hoàn thành" : "Tất cả khóa học"}</h2>{data && <span>{data.totalCount} kết quả{query.search ? ` cho “${query.search}”` : " dành cho bạn"}</span>}</div>{filtered && <Link href="/courses" className={styles.clearFilters}>Xóa bộ lọc <Icon name="close" /></Link>}</div>
       {!data ? <CatalogState error retry={catalogHref(query, { page: query.page })} /> : data.items.length === 0 ? <CatalogState filtered={filtered} /> : <>

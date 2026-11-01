@@ -5,6 +5,7 @@ using EnglishLearning.Api.Authentication;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -55,6 +56,12 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
             return created ? StatusCode(StatusCodes.Status201Created, result) : Ok(result);
         }
         catch (AuthoringException error) { return Problem(statusCode: error.Status, title: error.Message); }
+        catch (CloudMediaException error)
+        {
+            logger.LogWarning("Course media verification failed ({Code}).", error.Code);
+            if (error.RetryAfterSeconds is int seconds) Response.Headers.RetryAfter = seconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Problem(statusCode: error.Status, title: "Chưa xác minh được media khóa học. Vui lòng thử lại.", extensions: new Dictionary<string, object?> { ["code"] = error.Code });
+        }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
         catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException)
         {

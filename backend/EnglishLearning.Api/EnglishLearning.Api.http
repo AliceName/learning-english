@@ -34,6 +34,17 @@ Content-Type: application/json
 GET {{HostAddress}}/api/v1/auth/me
 Authorization: Bearer {{AccessToken}}
 
+### MongoDB health (read only; does not verify collection write permission)
+GET {{HostAddress}}/api/v1/health/mongodb
+
+### Dictionary: first successful lookup saves to MongoDB; subsequent lookups read it
+GET {{HostAddress}}/api/v1/vocabulary?word=hello
+Authorization: Bearer {{AccessToken}}
+
+### Same dictionary key after normalization
+GET {{HostAddress}}/api/v1/vocabulary?word=%20HELLO%20
+Authorization: Bearer {{AccessToken}}
+
 ### Course catalog (published system courses and your own uploads)
 GET {{HostAddress}}/api/v1/courses?sort=updated&page=1&pageSize=6
 Authorization: Bearer {{AccessToken}}
@@ -103,3 +114,19 @@ Content-Type: application/json
 ### Student: course details
 GET {{HostAddress}}/api/v1/courses/{{CourseId}}
 Authorization: Bearer {{AccessToken}}
+
+### Dictionary audio: search first, then automatically prepare the selected recording
+POST {{HostAddress}}/api/v1/vocabulary/audio/prepare
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "word": "match",
+  "entry": 0,
+  "phonetic": 1
+}
+
+### Read prepared audio (does not download upstream); Range is optional
+GET {{HostAddress}}/api/v1/vocabulary/audio?word=match&entry=0&phonetic=1
+Authorization: Bearer {{AccessToken}}
+Range: bytes=0-1023

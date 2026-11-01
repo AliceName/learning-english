@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace EnglishLearning.Api.Services;
 
-public sealed class MediaStorage(IConfiguration configuration, IWebHostEnvironment environment)
+public sealed class MediaStorage(IConfiguration configuration, IWebHostEnvironment environment) : IMediaStorage
 {
     private readonly string root = Path.GetFullPath(configuration["MediaStorage:RootPath"] ?? Path.Combine(environment.ContentRootPath, "App_Data", "uploads"));
     private static readonly IReadOnlyDictionary<string, string> Types = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -11,11 +11,12 @@ public sealed class MediaStorage(IConfiguration configuration, IWebHostEnvironme
         [".mp3"] = "audio/mpeg", [".wav"] = "audio/wav", [".aac"] = "audio/aac", [".m4a"] = "audio/mp4"
     };
     public static string? ContentType(string fileName) => Types.GetValueOrDefault(Path.GetExtension(fileName));
-    public string? Resolve(string fileName) => Regex.IsMatch(fileName, @"^[a-f0-9]{32}\.(jpg|jpeg|png|webp|mp3|wav|aac|m4a)$") ? Path.Combine(root, fileName) : null;
+    public static bool IsManagedFileName(string fileName) => Regex.IsMatch(fileName, @"\A[a-f0-9]{32}\.(jpg|jpeg|png|webp|mp3|wav|aac|m4a)\z");
+    public string? Resolve(string fileName) => IsManagedFileName(fileName) ? Path.Combine(root, fileName) : null;
     public bool Exists(string url, string? typePrefix = null) => !url.StartsWith("/api/media/", StringComparison.Ordinal) ||
         Resolve(url[11..]) is { } path && File.Exists(path) && (typePrefix is null || ContentType(path)?.StartsWith(typePrefix, StringComparison.Ordinal) == true);
 
-    public async Task<(string FileName, string ContentType)> SaveAsync(IFormFile file, string kind, CancellationToken ct)
+    public async Task<(string FileName, string ContentType, long SizeBytes)> SaveAsync(IFormFile file, string kind, CancellationToken ct)
     {
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         var type = ContentType(file.FileName);
@@ -37,7 +38,15 @@ public sealed class MediaStorage(IConfiguration configuration, IWebHostEnvironme
             await input.CopyToAsync(output, ct);
         }
         catch { if (File.Exists(path)) File.Delete(path); throw; }
-        return (fileName, type);
+        return (fileName, type, file.Length);
+    }
+    public Task<bool> ExistsAsync(string url, string typePrefix, CancellationToken token)
+    { token.ThrowIfCancellationRequested(); return Task.FromResult(Exists(url, typePrefix)); }
+    public Task<CourseMediaPlayback?> OpenAsync(string fileName, string? range, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested(); var path = Resolve(fileName);
+        return Task.FromResult(path is null || !File.Exists(path) ? null : new CourseMediaPlayback(
+            new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete, 81920, true), ContentType(fileName)!, new FileInfo(path).Length, EnableRangeProcessing: true));
     }
     private static bool MatchesHeader(string extension, byte[] bytes) => extension switch
     {

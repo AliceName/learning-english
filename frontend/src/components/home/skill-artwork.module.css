@@ -1,0 +1,29 @@
+.artwork {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 25%;
+  background-image: url("/Bộ biểu tượng học tập mèo đáng yêu.png");
+  background-repeat: no-repeat;
+  background-size: 472.174% 157.391%;
+  background-position-y: 58.712%;
+  mix-blend-mode: multiply;
+}
+.reading { background-position-x: 5.841%; }
+.listening { background-position-x: 35.28%; }
+.grammar { background-position-x: 64.72%; }
+.writing { background-position-x: 94.159%; }
+.peekingCat, .speakingCat {
+  display: block;
+  background-image: url("/Giao diện LEWA Reading Xanh Tươi.png");
+  background-size: 553.642% 540%;
+  background-position: 73.285% 0;
+  background-repeat: no-repeat;
+  aspect-ratio: 302 / 155;
+  mix-blend-mode: multiply;
+}
+.peekingCat { width: 100%; clip-path: polygon(0 0, 100% 0, 100% 80%, 81% 80%, 81% 100%, 18% 100%, 18% 80%, 0 80%); }
+.speaking { position: relative; display: block; width: 100%; height: 100%; border-radius: 25%; background: #e2ebd6; }
+.speakingCat { position: absolute; top: 6%; left: 0; width: 100%; }
+.microphone { position: absolute; right: 4%; bottom: 4%; display: grid; place-items: center; width: 42%; height: 42%; border-radius: 50%; background: #fffdf5; color: #31562b; }
+.microphone svg { width: 75%; height: 75%; }

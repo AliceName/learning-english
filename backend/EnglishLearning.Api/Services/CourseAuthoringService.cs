@@ -11,7 +11,7 @@ public sealed class AuthoringException(int status, string message) : Exception(m
     public int Status { get; } = status;
 }
 
-public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, MediaStorage media, IpaTranscriber transcriber)
+public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, IMediaStorage media, IpaTranscriber transcriber)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -93,20 +93,34 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
 
     public async Task<AdminCourseResponse> PublishAsync(int id, CancellationToken ct)
     {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct); deadline.CancelAfter(TimeSpan.FromSeconds(90));
+        ct = deadline.Token;
         var course = await CourseAsync(id, ct);
         if (course.IsPublished) return await GetAsync(id, ct);
         var detail = await GetAsync(id, ct);
         if (string.IsNullOrWhiteSpace(course.Description) || string.IsNullOrWhiteSpace(course.CoverImageUrl))
             throw new AuthoringException(400, "Bổ sung mô tả và ảnh bìa trước khi xuất bản.");
-        if (!media.Exists(course.CoverImageUrl, "image/")) throw new AuthoringException(400, "Không tìm thấy tệp ảnh bìa hợp lệ đã tải lên.");
+        var verified = new Dictionary<string, bool>(StringComparer.Ordinal);
+        async Task<bool> ExistsAsync(string url, string type)
+        {
+            var key = type + url;
+            if (!verified.TryGetValue(key, out var exists)) { exists = await media.ExistsAsync(url, type, ct); verified[key] = exists; }
+            return exists;
+        }
+        if (!await ExistsAsync(course.CoverImageUrl, "image/")) throw new AuthoringException(400, "Không tìm thấy tệp ảnh bìa hợp lệ đã tải lên.");
         var active = detail.Lessons.Where(lesson => lesson.IsActive).ToArray();
         if (active.Length == 0) throw new AuthoringException(400, "Cần ít nhất một bài học được kích hoạt.");
         foreach (var lesson in active)
         {
+            var audioValid = true;
+            if (lesson.SkillType == "speaking" && lesson.Speaking?.Sentences is { } sentences)
+                foreach (var sentence in sentences)
+                    if (sentence.AudioUrl is not null && !await ExistsAsync(sentence.AudioUrl, "audio/")) { audioValid = false; break; }
+            if (lesson.SkillType == "listening") audioValid = !string.IsNullOrWhiteSpace(lesson.AudioUrl) && await ExistsAsync(lesson.AudioUrl, "audio/");
             var valid = lesson.ContentSupported && lesson.DifficultyLevel is not null && lesson.EstimatedMinutes > 0 && (lesson.SkillType switch
             {
-                "speaking" => lesson.Speaking?.Sentences is { Length: > 0 } sentences && sentences.All(sentence => sentence.AudioUrl is null || media.Exists(sentence.AudioUrl, "audio/")),
-                "listening" => !string.IsNullOrWhiteSpace(lesson.AudioUrl) && media.Exists(lesson.AudioUrl, "audio/") && !string.IsNullOrWhiteSpace(lesson.Listening?.Transcript) && lesson.Listening?.Questions is { Length: > 0 },
+                "speaking" => lesson.Speaking?.Sentences is { Length: > 0 } && audioValid,
+                "listening" => audioValid && !string.IsNullOrWhiteSpace(lesson.Listening?.Transcript) && lesson.Listening?.Questions is { Length: > 0 },
                 "grammar" => lesson.Grammar is { Questions.Length: > 0 } grammar && !string.IsNullOrWhiteSpace(grammar.Topic) && !string.IsNullOrWhiteSpace(grammar.Rules),
                 "writing" => lesson.Writing is { Rubric.Length: > 0 } writing && !string.IsNullOrWhiteSpace(writing.Prompt)
                     && writing.MinWords>=1 && writing.MaxWords>=writing.MinWords && writing.Rubric.Sum(item=>item.Weight)==100,

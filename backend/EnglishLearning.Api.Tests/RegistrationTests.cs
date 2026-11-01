@@ -5,6 +5,7 @@ using System.Text.Json;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
+using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -56,10 +57,13 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.UseEnvironment("Development")
                 .ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-                    new Dictionary<string, string?> { ["Jwt:SigningKey"] = TestJwt.SigningKey, ["MediaStorage:RootPath"] = mediaRoot }))
+                    new Dictionary<string, string?> { ["Jwt:SigningKey"] = TestJwt.SigningKey, ["MediaStorage:RootPath"] = mediaRoot,
+                        ["Cloudinary:Enabled"] = "true", ["Cloudinary:CloudName"] = "unit-cloud", ["Cloudinary:ApiKey"] = "123456789012345",
+                        ["Cloudinary:ApiSecret"] = "unit-secret-not-real", ["Cloudinary:EnvironmentPrefix"] = "els/test" }))
                 .ConfigureServices(services =>
             {
                 services.RemoveAll<EnglishLearningDbContext>();
+                services.RemoveAll<ICloudinaryAssetTransport>(); services.AddSingleton<ICloudinaryAssetTransport>(new MemoryCloudTransport());
                 services.RemoveAll<DbContextOptions<EnglishLearningDbContext>>();
                 services.AddScoped(_ =>
                 {

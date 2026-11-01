@@ -49,3 +49,15 @@
 @media(max-width:1200px) { .target { display: none; } .headerRight { gap: 14px; } }
 @media(max-width:1000px) { .sidebar { display: none; } .header { left: 0; padding: 0 24px; } .menuButton { display: block; } .content { margin-left: 0; padding: 108px 24px 32px; } .quickSearch { width: 280px; } .skipLink { left: 60px; } }
 @media(max-width:600px) { .header { height: 72px; padding: 0 18px; gap: 12px; } .content { padding: 96px 18px 30px; } .quickSearch { width: 100%; } .quickSearch input { font-size: 11px; } .userText, .streak, .divider { display: none; } .headerRight { flex-shrink: 0; } .profile { gap: 0; } }
+
+/* Catalog-specific sidebar; other account and course screens keep their shell. */
+.catalogWorkspace .sidebar { border-right-color: #dce8fa; background: radial-gradient(ellipse at 5% 105%, #c6dfff 0 18%, transparent 18.5%) bottom left / 100% 210px no-repeat, radial-gradient(ellipse at 95% 110%, #d8e9ff 0 35%, transparent 35.5%) bottom left / 100% 210px no-repeat, linear-gradient(145deg, #f5f8ff, #eef5ff); scrollbar-width: thin; scrollbar-color: #d6e2f4 transparent; }
+.catalogWorkspace .drawer { background: #f0f6ff; }
+.catalogWorkspace .navLabel { color: #52698c; font-weight: 750; letter-spacing: 1.1px; }
+.catalogWorkspace .navigation { gap: 7px; }
+.catalogWorkspace .navigation > a { color: #18365e; border-radius: 13px; font-weight: 600; }
+.catalogWorkspace .navigation > a:hover { background: #e1edff; color: #0759c4; }
+.catalogWorkspace .navigation > a[aria-current] { color: white; background: linear-gradient(110deg, #0755be, #1376dd); box-shadow: 0 5px 14px #1668c923; }
+.catalogWorkspace .unavailable { color: #6e819e; }
+.catalogWorkspace .unavailable small { background: #e5edf9; color: #6c809f; }
+.catalogWorkspace .navigation > :last-child { margin-top: 14px; border-top: 1px solid #dae6f7; border-radius: 0; padding-top: 20px; }

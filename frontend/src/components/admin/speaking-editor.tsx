@@ -3,7 +3,6 @@
 import {useEffect, useId, useLayoutEffect, useRef, useState} from "react";
 import {adminRequest, type GeneratedIpa, type Sentence, type Speaking} from "@/lib/admin-courses";
 import Icon from "@/components/site-icon";
-import MediaField from "./media-field";
 import styles from "./admin.module.css";
 
 type SentenceProps = {
@@ -12,10 +11,9 @@ type SentenceProps = {
   disabled: boolean;
   onChange: (change: Partial<Sentence>, expectedText?: string) => void;
   onRemove: () => void;
-  onBusy: (key: string, value: boolean) => void;
 };
 
-function SentenceEditor({value, index, disabled, onChange, onRemove, onBusy}: SentenceProps) {
+function SentenceEditor({value, index, disabled, onChange, onRemove}: SentenceProps) {
   const id = useId();
   const abort = useRef<AbortController | null>(null);
   const latest = useRef({value, disabled, onChange});
@@ -97,15 +95,12 @@ function SentenceEditor({value, index, disabled, onChange, onRemove, onBusy}: Se
       <p>Chọn cách đọc phù hợp với nghĩa trong câu; hệ thống đang dùng cách đọc đầu tiên.</p>
       {result.alternatives.map(item => <p key={item.word}><strong>{item.word}</strong>: {item.pronunciations.join(" · ")}</p>)}
     </details>}
-    <MediaField kind="audio" label={`Audio mẫu câu ${index + 1} (không bắt buộc)`} value={value.audioUrl}
-      onChange={audioUrl => onChange({audioUrl})} onBusy={busy => onBusy(`audio-${id}`, busy)} disabled={disabled}/>
   </div>;
 }
 
-export default function SpeakingEditor({value, onChange, onBusy, disabled}: {
+export default function SpeakingEditor({value, onChange, disabled}: {
   value: Speaking;
   onChange: (value: Speaking | ((previous: Speaking) => Speaking)) => void;
-  onBusy: (key: string, value: boolean) => void;
   disabled: boolean;
 }) {
   // Stable local keys keep async results attached to their sentence when an earlier sentence is removed.
@@ -130,11 +125,11 @@ export default function SpeakingEditor({value, onChange, onBusy, disabled}: {
       <label className={styles.field}>Mục tiêu luyện nói<textarea value={value.goals} onChange={event => onChange(previous => ({...previous, goals: event.target.value}))} maxLength={3000} rows={3} placeholder="Ví dụ: Luyện âm cuối, nối âm và ngữ điệu trong câu hỏi…" disabled={disabled}/></label>
     </section>
     <section className={styles.panel}>
-      <div className={styles.sectionHeader}><span className={styles.sectionIcon}><Icon name="mic"/></span><div><h2>Khối 2: Câu tiếng Anh mẫu luyện nói</h2><p>{value.sentences.length}/30 câu · IPA tự động, audio mẫu tùy chọn.</p></div></div>
+      <div className={styles.sectionHeader}><span className={styles.sectionIcon}><Icon name="mic"/></span><div><h2>Khối 2: Câu tiếng Anh mẫu luyện nói</h2><p>{value.sentences.length}/30 câu · Tự động gợi ý phiên âm IPA.</p></div></div>
       <p className={styles.hint}>Nhập câu tiếng Anh rồi chuyển sang ô khác để tự tạo IPA. Phiên âm gợi ý theo từ điển Mỹ; từ đồng tự khác âm và nối âm cần kiểm tra theo ngữ cảnh.</p>
       {value.sentences.length === 0 && <p className={styles.hint}>Chưa có câu luyện nói. Thêm câu để bắt đầu biên soạn.</p>}
       {value.sentences.map((sentence, index) => <SentenceEditor key={sentenceIds[index]} value={sentence} index={index} disabled={disabled}
-        onChange={(patch, expectedText) => update(index, patch, expectedText)} onRemove={() => remove(index)} onBusy={onBusy}/>)}
+        onChange={(patch, expectedText) => update(index, patch, expectedText)} onRemove={() => remove(index)}/>)}
       <button type="button" className={styles.addButton} disabled={disabled || value.sentences.length >= 30} onClick={add}><Icon name="plus"/>Thêm câu luyện nói mới</button>
     </section>
   </>;

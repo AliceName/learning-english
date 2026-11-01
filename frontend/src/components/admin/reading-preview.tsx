@@ -18,7 +18,7 @@ export default function ReadingPreview({lesson}:{lesson:LessonDraft}) {
   const checked=signatures.filter(signature=>results[signature]!==undefined).length;
   const correct=signatures.filter(signature=>results[signature]===true).length;
   return <div className={styles.readingSimulator}>
-    <div className={styles.simulatorBar}><span><Icon name="book"/>LinguaAI Reading · {lesson.difficultyLevel}</span><span><Icon name="clock"/>{lesson.estimatedMinutes} phút</span></div>
+    <div className={styles.simulatorBar}><span><Icon name="book"/>LEWA Reading · {lesson.difficultyLevel}</span><span><Icon name="clock"/>{lesson.estimatedMinutes} phút</span></div>
     <div className={styles.readingTools}><div><button type="button" aria-label="Giảm cỡ chữ bài đọc" disabled={font<=85} onClick={()=>setFont(font-5)}>A−</button><span>Cỡ chữ {font}%</span><button type="button" aria-label="Tăng cỡ chữ bài đọc" disabled={font>=130} onClick={()=>setFont(font+5)}>A+</button></div><div><button type="button" aria-pressed={bilingual} disabled={!reading.translation?.trim()} title={reading.translation?.trim()?"Hiện bản dịch tham khảo":"Thêm bản dịch tham khảo trong phần nội dung bài đọc"} onClick={()=>setBilingual(!bilingual)}>Song ngữ</button><button type="button" onClick={()=>{setReview(!review);questionsRef.current?.scrollTo({top:0,behavior:"smooth"});}}>Review</button></div></div>
     <div className={styles.readingSplit}>
       <section className={styles.passagePane} aria-label="Bài đọc xem trước" style={{fontSize:`${font}%`}}>

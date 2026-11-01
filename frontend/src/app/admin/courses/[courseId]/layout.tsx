@@ -13,6 +13,6 @@ async function LoadCourse({children,params}:{children:ReactNode;params:Promise<{
   if(result.status==="forbidden")redirect("/account");
   if(result.status==="not_found")notFound();
   if(result.status!=="ok")return <div className={styles.empty}><h1>Chưa thể tải khóa học</h1><a href={`/admin/courses/${courseId}/general`}>Thử lại</a></div>;
-  return <CourseWorkspace initialCourse={result.data}>{children}</CourseWorkspace>;
+  return <div className={styles.authoring}><CourseWorkspace initialCourse={result.data}>{children}</CourseWorkspace></div>;
 }
 export default function CourseLayout(props:{children:ReactNode;params:Promise<{courseId:string}>}) {return <Suspense fallback={<p role="status">Đang tải khóa học…</p>}><LoadCourse {...props}/></Suspense>;}
