@@ -4,7 +4,7 @@ import Icon from "@/components/site-icon";
 import CourseCover from "@/components/courses/course-cover";
 import {adminRequest} from "@/lib/admin-courses";
 import styles from "./admin.module.css";
-export default function MediaField({kind,value,onChange,onBusy,disabled=false,label,onTimeChange}:{kind:"cover"|"audio";value:string|null;onChange:(value:string|null)=>void;onBusy?:(value:boolean)=>void;disabled?:boolean;label:string;onTimeChange?:(seconds:number)=>void}) {
+export default function MediaField({kind,value,onChange,onBusy,disabled=false,label,onTimeChange,imageFit="cover"}:{kind:"cover"|"audio";value:string|null;onChange:(value:string|null)=>void;onBusy?:(value:boolean)=>void;disabled?:boolean;label:string;onTimeChange?:(seconds:number)=>void;imageFit?:"cover"|"contain"}) {
   const id=useId();const input=useRef<HTMLInputElement>(null);const abort=useRef<AbortController|null>(null);
   const latestOnChange=useRef(onChange);
   useLayoutEffect(()=>{latestOnChange.current=onChange;},[onChange]);
@@ -24,6 +24,6 @@ export default function MediaField({kind,value,onChange,onBusy,disabled=false,la
       <input ref={input} id={id} type="file" accept={kind==="cover"?"image/jpeg,image/png,image/webp":"audio/mpeg,audio/wav,audio/aac,audio/mp4,.m4a"} onChange={event=>void upload(event.target.files?.[0])} className={styles.fileInput} disabled={disabled||busy}/>
       <button type="button" className={styles.secondaryButton} disabled={disabled||busy} onClick={()=>input.current?.click()}>{value?"Thay tệp mới":"Duyệt từ máy tính"}</button>
     </div>
-    {kind==="cover"?<div className={styles.mediaPreview}><CourseCover url={value} title="Xem trước ảnh bìa" eager/></div>:<div className={styles.audioPreview}><Icon name="headphones"/>{value?<audio controls src={value} preload="metadata" aria-label={label} onTimeUpdate={event=>onTimeChange?.(event.currentTarget.currentTime)}/>:<p>Audio nghe thử sẽ xuất hiện sau khi tải tệp.</p>}</div>}
+    {kind==="cover"?<div className={styles.mediaPreview}><CourseCover key={value} url={value} title={`Xem trước ${label.toLowerCase()}`} fit={imageFit} eager/></div>:<div className={styles.audioPreview}><Icon name="headphones"/>{value?<audio controls src={value} preload="metadata" aria-label={label} onTimeUpdate={event=>onTimeChange?.(event.currentTarget.currentTime)}/>:<p>Audio nghe thử sẽ xuất hiện sau khi tải tệp.</p>}</div>}
   </div><div className={styles.urlRow}><input key={value??""} type="text" aria-label={`${label}: URL`} defaultValue={value??""} onBlur={event=>{if(event.target.value!==(value??""))onChange(event.target.value||null);}} placeholder="Hoặc nhập URL https://…" maxLength={500} disabled={disabled||busy}/>{value&&<button type="button" className={styles.iconButton} onClick={()=>onChange(null)} aria-label={`Gỡ ${label}`} disabled={disabled||busy}><Icon name="trash"/></button>}</div>{busy&&<p role="status" className={styles.hint}>Đang tải lên, vui lòng chờ trước khi lưu.</p>}{error&&<p role="alert" className={styles.error}>{error}</p>}</div>;
 }

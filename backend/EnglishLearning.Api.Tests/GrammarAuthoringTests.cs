@@ -89,7 +89,7 @@ public sealed partial class RegistrationSqlServerTests
         var detail=(await publicDetail.Content.ReadFromJsonAsync<CourseDetailResponse>())!;
         Assert.Equal("grammar",Assert.Single(detail.Lessons).SkillType);Assert.Equal(35,detail.Course.EstimatedMinutes);
         Assert.DoesNotContain("correctOptionIndex",await publicDetail.Content.ReadAsStringAsync());
-        Assert.Equal(HttpStatusCode.Conflict,(await client.PutAsJsonAsync($"/api/v1/admin/courses/{course.CourseId}/lessons/{lesson.LessonId}",GrammarLesson())).StatusCode);
+        Assert.Equal(HttpStatusCode.OK,(await client.PutAsJsonAsync($"/api/v1/admin/courses/{course.CourseId}/lessons/{lesson.LessonId}",GrammarLesson())).StatusCode);
     }
 
     [SqlServerFact]

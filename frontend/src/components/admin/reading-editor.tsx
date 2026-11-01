@@ -5,9 +5,10 @@ import {readingParagraphCount,lessonPlainText} from "@/lib/lesson-text";
 import Icon from "@/components/site-icon";
 import FormattedTextEditor from "./formatted-text-editor";
 import ChoiceOptionsEditor from "./choice-options-editor";
+import MediaField from "./media-field";
 import styles from "./admin.module.css";
 
-export default function ReadingEditor({value,onChange,disabled}:{value:Reading;onChange:(update:Reading|((previous:Reading)=>Reading))=>void;disabled:boolean}) {
+export default function ReadingEditor({value,onChange,disabled,onBusy}:{value:Reading;onChange:(update:Reading|((previous:Reading)=>Reading))=>void;disabled:boolean;onBusy?:(busy:boolean)=>void}) {
   const [newType,setNewType]=useState<ReadingQuestion["type"]>("multiple_choice");
   const [glossaryNotice,setGlossaryNotice]=useState("");
   function update(index:number,change:Partial<ReadingQuestion>) {
@@ -24,6 +25,13 @@ export default function ReadingEditor({value,onChange,disabled}:{value:Reading;o
       <div className={styles.studioHeading}><span>01</span><div><h2>Văn bản bài đọc tiếng Anh</h2><p>{countWords(lessonPlainText(value.passage))} từ · {readingParagraphCount(value.passage)} đoạn · Ngăn cách các đoạn bằng một dòng trống.</p></div></div>
       <div className={styles.twoColumns}><label className={styles.field}>Tiêu đề bài đọc<input value={value.passageTitle} onChange={event=>onChange(previous=>({...previous,passageTitle:event.target.value}))} disabled={disabled} maxLength={255} placeholder="Quarterly Market Trends & Consumer Behavior"/></label>
       <label className={styles.field}>Thể loại bài đọc<input value={value.category??""} onChange={event=>onChange(previous=>({...previous,category:event.target.value}))} disabled={disabled} maxLength={255} placeholder="Corporate Economics"/></label></div>
+      <div className={styles.readingImageEditor}>
+        <MediaField kind="cover" label="Ảnh minh họa bài đọc (không bắt buộc)" value={value.imageUrl??null} imageFit="contain" disabled={disabled} onBusy={onBusy} onChange={imageUrl=>onChange(previous=>({...previous,imageUrl,...(!imageUrl?{imageAlt:"",imageCaption:""}:{})}))}/>
+        {value.imageUrl&&<div className={styles.twoColumns}>
+          <label className={styles.field}>Mô tả ảnh<input value={value.imageAlt??""} onChange={event=>onChange(previous=>({...previous,imageAlt:event.target.value}))} maxLength={500} disabled={disabled} placeholder="Mô tả nội dung ảnh cho người dùng trình đọc màn hình"/></label>
+          <label className={styles.field}>Chú thích dưới ảnh<input value={value.imageCaption??""} onChange={event=>onChange(previous=>({...previous,imageCaption:event.target.value}))} maxLength={1000} disabled={disabled} placeholder="Ví dụ: Biểu đồ số người sử dụng xe buýt giai đoạn 2020–2025"/></label>
+        </div>}
+      </div>
       <FormattedTextEditor label="Văn bản bài đọc" value={value.passage} onChange={passage=>onChange(previous=>({...previous,passage}))} rows={14} disabled={disabled} onGlossary={word=>{
         const exists=value.vocabulary.some(item=>item.word.trim().toLowerCase()===word.toLowerCase());
         if(exists){setGlossaryNotice(`“${word}” đã có trong danh sách chú giải.`);return;}

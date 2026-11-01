@@ -81,6 +81,7 @@ public sealed class ReadingWritingCompatibilityTests
             {"version":1,"reading":{"passageTitle":"Old lesson","passage":"Existing content","questions":[{"type":"fill_blank","prompt":"A [blank]","answer":"bus"}]}}
             """,options)!;
         Assert.Equal("",oldReading.Reading!.Category);Assert.Equal("",oldReading.Reading.Translation);
+        Assert.Null(oldReading.Reading.ImageUrl);Assert.Equal("",oldReading.Reading.ImageAlt);Assert.Equal("",oldReading.Reading.ImageCaption);
         Assert.Equal("scanning",oldReading.Reading.Questions[0].Focus);Assert.Equal(1m,oldReading.Reading.Questions[0].Points);
         var oldWriting=JsonSerializer.Deserialize<LessonContentDocument>("""
             {"version":1,"writing":{"taskType":"essay","prompt":"Existing prompt","minWords":150,"maxWords":300}}

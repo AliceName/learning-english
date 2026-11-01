@@ -57,14 +57,16 @@ public sealed class MediaController(IMediaStorage storage, EnglishLearningDbCont
                 var canRead = await visible.AnyAsync(course => course.CoverImageUrl == url || db.Lessons.Any(lesson => lesson.CourseId == course.CourseId && lesson.IsActive && lesson.AudioUrl == url), ct);
                 if (!canRead)
                 {
-                    var candidates = db.Lessons.AsNoTracking().Where(lesson => lesson.IsActive && lesson.SkillType == "speaking" &&
-                        visible.Any(course => course.CourseId == lesson.CourseId) && lesson.Content != null && lesson.Content.Contains(url)).Select(lesson => lesson.Content);
-                    await foreach (var content in candidates.AsAsyncEnumerable().WithCancellation(ct))
+                    var candidates = db.Lessons.AsNoTracking().Where(lesson => lesson.IsActive && (lesson.SkillType == "speaking" || lesson.SkillType == "reading") &&
+                        visible.Any(course => course.CourseId == lesson.CourseId) && lesson.Content != null && lesson.Content.Contains(url))
+                        .Select(lesson => new { lesson.SkillType, lesson.Content });
+                    await foreach (var candidate in candidates.AsAsyncEnumerable().WithCancellation(ct))
                     {
                         try
                         {
-                            var document = JsonSerializer.Deserialize<LessonContentDocument>(content!, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                            if (document is { Version: 1 } && document.Speaking?.Sentences?.Any(sentence => sentence?.AudioUrl == url) == true) { canRead = true; break; }
+                            var document = JsonSerializer.Deserialize<LessonContentDocument>(candidate.Content!, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                            if (document is { Version: 1 } && (candidate.SkillType == "speaking" && document.Speaking?.Sentences?.Any(sentence => sentence?.AudioUrl == url) == true
+                                || candidate.SkillType == "reading" && document.Reading?.ImageUrl == url)) { canRead = true; break; }
                         }
                         catch (JsonException) { }
                     }

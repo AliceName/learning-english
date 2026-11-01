@@ -105,6 +105,8 @@ Grammar được chọn ở phần thông tin khóa học hoặc thêm qua **Xâ
 
 **Reading** tại `/admin/courses/[id]/lessons/reading`: tiêu đề/thể loại, thanh định dạng văn bản, đếm từ/đoạn, tô sáng, chú giải từ được chọn, bản dịch tham khảo admin nhập tùy chọn. Câu hỏi có kỹ năng Skimming/Scanning/Inference/Vocabulary và điểm 0.1–10; hỗ trợ trắc nghiệm, điền từ, trả lời ngắn, True/False/Not Given, nối ý/tiêu đề, đáp án thay thế, phân biệt hoa/thường, giải thích/dẫn chứng và đổi thứ tự. Mô phỏng chia đôi màn hình, hai vùng cuộn độc lập, chỉnh cỡ chữ, bật song ngữ, tra từ tại chỗ, kiểm tra từng câu và Review tiến độ. [blank] hiển thị thành dấu chấm trong mô phỏng.
 
+Reading có một ảnh minh họa tùy chọn: tải/kéo thả JPG, PNG, WebP tối đa 5 MB hoặc nhập URL, thay/gỡ ảnh, nhập mô tả cho trình đọc màn hình và chú thích dưới ảnh. Ảnh hiển thị đầy đủ trong phần mô phỏng, không cắt nội dung biểu đồ; nút lưu chờ upload hoàn tất. Dữ liệu ảnh đi cùng JSON nội dung bài qua API bài học hiện có.
+
 Trình soạn hỗ trợ Markdown giới hạn: H2/H3, đậm/nghiêng/gạch chân (++), highlight (==), danh sách, trích dẫn và inline code. Chế độ Soạn thảo/Xem định dạng giữ nguyên nội dung nguồn. HTML, links và embeds không được chạy. Dữ liệu lưu qua API quản trị hiện có trong Lessons.Content version 1, tương thích bài cũ; không đổi schema SQL. Hai loại vẫn dùng chung navbar, bước tạo khóa học, lưu nháp và xuất bản. Trạng thái lưu phản ánh thao tác lưu thực tế, không hiển thị giờ tự lưu giả của demo.
 
 Các nút AI của mẫu hiển thị chưa tích hợp và bị vô hiệu hóa: chưa chấm Writing/kiểm tra ngữ pháp AI, chưa dịch/sinh câu hỏi/trích xuất từ vựng tự động. Bộ đếm và Review chỉ phản ánh thao tác trong mô phỏng, không giả điểm IELTS.
@@ -114,3 +116,9 @@ Trắc nghiệm Reading/Listening/Grammar khởi tạo với 2 lựa chọn. Com
 ## Các thư viện đã sử dụng
 ## Mastcot:
     npm i page-mascot
+
+## Quản lý khóa học đã xuất bản
+
+Danh sách `/admin/courses` có Chỉnh sửa và Ẩn khóa học/Hiện khóa học cho từng dòng. Cả thông tin chung và năm loại bài được biên soạn dù khóa đã xuất bản. Bước 4 **Hiển thị** có nút ẩn/hiện, xem trước và quay lại chỉnh sửa. Nút bật hiển thị bị khóa khi còn thay đổi chưa lưu hoặc checklist chưa đủ; máy chủ kiểm tra media/nội dung đầy đủ. Khóa hiển thị cập nhật cho học viên ngay khi lưu; muốn soạn dở, ẩn trước. Trạng thái false hiển thị “Đang ẩn / Bản nháp”.
+
+Ẩn/hiện dùng BFF POST `courses/{id}/hide` và `courses/{id}/publish`, giữ cookie HttpOnly, kiểm tra cùng nguồn và cache no-store. Các thao tác lưu có thể kiểm tra media nên proxy chờ tối đa 120 giây. Ẩn khóa không xóa bài học, bài nộp hoặc tiến độ.

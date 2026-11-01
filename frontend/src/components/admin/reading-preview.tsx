@@ -1,5 +1,6 @@
 "use client";
 import {useId,useRef,useState} from "react";
+import Image from "next/image";
 import {readingFocus,type LessonDraft} from "@/lib/admin-courses";
 import Icon from "@/components/site-icon";
 import LessonRichText from "./lesson-rich-text";
@@ -11,6 +12,7 @@ export default function ReadingPreview({lesson}:{lesson:LessonDraft}) {
   const [bilingual,setBilingual]=useState(false);
   const [font,setFont]=useState(100);
   const [review,setReview]=useState(false);
+  const [failedImage,setFailedImage]=useState<string|null>(null);
   const [results,setResults]=useState<Record<string,boolean>>({});
   const questionsRef=useRef<HTMLDivElement>(null);
   const id=useId();
@@ -23,6 +25,10 @@ export default function ReadingPreview({lesson}:{lesson:LessonDraft}) {
     <div className={styles.readingSplit}>
       <section className={styles.passagePane} aria-label="Bài đọc xem trước" style={{fontSize:`${font}%`}}>
         <div className={styles.passageHeading}><span className={styles.studioBadge}>{reading.category||"READING PASSAGE"}</span><h3>{reading.passageTitle||lesson.title||"Tiêu đề bài đọc"}</h3><p>Cuộn độc lập để tra cứu dữ kiện. Bấm từ được gạch chân để xem chú giải.</p></div>
+        {reading.imageUrl&&<figure className={styles.readingImage}>
+          {failedImage!==reading.imageUrl&&(/^(https?:\/\/)/i.test(reading.imageUrl)||reading.imageUrl.startsWith("/api/media/"))?<div className={styles.readingImageFrame}><Image src={reading.imageUrl} alt={reading.imageAlt?.trim()||reading.passageTitle||lesson.title||"Ảnh minh họa bài đọc"} fill unoptimized sizes="(max-width: 900px) 100vw, 40vw" onError={()=>setFailedImage(reading.imageUrl)}/></div>:<p role="status" className={styles.hint}>Không tải được ảnh minh họa. Hãy kiểm tra URL hoặc tải lại ảnh.</p>}
+          {reading.imageCaption&&<figcaption>{reading.imageCaption}</figcaption>}
+        </figure>}
         <LessonRichText text={reading.passage||"Thêm văn bản bài đọc để xem trước."} vocabulary={reading.vocabulary}/>
         {bilingual&&reading.translation&&<aside className={styles.translation}><strong>Bản dịch tham khảo</strong><LessonRichText text={reading.translation}/></aside>}
       </section>

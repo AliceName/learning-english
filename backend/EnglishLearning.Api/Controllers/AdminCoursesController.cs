@@ -38,6 +38,8 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
         ExecuteAsync(_ => authoring.SaveLessonAsync(id, lessonId, request, ct), true, ct);
     [HttpPost("{id:int:min(1)}/publish")]
     public Task<ActionResult<AdminCourseResponse>> Publish(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.PublishAsync(id, ct), true, ct);
+    [HttpPost("{id:int:min(1)}/hide")]
+    public Task<ActionResult<AdminCourseResponse>> Hide(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.HideAsync(id, ct), true, ct);
 
     private async Task<ActionResult<T>> ExecuteAsync<T>(Func<int, Task<T>> action, bool write, CancellationToken ct, bool created = false)
     {
@@ -48,7 +50,7 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
             var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, ct);
             if (user is null) return Unauthorized();
             if (user.Role != UserRoles.Admin) return Forbid();
-            // Serialize editing/publishing of drafts; reuse the enclosing rollback transaction in integration tests.
+            // Serialize editing and visibility changes; reuse the enclosing rollback transaction in integration tests.
             await using var transaction = write && db.Database.CurrentTransaction is null
                 ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
             var result = await action(userId);

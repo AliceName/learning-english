@@ -7,7 +7,7 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
   const method = request.method;
   const valid = path === "courses" && ["GET","POST"].includes(method) || /^courses\/[1-9]\d*$/.test(path) && ["GET","PUT"].includes(method)
     || /^courses\/[1-9]\d*\/lessons$/.test(path) && method === "POST" || /^courses\/[1-9]\d*\/lessons\/[1-9]\d*$/.test(path) && method === "PUT"
-    || /^courses\/[1-9]\d*\/publish$/.test(path) && method === "POST" || path === "uploads" && method === "POST"
+    || /^courses\/[1-9]\d*\/(publish|hide)$/.test(path) && method === "POST" || path === "uploads" && method === "POST"
     || path === "pronunciation/ipa" && method === "POST";
   if (!valid) return Response.json({title:"Không tìm thấy API."},{status:404});
   if (method !== "GET" && !isSameOrigin(request)) return Response.json({title:"Nguồn yêu cầu không hợp lệ."},{status:403});
@@ -30,10 +30,18 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
     }
     const target = backendUrl(`/api/v1/admin/${path}`);
     if (method === "GET") target.search = new URL(request.url).search;
-    const cloudOperation = upload || path.endsWith("/publish");
+    const cloudOperation = upload || path.endsWith("/publish") || method === "PUT" || path.endsWith("/lessons");
     const response = await fetch(target, {method,body,headers:{Authorization:`Bearer ${token}`,...(!upload && body ? {"Content-Type":"application/json"} : {})},cache:"no-store",signal:cloudOperation ? AbortSignal.any([request.signal, AbortSignal.timeout(120_000)]) : backendRequestSignal(request.signal)});
     const headers = new Headers({"Content-Type":response.headers.get("content-type") ?? "application/json","Cache-Control":"no-store"});
     const retry = response.headers.get("retry-after"); if (retry) headers.set("Retry-After", retry);
+    if (response.status === 404 && /^courses\/[1-9]\d*\/(publish|hide)$/.test(path)) {
+      const body = await response.text();
+      if (!body.trim()) return Response.json({
+        title:"Backend đang chạy phiên bản chưa có API ẩn/hiện khóa học. Vui lòng build và khởi động lại API rồi thử lại.",
+        code:"backend_endpoint_unavailable"
+      }, {status:503,headers:{"Cache-Control":"no-store"}});
+      return new Response(body,{status:response.status,headers});
+    }
     return new Response(response.body,{status:response.status,headers});
   } catch(error) {
     if (request.signal.aborted) return new Response(null,{status:499});

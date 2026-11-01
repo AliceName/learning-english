@@ -68,7 +68,7 @@ public sealed partial class RegistrationSqlServerTests
         Assert.Equal(HttpStatusCode.OK,(await client.PostAsync($"/api/v1/admin/courses/{course.CourseId}/publish",null)).StatusCode);
         var catalog=(await client.GetFromJsonAsync<CourseListResponse>("/api/v1/courses?skill=writing&level=B2"))!;
         Assert.Contains(catalog.Items,item=>item.CourseId==course.CourseId);
-        Assert.Equal(HttpStatusCode.Conflict,(await client.PutAsJsonAsync(path,WritingLesson())).StatusCode);
+        Assert.Equal(HttpStatusCode.OK,(await client.PutAsJsonAsync(path,WritingLesson())).StatusCode);
     }
 
     [SqlServerFact]
