@@ -11,7 +11,7 @@ public sealed class AuthoringException(int status, string message) : Exception(m
     public int Status { get; } = status;
 }
 
-public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, MediaStorage media, IpaTranscriber transcriber)
+public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, IMediaStorage media, IpaTranscriber transcriber)
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -51,8 +51,9 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
 
     public async Task<AdminCourseResponse> UpdateAsync(int id, SaveCourseRequest request, CancellationToken ct)
     {
-        var course = await DraftAsync(id, ct);
+        var course = await CourseAsync(id, ct);
         course.Title = request.Title.Trim(); course.Description = request.Description?.Trim(); course.CoverImageUrl = EmptyToNull(request.CoverImageUrl);
+        if (course.IsPublished) await ValidateForPublicationAsync(course, (await GetAsync(id, ct)).Lessons, ct);
         await TouchAsync(course, ct);
         await dbContext.SaveChangesAsync(ct);
         return await GetAsync(id, ct);
@@ -60,7 +61,7 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
 
     public async Task<AdminCourseResponse> SaveLessonAsync(int id, int? lessonId, SaveLessonRequest request, CancellationToken ct)
     {
-        var course = await DraftAsync(id, ct);
+        var course = await CourseAsync(id, ct);
         Lesson lesson;
         if (lessonId is { } existingId)
         {
@@ -86,8 +87,27 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
             }).ToArray()
         } : null;
         lesson.Content = JsonSerializer.Serialize(new LessonContentDocument(1, speaking, request.Listening, request.Grammar, request.Writing, request.Reading), JsonOptions);
+        if (course.IsPublished)
+        {
+            // Validate the candidate in memory before persisting any published changes.
+            var saved = (await GetAsync(id, ct)).Lessons;
+            var candidate = saved.Where(item => lessonId is null || item.LessonId != lessonId).Append(ToResponse(lesson)).ToArray();
+            await ValidateForPublicationAsync(course, candidate, ct);
+        }
         await TouchAsync(course, ct);
         await dbContext.SaveChangesAsync(ct);
+        return await GetAsync(id, ct);
+    }
+
+    public async Task<AdminCourseResponse> HideAsync(int id, CancellationToken ct)
+    {
+        var course = await CourseAsync(id, ct);
+        if (course.IsPublished)
+        {
+            course.IsPublished = false;
+            await TouchAsync(course, ct);
+            await dbContext.SaveChangesAsync(ct);
+        }
         return await GetAsync(id, ct);
     }
 
@@ -95,18 +115,43 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
     {
         var course = await CourseAsync(id, ct);
         if (course.IsPublished) return await GetAsync(id, ct);
-        var detail = await GetAsync(id, ct);
+        await ValidateForPublicationAsync(course, (await GetAsync(id, ct)).Lessons, ct);
+        course.IsPublished = true;
+        await TouchAsync(course, ct);
+        await dbContext.SaveChangesAsync(ct);
+        return await GetAsync(id, ct);
+    }
+
+    private async Task ValidateForPublicationAsync(Course course, IReadOnlyList<AdminLessonResponse> lessons, CancellationToken ct)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct); deadline.CancelAfter(TimeSpan.FromSeconds(90));
+        ct = deadline.Token;
         if (string.IsNullOrWhiteSpace(course.Description) || string.IsNullOrWhiteSpace(course.CoverImageUrl))
             throw new AuthoringException(400, "Bổ sung mô tả và ảnh bìa trước khi xuất bản.");
-        if (!media.Exists(course.CoverImageUrl, "image/")) throw new AuthoringException(400, "Không tìm thấy tệp ảnh bìa hợp lệ đã tải lên.");
-        var active = detail.Lessons.Where(lesson => lesson.IsActive).ToArray();
+        var verified = new Dictionary<string, bool>(StringComparer.Ordinal);
+        async Task<bool> ExistsAsync(string url, string type)
+        {
+            var key = type + url;
+            if (!verified.TryGetValue(key, out var exists)) { exists = await media.ExistsAsync(url, type, ct); verified[key] = exists; }
+            return exists;
+        }
+        if (!await ExistsAsync(course.CoverImageUrl, "image/")) throw new AuthoringException(400, "Không tìm thấy tệp ảnh bìa hợp lệ đã tải lên.");
+        var active = lessons.Where(lesson => lesson.IsActive).ToArray();
         if (active.Length == 0) throw new AuthoringException(400, "Cần ít nhất một bài học được kích hoạt.");
         foreach (var lesson in active)
         {
+            var audioValid = true;
+            if (lesson.SkillType == "speaking" && lesson.Speaking?.Sentences is { } sentences)
+                foreach (var sentence in sentences)
+                    if (sentence.AudioUrl is not null && !await ExistsAsync(sentence.AudioUrl, "audio/")) { audioValid = false; break; }
+            if (lesson.SkillType == "listening") audioValid = !string.IsNullOrWhiteSpace(lesson.AudioUrl) && await ExistsAsync(lesson.AudioUrl, "audio/");
+            if (lesson.SkillType == "reading" && !string.IsNullOrWhiteSpace(lesson.Reading?.ImageUrl)
+                && !await ExistsAsync(lesson.Reading.ImageUrl, "image/"))
+                throw new AuthoringException(400, $"Ảnh minh họa của bài “{lesson.Title}” không tồn tại hoặc không phải tệp ảnh hợp lệ.");
             var valid = lesson.ContentSupported && lesson.DifficultyLevel is not null && lesson.EstimatedMinutes > 0 && (lesson.SkillType switch
             {
-                "speaking" => lesson.Speaking?.Sentences is { Length: > 0 } sentences && sentences.All(sentence => sentence.AudioUrl is null || media.Exists(sentence.AudioUrl, "audio/")),
-                "listening" => !string.IsNullOrWhiteSpace(lesson.AudioUrl) && media.Exists(lesson.AudioUrl, "audio/") && !string.IsNullOrWhiteSpace(lesson.Listening?.Transcript) && lesson.Listening?.Questions is { Length: > 0 },
+                "speaking" => lesson.Speaking?.Sentences is { Length: > 0 } && audioValid,
+                "listening" => audioValid && !string.IsNullOrWhiteSpace(lesson.Listening?.Transcript) && lesson.Listening?.Questions is { Length: > 0 },
                 "grammar" => lesson.Grammar is { Questions.Length: > 0 } grammar && !string.IsNullOrWhiteSpace(grammar.Topic) && !string.IsNullOrWhiteSpace(grammar.Rules),
                 "writing" => lesson.Writing is { Rubric.Length: > 0 } writing && !string.IsNullOrWhiteSpace(writing.Prompt)
                     && writing.MinWords>=1 && writing.MaxWords>=writing.MinWords && writing.Rubric.Sum(item=>item.Weight)==100,
@@ -115,21 +160,11 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, M
             });
             if (!valid) throw new AuthoringException(400, $"Bài “{lesson.Title}” chưa đủ nội dung. Hãy hoàn thiện hoặc tắt kích hoạt.");
         }
-        course.IsPublished = true;
-        await TouchAsync(course, ct);
-        await dbContext.SaveChangesAsync(ct);
-        return await GetAsync(id, ct);
     }
 
     private async Task<Course> CourseAsync(int id, CancellationToken ct) => await dbContext.Courses
         .SingleOrDefaultAsync(course => course.CourseId == id && course.SourceType == "system", ct)
         ?? throw new AuthoringException(404, "Không tìm thấy khóa học hệ thống.");
-    private async Task<Course> DraftAsync(int id, CancellationToken ct)
-    {
-        var course = await CourseAsync(id, ct);
-        if (course.IsPublished) throw new AuthoringException(409, "Khóa học đã xuất bản. Trình tạo khóa học chỉ chỉnh sửa bản nháp.");
-        return course;
-    }
     private async Task TouchAsync(Course course, CancellationToken ct) => course.UpdatedAt =
         await dbContext.Database.SqlQuery<DateTime>($"SELECT SYSDATETIME() AS Value").SingleAsync(ct);
     private static string? EmptyToNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

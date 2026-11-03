@@ -35,10 +35,10 @@ public sealed partial class RegistrationSqlServerTests
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return (await response.Content.ReadFromJsonAsync<AdminCourseResponse>())!;
     }
-    private static SaveLessonRequest SpeakingLesson(string title = "Daily communication") => new()
+    private static SaveLessonRequest SpeakingLesson(string title = "Daily communication", string? audioUrl = null, string goals = "Practice final sounds.") => new()
     {
         Title = title, SkillType = "speaking", DifficultyLevel = "B2", EstimatedMinutes = 25,
-        Speaking = new SpeakingContent { Goals = "Practice final sounds.", Sentences = [new SpeakingSentence { Text = "Could you tell me the way?", Ipa = "/kʊd juː/" }] }
+        Speaking = new SpeakingContent { Goals = goals, Sentences = [new SpeakingSentence { Text = "Could you tell me the way?", Ipa = "/kʊd juː/", AudioUrl = audioUrl }] }
     };
     private static SaveLessonRequest ListeningLesson(string? audioUrl = "https://example.com/meeting.mp3") => new()
     {
@@ -90,7 +90,7 @@ public sealed partial class RegistrationSqlServerTests
         var publicCourse = (await client.GetFromJsonAsync<CourseDetailResponse>($"/api/v1/courses/{course.CourseId}"))!;
         Assert.Equal(2, publicCourse.Course.LessonCount); Assert.Equal(55, publicCourse.Course.EstimatedMinutes);
         Assert.Equal("Edited workplace course", publicCourse.Course.Title);
-        Assert.Equal(HttpStatusCode.Conflict, (await client.PutAsJsonAsync($"/api/v1/admin/courses/{course.CourseId}/lessons/{speaking.LessonId}", SpeakingLesson())).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync($"/api/v1/admin/courses/{course.CourseId}/lessons/{speaking.LessonId}", SpeakingLesson())).StatusCode);
         using var scope = factory.Services.CreateScope();
         var row = await scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>().Courses.SingleAsync(item => item.CourseId == course.CourseId);
         Assert.Equal(admin.User.UserId, row.CreatedBy); Assert.Equal("system", row.SourceType);

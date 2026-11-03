@@ -24,7 +24,7 @@ export type Writing={taskType:keyof typeof writingTaskTypes;topic:string;prompt:
 export const readingQuestionTypes={multiple_choice:"Trắc nghiệm",fill_blank:"Điền từ",short_answer:"Trả lời ngắn",true_false_not_given:"True / False / Not Given",matching:"Nối ý / tiêu đề"} as const;
 export const readingFocus={skimming:"Skimming · Đọc lướt",scanning:"Scanning · Tìm chi tiết",inference:"Inference · Suy luận",vocabulary:"Vocabulary · Từ vựng"} as const;
 export type ReadingQuestion={type:keyof typeof readingQuestionTypes;prompt:string;options:string[];correctOptionIndex:number|null;answer:string|null;acceptedAnswers:string[];caseSensitive:boolean;explanation:string|null;reference:string|null;focus:keyof typeof readingFocus;points:number;pairs:{left:string;right:string}[]};
-export type Reading={passageTitle:string;category:string;passage:string;translation:string;instructions:string;vocabulary:{word:string;meaning:string;example:string}[];questions:ReadingQuestion[]};
+export type Reading={passageTitle:string;category:string;imageUrl:string|null;imageAlt:string;imageCaption:string;passage:string;translation:string;instructions:string;vocabulary:{word:string;meaning:string;example:string}[];questions:ReadingQuestion[]};
 export type LessonDraft = { title: string; skillType: Skill; difficultyLevel: string; estimatedMinutes: number; isActive: boolean; audioUrl: string | null; speaking: Speaking | null; listening: Listening | null; grammar:Grammar|null;writing:Writing|null;reading:Reading|null };
 export type AdminLesson = Omit<LessonDraft, "skillType"> & { lessonId: number; orderIndex: number; skillType: string; contentSupported: boolean };
 export type AdminCourse = { courseId: number; title: string; description: string | null; coverImageUrl: string | null; isPublished: boolean; updatedAt: string; lessons: AdminLesson[] };
@@ -46,7 +46,7 @@ export function lessonDraft(lesson: AdminLesson, skill: Skill): LessonDraft {
     writing:skill === "writing" ? {...blankWriting(),...lesson.writing} : null,
     reading:skill === "reading" ? {...blankReading(),...lesson.reading,questions:lesson.reading?.questions.map(question=>({...newReadingQuestion(question.type),...question}))??[]} : null };
 }
-export function blankReading():Reading { return {passageTitle:"",category:"",passage:"",translation:"",instructions:"",vocabulary:[],questions:[]}; }
+export function blankReading():Reading { return {passageTitle:"",category:"",imageUrl:null,imageAlt:"",imageCaption:"",passage:"",translation:"",instructions:"",vocabulary:[],questions:[]}; }
 export function blankWriting():Writing {
   return {taskType:"essay",topic:"",prompt:"",instructions:"",minWords:150,maxWords:250,sampleAnswer:"",rubric:[
     {name:"Đáp ứng yêu cầu đề bài",description:"Đúng chủ đề, đủ các ý được yêu cầu.",weight:25},

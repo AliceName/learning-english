@@ -41,5 +41,7 @@ public sealed record CourseListResponse(
     int TotalPages, CourseSummary Summary);
 public sealed record CourseLessonSummary(
     int LessonId, string Title, string SkillType, string? DifficultyLevel,
-    int? EstimatedMinutes, int OrderIndex);
-public sealed record CourseDetailResponse(CourseListItem Course, IReadOnlyList<CourseLessonSummary> Lessons);
+    int? EstimatedMinutes, int OrderIndex, ListeningLessonStatus? ListeningStatus = null);
+public sealed record ListeningLessonStatus(int AttemptCount, decimal LatestScore);
+public sealed record CourseDetailResponse(CourseListItem Course, IReadOnlyList<CourseLessonSummary> Lessons,
+    ListeningCourseProgress? ListeningProgress = null);

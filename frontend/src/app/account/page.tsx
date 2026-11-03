@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/server-auth";
 import ProfileForm from "./profile-form";
 import styles from "./account.module.css";
 
-export const metadata: Metadata = { title: "Tài khoản của bạn | LinguaAI" };
+export const metadata: Metadata = { title: "Tài khoản của bạn | LEWA" };
 
 async function AccountContent() {
   const session = await getCurrentUser();

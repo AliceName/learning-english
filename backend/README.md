@@ -37,11 +37,17 @@ API kiểm tra SQL Server trả `200` khi kết nối thành công và `503` khi
 
 ## Kết nối MongoDB local trên Dat
 
-API sử dụng `MongoDB.Driver` 3.13.0 và cấu hình `MongoDbSettings`. Máy local dùng `mongodb://127.0.0.1:27017` trong `EnglishLearning.Api/appsettings.Development.json`, database được cấu hình là `EnglishLearningDB`, collection từ điển dự kiến là `VocabularyEntries`. Có thể ghi đè bằng User Secrets hoặc biến môi trường `MongoDbSettings__ConnectionString`, `MongoDbSettings__DatabaseName`.
+API sử dụng `MongoDB.Driver` 3.13.0 và cấu hình `MongoDbSettings`. Giá trị mặc định trong `EnglishLearning.Api/appsettings.json` là `mongodb://localhost:27017`, database `EnglishLearningDB`, collection từ điển `VocabularyEntries`. Máy hiện tại ghi đè URI thành `mongodb://127.0.0.1:27017` trong cấu hình Development local. Có thể ghi đè bằng User Secrets hoặc biến môi trường `MongoDbSettings__ConnectionString`, `MongoDbSettings__DatabaseName`.
 
 `GET /api/v1/health/mongodb` chạy lệnh `ping: 1`, trả `200` khi kết nối được, `503` khi không kết nối được và không trả URI hoặc chi tiết credentials. Client dùng lại qua DI, có giới hạn thời gian và tắt retry writes để tương thích MongoDB standalone local.
 
-Phần này chỉ bổ sung kết nối và health check. Chưa đưa chức năng từ điển/cache của nhánh `nga` vào Dat. Khởi động API và gọi health không tạo database, collection, validator, index hoặc dữ liệu. MongoDB local hiện chưa có database ứng dụng có dữ liệu; tên database cấu hình sẽ chỉ xuất hiện trong MongoDB Compass khi có dữ liệu được tạo qua luồng được triển khai và cho phép riêng.
+Phần từ điển/cache của nhánh `nga` đã được tích hợp cùng Speaking, hồ sơ và Flashcards của Dat. Khởi động API và gọi health không tạo database, collection, validator, index hoặc dữ liệu. Việc cấp phát collection từ điển theo `MONGODB_SCHEMA.md` vẫn là lệnh riêng, không tự chạy khi khởi động. MongoDB local hiện chưa có database ứng dụng có dữ liệu.
+
+### Media khi phát triển trên máy local
+
+`appsettings.Development.json` bật rõ `MediaStorage:EnableDevelopmentLocalStorage=true` để giữ chức năng đọc/tải ảnh và audio khóa học trên máy chưa cấu hình Cloudinary. Chế độ này chỉ hoạt động trong Development và khi `Cloudinary:Enabled=false`; health media báo `local-development`. Nếu bật Cloudinary, media luôn dùng Cloudinary và không tự quay về local khi cloud lỗi. Mặc định ngoài Development vẫn dùng kho Cloudinary theo cấu hình của nhánh nga.
+
+Chế độ local này áp dụng cho media khóa học. Audio từ điển giữ cơ chế Cloudinary của nga; bản ghi Speaking tiếp tục dùng kho riêng có kiểm tra chủ sở hữu. Không chạy migration hoặc di chuyển/xóa media khi gộp code.
 
 ## Cấu hình CSDL
 
@@ -57,6 +63,197 @@ Trong `appsettings.json`, `ConnectionStrings:DefaultConnection` để trống; f
 Khi chạy ngoài môi trường Development, cung cấp `ConnectionStrings__DefaultConnection` qua biến môi trường hoặc nơi lưu secrets. Không ghi mật khẩu SQL Server vào source code. `TrustServerCertificate=True` trong cấu hình Development phục vụ SQL Server local; môi trường triển khai cần cấu hình chứng chỉ phù hợp.
 
 CORS cho phép frontend tại `http://localhost:3000`; thay đổi danh sách `Cors:AllowedOrigins` nếu frontend chạy ở địa chỉ khác. Swagger chỉ được bật trong Development.
+
+## Cấu hình CSDL cho MongoDB
+
+`MongoDB.Driver` 3.13.0 đã có trong project. Từ điển dùng `MongoDbSettings:ConnectionString`, `DatabaseName`, `VocabularyCollectionName` (mặc định `VocabularyEntries`) và `OperationTimeoutMs` (mặc định 1000 ms). Giữ nguyên `CoursesCollectionName` đã cấu hình; collection đó không được dùng cho từ điển. URI có tài khoản/mật khẩu cần được cung cấp qua User Secrets hoặc `MongoDbSettings__ConnectionString`, không đưa credentials vào repository/log.
+
+Thiết kế chính thức nằm ở `../MONGODB_SCHEMA.md`. Sau khi cấu hình đúng môi trường, chạy tường minh từ repository root:
+
+```powershell
+dotnet run --project backend/EnglishLearning.Api -- --initialize-vocabulary=true
+```
+
+Lệnh tạo collection/validator nếu thiếu; khi collection đã có dữ liệu, kiểm tra dữ liệu cũ trước khi cập nhật validator và dừng nếu có bản ghi vi phạm. Khởi động API bình thường không sửa schema MongoDB/SQL Server. MongoDB tạm mất kết nối không ngăn API khởi động; lỗi cấu hình thiếu/sai vẫn cần sửa. Health riêng: `GET /api/v1/health/mongodb` chỉ ping, không chứng minh quyền ghi collection.
+
+### API tra từ vựng
+
+- `GET /api/v1/vocabulary?word=hello`, yêu cầu JWT và tài khoản còn hoạt động, dùng được cho user/admin. Khách nhận 401.
+- Chuẩn hóa từ một lần, đọc equality theo unique `_id` `en:hello`. Cache hit chỉ có một lượt đọc MongoDB; không ghi hoặc gọi nguồn. Từ chưa có gọi Dictionary API, giữ đủ entries/metadata dạng BSON và upsert bằng `$setOnInsert`; chèn thành công đã xác nhận thì không đọc lại.
+- Response gồm `word`, `language`, `entries`, `fetchedAtUtc`, `source` (`mongodb`/`dictionaryApi`) và `isPersisted`. MongoDB ghi lỗi nhưng nguồn thành công vẫn trả 200 với `isPersisted=false`; không có hàng đợi lưu bù.
+- Nguồn xác nhận không có từ trả 404. HTML/JSON hỏng/nguồn 5xx trả 502; nguồn không kết nối hoặc rate limit trả 503; timeout trả 504. Giới hạn lượt của hệ thống trả 429 và Retry-After. Response lỗi dùng ProblemDetails, không lộ URI hoặc stack trace.
+- `DictionaryApiSettings` điều khiển timeout nguồn (5s), giới hạn body (1 MiB), số tra mới đồng thời (32), lượt/tài khoản/phút (30). Mỗi thao tác MongoDB mặc định 1s; tác vụ dùng chung tối đa 8s, deadline người gọi 10s sau xác thực. Proxy frontend có timeout 30s, bao gồm xác thực SQL.
+- Gộp các request cùng từ trong một instance. Người hủy chỉ ngừng chờ của mình; DB ngăn document trùng giữa nhiều instance. Không TTL, không tự tạo flashcard/bookmark/lịch sử người dùng.
+- Log Debug có thời gian cache hit/miss, nguồn và lưu; Warning có mã lỗi nhưng không ghi payload hoặc URI kết nối.
+
+### Audio từ điển: Wikimedia và cache file
+
+Audio từ điển đã tích hợp Cloudinary qua `IDictionaryAudioStorage`/`CloudinaryDictionaryAudioStorage`. Runtime mặc định chỉ đọc Cloudinary; cache local cũ chỉ được đọc khi chủ động bật `Cloudinary:AllowLegacyReads=true` để rollback. Media khóa học trong chế độ cloud cũng dùng chính sách này qua `IMediaStorage`; chế độ Development local được mô tả ở trên. Kế hoạch: `../reports/Ke_hoach_Cloudinary_media_2026-10-27.md`.
+
+Sau khi hiển thị nghĩa, frontend tự gọi `POST /api/v1/vocabulary/audio/prepare` với `{ "word": "match", "entry": 0, "phonetic": 1 }`. Backend đọc nguồn từ mục từ đã lưu, ưu tiên **cache → file gốc Wikimedia qua imageinfo → URL audio nguồn trong allowlist**. Request chỉ nhận từ/chỉ số, không nhận URL tùy ý. Các từ cũ trong MongoDB cũng dùng luồng này, không cần tải lại nghĩa hoặc sửa schema.
+
+Prepare trả `status=ready`, `playbackUrl` cùng origin Next.js, MIME, dung lượng và attribution sau khi lưu file thành công. Trình duyệt còn phải tải đủ file và chờ player sẵn sàng trước khi bật nút nghe. `GET /api/v1/vocabulary/audio?word=match&entry=0&phonetic=1` chỉ đọc file đã chuẩn bị; hỗ trợ Range 206/416, không khởi động tải nguồn. Cả hai endpoint yêu cầu JWT và tài khoản SQL còn hoạt động; trả private/no-store. Cache không được phục vụ trực tiếp từ public.
+
+Audio mới chỉ ghi lên Cloudinary `video/authenticated`; manifest `raw/authenticated` giữ hash/MIME/size/attribution theo hợp đồng adapter bước 2. GET stream qua backend sau xác thực, không đưa signed URL cho browser. Chỉ khi bật `AllowLegacyReads=true`, `App_Data/dictionary-audio` và sidecar cũ mới được đọc khi cloud xác nhận miss hoặc Cloudinary đang tắt; không tự upload/migrate/xóa file cũ trong request. Cloud lỗi được trả thành ProblemDetails, không chuyển sang ghi disk. Khi chưa bật Cloudinary, prepare bản thu mới trả `audio_storage_not_configured` trước khi tải nguồn; đọc audio cũ cũng cần bật rollback. MongoDB giữ nguyên 5 field root, không lưu file/base64/đường dẫn hoặc metadata Cloudinary.
+
+`DictionaryAudioSettings` trong appsettings (có thể ghi đè bằng biến môi trường):
+
+| Cấu hình | Mặc định | Ý nghĩa |
+|---|---|---|
+| `RootPath` | `App_Data/dictionary-audio` dưới content root | Cache legacy chỉ đọc trong luồng runtime mới |
+| `MaxFileBytes` | 5 MiB | Giới hạn từng bản thu |
+| `MaxCacheBytes` | 512 MiB | Chỉ còn áp dụng cho legacy writer/test; runtime mới không ghi/dọn disk |
+| `MaxConcurrentPreparations` | 4 | Số tác vụ tải đang thực hiện trong một instance |
+| `MaxPendingPreparations` | 32 | Tổng tác vụ đang chạy/chờ; vượt giới hạn trả 503 |
+| `PreparationTimeoutSeconds` | 90 | Deadline chung gồm chờ slot, cloud lookup, tải nguồn, upload và verify |
+| `SourceTimeoutSeconds` | 10 | Mỗi lượt tải; resolve metadata tối đa 5 giây |
+| `RequestsPerMinute` | 120 | Tổng prepare/file mỗi tài khoản/phút |
+| `UserAgent` | `EnglishLearningSystem/1.0 (...)` | Nhận diện ứng dụng khi gọi Wikimedia; đặt thông tin liên hệ phù hợp khi triển khai |
+
+Gộp cloud lookup/tải/upload của các request cùng bản thu trong một instance. Một người hủy chờ không hủy tác vụ chung; lỗi không được lưu thành cache, nút Thử lại chạy lượt chuẩn bị mới. Host/path tải bị giới hạn và mọi redirect được kiểm tra lại. Không chuyển mã hoặc dùng giọng tổng hợp; trình duyệt không hỗ trợ codec sẽ báo lỗi riêng cho giọng đó. Cloudinary dùng `overwrite=false` và xác minh conflict giữa các instance; tác vụ tải Wikimedia vẫn có thể trùng giữa instance, chưa có distributed lock. Proxy prepare chờ tối đa 120 giây, GET 30 giây; browser chờ prepare + tải file tối đa 165 giây, nghĩa vẫn hiển thị độc lập.
+
+Smoke Wikimedia thật bật bằng `ENGLISHLEARNING_RUN_LIVE_AUDIO_TEST=1`: tải bản thu match-US, kiểm tra OGG/nguồn/giấy phép, lưu vào thư mục tạm riêng rồi tạo lại dịch vụ với mạng bị chặn để xác nhận cache bền qua khởi tạo lại. Các bài fake/storage và integration SQL kiểm tra thêm dedup, lỗi file/redirect/quota, auth và Range. Không ghi cache hoặc dữ liệu kiểm thử vào kho production.
+
+Có thể đặt `ENGLISHLEARNING_AUDIO_SMOKE_REPORT` thành đường dẫn JSON để ghi một mẫu thời gian tải/lưu lần đầu và prepare từ cache sau khi tạo lại dịch vụ. Mẫu dùng repository từ vựng trong bộ nhớ, không bao gồm SQL/MongoDB/proxy/browser và không đại diện p95 hoặc SLA. Báo cáo triển khai: `../reports/Bao_cao_cache_audio_Wikimedia_2026-10-27.md`.
+
+### Kiểm thử MongoDB và benchmark
+
+Test mặc định không cần nguồn Dictionary API công khai. Để chạy integration MongoDB, đặt `ENGLISHLEARNING_TEST_MONGODB_CONNECTION_STRING`; database test mặc định `EnglishLearningDictionaryTests`, có thể đổi bằng `ENGLISHLEARNING_TEST_MONGODB_DATABASE` nhưng tên phải kết thúc bằng `Tests`. Mỗi test chỉ tạo/xóa collection có prefix `vocabulary_test_` của chính nó. Không dùng URI production.
+
+```powershell
+$env:ENGLISHLEARNING_TEST_MONGODB_CONNECTION_STRING = 'mongodb://localhost:27017'
+dotnet test EnglishLearningSystem.sln --filter 'FullyQualifiedName~Vocabulary'
+```
+
+Benchmark 10.000/100.000 document chỉ chạy khi thêm `ENGLISHLEARNING_RUN_VOCABULARY_BENCHMARK=1`. Có thể đặt `ENGLISHLEARNING_VOCABULARY_BENCHMARK_REPORT` thành đường dẫn JSON báo cáo. Test lấy 200 mẫu sau warmup, dùng explain xác nhận không COLLSCAN và chỉ xét tối đa một document; số đo DB không đại diện cho độ trễ toàn bộ giao diện.
+
+Smoke test gọi nguồn thật chỉ chạy khi bật `ENGLISHLEARNING_RUN_LIVE_DICTIONARY_TEST=1` cùng cấu hình SQL test. Test tra `hello`, lưu vào collection MongoDB test riêng, tạo lại ứng dụng rồi dùng tài khoản thứ hai để đọc lại trong lúc client nguồn đã bị chặn. Tài khoản SQL được rollback và collection test được dọn. Test mặc định không phụ thuộc tình trạng Dictionary API công khai.
+
+## Cloudinary — bước 1: cấu hình môi trường và smoke test
+
+Đã có SDK `CloudinaryDotNet` **1.29.3**, options/validation và smoke command riêng. `Cloudinary:Enabled=false` mặc định trong cấu hình mẫu; bật bằng User Secrets để cache audio từ điển và upload media khóa học trên Cloudinary. Trong chế độ cloud, khi tắt chỉ đọc file legacy nếu chủ động bật `AllowLegacyReads=true`; không tạo file local mới. Media khóa học có chế độ Development local riêng được chọn rõ khi khởi động. Không cần sửa schema SQL/MongoDB hoặc khởi động thêm backend để chạy smoke.
+
+### Tạo tài khoản và lấy credentials
+
+1. Đăng ký tại [Cloudinary](https://cloudinary.com/users/register_free), mở Console và chọn Product Environment của dự án.
+2. Vào **Settings → API Keys** để lấy **Cloud Name**, **API Key**, **API Secret**. Tài khoản free có một product environment; dùng prefix để tách dev/test. Không đổi cloud name sau khi đã đưa URL vào sử dụng. [Hướng dẫn chính thức](https://cloudinary.com/documentation/dev_kickstart_acct_setup).
+3. Trong Visual Studio, nhấp phải project **EnglishLearning.Api → Manage User Secrets**. Thêm các khóa sau vào JSON hiện có (giữ JWT/SQL/MongoDB và dấu phẩy giữa các mục):
+
+```json
+"Cloudinary:Enabled": true,
+"Cloudinary:CloudName": "your_cloud_name",
+"Cloudinary:ApiKey": "your_api_key",
+"Cloudinary:ApiSecret": "your_api_secret",
+"Cloudinary:EnvironmentPrefix": "els/dev"
+```
+
+File local: `%APPDATA%\Microsoft\UserSecrets\464087af-810d-4b10-95fc-37a9adaa019d\secrets.json`. Các dòng trên là các property để thêm vào object đang có, không thay cả file. Không đặt chúng ở frontend/appsettings. Để nhập bằng script thay vì sửa JSON, chạy từ repository root:
+
+```powershell
+.\backend\scripts\Set-CloudinarySecrets.ps1
+```
+
+Script hỏi Cloud Name và che API Key/Secret khi nhập, mặc định prefix `els/dev`. Có thể chọn `-EnvironmentPrefix els/test`. Credentials được truyền qua stdin tới `dotnet user-secrets set`, tránh đưa secret vào tham số process/history. Lệnh merge các key `Cloudinary:*`, giữ JWT/SQL/MongoDB đã có; không in giá trị credentials. User Secrets là cấu hình local ngoài repository, không phải kho secret được mã hóa cho production. Không gửi API Secret vào chat.
+
+Production sử dụng secrets của hosting với `Cloudinary__Enabled`, `Cloudinary__CloudName`, `Cloudinary__ApiKey`, `Cloudinary__ApiSecret`, `Cloudinary__EnvironmentPrefix=els/prod`. Không lưu credentials trong appsettings/frontend. Smoke từ chối prefix production kể cả khi credentials hợp lệ.
+
+### Kiểm tra môi trường thật
+
+Sau khi lưu secrets, chạy từ repository root:
+
+```powershell
+.\backend\scripts\Test-CloudinaryEnvironment.ps1
+```
+
+Script build vào `EnglishLearning.Api/bin/CloudinaryEnvironment` để không đụng DLL backend đang chạy trong Visual Studio. Sau đó chạy CLI `--cloudinary-smoke=true`, không mở cổng 5000, không truy cập SQL/MongoDB hoặc thay kho runtime. Báo cáo: `../reports/Cloudinary_environment_smoke.json`.
+
+Mỗi lần chạy tạo prefix riêng `els/dev/smoke/<guid>` hoặc `els/test/smoke/<guid>`, upload ảnh PNG 1×1, bản thu OGG 14.795 byte và JSON attribution bằng `image`, `video`, `raw`, tất cả `type=authenticated`. Kiểm tra:
+
+- Signed HTTPS stream trả đúng toàn bộ byte của cả ba file.
+- URL authenticated không có chữ ký và URL public tương ứng đều bị từ chối (401/403/404); 5xx không được coi là đã bảo vệ thành công.
+- Audio Range `bytes=0-31` phải trả 206, đủ 32 byte và Content-Range/Length đúng. Với range vượt cuối file, report ghi nguyên trạng `audioRangeResponses`: CDN có thể trả 416 hoặc bỏ qua Range và trả toàn file 200. Trường hợp 200 chỉ được ghi nhận khi byte và kích thước khớp toàn bộ file gốc, không coi đó là 416. `capabilityNotes` yêu cầu proxy ứng dụng trả 416 + `bytes */<kích thước đã xác minh>` ở bước 2 trước khi gọi upstream. Header 416 có mặt nhưng sai kích thước vẫn làm test thất bại. RFC 9110 cho phép server bỏ qua Range và chỉ khuyến nghị Content-Range ở 416. [RFC 9110 §14.2](https://www.rfc-editor.org/rfc/rfc9110.html#name-range), [§15.5.17](https://www.rfc-editor.org/rfc/rfc9110.html#name-416-range-not-satisfiable).
+- Dọn đúng ba public ID do lượt smoke tạo, kể cả khi request upload mất phản hồi. Không List/Search/xóa asset có sẵn. Nếu cleanup lỗi, báo cáo liệt kê ID cần dọn. Script đối soát ID fixture trong các báo cáo `Cloudinary_environment_*failure_*.json` trước khi upload mới; chỉ đúng tên `image`, `audio`, `manifest.json` dưới prefix dev/test/smoke của lượt đó được phép dọn. Kết quả đối soát lưu `_recovery.json`, không chạy lại recovery đã xác nhận thành công.
+
+Exit `0` chỉ khi các kiểm tra và cleanup đều đạt; `2` nghĩa chưa cấu hình hoặc namespace không phù hợp, chưa chạy kiểm tra thật; `1` nghĩa smoke thất bại. Trường `configurationIssues` nêu tên key hoặc namespace cần sửa khi chưa cấu hình hợp lệ. `configurationSources` chỉ ghi loại provider/tên file, không ghi giá trị; mã lỗi HTTP/SDK/network được phân loại an toàn và lỗi cleanup có status riêng. Report không chứa API key/secret, signed URL hoặc response body của SDK. Khi chưa có credentials, **không đánh dấu bước 1 đã nghiệm thu**. Lỗi/tính năng Cloudinary hoặc Range không được hỗ trợ sẽ thể hiện trong report để điều chỉnh trước bước 2; không mở public asset để làm test vượt qua.
+
+Fixture OGG và giấy phép được ghi tại `EnglishLearning.Api/Resources/Cloudinary/README.md`; đây là dữ liệu kiểm thử nhúng, không phải cache media runtime mới.
+
+Kiểm thử giả lập: `dotnet test EnglishLearningSystem.sln --filter FullyQualifiedName~CloudinaryEnvironmentTests`. Test mặc định không gọi Cloudinary. Báo cáo tiến độ bước 1: `../reports/Cloudinary_buoc_1_2026-10-27.md`.
+
+## Cloudinary — bước 2: adapter và manifest
+
+`ICloudMediaStore`/`CloudinaryMediaStore` và `ICloudinaryAssetTransport`/`CloudinaryAssetTransport` đã được đăng ký DI, dùng chung cho audio từ điển và media khóa học. Không có file media/manifest mới được ghi xuống disk bởi adapter và không đổi schema SQL/MongoDB.
+
+- `StoreAsync(kind, reference, bytes, format, attribution, token)`: kiểm tra loại/kích thước/byte header, tạo SHA-256, upload `authenticated` với `overwrite=false`, đọc lại có giới hạn để xác minh hash/MIME/size, rồi mới ghi manifest JSON. Chỉ trả thành công sau khi đọc lại manifest đã commit.
+- `FindAsync`: đọc manifest theo ID cụ thể qua signed delivery và kiểm tra file bằng HEAD, cache metadata tối đa 1.000 entry/60 giây. Không cache miss hoặc quyền người dùng. CDN 404 được đối chiếu bằng targeted Admin lookup để tránh nhầm manifest vừa được instance khác tạo; Admin cũng dùng khi response conflict thiếu metadata. Không List/Search toàn kho hoặc gọi Admin trên đường đọc thường đã cache.
+- `OpenAsync`: trả stream cùng status/MIME/length/Range, không trả signed URL. Caller sở hữu stream và phải dispose. Out-of-bounds Range trả 416 + Content-Range từ manifest trước khi gọi CDN. Range hợp lệ mà CDN bỏ qua được xử lý bằng tải full trong giới hạn, xác minh SHA-256 rồi trả đúng slice 206. Không bật lại Range processing của MVC trên stream đã cắt sẵn.
+- Ảnh tối đa 5 MiB (JPG/PNG/WebP), từ điển 5 MiB (OGG/MP3/WAV), audio khóa học 25 MiB (thêm AAC/M4A). Input/metadata sai loại, JSON không hợp lệ, stream thiếu/quá dung lượng, MIME/hash sai hoặc namespace khác bị từ chối.
+- Manifest version 1 chứa kind/reference, asset ID/public ID/version/resource type/delivery type/format, SHA-256/MIME/size/UTC và attribution nguồn. Không chứa signed URL hoặc base64. Root MongoDB và URL ứng dụng hiện tại không thay đổi.
+- Đọc manifest không bắt buộc header HTTP `Content-Length`: sau upload vẫn kiểm tra đúng số byte theo receipt và EOF; cold read không có header chỉ đọc tối đa `MaxManifestBytes + 1` byte để phát hiện vượt giới hạn. Header có mặt nhưng sai, file bị cắt hoặc dư byte vẫn bị từ chối. [RFC 9110 §8.6](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.6).
+- Binary từ điển bất biến theo content hash; nhiều nguồn dùng chung file nhưng có manifest riêng. Cùng reference và nội dung được tái sử dụng; nội dung khác cùng reference trả 409. Manifest đã tồn tại thắng cuộc đua; không ghi đè metadata của writer khác.
+- Manifest thiếu trả cache miss; binary có sẵn được dùng lại sau khi xác minh khi Store retry. Manifest sai/corrupt hoặc trỏ asset/version đã khác trả lỗi rõ ràng, không bị ghi đè tự động. Asset mất nhưng manifest cũ còn tồn tại cần đối soát riêng; không tự xóa manifest để sửa.
+- Ghi manifest lỗi hoặc mất acknowledgement: trả lỗi cùng `OrphanCandidates`/log ID thuộc namespace. Đây là danh sách cần đối soát, không phải lệnh xóa: binary có thể đã được tham chiếu hoặc manifest đã commit nhưng mất phản hồi. Không có job xóa/collection orphan mới; retry cùng nội dung khôi phục được trường hợp manifest thiếu hoặc đã commit.
+- 401/403 credentials/quyền và quota được phân loại thành lỗi cấu hình/storage không retry mù; 420/429 có mã rate-limit/Retry-After đề xuất, network/timeout có thể retry trong deadline của caller. Không đưa error body hoặc signed URL của provider vào exception/log.
+
+`CloudinaryMedia` options: `MaxManifestBytes=32768`, `MaxConcurrentOperations=4`, `OperationTimeoutSeconds=90`, `MetadataCacheSeconds=60`, `MetadataCacheEntries=1000`. Một instance có 64 lock stripe theo reference; phía Cloudinary vẫn dùng `overwrite=false` để tránh ghi đè giữa nhiều instance. TTL không thay thế xác thực SQL tại endpoint. Bước tích hợp phải đặt deadline ngoài bao phủ SQL/Mongo/storage và truyền cancellation; stream có deadline riêng cả sau khi headers đã tới.
+
+Chạy kiểm thử adapter thật từ repository root bằng User Secrets của bạn:
+
+```powershell
+.\backend\scripts\Test-CloudinaryAdapter.ps1
+```
+
+Lệnh tương đương `Test-CloudinaryEnvironment.ps1 -Adapter`; report riêng `../reports/Cloudinary_adapter_smoke.json`. Test dùng namespace `els/dev/smoke/<guid>` hoặc `els/test/smoke/<guid>`, kiểm tra commit/read lại, recreate service, existing conflict, orphan, ảnh/audio khóa học, 206/416 và snapshot media local không thay đổi; dọn đúng ID fixture của lượt đó. Không chuyển provider runtime, không mở thêm cổng backend hoặc sửa SQL/MongoDB. Nếu cleanup không xác nhận được, report liệt kê ID để xử lý; không xóa cả folder/cloud namespace khác.
+
+Khi smoke adapter thất bại, `adapterFailure` ghi stage, thao tác delivery cuối, resource type/format, status và kích thước receipt/header nếu có. Các trường này không chứa credentials, signed URL hoặc nội dung file. Report trước bản cập nhật 28/10 chưa có chẩn đoán này.
+
+Test mặc định dùng fake transport và HTTP handler, không cần Cloudinary: `dotnet test EnglishLearningSystem.sln --filter 'FullyQualifiedName~CloudinaryMediaStoreTests|FullyQualifiedName~CloudinaryAssetTransportTests'`. Kết quả bước 2: `../reports/Cloudinary_buoc_2_2026-10-27.md`.
+
+## Cloudinary — bước 3: audio từ điển
+
+`CloudinaryDictionaryAudioStorage` mặc định chỉ đọc cloud; nhánh đọc legacy khi miss chỉ bật qua `AllowLegacyReads=true` trong rollback. GET vẫn xác thực JWT/tài khoản SQL trước khi tra storage; cloud stream giữ status/length/Content-Range từ adapter và **không** chạy MVC Range lần nữa. Legacy FileStream dùng MVC Range. Cả hai trả private/no-store và nosniff. Lỗi cloud có code an toàn và Retry-After nếu có; không lộ signed URL/credentials hay tác động payload nghĩa.
+
+Chạy smoke bước 3 trong PowerShell có User Secrets:
+
+```powershell
+.\backend\scripts\Test-CloudinaryDictionaryAudio.ps1
+```
+
+Report riêng `../reports/Cloudinary_dictionary_audio_smoke.json`; 13 kiểm tra adapter + 9 kiểm tra pipeline prepare/cache/attribution/retry/Range/no-disk. Test dùng Cloudinary thật trong namespace smoke riêng, repository/nguồn audio fixture trong bộ nhớ và dọn asset test; không mở cổng server, không ghi SQL/MongoDB/cache local. Nguồn Wikimedia thật, xác thực HTTP/SQL và UI được kiểm chứng riêng; smoke này không thay thế toàn bộ luồng browser với tài khoản thật. Chi tiết `../reports/Cloudinary_buoc_3_2026-10-28.md`.
+
+Nếu report chỉ lỗi cleanup, chạy `Test-CloudinaryDictionaryAudio.ps1 -CleanupOnly` để đối soát đúng ID/type trong report mà không upload lại. Recovery dùng namespace dev/test smoke UUID, retry lỗi tạm thời tối đa 3 lần trong deadline 90 giây; không retry credentials/quyền. `ok`/`not found` đều hợp lệ. Ghi report `_recovery.json` với `cleanupTargets`, giữ nguyên bằng chứng smoke gốc. Mode thường tự đối soát các report adapter/dictionary còn pending trước khi tạo asset mới. Không xóa cả folder hoặc media runtime.
+
+## Cloudinary — bước 4: media khóa học
+
+`CloudinaryCourseMediaStorage` xử lý upload và read/verify bất đồng bộ. Upload mới ghi Cloudinary, URL ứng dụng vẫn `/api/media/<guid>.<ext>`; local cache cũ chỉ đọc khi cloud miss hoặc đang tắt. Validate MIME/magic và số byte thực tế trong giới hạn cover 5 MiB/audio 25 MiB. Multipart giới hạn 27 MiB, memory threshold 28 MiB để request hợp lệ không dùng temp disk. Upload/publish backend có deadline 90 giây, proxy 120 giây.
+
+Admin được preview media draft. Học viên chỉ đọc file tham chiếu từ khóa học đã publish và nhìn thấy được, lesson active. Speaking kiểm tra đúng `sentences[].audioUrl` sau khi parse schema version 1; URL trong văn bản không cấp quyền. Publish dedup URL/type và HEAD asset ngay cả khi manifest còn trong cache, từ chối thiếu/sai loại và giữ draft khi cloud lỗi. Các URL ngoài HTTP/HTTPS không có user-info giữ theo hợp đồng cũ; server không fetch URL đó. Cloud stream không chạy MVC Range lần nữa; legacy FileStream giữ MVC Range.
+
+Smoke riêng: `.\backend\scripts\Test-CloudinaryCourseMedia.ps1`, report `../reports/Cloudinary_course_media_smoke.json`. 22 kiểm tra adapter/wrapper bằng PNG/WAV fixture trên namespace smoke riêng, không server/SQL/MongoDB hoặc file runtime. Chỉ cleanup lại: thêm `-CleanupOnly`. Test proxy: `node tests/cloudinary-media-proxy.mjs` từ frontend, dùng route exports thật và backend/cookies giả lập. Chi tiết `../reports/Cloudinary_buoc_4_2026-10-28.md`. Chưa migrate hoặc xóa media cũ.
+
+## Cloudinary — bước 5: di chuyển dữ liệu
+
+Công cụ CLI riêng không mở server, seed hoặc sửa DB. `Invoke-CloudinaryMediaMigration.ps1` mặc định DryRun; đọc SQL/MongoDB bằng SELECT/Find, kiểm kê cả file chưa thấy tham chiếu, hash và map key/GUID sang manifest hiện có. Plan bind snapshot nguồn/reference và namespace/account; thay đổi sau dry-run sẽ dừng trước upload.
+
+```powershell
+.\backend\scripts\Invoke-CloudinaryMediaMigration.ps1 -Mode DryRun
+.\backend\scripts\Invoke-CloudinaryMediaMigration.ps1 -Mode Apply
+.\backend\scripts\Invoke-CloudinaryMediaMigration.ps1 -Mode Verify
+# Hoặc tuần tự cả ba lượt:
+.\backend\scripts\Invoke-CloudinaryMediaMigration.ps1 -Mode All
+```
+
+Apply backup tất cả file inventoried vào `backups/media-migration/<planId>/` (Git-ignore), kiểm tra hash trước khi upload từ RAM qua adapter bất biến. URL course giữ nguyên GUID/extension; dictionary giữ source key và attribution. Verify dùng store/cache mới, tải đủ byte và tính SHA-256. Có plan/apply/verify archive trong backup; report canonical tại `../reports/Cloudinary_media_migration_*.json`. Mọi file không chuyển/missing/conflict có trạng thái riêng; re-audit cuối bắt file mới hoặc reference thay đổi. Không tự sửa DB, xóa nguồn hoặc xóa cloud runtime. Chỉ `verified` mới là nghiệm thu; partial/blocked trả exit 1 và giữ dữ liệu để đối soát/rerun.
+
+Hỗ trợ `-PlanPath` và `-BackupRoot`; dùng cùng backup root khi Apply/Verify tách lượt. Không dùng inspection plan chưa bind account để apply. Chi tiết giới hạn, rollback và kết quả ở `../reports/Cloudinary_buoc_5_2026-10-28.md`. Dọn legacy sau verify và thời gian giữ thuộc bước 6.
+
+## Cloudinary — bước 6: cloud-only và retention
+
+Trong chế độ cloud, runtime mặc định `Cloudinary:AllowLegacyReads=false`: không resolve legacy reader hoặc đọc local khi cloud miss/lỗi. `Enabled=false` không tự quay về disk. Option legacy chỉ bật có chủ đích cho rollback; new writes vẫn lên cloud hoặc báo unavailable. Không cần tạo `App_Data` cho đường cloud-only. Chế độ Development local được chọn riêng lúc khởi động, không phải fallback khi cloud lỗi.
+
+Khởi động lại backend hiện tại bằng mã mới rồi chạy `.\backend\scripts\Test-CloudinaryCutover.ps1`. GET `/api/v1/health/media` no-store chỉ trả revision/mode/target hash/instance ID/start time, không secret. Tool xác nhận API đã restart sau migration, hai process đọc đồng thời và một process mới sau restart; không listener mới. Chrome kiểm tra decode/Blob/offline bằng backup khớp hash, native workers đọc cloud thật. Report mô tả rõ fixture harness, không giả logged-in end-to-end.
+
+Acceptance seal chốt hạn giữ tối thiểu 7 ngày. `-Mode CleanupDryRun` hoặc `-Mode Cleanup` trước hạn chỉ ghi deferred/0 deleted; không force/bypass ngày. Sau hạn, tool xác minh fresh cloud + hash backup/source, chỉ xóa file allowlist, giữ backup/extra. Adapter/config cần refactor và build/test review sau window, không bị xóa mù bởi CLI. Xem `../reports/Cloudinary_buoc_6_2026-10-28.md`; không coi source cleanup là đã xong trước hạn.
 
 ## Dependencies .NET
 
@@ -205,18 +402,19 @@ Các API `/api/v1/admin/*` yêu cầu JWT role `admin` **và** kiểm tra lại 
 | `PUT /api/v1/admin/courses/{id}` | Lưu tên, mô tả, ảnh bìa bản nháp |
 | `POST /api/v1/admin/courses/{id}/lessons` | Thêm bài Speaking/Listening/Reading/Writing/Grammar |
 | `PUT /api/v1/admin/courses/{id}/lessons/{lessonId}` | Lưu bài học thuộc đúng khóa học |
-| `POST /api/v1/admin/courses/{id}/publish` | Kiểm tra và xuất bản |
+| `POST /api/v1/admin/courses/{id}/publish` | Kiểm tra và bật hiển thị khóa học |
+| `POST /api/v1/admin/courses/{id}/hide` | Ẩn khóa học với học viên; giữ nội dung và tiến độ |
 | `POST /api/v1/admin/uploads` | Multipart `file` + `kind=cover/audio`; trả URL dùng trong frontend |
 | `POST /api/v1/admin/pronunciation/ipa` | Tạo IPA Mỹ từ `{ "text": "câu tiếng Anh" }`, tối đa 1000 ký tự; không lưu dữ liệu |
 | `GET /api/v1/media/{fileName}` | Đọc ảnh/audio, hỗ trợ Range/206; cần JWT và quyền đọc nội dung |
 
-Tạo khóa học luôn đặt SourceType=system, CreatedBy từ JWT, IsPublished=false; không lấy các giá trị này từ client. Mỗi kỹ năng được chọn khởi tạo một Lesson trống với cấp độ/thời lượng mặc định, vì schema lưu CEFR, thời lượng và kỹ năng ở Lessons. Tiếp tục chỉnh riêng từng bài ở bước 2. Các request ghi dùng transaction; không cho chỉnh khóa học đã xuất bản qua trình tạo này (`409`). Không chỉnh nội dung user_upload bằng các API quản trị khóa học hệ thống.
+Tạo khóa học luôn đặt SourceType=system, CreatedBy từ JWT, IsPublished=false; không lấy các giá trị này từ client. Mỗi kỹ năng được chọn khởi tạo một Lesson trống với cấp độ/thời lượng mặc định, vì schema lưu CEFR, thời lượng và kỹ năng ở Lessons. Tiếp tục chỉnh riêng từng bài ở bước 2. Các request ghi dùng transaction. Admin được sửa cả khóa học đang hiển thị; nội dung ứng viên phải vượt qua cùng kiểm tra xuất bản trước khi lưu. Khóa đang ẩn được lưu nháp chưa hoàn chỉnh. Không chỉnh nội dung user_upload bằng các API quản trị khóa học hệ thống.
 
 `Lessons.Content` lưu JSON version 1 `{ version, speaking, listening, grammar }`. Speaking gồm `goals`, `sentences[{text,ipa,audioUrl}]`. Listening gồm `transcript`, `hideTranscriptFirstListen`, `questions[]` hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank]/answer/caseSensitive) và matching (pairs left/right); mỗi câu có explanation/atSeconds tùy chọn. Audio chính lưu ở Lessons.AudioUrl. Bản nháp được phép chưa có câu/audio; xuất bản yêu cầu mô tả, ảnh bìa và ít nhất một bài active hoàn chỉnh. Audio Listening, transcript và câu hỏi phải đủ; Speaking phải có câu luyện nói. Chưa có TTS AI hoặc chấm điểm phát âm. API học viên hiện chỉ trả tóm tắt bài học, không trả JSON đáp án quản trị.
 
 IPA được sinh offline từ 125.927 mục từ Mỹ của ipa-dict/CMUdict, đóng gói trong assembly (không cần Python/API key hoặc kết nối Internet). API trả `ipa`, `accent: en-US`, `unknownWords`, `alternatives`. Mặc định chọn cách đọc đầu tiên; đây là phiên âm theo từ, chưa phân biệt nghĩa/ngữ cảnh hoặc nối âm cả câu. Từ chưa biết, số và ký hiệu không hỗ trợ trả `ipa: null` và danh sách cần kiểm tra, không trả câu phiên âm bị thiếu. Khi lưu Speaking, backend tự điền IPA còn trống nếu tra được toàn bộ câu; giữ nguyên bản sửa thủ công. IPA tối đa 8000 ký tự trong JSON hiện có, không thay đổi schema. Nguồn dữ liệu, checksum và giấy phép ở `EnglishLearning.Api/Resources/Pronunciation/README.md`. Tests bao gồm câu thường, contractions, từ ghép, nhiều cách đọc, input bounds, unknown words, quyền admin bị thu hồi và lưu/tải lại IPA.
 
-Upload ảnh tối đa 5 MB (JPG/PNG/WebP), audio tối đa 25 MB (MP3/WAV/AAC/M4A). Server kiểm tra phần mở rộng và magic bytes, đổi tên GUID; không dùng tên tệp của client để tạo đường dẫn. Tệp lưu ngoài wwwroot tại `App_Data/uploads` (gitignored); có thể cấu hình `MediaStorage:RootPath`. Cần lưu giữ thư mục này khi triển khai/sao lưu. Tệp nháp chỉ Admin được đọc; học viên chỉ đọc tệp được tham chiếu bởi khóa học đã xuất bản mà họ có quyền xem. Chưa có cơ chế dọn tệp tải lên nhưng không còn được dùng.
+Upload ảnh tối đa 5 MB (JPG/PNG/WebP), audio tối đa 25 MB (MP3/WAV/AAC/M4A). Trong chế độ cloud, server kiểm tra extension/MIME/magic và số byte thực tế, đổi tên GUID, ghi Cloudinary `authenticated` cùng manifest; không dùng tên tệp client làm đường dẫn. `App_Data/uploads` và `MediaStorage:RootPath` dùng cho đường đọc legacy trong chế độ cloud, hoặc kho local khi chọn rõ chế độ Development local. Giữ dữ liệu cũ tới bước migrate/verify và khoảng rollback. Tệp nháp chỉ admin đọc; học viên chỉ đọc tham chiếu media thực của khóa học đã publish mà họ có quyền xem. Chưa tự xóa asset runtime không còn được dùng; orphan phải đối soát theo kế hoạch.
 
 Kiểm thử `CourseAuthoringTests.cs` bao gồm quyền Admin, role bị thu hồi, nháp → Speaking/Listening → xuất bản, validation, truy cập bài thuộc khóa khác, định dạng upload và HTTP Range. Tất cả dữ liệu SQL dùng transaction rollback; tệp kiểm thử nằm trong thư mục temp riêng và được dọn sau test.
 
@@ -236,7 +434,7 @@ Kiểm thử `CourseAuthoringTests.cs` bao gồm quyền Admin, role bị thu h�
 
 Các API tạo/sửa bài hiện có nhận `skillType: "grammar"` và `grammar: { topic, rules, commonMistakes, questions }`; các nội dung của loại khác và `audioUrl` phải là null. API tạo khóa học nhận Skills gồm Speaking, Listening, Reading, Writing, Grammar (1–5 loại, không trùng). Nội dung Grammar nằm trong Lessons.Content JSON version 1; các bài Speaking/Listening cũ vẫn đọc được.
 
-Grammar có tối đa 30 câu hỏi với `type` là `multiple_choice`, `fill_blank`, `error_correction`. Mỗi câu có prompt, explanation và tag. Trắc nghiệm/sửa lỗi có 2–4 options và correctOptionIndex; sửa lỗi cần correction. Điền từ cần `[blank]`, answer, acceptedAnswers (tối đa 10 đáp án thay thế) và caseSensitive. Backend kiểm tra null, độ dài, số lựa chọn và chỉ số đáp án. Có thể lưu lý thuyết trống khi còn nháp; xuất bản cần topic, rules và ít nhất một câu hỏi hợp lệ. Chỉ Admin còn hoạt động được ghi; bài đã xuất bản không sửa ở luồng này.
+Grammar có tối đa 30 câu hỏi với `type` là `multiple_choice`, `fill_blank`, `error_correction`. Mỗi câu có prompt, explanation và tag. Trắc nghiệm/sửa lỗi có 2–4 options và correctOptionIndex; sửa lỗi cần correction. Điền từ cần `[blank]`, answer, acceptedAnswers (tối đa 10 đáp án thay thế) và caseSensitive. Backend kiểm tra null, độ dài, số lựa chọn và chỉ số đáp án. Có thể lưu lý thuyết trống khi còn nháp; xuất bản cần topic, rules và ít nhất một câu hỏi hợp lệ. Chỉ Admin còn hoạt động được ghi; bài thuộc khóa đang hiển thị được chỉnh sửa nếu nội dung sau sửa vẫn đáp ứng điều kiện xuất bản.
 
 Danh sách/chi tiết khóa học hiển thị loại Grammar; `GET /api/v1/courses?skill=grammar` lọc khóa học có bài Grammar active. API học viên vẫn chỉ trả tóm tắt bài, không lộ đáp án quản trị. Chưa triển khai lưu điểm/bài nộp Grammar hay ErrorLogs cho học viên. `GrammarAuthoringTests.cs` kiểm tra migration chạy lại trong transaction rollback, khởi tạo/thêm/sửa, validation, xuất bản, lọc khóa học và quyền ghi; không để lại dữ liệu kiểm thử.
 
@@ -246,7 +444,9 @@ Danh sách/chi tiết khóa học hiển thị loại Grammar; `GET /api/v1/cour
 
 Writing: `writing: { taskType, topic, prompt, instructions, minWords, maxWords, sampleAnswer, rubric }`. TaskType nhận essay/email/paragraph/report/proposal. Topic là chủ đề riêng, tối đa 255 ký tự; bài cũ không có topic vẫn đọc được. MinWords/MaxWords từ 1–5000 và min ≤ max. Rubric tối đa 8 tiêu chí `{name,description,weight}`; khi có tiêu chí, tổng weight phải bằng 100. Có thể lưu nháp chưa có đề hoặc rubric; xuất bản cần đề bài và ít nhất một tiêu chí, tổng trọng số 100%. Bài mẫu không bắt buộc. Xem trước nhập bài thử và kiểm tra số từ; chưa có chấm điểm/nhận xét AI hoặc lưu bài nộp học viên.
 
-Reading: `reading: { passageTitle, category, passage, translation, instructions, vocabulary, questions }`. Category tối đa 255 ký tự; passage/translation tối đa 30000 ký tự mỗi trường, translation là bản dịch admin nhập tùy chọn. Vocabulary tối đa 30 mục `{word,meaning,example}`. Questions tối đa 30, hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank], answer, acceptedAnswers, caseSensitive), short_answer (answer, acceptedAnswers, caseSensitive; không yêu cầu [blank]), true_false_not_given (answer true/false/not_given), matching (pairs left/right). Mỗi câu có focus (skimming/scanning/inference/vocabulary, mặc định scanning) và points (0.1–10, mặc định 1), explanation/reference cho dẫn chứng. Xuất bản cần bài đọc và ít nhất một câu hỏi. Preview hiển thị [blank] thành dấu chấm, giữ nguyên marker trong bản biên soạn và JSON lưu trữ.
+Reading: `reading: { passageTitle, category, imageUrl, imageAlt, imageCaption, passage, translation, instructions, vocabulary, questions }`. Category tối đa 255 ký tự; passage/translation tối đa 30000 ký tự mỗi trường, translation là bản dịch admin nhập tùy chọn. Vocabulary tối đa 30 mục `{word,meaning,example}`. Questions tối đa 30, hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank], answer, acceptedAnswers, caseSensitive), short_answer (answer, acceptedAnswers, caseSensitive; không yêu cầu [blank]), true_false_not_given (answer true/false/not_given), matching (pairs left/right). Mỗi câu có focus (skimming/scanning/inference/vocabulary, mặc định scanning) và points (0.1–10, mặc định 1), explanation/reference cho dẫn chứng. Xuất bản cần bài đọc và ít nhất một câu hỏi. Preview hiển thị [blank] thành dấu chấm, giữ nguyên marker trong bản biên soạn và JSON lưu trữ.
+
+Ảnh Reading là tùy chọn: `imageUrl` tối đa 500 ký tự (MediaUrl như ảnh bìa), `imageAlt` tối đa 500, `imageCaption` tối đa 1000. Tải JPG/PNG/WebP tối đa 5 MB qua API uploads hiện có với `kind=cover`; ảnh dùng URL `/api/media/<guid>.<ext>`. Xuất bản hoặc sửa bài đang hiển thị kiểm tra ảnh managed tồn tại và đúng loại image. Quyền đọc ảnh yêu cầu tham chiếu chính xác trong nội dung Reading version 1 của bài đang kích hoạt, thuộc khóa học được phép xem; URL chỉ xuất hiện trong văn bản không cấp quyền đọc. Bài cũ không có ảnh vẫn tương thích, không đổi schema.
 
 Mỗi bài chỉ được gửi đúng một nội dung tương ứng skillType; audioUrl của Reading/Writing phải null. GET quản trị trả nội dung Reading/Writing đã lưu; API danh mục/chi tiết học viên chỉ trả tóm tắt và hỗ trợ lọc skill=reading/writing, không lộ đáp án/bài mẫu/rubric qua danh mục. `ReadingWritingAuthoringTests.cs` kiểm tra khởi tạo 5 loại, thêm vào khóa hiện có, save/reload/publish/filter, validation, giới hạn từ/trọng số, quyền ghi và isolation giữa khóa học. Dữ liệu test được rollback. `ReadingWritingDemoTests.cs` kiểm tra các trường của demo mới, short_answer, validation điểm/kỹ năng và tương thích JSON version 1 cũ.
 
@@ -265,3 +465,39 @@ Câu trắc nghiệm Reading/Listening/Grammar (và chọn phần sai của Gram
 Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
 
 Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.
+
+## Học viên luyện nghe và nộp bài
+
+Tiền tố: `/api/v1/courses/{courseId}/lessons/{lessonId}/listening`. Các endpoint yêu cầu JWT và tài khoản còn hoạt động, khóa học đã xuất bản, bài Listening active thuộc đúng khóa. Khóa cá nhân chỉ chủ sở hữu được truy cập, cùng quy tắc catalog/media. Kết quả luôn lọc theo user trong JWT.
+
+| Method | Hậu tố | Chức năng |
+|---|---|---|
+| GET | (trống) | Nội dung đã loại đáp án, mốc nghe, tiến độ nghe, điểm gần nhất và vị trí gần nhất. Không ghi DB. |
+| POST | `/start` | Tạo đăng ký nếu chưa có, tiếp tục đăng ký abandoned, cập nhật bài đang học. Gọi lại không tạo đăng ký trùng. |
+| PUT | `/position` | Lưu `{ positionSeconds }` từ 0–86400. Bỏ qua request trễ từ bài khác. |
+| GET | `/transcript` | Transcript phục vụ luyện tập; UI điều khiển thời điểm mở. |
+| POST | `/submissions` | Nhận contentVersion, answers, timeSpentSeconds; backend chấm và lưu kết quả. |
+| GET | `/results?page=1&pageSize=10` | Lịch sử điểm của chính học viên, pageSize tối đa 50. |
+| GET | `/results/{resultId}` | Điểm và ảnh chụp chi tiết câu sai đã lưu. |
+
+Submission có `answers: [{questionId, optionIndex?, text?, matches: [{leftIndex, rightId}]}]`, questionId/leftIndex bắt đầu từ 0. Chỉ gửi trường phù hợp dạng câu. Câu thiếu/bỏ trống tính sai; câu trùng, câu lạ, lựa chọn sai phạm vi hoặc token nối ý giả trả 400. ContentVersion không khớp trả 409. Body tối đa 128 KiB.
+
+Trắc nghiệm chấm theo chỉ số đáp án, điền từ chuẩn hóa Unicode + trim và tôn trọng caseSensitive, nối ý chấm toàn bộ nhóm. Điểm = số câu đúng / tổng câu × 100, làm tròn 2 chữ số. Không nhận điểm/tổng câu đúng từ client. Thời gian do client gửi chỉ dùng thống kê luyện tập, không dùng kiểm soát thi.
+
+`ListeningGradingService` tạo mã lựa chọn nối ý bằng ASP.NET Core Data Protection, ràng buộc theo lesson/câu, và xáo thứ tự vế phải. DTO làm bài không có answer/correctOptionIndex/explanation/transcript hoặc cặp nối đúng. Khi triển khai nhiều instance, các instance cần dùng chung Data Protection key ring và application identity để giải mã cùng mã lựa chọn.
+
+Lưu vào `ExerciseResults` hiện có; `WrongAnswersJson` version 1 chỉ chứa ảnh chụp câu sai/bỏ trống. Phản hồi nộp bài có chữa đủ câu, lịch sử sau reload chỉ trả chi tiết câu sai đã lưu. `UserCourses` dùng cho vào học và `LearningProgress` dùng vị trí gần nhất theo khóa. Ghi kết quả/cập nhật tiến độ trong transaction; start xử lý tranh chấp UNIQUE bằng transaction Serializable và retry giới hạn. Không đổi entity, mapping hoặc schema SQL.
+
+Tiến độ nghe được tính từ các LessonId Listening đã có kết quả của học viên, không đếm lần nộp lặp. `GET /courses/{id}` bổ sung listeningProgress và listeningStatus cho từng bài; tiến độ toàn khóa trong UserCourses giữ quy tắc hiện có. Chưa có lưu nháp câu trả lời nhiều thiết bị hoặc khóa chống nộp trùng bền vững.
+
+Kiểm thử mới: `ListeningGradingTests.cs` và `ListeningPracticeTests.cs`. Nhóm integration dùng SQL Server trong transaction rollback theo cấu hình kiểm thử ở trên. Kết quả kiểm tra và ảnh giao diện: `../reports/Bao_cao_Listening_User_2026-10-28.md`.
+
+## Sửa và ẩn/hiện khóa học của Admin
+
+Admin sửa thông tin chung, bài học và thêm bài mới qua các API PUT/POST lessons hiện có, bao gồm khóa đang hiển thị. IsPublished không tự đổi khi lưu. Với khóa đang hiển thị, API kiểm tra mô tả, ảnh bìa/media và tất cả bài active trên nội dung ứng viên trước khi persist; lỗi 400 giữ nguyên dữ liệu đã lưu. Không thể tắt bài active cuối cùng. Muốn soạn nội dung dở dang, ẩn khóa trước.
+
+POST `/api/v1/admin/courses/{id}/hide` đặt Courses.IsPublished=false; POST `.../{id}/publish` kiểm tra và đặt true. Cả hai idempotent, yêu cầu role admin hiện tại trong SQL và chỉ quản lý SourceType=system. Không thay đổi schema/migration. IsPublished=false bao gồm bản nháp và khóa bị ẩn; không tạo trạng thái lịch sử xuất bản riêng.
+
+Khóa ẩn vắng khỏi catalog/summary, chi tiết và luồng luyện nghe trả 404; media được quản lý cũng bị chặn với học viên. Admin vẫn xem trước/chỉnh sửa được. Ẩn/hiện không xóa Lessons, UserCourses, LearningProgress hoặc ExerciseResults. Bài nghe sửa nội dung dùng contentVersion hiện có để từ chối bài nộp cũ 409. URL ngoài hệ thống không chịu quyền truy cập của media proxy.
+
+`PublishedCourseManagementTests.cs` kiểm tra sửa đủ năm loại bài, cập nhật ứng viên bị từ chối không ghi dở, thêm bài, tắt bài cuối cùng, ẩn/hiện, quyền admin/user và phạm vi system, catalog/practice/media, giữ bài nộp/đăng ký học và phiên bản bài nghe. Các dữ liệu SQL trong kiểm thử được rollback.

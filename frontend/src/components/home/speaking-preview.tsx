@@ -38,7 +38,7 @@ export default function SpeakingPreview() {
   return (
     <div className={styles.studio} aria-label="Bản xem trước luyện phát âm với AI">
       <div className={styles.studioToolbar}>
-        <div className={styles.windowLabel}><span className={styles.windowDots} aria-hidden="true"><i /><i /><i /></span><span>lingua.ai/studio/speaking-coach</span></div>
+        <div className={styles.windowLabel}><span className={styles.windowDots} aria-hidden="true"><i /><i /><i /></span><span>LEWA / Speaking Coach</span></div>
         <span className={styles.streak}><Icon name="flame" />14 ngày streak</span>
       </div>
       <div className={styles.studioGrid}>

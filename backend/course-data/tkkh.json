@@ -1,0 +1,2825 @@
+{
+  "schemaVersion": 1,
+  "packageId": "tkkh-2026-11-01",
+  "notes": [
+    "Nhập thành bản nháp; không tự xuất bản. Chưa có ảnh bìa trong nguồn.",
+    "Vocabulary được lưu bằng trường reading.vocabulary hiện có; không thay đổi schema.",
+    "Rubric Writing bổ sung mặc định 4 tiêu chí, mỗi tiêu chí 25%. Giới hạn từ khi nguồn không quy định: A1/A2 30–120, C1 250–500; cần rà soát.",
+    "Speaking A1 chuyển các bài mẫu trong thư mục Speaking thành câu luyện nói.",
+    "Sửa In the beach thành On the beach; bỏ ký hiệu - biểu thị zero article trong các câu mẫu A2.",
+    "Đáp án A1 Grammar/Reading/True-False và C1 Reading được đối chiếu/biên soạn từ nguồn, không phải bảng đáp án riêng."
+  ],
+  "skippedSources": [
+    {
+      "path": "LVB1\\Grammar\\Tài liệu không có tiêu đề.docx",
+      "reason": "Tài liệu Word không có nội dung."
+    }
+  ],
+  "audioFiles": {
+    "LVA1_Around you\\Listening\\LE_listening_A1_Ordering_in_a_café.mp3": {
+      "sha256": "928cf0f7567b86e1ef88df47e4fc519a8c4cf9c155169f4bfb4e564195343704",
+      "bytes": 2956437
+    },
+    "LVA1_Around you\\Listening\\LE_listening_A1_Shopping_for_clothes.mp3": {
+      "sha256": "a22c8169d1ad3f5002a6abae8437e4929324486e8dc5680c03634e5dd4269150",
+      "bytes": 1788450
+    },
+    "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Listening\\A2_eating_out.mp3": {
+      "sha256": "27d966c08ac211efc1767067ab49b7facff31a5a36a6c88c95eda00345f52f4c",
+      "bytes": 1247973
+    },
+    "LVB1\\Lis\\B1_Advice_for_exams.mp3": {
+      "sha256": "8067c611aedb6e4513a5c64781b341b7f0ba8ceacf9f5507c116b7f76b887113",
+      "bytes": 4766743
+    },
+    "LVC1_JobAndDreams\\Listening\\Ls1\\mini-test-17.mp3": {
+      "sha256": "587cb98a33bb9bf0fac99414bdb1d90fd59be255f874a8c5fea771b9764e4443",
+      "bytes": 2904816
+    },
+    "LVC1_JobAndDreams\\Listening\\Ls2\\mini-test-14.mp3": {
+      "sha256": "09ebdfc8917784b190d9f8ec7bb1903ae3298ebe9c330d8cd118e0a8c5685e00",
+      "bytes": 3294563
+    }
+  },
+  "courses": [
+    {
+      "key": "tkkh-a1",
+      "level": "A1",
+      "course": {
+        "title": "Around You — A1",
+        "description": "Tiếng Anh quanh bạn: tính từ đi với giới từ, giao tiếp ở quán cà phê và cửa hàng, đọc vé tàu, giới thiệu bản thân và viết email."
+      },
+      "lessons": [
+        {
+          "key": "adjectives-prepositions",
+          "request": {
+            "title": "Adjectives and Prepositions",
+            "skillType": "grammar",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "grammar": {
+              "topic": "Adjectives and prepositions",
+              "rules": "Some adjectives go with certain prepositions. There are no grammatical rules for which preposition is used with which adjective, so it's a good idea to try to learn them together. To help you do this, write new vocabulary in your notebook in a sentence or phrase.\n\nHowever, there are some patterns that can help you. Let's look at them first. Remember that a preposition is followed by a noun or a gerund (-ing form).\n\nWith at: We use at with adjectives like good/bad/amazing/brilliant/terrible, etc. to talk about skills and abilities. Ex:\n\nHe's really good at English.\nShe's amazing at the piano.\nThey're terrible at organising anything.\nI'm not very good at drawing.\n\nWith about: We often use about with adjectives of feelings like angry/excited/happy/nervous/sad/stressed/worried, etc. to explain what is causing that feeling. Ex:\n\nI'm angry about the decision.\nHe's nervous about the presentation.\nShe's excited about the new job.\nThey were worried about the exam.\n\nWith of: However, sometimes we use of with feelings. Ex:\n\nShe was afraid of telling her mum.\nI'm frightened of having an accident.\nHe's scared of flying.\nYou should be proud of your progress.\n\nWith to: We can use to to show the connection between people or things. Ex:\n\nHe's married to the director.\nI'm addicted to my phone.\nI'm allergic to nuts.\nIt's similar to the old one.\n\nWe can also use to to talk about someone's behaviour towards someone else. Ex:\n\nThey were really friendly to me.\nWas he nice to you?\nHe is always polite to everyone.\nShe was very rude to the waitress.\n\nHere are some other useful adjectives with prepositions. Ex:\n\nWith for\n\nExercise is good for you.\n\tStress is bad for you.\n\tThe town is famous for its cheese.\n\tI'm responsible for the financial side of the business.\n\nWith in\n\nShe's interested in the project.\n\tThey want someone who's experienced in design.\n\tI didn't want to get involved in the argument.",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I'm really proud ___ you!",
+                  "options": [
+                    "of",
+                    "to",
+                    "with"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "She's responsible ___ health and safety.",
+                  "options": [
+                    "for",
+                    "in",
+                    "of"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "He's allergic ___ seafood.",
+                  "options": [
+                    "of",
+                    "to",
+                    "with"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "They're interested ___ our project.",
+                  "options": [
+                    "about",
+                    "in",
+                    "on"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I'm addicted ___ that new series on Channel 4.",
+                  "options": [
+                    "of",
+                    "to",
+                    "with"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Sugar is bad ___ your teeth.",
+                  "options": [
+                    "at",
+                    "for",
+                    "of"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I'm really excited ___ the new house.",
+                  "options": [
+                    "about",
+                    "of",
+                    "to"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "My boss is terrible ___ communicating.",
+                  "options": [
+                    "at",
+                    "in",
+                    "to"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I'm really good ___ playing football.",
+                  "options": [
+                    "at",
+                    "for",
+                    "in"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Are you afraid ___ dogs?",
+                  "options": [
+                    "about",
+                    "of",
+                    "to"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu từ phần Grammar explanation trong tài liệu gốc."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Grammar\\Adjectives and prepositions.docx"
+          ]
+        },
+        {
+          "key": "ordering-cafe",
+          "request": {
+            "title": "Ordering in a Café",
+            "skillType": "listening",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "listening": {
+              "transcript": "Customer 1: Can I have an orange juice, please?\nServer: Regular or large?\nCustomer 1: How big is a large?\nServer: This is a large. This is a regular.\nCustomer 1: I'll have a large, then, please. Without ice.\nServer: OK, coming up.\nCustomer 1: Sorry, I wanted freshly squeezed orange juice.\nServer: I'm afraid we only have bottled juices.\nCustomer 1: Oh, then I'll have an apple juice instead, please.\nServer: Here you go. That's £3.50, please.\nCustomer: Thanks.\nServer: Thank you.\nServer: Can I help anyone?\nCustomer 2: Who's next?\nCustomer 3: You were first, I think.\nCustomer 2: What teas do you have?\nServer: Breakfast tea, mint and green tea.\nCustomer 2: A mint tea and a slice of lemon cake, please.\nServer: To eat in or take away?\nCustomer 2: Take away, please.\nServer: There you go. That'll be £4.20, please.\nCustomer 2: Sorry, I've only got a fifty.\nServer: That's OK. Here's your change … 5, 10, 30, 50.\nServer: Who's next?\nCustomer 4: Can I have a ...\nCustomer 3: Sorry, I think I was in front of you. \nCustomer 4: Oh, sorry! \nCustomer 3: Can I have a chocolate chip cookie, please?\nServer: Would you like a drink with that?\nCustomer 3: No, thanks. Just the cookie.\nServer: OK, then. That's 95p, please.\nCustomer 3: Thanks. I think that's right.\nServer: 50, 70, 80, 85, 90, 92, 94, yep, 95. Thank you.",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Customer 1 orders a large bottle of orange juice.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The apple juice costs £3.15.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Customer 2 is not going to have their tea and cake inside the café.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Customer 2 pays with a twenty pound note.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Customer 3 orders something to drink.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The cookie costs 85p.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án đối chiếu với transcript trong tài liệu gốc."
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "I'm [blank] we only have bottled juices.",
+                  "answer": "afraid",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "I'll have an apple juice [blank] .",
+                  "answer": "instead",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Sorry, I wanted freshly [blank] orange juice.",
+                  "answer": "squeezed",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "To eat in or [blank] ?",
+                  "answer": "take away",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Sorry, I think I was in [blank] of you.",
+                  "answer": "front",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "No, thanks. [blank] the cookie.",
+                  "answer": "just",
+                  "caseSensitive": false,
+                  "explanation": ""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Listening\\Ques_LE_listening_A1_Ordering_in_a_café.docx"
+          ],
+          "audioFile": "LVA1_Around you\\Listening\\LE_listening_A1_Ordering_in_a_café.mp3"
+        },
+        {
+          "key": "shopping-clothes",
+          "request": {
+            "title": "Shopping for Clothes",
+            "skillType": "listening",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "listening": {
+              "transcript": "Shop assistant: Hello, can I help you?\nCustomer: I'm just looking, thanks.\nCustomer: Excuse me?\nShop assistant: Yes?\nCustomer: Where are the changing rooms?\nShop assistant: They're over there. Behind you.\nCustomer: Thank you.\nCustomer: Hi. Excuse me again. Do you have this jumper in black?\nShop assistant: Yes, just a moment. What size do you need?\nCustomer: Extra small, please.\nShop assistant: Here you are.\nCustomer: How much is this?\nShop assistant: It's £29.\nCustomer: Can I pay by credit card?\nShop assistant: Yes, you can. Of course.\nShop assistant: Would you like a bag for that?\nCustomer: Yes, please.",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Where are the changing rooms?",
+                  "options": [
+                    "Behind the customer",
+                    "Next to the shop assistant",
+                    "Outside the shop"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Thu ngân nói: \"They're over there. Behind you.\" (Phòng thay đồ ở đằng kia, phía sau bạn)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "What size jumper does the customer need?",
+                  "options": [
+                    "Small",
+                    "Medium",
+                    "Extra small"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Giải thích: Khách hàng nói: \"Extra small, please.\" (Cho tôi size rất nhỏ / XS)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "How much does the jumper cost?",
+                  "options": [
+                    "£19",
+                    "£29",
+                    "£39"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Thu ngân nói: \"It's £29.\" (Món đồ có giá 29 bảng)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "How does the customer pay for the jumper?",
+                  "options": [
+                    "By cash",
+                    "By credit card",
+                    "By phone"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Khách hàng hỏi: \"Can I pay by credit card?\" và thu ngân đồng ý \"Yes, you can.\""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Listening\\Ques_Shopping for clothes – 2.docx"
+          ],
+          "audioFile": "LVA1_Around you\\Listening\\LE_listening_A1_Shopping_for_clothes.mp3"
+        },
+        {
+          "key": "train-station",
+          "request": {
+            "title": "At the Train Station",
+            "skillType": "reading",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "At the Train Station",
+              "passage": "A train is arriving at a train station. Passengers wait on the platform. You need a train ticket to travel by train.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Good at",
+                  "meaning": "Giỏi về cái gì (kỹ năng, môn học).",
+                  "example": "He's good at English. (Anh ấy giỏi tiếng Anh.)"
+                },
+                {
+                  "word": "Bad at",
+                  "meaning": "Kém, tệ về cái gì.",
+                  "example": "I'm bad at drawing. (Tôi vẽ kém.)"
+                },
+                {
+                  "word": "Afraid of",
+                  "meaning": "Sợ cái gì đó.",
+                  "example": "She was afraid of telling her mum. (Cô ấy sợ nói với mẹ.)"
+                },
+                {
+                  "word": "Proud of",
+                  "meaning": "Tự hào về ai/cái gì.",
+                  "example": "I'm proud of you. (Tôi rất tự hào về bạn.)"
+                },
+                {
+                  "word": "Excited about",
+                  "meaning": "Phấn khích, hào hứng về điều gì sắp tới.",
+                  "example": "She's excited about the new job. (Cô ấy hào hứng với công việc mới.)"
+                },
+                {
+                  "word": "Worried about",
+                  "meaning": "Lo lắng về điều gì.",
+                  "example": "They were worried about the exam. (Họ lo lắng về kỳ thi.)"
+                },
+                {
+                  "word": "Married to",
+                  "meaning": "Kết hôn với ai.",
+                  "example": "He's married to the director. (Anh ấy đã kết hôn với nữ giám đốc.)"
+                },
+                {
+                  "word": "Allergic to",
+                  "meaning": "Bị dị ứng với cái gì (thức ăn, vật nuôi...).",
+                  "example": "I'm allergic to nuts. (Tôi bị dị ứng với các loại hạt.)"
+                },
+                {
+                  "word": "Good / Bad for",
+                  "meaning": "Tốt cho / Có hại cho (sức khỏe, cơ thể).",
+                  "example": "Exercise is good for you. (Tập thể dục tốt cho bạn.)"
+                },
+                {
+                  "word": "Interested in",
+                  "meaning": "Quan tâm, hứng thú đến cái gì.",
+                  "example": "She's interested in the project. (Cô ấy quan tâm đến dự án.)"
+                }
+              ],
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "You can take a train at the __________.",
+                  "options": [
+                    "bus station",
+                    "train station"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "At a train station you need a __________.",
+                  "options": [
+                    "train ticket",
+                    "passport"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Reading\\Bus.docx",
+            "LVA1_Around you\\Vocabulary\\Tài liệu không có tiêu đề.docx"
+          ],
+          "reviewNotes": [
+            "Ảnh đoàn tàu trong nguồn được mô tả bằng văn bản vì Reading hiện chưa có trường ảnh."
+          ]
+        },
+        {
+          "key": "train-ticket",
+          "request": {
+            "title": "Reading a Train Ticket",
+            "skillType": "reading",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "Reading a Train Ticket",
+              "passage": "UK TRAINS\nClass: STD\nTicket type: SINGLE\nPassenger type: ADULT\nDate valid: 10 JULY 2014\nTicket number: 20124444122637\nFrom: MANCHESTER\nTo: LIVERPOOL\nPrice: £16.50",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [],
+              "questions": [
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "This is a single ticket.",
+                  "answer": "true",
+                  "explanation": "Đáp án đối chiếu với các trường trên ảnh vé tàu gốc.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "This is a child's ticket.",
+                  "answer": "false",
+                  "explanation": "Đáp án đối chiếu với các trường trên ảnh vé tàu gốc.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "This ticket costs £16.50.",
+                  "answer": "true",
+                  "explanation": "Đáp án đối chiếu với các trường trên ảnh vé tàu gốc.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "This ticket is for trains to London.",
+                  "answer": "false",
+                  "explanation": "Đáp án đối chiếu với các trường trên ảnh vé tàu gốc.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "This ticket is for trains leaving Liverpool.",
+                  "answer": "false",
+                  "explanation": "Đáp án đối chiếu với các trường trên ảnh vé tàu gốc.",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Reading\\Nhìn hình chọn true false.docx"
+          ],
+          "reviewNotes": [
+            "Các trường trên ảnh vé tàu đã được chép lại nguyên nội dung thành văn bản."
+          ]
+        },
+        {
+          "key": "yourself",
+          "request": {
+            "title": "Talk About Yourself",
+            "skillType": "speaking",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "Luyện nói theo các câu mẫu rồi thay bằng thông tin của bạn.\nYêu cầu: Hãy viết 4–5 câu giới thiệu về những điều bạn giỏi, những gì bạn thích/hứng thú, và những thứ bạn sợ hoặc lo lắng.\nGợi ý sử dụng các cụm tính từ đã học:\ngood at... (giỏi về...)\ninterested in... (quan tâm/thích...)\nafraid of... (sợ...)\nexcited about... (hào hứng về...)\nbad at... (kém về...)",
+              "sentences": [
+                {
+                  "text": "My name is Nam."
+                },
+                {
+                  "text": "I am good at English and drawing, but I am bad at cooking."
+                },
+                {
+                  "text": "I am very interested in music and computers."
+                },
+                {
+                  "text": "Sometimes, I am afraid of dogs, but I am excited about the weekend!"
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Speaking\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "family",
+          "request": {
+            "title": "Family and Friends",
+            "skillType": "speaking",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "Luyện nói theo các câu mẫu rồi thay bằng thông tin của bạn.\nYêu cầu: Hãy viết 4–5 câu giới thiệu về các thành viên trong gia đình hoặc bạn bè của bạn, sử dụng các cụm tính từ chỉ sự quan tâm, tính cách hoặc mối quan hệ.\nGợi ý sử dụng các cụm tính từ đã học:\ngood at... (giỏi về...)\nmarried to... (đã kết hôn với...)\nfriendly to... (thân thiện với...)\ninterested in... (quan tâm đến...)",
+              "sentences": [
+                {
+                  "text": "My dad is good at cooking."
+                },
+                {
+                  "text": "My mum is interested in gardening and reading books."
+                },
+                {
+                  "text": "My sister is always friendly to everyone at school."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Speaking\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "school",
+          "request": {
+            "title": "School and Free Time",
+            "skillType": "speaking",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "Luyện nói theo các câu mẫu rồi thay bằng thông tin của bạn.\nYêu cầu: Hãy viết 4–5 câu chia sẻ về những môn học bạn thích, những điều bạn hào hứng hoặc lo lắng trong cuộc sống hàng ngày.\nGợi ý sử dụng các cụm tính từ đã học:\nbad at... (kém/tệ về...)\nexcited about... (hào hứng về...)\nworried about... (lo lắng về...)\nproud of... (tự hào về...)",
+              "sentences": [
+                {
+                  "text": "I am bad at math, but I like going to school."
+                },
+                {
+                  "text": "Next week, I am very excited about the school trip."
+                },
+                {
+                  "text": "Sometimes I am worried about tests, but I am always proud of my hard work."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Speaking\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "hoburn-job",
+          "request": {
+            "title": "Jobs at University of Hoburn",
+            "skillType": "writing",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 30,
+            "isActive": false,
+            "writing": {
+              "taskType": "email",
+              "topic": "Jobs at University of Hoburn",
+              "prompt": "Football trainer wanted, University of Hoburn football team\nDo you like football?\nCan you teach football?\nCan you organise a group of people?\nCan you speak English?\nCan you drive a car?\nYes? Send us an email at jobs@uoh.edu.uk-sports",
+              "instructions": "Write an email about the advertised job. Bổ sung yêu cầu độ dài và thống nhất vị trí tuyển dụng trước khi kích hoạt.",
+              "sampleAnswer": "Dear Hoburn University Sports Club\nPlease send me information about the job at the sports café.\nI am friendly and I love working with people. I can cook well, especially pasta and pizza. I can speak English, Spanish and a little German. I can use a computer very well.\nBest regards\nLenny Tyler",
+              "minWords": 30,
+              "maxWords": 120,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Writing\\Tài liệu không có tiêu đề.docx"
+          ],
+          "reviewNotes": [
+            "Đề tuyển huấn luyện viên bóng đá nhưng bài mẫu hỏi việc tại sports café; giữ nguyên nguồn và tắt kích hoạt chờ chỉnh."
+          ]
+        },
+        {
+          "key": "pen-pal",
+          "request": {
+            "title": "Introduce Yourself and Your Passions",
+            "skillType": "writing",
+            "difficultyLevel": "A1",
+            "estimatedMinutes": 30,
+            "isActive": true,
+            "writing": {
+              "taskType": "email",
+              "topic": "Introduce Yourself and Your Passions",
+              "prompt": "Write a short email (about 50–70 words) to a new pen pal (bạn qua thư) to introduce yourself. In your email, try to use at least 4 different structures from the list below:",
+              "instructions": "good at / bad at / amazing at (giỏi / dở / xuất sắc về...)\nexcited about / nervous about (hào hứng / lo lắng về...)\nafraid of / scared of / proud of (sợ / tự hào về...)\ninterested in (thích / quan tâm đến...)\ngood for / bad for (tốt cho / xấu cho...)\nfriendly to / nice to (thân thiện / tốt với...)\nSuggested Outline (Gợi ý dàn ý):\nGreeting (Chào hỏi):\nDear [Name], / Hi [Name],\nBody (Nội dung chính):\nTell them what you are good or bad at (E.g., I am good at English...).\nMention what you are interested in or excited about (E.g., I am interested in music...).\nShare a feeling or habit (E.g., I am proud of my family, exercise is good for me...).\nClosing (Kết bài):\nBest regards, / See you soon, + [Your Name]",
+              "sampleAnswer": "Subject: Hello from Vietnam!\nDear Alex,\nMy name is Nga and I live in Vietnam. I am very interested in learning English, but I am not very good at speaking yet. I am always excited about making new friends around the world! In my free time, I love playing sports because it is good for my health. My family is always nice to everyone.\nWhat about you? Tell me about yourself!\nBest regards,\nNga",
+              "minWords": 50,
+              "maxWords": 70,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA1_Around you\\Writing\\Tài liệu không có tiêu đề.docx"
+          ],
+          "reviewNotes": [
+            "Bài mẫu gốc dài hơn 70 từ; giữ nguyên bài mẫu, giới hạn bài nộp theo yêu cầu 50–70 từ."
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tkkh-a2",
+      "level": "A2",
+      "course": {
+        "title": "English Foundation — Essential Grammar & Everyday Skills (A1–A2)",
+        "description": "Củng cố mạo từ a, an, the và không dùng mạo từ; luyện nghe khi ăn ngoài, đọc đoạn văn ngắn, nói về thói quen và địa điểm yêu thích, viết đoạn văn."
+      },
+      "lessons": [
+        {
+          "key": "articles",
+          "request": {
+            "title": "Articles — A, An, The and Zero Article",
+            "skillType": "grammar",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "grammar": {
+              "topic": "Articles",
+              "rules": "Tổng hợp kiến thức về Mạo từ (Articles)\nMạo từ bất định (A / An):\nDùng với danh từ đếm được số ít khi nhắc đến lần đầu hoặc nói chung chung thuộc một nhóm.\nA: Dùng trước từ bắt đầu bằng âm phụ âm (ví dụ: a sandwich, a university).\nAn: Dùng trước từ bắt đầu bằng âm nguyên âm (ví dụ: an apple, an hour).\nNgoại lệ: Dùng với nghề nghiệp (ví dụ: She's a doctor, He's an architect).\nMạo từ xác định (The):\nDùng khi người nghe/đọc đã biết rõ đối tượng (đã được nhắc trước đó, chỉ có duy nhất một trên đời như the moon, hoặc được xác định bởi ngữ cảnh).\nDùng khi nói về một nhóm cụ thể (the kangaroos in that zoo).\nKhông dùng mạo từ (Zero article / -):\nDùng khi nói về sự vật/sự việc chung chung với danh từ số nhiều hoặc danh từ không đếm được (ví dụ: I hate mosquitos, I love parties, Water freezes).",
+              "questions": [
+                {
+                  "type": "fill_blank",
+                  "prompt": "Do you want [blank] sandwich? I've got cheese and bread in the shopping bag.",
+                  "answer": "a",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "She wants to be [blank] ambulance driver when she finishes school.",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Did you see [blank] moon last night?",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "I really hate  [blank] mosquitos. They always bite me.",
+                  "answer": "-",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "If you need to contact me over the weekend, please send me [blank] email.",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "I'm a fun-loving person. I love [blank] parties and dancing!",
+                  "answer": "-",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "I'll be there in [blank] hour.",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "[blank] teachers at my son's school are great.",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Paris is [blank] capital city of France.",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "My brother usually eats [blank] apple every morning.",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": ""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Grammar\\Tài liệu không có tiêu đề.docx"
+          ],
+          "reviewNotes": [
+            "Thêm ô trống bị thiếu ở câu ambulance driver; làm rõ a/an dựa trên âm đầu."
+          ]
+        },
+        {
+          "key": "eating-out",
+          "request": {
+            "title": "Eating Out",
+            "skillType": "listening",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "listening": {
+              "transcript": "Waiter: Hello.\nJamie: Hi. A table for two, please.\nWaiter: Of course. Over here, please. Here’s the menu.\nSally: Thank you.\n(pause)\nWaiter: Are you ready to order?\nSally: Yes, we are.\nWaiter: What would you like for your starter?\nJamie: I’d like French onion soup, please.\nSally: And I’ll have a tomato salad, please.\nWaiter: And for your main course?\nJamie: Mmm, I’m not sure. I don’t know whether to have the steak or Thai chicken.\nSally: Oh, I’d like the Thai chicken and rice please.\nJamie: OK, me too.\nWaiter: So that’s two Thai chicken and rice. What would you like to drink?\nJamie: I’ll have a fresh orange juice and ...\nSally: I’d like some mineral water, please.\nWaiter: OK, thank you. ",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The customers want two tables.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Ngay đầu hội thoại, Jamie đã nói: \"A table for two, please\" (Một bàn cho hai người), tức là họ chỉ cần một bàn cho cả hai người."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "There are two customers eating together.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Có hai khách hàng là Jamie và Sally cùng gọi món và ăn uống với nhau (được thể hiện qua yêu cầu đặt bàn cho 2 người và sự xuất hiện của hai nhân vật trong hội thoại)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The two customers order the same starter.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Khi được hỏi về món khai vị (starter), Jamie gọi \"French onion soup\" (súp hành tây kiểu Pháp), trong khi Sally gọi \"a tomato salad\" (salad cà chua). Hai người gọi hai món khác nhau."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Both customers order the Thai chicken for their main course.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Mặc dù ban đầu Jamie phân vân giữa bít tết và gà kiểu Thái, nhưng sau khi Sally chọn gà kiểu Thái (Thai chicken and rice), Jamie đã nói: \"OK, me too\" (Được rồi, tôi cũng vậy). Cuối cùng cả hai đều gọi món gà Thái cho món chính."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The customers order cold drinks.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Jamie gọi \"a fresh orange juice\" (nước cam tươi) và Sally gọi \"some mineral water\" (nước khoáng). Đây đều là những loại đồ uống lạnh/giải khát."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Both customers order a dessert.",
+                  "options": [
+                    "True",
+                    "False"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Trong toàn bộ đoạn hội thoại, hai vị khách chỉ gọi món khai vị (starter), món chính (main course) và đồ uống (drink). Hoàn toàn không có thông tin hay lời nào nhắc đến việc gọi món tráng miệng (dessert)."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Listening\\A2_eating_out.docx"
+          ],
+          "audioFile": "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Listening\\A2_eating_out.mp3"
+        },
+        {
+          "key": "daily-reading",
+          "request": {
+            "title": "My Daily Routine and Hobbies",
+            "skillType": "reading",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "My Daily Routine and Hobbies",
+              "passage": "Every morning, I wake up early and eat (1) ______ apple for breakfast. Then, I listen to (2) ______ music while cleaning my room. In the afternoon, I usually go to (3) ______ supermarket near my house to buy some food. My mother often cooks (4) ______ delicious dinner for our family. In (5) ______ evening, I love reading books to relax before going to sleep.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Definite article",
+                  "meaning": "Mạo từ xác định (the).",
+                  "example": "We use the when the listener knows what we are talking about."
+                },
+                {
+                  "word": "Indefinite article",
+                  "meaning": "Mạo từ bất định (a, an).",
+                  "example": "Use a or an for singular countable nouns."
+                },
+                {
+                  "word": "Zero article / No article",
+                  "meaning": "Không dùng mạo từ (-).",
+                  "example": "We use zero article for general plural nouns."
+                },
+                {
+                  "word": "Consonant sound",
+                  "meaning": "Âm phụ âm (đi với mạo từ a).",
+                  "example": "\"University\" starts with a consonant sound, so we use a."
+                },
+                {
+                  "word": "Vowel sound",
+                  "meaning": "Âm nguyên âm (a, e, i, o, u - đi với mạo từ an).",
+                  "example": "\"Hour\" starts with a vowel sound, so we use an."
+                },
+                {
+                  "word": "Countable noun",
+                  "meaning": "Danh từ đếm được (có thể đếm số lượng: a dog, three dogs).",
+                  "example": ""
+                },
+                {
+                  "word": "Uncountable noun",
+                  "meaning": "Danh từ không đếm được (không dùng số nhiều hay a/an: water, milk, weather).",
+                  "example": ""
+                },
+                {
+                  "word": "Sandwich",
+                  "meaning": "Bánh mì kẹp.",
+                  "example": "Do you want a sandwich?"
+                },
+                {
+                  "word": "Ambulance driver",
+                  "meaning": "Lái xe cứu thương.",
+                  "example": "She wants to be an ambulance driver."
+                },
+                {
+                  "word": "Moon",
+                  "meaning": "Mặt trăng (vật thể duy nhất).",
+                  "example": "Did you see the moon last night?"
+                },
+                {
+                  "word": "Mosquito",
+                  "meaning": "Con muỗi.",
+                  "example": "I really hate mosquitos."
+                },
+                {
+                  "word": "Capital city",
+                  "meaning": "Thành phố thủ đô.",
+                  "example": "Paris is the capital city of France."
+                },
+                {
+                  "word": "Weather",
+                  "meaning": "Thời tiết (danh từ không đếm được).",
+                  "example": "Da Lat has cool weather."
+                },
+                {
+                  "word": "Waterfall",
+                  "meaning": "Thác nước.",
+                  "example": "We visited famous waterfalls."
+                },
+                {
+                  "word": "Supermarket",
+                  "meaning": "Siêu thị.",
+                  "example": "I buy food at the supermarket near my house."
+                }
+              ],
+              "questions": [
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 1: [blank] (a, an, the or -)",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": "Giải thích: Danh từ đếm được số ít apple nhắc đến lần đầu và bắt đầu bằng nguyên âm /æ/.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 2: [blank] (a, an, the or -)",
+                  "answer": "-",
+                  "caseSensitive": false,
+                  "explanation": "Giải thích: Music là danh từ không đếm được, dùng khi nói chung chung.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 3: [blank] (a, an, the or -)",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": "Giải thích: Chỉ một siêu thị cụ thể nằm ở gần nhà (near my house) mà người nghe/đọc đã xác định được.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 4: [blank] (a, an, the or -)",
+                  "answer": "a",
+                  "caseSensitive": false,
+                  "explanation": "Giải thích: Cụm danh từ đếm được số ít a delicious dinner nhắc đến lần đầu với tính từ bổ nghĩa bắt đầu bằng phụ âm /d/.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 5: [blank] (a, an, the or -)",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": "Giải thích: Dùng trong cụm từ chỉ thời gian cố định: in the evening (vào buổi tối).",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Reading\\reading.docx",
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Vocabulary\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "supermarket-reading",
+          "request": {
+            "title": "A Visit to the Supermarket",
+            "skillType": "reading",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "A Visit to the Supermarket",
+              "passage": "Yesterday, I went to (1) ______ supermarket near my house. I bought (2) ______ apple, some vegetables, and (3) ______ bottle of milk. When I came home, (4) ______ weather was very nice, so I ate my food in (5) ______ garden.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Definite article",
+                  "meaning": "Mạo từ xác định (the).",
+                  "example": "We use the when the listener knows what we are talking about."
+                },
+                {
+                  "word": "Indefinite article",
+                  "meaning": "Mạo từ bất định (a, an).",
+                  "example": "Use a or an for singular countable nouns."
+                },
+                {
+                  "word": "Zero article / No article",
+                  "meaning": "Không dùng mạo từ (-).",
+                  "example": "We use zero article for general plural nouns."
+                },
+                {
+                  "word": "Consonant sound",
+                  "meaning": "Âm phụ âm (đi với mạo từ a).",
+                  "example": "\"University\" starts with a consonant sound, so we use a."
+                },
+                {
+                  "word": "Vowel sound",
+                  "meaning": "Âm nguyên âm (a, e, i, o, u - đi với mạo từ an).",
+                  "example": "\"Hour\" starts with a vowel sound, so we use an."
+                },
+                {
+                  "word": "Countable noun",
+                  "meaning": "Danh từ đếm được (có thể đếm số lượng: a dog, three dogs).",
+                  "example": ""
+                },
+                {
+                  "word": "Uncountable noun",
+                  "meaning": "Danh từ không đếm được (không dùng số nhiều hay a/an: water, milk, weather).",
+                  "example": ""
+                },
+                {
+                  "word": "Sandwich",
+                  "meaning": "Bánh mì kẹp.",
+                  "example": "Do you want a sandwich?"
+                },
+                {
+                  "word": "Ambulance driver",
+                  "meaning": "Lái xe cứu thương.",
+                  "example": "She wants to be an ambulance driver."
+                },
+                {
+                  "word": "Moon",
+                  "meaning": "Mặt trăng (vật thể duy nhất).",
+                  "example": "Did you see the moon last night?"
+                },
+                {
+                  "word": "Mosquito",
+                  "meaning": "Con muỗi.",
+                  "example": "I really hate mosquitos."
+                },
+                {
+                  "word": "Capital city",
+                  "meaning": "Thành phố thủ đô.",
+                  "example": "Paris is the capital city of France."
+                },
+                {
+                  "word": "Weather",
+                  "meaning": "Thời tiết (danh từ không đếm được).",
+                  "example": "Da Lat has cool weather."
+                },
+                {
+                  "word": "Waterfall",
+                  "meaning": "Thác nước.",
+                  "example": "We visited famous waterfalls."
+                },
+                {
+                  "word": "Supermarket",
+                  "meaning": "Siêu thị.",
+                  "example": "I buy food at the supermarket near my house."
+                }
+              ],
+              "questions": [
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 1: [blank] (a, an, the or -)",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": "the (vì siêu thị ở gần nhà đã được xác định trong ngữ cảnh).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 2: [blank] (a, an, the or -)",
+                  "answer": "an",
+                  "caseSensitive": false,
+                  "explanation": "an (danh từ đếm được số ít, bắt đầu bằng nguyên âm 'a').",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 3: [blank] (a, an, the or -)",
+                  "answer": "a",
+                  "caseSensitive": false,
+                  "explanation": "a (danh từ đếm được số ít, bắt đầu bằng phụ âm 'b').",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 4: [blank] (a, an, the or -)",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": "The (thời tiết nói chung cụ thể trong ngày hôm đó).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Gap 5: [blank] (a, an, the or -)",
+                  "answer": "the",
+                  "caseSensitive": false,
+                  "explanation": "the (Khu vườn cụ thể của nhà người nói).",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Reading\\reading.docx",
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Vocabulary\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "articles-context",
+          "request": {
+            "title": "Articles in Everyday Sentences",
+            "skillType": "reading",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "Articles in Everyday Sentences",
+              "passage": "My sister wants to be ......... architect when she graduates.\nDid you lock ......... front door before leaving the house?\nI love eating ......... fresh fruit every single day.\nParis is ......... capital city of France.\nHe gave me ......... very interesting book to read.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Definite article",
+                  "meaning": "Mạo từ xác định (the).",
+                  "example": "We use the when the listener knows what we are talking about."
+                },
+                {
+                  "word": "Indefinite article",
+                  "meaning": "Mạo từ bất định (a, an).",
+                  "example": "Use a or an for singular countable nouns."
+                },
+                {
+                  "word": "Zero article / No article",
+                  "meaning": "Không dùng mạo từ (-).",
+                  "example": "We use zero article for general plural nouns."
+                },
+                {
+                  "word": "Consonant sound",
+                  "meaning": "Âm phụ âm (đi với mạo từ a).",
+                  "example": "\"University\" starts with a consonant sound, so we use a."
+                },
+                {
+                  "word": "Vowel sound",
+                  "meaning": "Âm nguyên âm (a, e, i, o, u - đi với mạo từ an).",
+                  "example": "\"Hour\" starts with a vowel sound, so we use an."
+                },
+                {
+                  "word": "Countable noun",
+                  "meaning": "Danh từ đếm được (có thể đếm số lượng: a dog, three dogs).",
+                  "example": ""
+                },
+                {
+                  "word": "Uncountable noun",
+                  "meaning": "Danh từ không đếm được (không dùng số nhiều hay a/an: water, milk, weather).",
+                  "example": ""
+                },
+                {
+                  "word": "Sandwich",
+                  "meaning": "Bánh mì kẹp.",
+                  "example": "Do you want a sandwich?"
+                },
+                {
+                  "word": "Ambulance driver",
+                  "meaning": "Lái xe cứu thương.",
+                  "example": "She wants to be an ambulance driver."
+                },
+                {
+                  "word": "Moon",
+                  "meaning": "Mặt trăng (vật thể duy nhất).",
+                  "example": "Did you see the moon last night?"
+                },
+                {
+                  "word": "Mosquito",
+                  "meaning": "Con muỗi.",
+                  "example": "I really hate mosquitos."
+                },
+                {
+                  "word": "Capital city",
+                  "meaning": "Thành phố thủ đô.",
+                  "example": "Paris is the capital city of France."
+                },
+                {
+                  "word": "Weather",
+                  "meaning": "Thời tiết (danh từ không đếm được).",
+                  "example": "Da Lat has cool weather."
+                },
+                {
+                  "word": "Waterfall",
+                  "meaning": "Thác nước.",
+                  "example": "We visited famous waterfalls."
+                },
+                {
+                  "word": "Supermarket",
+                  "meaning": "Siêu thị.",
+                  "example": "I buy food at the supermarket near my house."
+                }
+              ],
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "My sister wants to be ......... architect when she graduates.",
+                  "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "-"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "b) an (Vì \"architect\" bắt đầu bằng nguyên âm /ɑː/).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Did you lock ......... front door before leaving the house?",
+                  "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "-"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "c) the (Cửa trước của ngôi nhà đã được xác định rõ).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I love eating ......... fresh fruit every single day.",
+                  "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "-"
+                  ],
+                  "correctOptionIndex": 3,
+                  "explanation": "d) - (Danh từ không đếm được/số nhiều chỉ sự vật chung chung).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Paris is ......... capital city of France.",
+                  "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "-"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "c) the (Thủ đô của nước Pháp chỉ có một).",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "He gave me ......... very interesting book to read.",
+                  "options": [
+                    "a",
+                    "an",
+                    "the",
+                    "-"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "a) a (Danh từ đếm được số ít lần đầu, tính từ \"very\" bắt đầu bằng phụ âm /v/).",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Reading\\reading.docx"
+          ]
+        },
+        {
+          "key": "daily-speaking",
+          "request": {
+            "title": "Talk About Your Daily Routines",
+            "skillType": "speaking",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "Mẫu bắt chước (Shadowing Template):\nIn the morning, I usually eat [danh từ không đếm được/số nhiều] and drink a glass of [đồ uống]. Then, I take the [phương tiện] to go to work.",
+              "sentences": [
+                {
+                  "text": "In the morning, I usually eat bread and drink a glass of milk. Then, I take the bus to go to work."
+                },
+                {
+                  "text": "In the morning, I usually eat eggs and drink a glass of juice. Then, I take the train to go to work."
+                },
+                {
+                  "text": "In the morning, I usually eat noodles and drink a glass of water. Then, I take the subway to go to work."
+                },
+                {
+                  "text": "In the morning, I usually eat fruit and drink a glass of tea. Then, I take the car to go to work."
+                },
+                {
+                  "text": "In the morning, I usually eat cake and drink a glass of coffee. Then, I take the bike to go to work."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Speaking\\Đề Speaking (Nói).docx"
+          ]
+        },
+        {
+          "key": "places-speaking",
+          "request": {
+            "title": "Talk About Your Favorite Places",
+            "skillType": "speaking",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "Mẫu bắt chước (Shadowing Template):\nMy favorite place in my city is a [tính từ] [địa điểm]. In the [địa điểm đó], I always [hành động] with my friends.",
+              "sentences": [
+                {
+                  "text": "My favorite place in my city is a peaceful park. In the park, I always walk with my friends."
+                },
+                {
+                  "text": "My favorite place in my city is a busy market. In the market, I always shop with my friends."
+                },
+                {
+                  "text": "My favorite place in my city is a large library. In the library, I always study with my friends."
+                },
+                {
+                  "text": "My favorite place in my city is a beautiful beach. On the beach, I always swim with my friends."
+                },
+                {
+                  "text": "My favorite place in my city is a cozy cafe. In the cafe, I always chat with my friends."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\Speaking\\Đề Speaking (Nói).docx"
+          ]
+        },
+        {
+          "key": "weekend",
+          "request": {
+            "title": "My Ideal Weekend",
+            "skillType": "writing",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 30,
+            "isActive": true,
+            "writing": {
+              "taskType": "paragraph",
+              "topic": "My Ideal Weekend",
+              "prompt": "Yêu cầu: Viết một đoạn ngắn từ 4–5 câu giới thiệu về một ngày cuối tuần lý tưởng của bạn hoặc những món đồ bạn thường mang theo khi đi học.",
+              "instructions": "Quy tắc: Phải sử dụng ít nhất một lần các mạo từ a, an, the và danh từ số nhiều không dùng mạo từ (-).",
+              "sampleAnswer": "On Sunday, I usually wake up early and eat an apple for breakfast. Then, I take the bus to visit my friends. We love eating pizza and talking about movies. It is always a wonderful day!",
+              "minWords": 30,
+              "maxWords": 120,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\writing\\writting.docx"
+          ]
+        },
+        {
+          "key": "dream-house",
+          "request": {
+            "title": "My Dream House",
+            "skillType": "writing",
+            "difficultyLevel": "A2",
+            "estimatedMinutes": 30,
+            "isActive": true,
+            "writing": {
+              "taskType": "paragraph",
+              "topic": "My Dream House",
+              "prompt": "Yêu cầu: Viết một đoạn văn ngắn từ 4–5 câu miêu tả ngôi nhà mơ ước của bạn (có phòng nào, đồ vật gì ở bên trong).",
+              "instructions": "Quy tắc bắt buộc: Trong bài viết, bạn phải sử dụng ít nhất:\n1 lần mạo từ a hoặc an\n1 lần mạo từ the\n1 lần danh từ số nhiều/không đếm được không dùng mạo từ (-)",
+              "sampleAnswer": "In the future, I want to have a big house in the countryside. The house will have a nice garden with beautiful flowers and green trees. Inside, I will have a modern kitchen and a comfortable bedroom. I love living in quiet places!",
+              "minWords": 30,
+              "maxWords": 120,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVA2_English Foundation_ Essential Grammar & Everyday Skills (A1-A2)\\writing\\writting.docx"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tkkh-b1",
+      "level": "B1",
+      "course": {
+        "title": "Advice for Exams — B1",
+        "description": "Luyện nghe lời khuyên chuẩn bị cho kỳ thi, ghi chú ý chính và trả lời 10 câu trắc nghiệm theo transcript."
+      },
+      "lessons": [
+        {
+          "key": "exam-advice",
+          "request": {
+            "title": "Advice for Exams",
+            "skillType": "listening",
+            "difficultyLevel": "B1",
+            "estimatedMinutes": 20,
+            "isActive": true,
+            "listening": {
+              "transcript": "Morning, everyone. Quiet, please. Right, OK. So, today I'm going to give you some advice to help you prepare for the exams next week. So, make some notes as I'm talking, please. Everybody ready?\nNow, while you're studying, eat food that gives you energy. Don't be tempted to eat sweets or drink cola. Sugar won't help you study but fruit and cereals will. Apples, actually, are especially good.\nFind a comfortable place with plenty of light when you study. But not 'too' comfortable or you'll fall asleep!\nTry and keep a positive mind. It is easier to study when you are positive and relaxed. Now, if you start feeling anxious, have a little break. Go out for a stroll around the block.\nDon't try to learn everything. There isn't time. Just choose the 'important' things, the things that'll get you the most points in an exam. And if you aren't sure about this, ask me.\nFirst, learn the main ideas and don't worry too much about the details. If you have time, you can come back later and read the details.\nMake notes of these key points and read them, then cover them up and try to remember all the points. Now, it might be boring, but repetition helps you to remember.\nUse past exam papers to study. They will help you understand what kind of questions come up. There are plenty of past exam papers in the library. You can photocopy them and take them home.\nTake regular breaks while you're studying. A five-minute break every half hour is usually enough. Get some fresh air and stretch your arms and legs. Drink a glass of water too. It's important to keep hydrated.\nAnd, last but not least, good luck! I'm sure you'll all do your best.\nThis audio is for you to practise your listening skills. Some of the information it contains may not be up to date.",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher wants the students to …",
+                  "options": [
+                    "take notes after she has finished speaking.",
+                    "take notes while she is speaking.",
+                    "forget about taking notes."
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Ngay đầu bài nghe, giáo viên nói: \"So, make some notes as I'm talking, please\" (Vì vậy, hãy ghi chú khi tôi đang nói)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher suggests eating …",
+                  "options": [
+                    "sugary snacks.",
+                    "only apples.",
+                    "fruit and cereals."
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Giải thích: Giáo viên khuyên tránh đồ ngọt/cola và nói rõ: \"Sugar won't help you study but fruit and cereals will\" (Đường không giúp bạn học tập nhưng trái cây và ngũ cốc thì có)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher suggests finding a study place with a lot of …",
+                  "options": [
+                    "light.",
+                    "space.",
+                    "books."
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Trong đoạn nói về chỗ ngồi, giáo viên hướng dẫn: \"Find a comfortable place with plenty of light when you study\" (Tìm một nơi thoải mái với nhiều ánh sáng khi học)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "If students feel stressed they should …",
+                  "options": [
+                    "go to bed.",
+                    "go out for a walk.",
+                    "drink some water."
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Giáo viên hướng dẫn khi học sinh cảm thấy lo âu/căng thẳng (anxious): \"Go out for a stroll around the block\" (Đi dạo một vòng quanh khu nhà - tương đương với đi bộ)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Students are advised to …",
+                  "options": [
+                    "select the important things to learn.",
+                    "read through everything once.",
+                    "make notes about every topic."
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Giải thích: Giáo viên khuyên không nên học tất cả vì không đủ thời gian: \"Just choose the 'important' things, the things that'll get you the most points...\" (Chỉ chọn những thứ \"quan trọng\", những thứ sẽ giúp bạn đạt được nhiều điểm nhất)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher understands that repeating things can be …",
+                  "options": [
+                    "difficult.",
+                    "uninteresting.",
+                    "tiring."
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Khi nhắc đến việc lặp lại để ghi nhớ, giáo viên thừa nhận: \"Now, it might be boring, but repetition helps you to remember\" (Nó có thể nhàm chán/không thú vị, nhưng sự lặp lại giúp bạn ghi nhớ. Boring đồng nghĩa với uninteresting)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Students can do past exam papers ...",
+                  "options": [
+                    "in the library only.",
+                    "at home if they take photocopies.",
+                    "in the after-school study group."
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Giải thích: Về đề thi cũ, giáo viên hướng dẫn: \"There are plenty of past exam papers in the library. You can photocopy them and take them home\" (Có rất nhiều đề thi cũ trong thư viện. Bạn có thể sao chụp chúng và mang về nhà)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher recommends a break of five minutes every …",
+                  "options": [
+                    "hour.",
+                    "two hours.",
+                    "thirty minutes."
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Giải thích: Khi nói về việc nghỉ giải lao, giáo viên nêu rõ: \"A five-minute break every half hour is usually enough\" (Nghỉ 5 phút mỗi nửa tiếng/30 phút là đủ)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "It's important to …",
+                  "options": [
+                    "eat regularly.",
+                    "sleep when you feel tired.",
+                    "keep hydrated."
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Giải thích: Ở phần cuối đoạn nghỉ giải lao, giáo viên dặn dò: \"Drink a glass of water too. It's important to keep hydrated\" (Hãy uống một cốc nước nữa. Giữ cơ thể đủ nước là rất quan trọng)."
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The teacher is sure that the students will …",
+                  "options": [
+                    "pass their exams.",
+                    "fail their exams.",
+                    "do their best."
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Giải thích: Ở câu chào kết thúc, giáo viên khẳng định: \"I'm sure you'll all do your best\" (Cô chắc chắn rằng tất cả các em sẽ làm hết sức mình)."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVB1\\Lis\\B1_Advice_for_exams.docx"
+          ],
+          "audioFile": "LVB1\\Lis\\B1_Advice_for_exams.mp3",
+          "reviewNotes": [
+            "File Grammar B1 trống nên chưa tạo bài Grammar."
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tkkh-c1",
+      "level": "C1",
+      "course": {
+        "title": "Jobs and Dreams — C1",
+        "description": "Tiếng Anh nâng cao về công việc và ước mơ: phrasal verbs, từ vựng nghề nghiệp, bài đọc dài, luyện nói và viết bài luận. Hai bài nghe chờ bổ sung transcript."
+      },
+      "lessons": [
+        {
+          "key": "advanced-grammar",
+          "request": {
+            "title": "Advanced English — Phrasal Verbs and Vocabulary",
+            "skillType": "grammar",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 35,
+            "isActive": true,
+            "grammar": {
+              "topic": "Phrasal verbs and vocabulary in context",
+              "rules": "Phần 1: Phrasal Verbs với \"Carry\" (Câu 1 - 5)\nCarry off (v.phr.)\nNghĩa: Thành công vượt qua hoặc đạt được một việc khó khăn (ví dụ: giành giải thưởng, xử lý tình huống bất ngờ).\nVí dụ: To carry off a difficult task.\nCarry out (v.phr.)\nNghĩa: Tiến hành, thực hiện (kế hoạch, nghiên cứu, cải cách).\nVí dụ: To carry out cultural reform (Thực hiện cải cách văn hóa).\nCarry on with (v.phr.)\nNghĩa: Tiếp tục làm việc gì đó.\nVí dụ: To carry on with bilateral projects (Tiếp tục các dự án song phương).\nCarry through (v.phr.)\nNghĩa: Hoàn thành trọn vẹn, vượt qua khó khăn để đạt mục đích (như thực hiện các điều chỉnh lớn - readjustments).\nCarry away (v.phr.)\nNghĩa: Làm cho ai đó mất kiểm soát cảm xúc hoặc bị cuốn đi bởi sự hào hứng/tức giận. (Thường dùng ở dạng bị động: get carried away).\nPhần 2: Từ vựng về Ẩm thực & Nhà hàng (Câu 6 - 10)\nIntoxicating (adj.) /ɪnˈtɒksɪkeɪtɪŋ/\nNghĩa: Say đắm, làm say mê (nghĩa bóng) hoặc gây say (nghĩa đen - đồ uống có cồn).\nVí dụ: Intoxicating drink / spices (Đồ uống/gia vị làm say đắm lòng người).\nRetain (v.) /rɪˈteɪn/\nNghĩa: Giữ lại, duy trì (đặc tính, vẻ đẹp, sự bí ẩn).\nVí dụ: Thai cuisine still retains an element of mystery.\nParticularly (adv.) /pəˈtɪkjələli/\nNghĩa: Đặc biệt là, cực kỳ.\nVí dụ: Particularly adept at perfecting dishes (Đặc biệt thành thạo trong việc hoàn thiện các món ăn).\nExquisite (adj.) /ɪkˈskwɪzɪt/ hoặc /ˈekskwɪzɪt/\nNghĩa: Tinh tế, thanh nhã, tuyệt mỹ (dùng để khen đồ ăn, nghệ thuật, dịch vụ cao cấp).\nVí dụ: Exquisite cuisine and service.\nEvoke (v.) /ɪˈvəʊk/\nNghĩa: Gợi lên, khơi gợi (cảm xúc, ký ức, sự hoài niệm).\nVí dụ: European cuisine always evokes a sense of nostalgia.\nPhần 3: Thành ngữ & Từ vựng về Sa thải / Mất việc (Câu 11 - 20)\nSack / Give the sack (n. / idiom)\nNghĩa: Sa thải, đuổi việc (thông tục nhưng rất phổ biến trong văn hóa Anh - Mỹ).\nVí dụ: I've just been given the sack.\nDismiss (v.) /dɪsˈmɪs/\nNghĩa: Sa thải, cho thôi việc (từ trang trọng hơn của fire).\nHand someone their papers / cards (idiom)\nNghĩa: Phát quyết định sa thải nhân viên.\nGet rid of (v.phr.)\nNghĩa: Loại bỏ, tống khứ ai/cái gì.\nRedundant / Make someone redundant (adj. / v.)\nNghĩa: Dư thừa nhân sự, mất việc do công ty cắt giảm biên chế/không còn nhu cầu vị trí đó.\nVí dụ: She has been made redundant.\nDownsize (v.) /ˌdaʊnˈsaɪz/\nNghĩa: Thu hẹp quy mô doanh nghiệp (cắt giảm nhân sự để tối ưu hóa).\nSurplus to requirements (idiom / phrase)\nNghĩa: Dư thừa so với nhu cầu thực tế của công ty (không còn cần thiết nữa).\nVí dụ: Considered to be surplus to requirements.\nBother (v.)\nNghĩa: Phiền lòng, bận tâm (trong ngữ cảnh câu 19: không cần bận tâm quay lại làm việc nữa).\nNotice / One month's notice (n.)\nNghĩa: Thời gian báo trước trước khi nghỉ việc hoặc bị sa thải (thường là 1 tháng).\nPhần 4: Từ vựng về Kinh doanh, Marketing & Thị trường (Câu 21 - 30)\nConvince (v.) /kənˈvɪns/\nNghĩa: Thuyết phục ai đó tin vào điều gì.\nVí dụ: To convince potential customers.\nInspired (adj.) /ɪnˈspaɪəd/\nNghĩa: Đầy cảm hứng, nhiệt huyết.\nSatisfied (adj.)\nNghĩa: Hài lòng.\nVí dụ: A satisfied customer will always return.\nFad (n.) /fæd/\nNghĩa: Mốt nhất thời, trào lưu qua nhanh (khác với xu hướng lâu dài).\nVí dụ: That style was considered to be a fad.\nMarket (v.)\nNghĩa: Tiếp thị, thương mại hóa một sản phẩm mới ra thị trường.\nProductive (adj.)\nNghĩa: Năng suất, hiệu quả cao.\nCompare (v.)\nNghĩa: So sánh (giá cả, chất lượng).\nKeep current (v.phr.)\nNghĩa: Cập nhật thông tin mới nhất, bắt nhịp thời đại.",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "An eagle, if pressed for food, might … a small baby that had been left in the open.",
+                  "options": [
+                    "carry off",
+                    "carry out",
+                    "carry on with"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Their education system is a good example of the fact that it is possible to … very extensive readjustments.",
+                  "options": [
+                    "carry off",
+                    "carry away",
+                    "carry through"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Russia and Iran will continue to deepen ties and … bilateral projects.",
+                  "options": [
+                    "carry away",
+                    "carry off",
+                    "carry on with"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "This chemical compound helps … waste products from the liver.",
+                  "options": [
+                    "carry away",
+                    "carry over",
+                    "carry on with"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The government announced its plan to … cultural reform.",
+                  "options": [
+                    "carry off",
+                    "carry out",
+                    "carry away"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "These restaurants remind me of belly dancers, exotic spices and … drink.",
+                  "options": [
+                    "instigating",
+                    "intoxicating",
+                    "incriminating"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Thai cuisine still … an element of mystery and exoticism.",
+                  "options": [
+                    "refrains",
+                    "retains",
+                    "regains"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "International restaurants are … adept at perfecting both eastern and western dishes.",
+                  "options": [
+                    "partly",
+                    "particularity",
+                    "particularly"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Hong Kong is a place where you can enjoy … cuisine and service at reasonable prices.",
+                  "options": [
+                    "expletive",
+                    "exquisite",
+                    "explosive"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "European cuisine always … a sense of nostalgia and romance.",
+                  "options": [
+                    "evokes",
+                    "evicts",
+                    "evolves"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Her job has gone because her manager … her.",
+                  "options": [
+                    "flamed",
+                    "fired",
+                    "burned"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I won’t be working tomorrow because I’ve just been given the … .",
+                  "options": [
+                    "sack",
+                    "bag",
+                    "case"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I was … this morning and had to empty my desk.",
+                  "options": [
+                    "departed",
+                    "deterred",
+                    "dismissed"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I was handed my … yesterday.",
+                  "options": [
+                    "books",
+                    "papers",
+                    "cards"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The company decided to get … of me last week.",
+                  "options": [
+                    "rod",
+                    "ride",
+                    "rid"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "She has been made … because her work is no longer needed.",
+                  "options": [
+                    "redundant",
+                    "repellent",
+                    "reduced"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The firm decided to … which means they don’t want us.",
+                  "options": [
+                    "resize",
+                    "downsize",
+                    "upsize"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "They told Mark to go because he was said to be … to requirements.",
+                  "options": [
+                    "recess",
+                    "surplus",
+                    "excess"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I was told not to … to come back to work tomorrow.",
+                  "options": [
+                    "worry",
+                    "care",
+                    "bother"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "I didn’t ask for more money because he gave me one month’s … .",
+                  "options": [
+                    "notice",
+                    "facts",
+                    "news"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The most difficult part for the salesperson is to … potential customers.",
+                  "options": [
+                    "contract",
+                    "convince",
+                    "consider"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "They must believe in the product and be … enough to promote it vigorously.",
+                  "options": [
+                    "indebted",
+                    "inspired",
+                    "invested"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "A … customer will always return to the same firm and buy again.",
+                  "options": [
+                    "satisfied",
+                    "interested",
+                    "encouraged"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "That style was considered to be a … but now it is coming back into fashion.",
+                  "options": [
+                    "fuss",
+                    "fad",
+                    "fidget"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "One of the first things to do when you want to … a new product is to evaluate its potential demand.",
+                  "options": [
+                    "master",
+                    "muster",
+                    "market"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Analyze the supermarkets … for the same clientele.",
+                  "options": [
+                    "competing",
+                    "confusing",
+                    "concerning"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Weekly meetings were not considered to be … enough.",
+                  "options": [
+                    "produced",
+                    "products",
+                    "productive"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Her ability to … facts and figures quickly was the main reason for her success.",
+                  "options": [
+                    "consumer",
+                    "consume",
+                    "consumption"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "The main advantage of our website is that customers can … different prices for the same article.",
+                  "options": [
+                    "continue",
+                    "confer",
+                    "compare"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "If you want to keep … with the latest developments in your field, you have to read the news.",
+                  "options": [
+                    "current",
+                    "currently",
+                    "currant"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Grammar\\Grammar_30Cau_ Advanced English Grammar Test – Multiple-choice.docx",
+            "LVC1_JobAndDreams\\Vacabulary\\Từ Vựng.docx"
+          ],
+          "reviewNotes": [
+            "Giữ đáp án của nguồn; câu 14 chấp nhận cards theo đáp án, papers cũng là cách diễn đạt có thể dùng."
+          ]
+        },
+        {
+          "key": "registration-form",
+          "request": {
+            "title": "Registration Form — Report a Robbery",
+            "skillType": "listening",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 20,
+            "isActive": false,
+            "listening": {
+              "transcript": "",
+              "questions": [
+                {
+                  "type": "fill_blank",
+                  "prompt": "Name: Anna [blank]",
+                  "answer": "Grieg",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Date of Birth (dd/mm/yyyy): [blank]",
+                  "answer": "15/03/1980",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Address: [blank] St.",
+                  "answer": "Ellendale",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Post code: [blank]",
+                  "answer": "W5 2AT",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Number of previous burglaries: …",
+                  "options": [
+                    "0",
+                    "1",
+                    "2"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Nguồn chấp nhận: 0 or no"
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Time of apartment tenancy: …",
+                  "options": [
+                    "8 months",
+                    "6 months",
+                    "12 months"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Nguồn chấp nhận: 8 or eight months"
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Number of occupants: …",
+                  "options": [
+                    "1",
+                    "2",
+                    "3"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": "Nguồn chấp nhận: 1 or one"
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Entry point of burglar: [blank]",
+                  "answer": "back door",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Serial number of lost computer: [blank]",
+                  "answer": "G4168770",
+                  "caseSensitive": false,
+                  "explanation": ""
+                },
+                {
+                  "type": "fill_blank",
+                  "prompt": "Material of stolen purse: [blank]",
+                  "answer": "Silver-Colored",
+                  "caseSensitive": false,
+                  "explanation": ""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Listening\\Ls1\\Ls_mini-test-17-question.docx"
+          ],
+          "audioFile": "LVC1_JobAndDreams\\Listening\\Ls1\\mini-test-17.mp3",
+          "reviewNotes": [
+            "Thiếu transcript; tắt kích hoạt. Ba câu có đáp án số/chữ được chuyển sang trắc nghiệm để tránh chấm sai biến thể."
+          ]
+        },
+        {
+          "key": "campus-safety",
+          "request": {
+            "title": "Campus Safety — Crime Prevention",
+            "skillType": "listening",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 20,
+            "isActive": false,
+            "listening": {
+              "transcript": "",
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "13. The campus crime rate has ……………… so far this year.",
+                  "options": [
+                    "increased",
+                    "decreased",
+                    "stayed the same"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "14. Why is there added concern about crime?",
+                  "options": [
+                    "exaggeration in media",
+                    "crime TV shows",
+                    "factual news articles"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "16. What is the primary method for increasing safety?",
+                  "options": [
+                    "informing students and staff of safety precautions",
+                    "offering free self-defense courses to students",
+                    "reminding students to carry a mobile phone at all times"
+                  ],
+                  "correctOptionIndex": 0,
+                  "explanation": ""
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "18. It is dangerous to",
+                  "options": [
+                    "drive home late at night.",
+                    "carry a knife.",
+                    "carry pepper spray."
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": ""
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Listening\\Ls2\\mini-test-14-question.docx"
+          ],
+          "audioFile": "LVC1_JobAndDreams\\Listening\\Ls2\\mini-test-14.mp3",
+          "reviewNotes": [
+            "Thiếu transcript và đáp án 6 câu (11, 12, 15, 17, 19, 20); chỉ nhập 4 câu có đáp án rõ. Các câu còn lại lưu trong pendingQuestions."
+          ],
+          "pendingQuestions": [
+            {
+              "prompt": "11. The lecture was organised by",
+              "options": [
+                "City of Nottingham.",
+                "University of Nottingham Students’ Union.",
+                "Nottingham Police Department."
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            },
+            {
+              "prompt": "12. The majority of crime on campus is",
+              "options": [
+                "Drugs and Alcohol.",
+                "Violence",
+                "Theft"
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            },
+            {
+              "prompt": "15. Carlos says if you are the victim of a crime, you should",
+              "options": [
+                "run away.",
+                "resist",
+                "seek help."
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            },
+            {
+              "prompt": "17. If a student must work late, it is most important to",
+              "options": [
+                "not return home until the morning.",
+                "go back with a friend.",
+                "bring a mobile phone."
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            },
+            {
+              "prompt": "19. Students who complete a self-defense course are",
+              "options": [
+                "more aware of dangers.",
+                "mentally tougher.",
+                "walking more confidently."
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            },
+            {
+              "prompt": "20. A university is",
+              "options": [
+                "not surrounded by walls.",
+                "patrolled by military.",
+                "completely safe."
+              ],
+              "reason": "Nguồn chỉ ghi Correct, không lưu lựa chọn đã chọn."
+            }
+          ]
+        },
+        {
+          "key": "memory-age",
+          "request": {
+            "title": "Memory and Age",
+            "skillType": "reading",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 40,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "Memory and Age",
+              "passage": " A\n\nAging, it is now clear, is part of an ongoing maturation process that all our organs go through. “In a sense, aging is keyed to the level of the vigor of the body and the continuous interaction between levels of body activity and levels of mental activity,” reports Arnold B. Scheibel, M.D., whose very academic title reflects how once far-flung domains now converge on the mind and the brain. Scheibel is a professor of anatomy, cell biology, psychiatry, and behavioral sciences at the University of California at Los Angeles, and director of university’s Brain Research Institute. Experimental evidence has backed up popular assumptions that the aging mind undergoes decay analogous to that of the aging body. Younger monkeys, chimps, and lower animals consistently outperform their older colleagues on memory tests. In humans, psychologists concluded, memory and other mental functions deteriorate over time because of inevitable organic changes in the brain as neurons die off. The mental decline after young adulthood appeared inevitable.\n\nB\n\nEquipped with imaging techniques that capture the brain in action, Stanley Rapoport, Ph.D., at the National Institutes of Health, measured the flow of blood in the brains of old and young people as they went through the task of matching photos of faces. Since blood flow reflects neuronal activity, Rapoport could compare with networks of neurons were being used by different subjects. “Even when the reaction times of older and younger subjects were the same, the neural networks they used were significantly different. The older subjects were using different internal strategies to accomplish the same result in the same time,” Rapoport says. Either the task required greater effort on the part of the older subjects or the work of neurons originally involved in tasks of that type had been taken over by other neurons, creating different networks.\n\nC\n\nAt the Georgia Institute of Technology, psychologist Timothy Salthouse, Ph.D., compared a group of very fast and accurate typists of college-age with another group in their 60s. since reaction time is faster in younger people and most people’s fingers grow less nimble with age, younger typists might be expected to tap right along while the older one’s fumble. But both typed 60 words a minute. The older typists, it turned out, achieved their speed with cunning little strategies that made them far more efficient than their younger counterparts: They made fewer finger movements, saving a fraction of a second here and there. They also read ahead in the text. The neural networks involved in typing appear to have been reshaped to compensate for losses in motor skills or other age changes.\n\nD\n\n“When a rat is kept in isolation without playmates or objects to interact with, the animal’s brain shrinks, but if we put that rat with 11 other rats in a large cage and give them an assortment of wheels, ladders, and other toys, we can show—after four days—significant differences in its brain,” says Diamond, professor of integrative biology. Proliferating dendrites first appear in the visual association areas. After a month in the enriched environment, the whole cerebral cortex has expanded, a has its blood supply. Even in the enriched environment, rats get bored unless the toys are varied. “Animals are just like we are. They need stimulation,” says Diamond.\n\nOne of the most profoundly important mental functions is memory-notorious for its failure with age. So important is a memory that the Charles A. Dana foundation recently spent $8.4 million to set up a consortium of leading medical centers to measure memory loss and aging through brain-imaging technology, neurochemical experiment, and cognitive and psychological tests. One thing, however, is already fairly clear—many aspects of memory are not a function of age at all but of education. Memory exists in more than one form. What we call knowledge—facts—is what psychologists such as Harry P. Bahrick, Ph.D., of Ohio Wesleyan University call semantic memory. Events, conversations, and occurrences in time and space, on the other hand, make up episodic or event memory, which is triggered by cues from the context. If you were around in 1963 you don’t need to be reminded of the circumstances surrounding the moment you heard that JFK had been assassinated. That event is etched into your episodic memory.\n\nE\n\nWhen you forget a less vivid item, like buying a roll of paper towels at the supermarket, you may blame it on your aging memory. It’s true that episodic memory begins to decline when most people are in their 50s, but it’s never perfect at any age. “Every memory begins as an event,” says Bahrick. “Through repetition, certain events leave behind a residue of knowledge or semantic memory. On a specific day in the past, somebody taught you that two and two are four, but you’ve been over that information so often you don’t remember where you learned it. What started as an episodic memory has become a permanent part of your knowledge base.” You remember the content, not the context. Our language knowledge, our knowledge of the world and of people, is largely that permanent or semi-permanent residue.\n\nF\n\nProbing the longevity of knowledge, Bahrick tested 1,000 high school graduates to see how well they recalled their algebra. Some had completed the course as recently as a month before, others as long as 50 years earlier. He also determined how long each person had studied algebra, the grade received, and how much the skill was used over the course of adulthood. Surprisingly, a person’s grasp of algebra at the time of testing did not depend on how long ago he’d taken the course—the determining factor was the duration of instruction. Those who had spent only a few months learning algebra forgot most of it within two or three years.\n\nG\n\nIn another study, Bahrick discovered that people who had taken several courses in Spanish, spread out over a couple of years, could recall, decades later, 60 per cent or more of the vocabulary they learned. Those who took just one course retained only a trace after three years. “This long-term residue of knowledge remains stable over the decades, independent of the age of the person and the age of the memory. No serious deficit appears until people get to their 50s and 60s, probably due to the degenerative processes of aging rather than a cognitive loss.”\n\nH\n\n“You could say metamemory is a byproduct of going to school,” says psychologist Robert Kail, Ph.D., of Purdue University, who studies children from birth to 20 years, the time of life when mental development is most rapid. “The question-and-answer process, especially exam-taking, helps children learn—and also teaches them how their memory works. This may be one reason why, according to a broad range of studies in people over 60, the better educated a person is, the more likely they are to perform better in life and on psychological tests. A group of adult novice chess players were compared with a group of child experts at the game. In tests of their ability to remember a random series of numbers, the adults, as expected, outscored the children. But when asked to remember the patterns of chess pieces arranged on a board, the children won. “Because they’d played a lot of chess, their knowledge of chess was better organized than that of the adults, and their existing knowledge of chess served as a framework for new memory,” explains Kail.\n\nI\n\nSpecialized knowledge is a mental resource that only improve with time. Crystallized intelligence about one’s occupation apparently does not decline at all until at least age 75, and if there is no disease or dementia, may remain even longer. Special knowledge is often organized by a process called “chunking.” If procedure A and procedure B are always done together, for example, the mind may merge them into a single command. When you apply yourself to a specific interest—say, cooking—you build increasingly elaborate knowledge structures that let you do more and do it better. This ability, which is tied to experience, is the essence of expertise. Vocabulary is one such specialized form of accrued knowledge. Research clearly shows that vocabulary improves with time. Retired professionals, especially teachers and journalists, consistently score higher on tests of vocabulary and general information than college students, who are supposed to be in their mental prime.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Carry off",
+                  "meaning": "Thành công vượt qua hoặc đạt được một việc khó khăn (ví dụ: giành giải thưởng, xử lý tình huống bất ngờ).",
+                  "example": "To carry off a difficult task."
+                },
+                {
+                  "word": "Carry out",
+                  "meaning": "Tiến hành, thực hiện (kế hoạch, nghiên cứu, cải cách).",
+                  "example": "To carry out cultural reform (Thực hiện cải cách văn hóa)."
+                },
+                {
+                  "word": "Carry on with",
+                  "meaning": "Tiếp tục làm việc gì đó.",
+                  "example": "To carry on with bilateral projects (Tiếp tục các dự án song phương)."
+                },
+                {
+                  "word": "Carry through",
+                  "meaning": "Hoàn thành trọn vẹn, vượt qua khó khăn để đạt mục đích (như thực hiện các điều chỉnh lớn - readjustments).",
+                  "example": ""
+                },
+                {
+                  "word": "Carry away",
+                  "meaning": "Làm cho ai đó mất kiểm soát cảm xúc hoặc bị cuốn đi bởi sự hào hứng/tức giận. (Thường dùng ở dạng bị động: get carried away).",
+                  "example": ""
+                },
+                {
+                  "word": "Intoxicating",
+                  "meaning": "Say đắm, làm say mê (nghĩa bóng) hoặc gây say (nghĩa đen - đồ uống có cồn).",
+                  "example": "Intoxicating drink / spices (Đồ uống/gia vị làm say đắm lòng người)."
+                },
+                {
+                  "word": "Retain",
+                  "meaning": "Giữ lại, duy trì (đặc tính, vẻ đẹp, sự bí ẩn).",
+                  "example": "Thai cuisine still retains an element of mystery."
+                },
+                {
+                  "word": "Particularly",
+                  "meaning": "Đặc biệt là, cực kỳ.",
+                  "example": "Particularly adept at perfecting dishes (Đặc biệt thành thạo trong việc hoàn thiện các món ăn)."
+                },
+                {
+                  "word": "Exquisite",
+                  "meaning": "Tinh tế, thanh nhã, tuyệt mỹ (dùng để khen đồ ăn, nghệ thuật, dịch vụ cao cấp).",
+                  "example": "Exquisite cuisine and service."
+                },
+                {
+                  "word": "Evoke",
+                  "meaning": "Gợi lên, khơi gợi (cảm xúc, ký ức, sự hoài niệm).",
+                  "example": "European cuisine always evokes a sense of nostalgia."
+                },
+                {
+                  "word": "Sack / Give the sack",
+                  "meaning": "Sa thải, đuổi việc (thông tục nhưng rất phổ biến trong văn hóa Anh - Mỹ).",
+                  "example": "I've just been given the sack."
+                },
+                {
+                  "word": "Dismiss",
+                  "meaning": "Sa thải, cho thôi việc (từ trang trọng hơn của fire).",
+                  "example": ""
+                },
+                {
+                  "word": "Hand someone their papers / cards",
+                  "meaning": "Phát quyết định sa thải nhân viên.",
+                  "example": ""
+                },
+                {
+                  "word": "Get rid of",
+                  "meaning": "Loại bỏ, tống khứ ai/cái gì.",
+                  "example": ""
+                },
+                {
+                  "word": "Redundant / Make someone redundant",
+                  "meaning": "Dư thừa nhân sự, mất việc do công ty cắt giảm biên chế/không còn nhu cầu vị trí đó.",
+                  "example": "She has been made redundant."
+                },
+                {
+                  "word": "Downsize",
+                  "meaning": "Thu hẹp quy mô doanh nghiệp (cắt giảm nhân sự để tối ưu hóa).",
+                  "example": ""
+                },
+                {
+                  "word": "Surplus to requirements",
+                  "meaning": "Dư thừa so với nhu cầu thực tế của công ty (không còn cần thiết nữa).",
+                  "example": "Considered to be surplus to requirements."
+                },
+                {
+                  "word": "Bother",
+                  "meaning": "Phiền lòng, bận tâm (trong ngữ cảnh câu 19: không cần bận tâm quay lại làm việc nữa).",
+                  "example": ""
+                },
+                {
+                  "word": "Notice / One month's notice",
+                  "meaning": "Thời gian báo trước trước khi nghỉ việc hoặc bị sa thải (thường là 1 tháng).",
+                  "example": ""
+                },
+                {
+                  "word": "Convince",
+                  "meaning": "Thuyết phục ai đó tin vào điều gì.",
+                  "example": "To convince potential customers."
+                },
+                {
+                  "word": "Inspired",
+                  "meaning": "Đầy cảm hứng, nhiệt huyết.",
+                  "example": ""
+                },
+                {
+                  "word": "Satisfied",
+                  "meaning": "Hài lòng.",
+                  "example": "A satisfied customer will always return."
+                },
+                {
+                  "word": "Fad",
+                  "meaning": "Mốt nhất thời, trào lưu qua nhanh (khác với xu hướng lâu dài).",
+                  "example": "That style was considered to be a fad."
+                },
+                {
+                  "word": "Market",
+                  "meaning": "Tiếp thị, thương mại hóa một sản phẩm mới ra thị trường.",
+                  "example": ""
+                },
+                {
+                  "word": "Productive",
+                  "meaning": "Năng suất, hiệu quả cao.",
+                  "example": ""
+                },
+                {
+                  "word": "Compare",
+                  "meaning": "So sánh (giá cả, chất lượng).",
+                  "example": ""
+                },
+                {
+                  "word": "Keep current",
+                  "meaning": "Cập nhật thông tin mới nhất, bắt nhịp thời đại.",
+                  "example": ""
+                }
+              ],
+              "questions": [
+                {
+                  "type": "multiple_choice",
+                  "prompt": "What does the experiment of typist show in the passage?",
+                  "options": [
+                    "Old people reading ability is superior",
+                    "Losses of age is irreversible",
+                    "Seasoned tactics made elders more efficient",
+                    "Old people performed poorly in the driving test"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Đáp án biên soạn từ nội dung đoạn C; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "Which is correct about rat experiment?",
+                  "options": [
+                    "Different toys have a different effect on rats",
+                    "Rat’s brain weight increased in both cages",
+                    "Isolated rat’s brain grows new connections",
+                    "Boring and complicated surroundings affect brain development"
+                  ],
+                  "correctOptionIndex": 3,
+                  "explanation": "Đáp án biên soạn từ nội dung đoạn D; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "What can be concluded in a chess game of children group?",
+                  "options": [
+                    "They won a game with adults",
+                    "Their organization of chess knowledge is better",
+                    "Their image memory is better than adults",
+                    "They used a different part of the brain when playing chess"
+                  ],
+                  "correctOptionIndex": 1,
+                  "explanation": "Đáp án biên soạn từ nội dung đoạn H; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "multiple_choice",
+                  "prompt": "What is the author’s purpose of using “vocabulary study” at the end of the passage?",
+                  "options": [
+                    "Certain people are sensitive to vocabularies while others aren’t",
+                    "Teachers and professionals won by their experience",
+                    "Vocabulary memory as a crystallized intelligence is hard to decline",
+                    "Old people use their special zone of the brain when the study"
+                  ],
+                  "correctOptionIndex": 2,
+                  "explanation": "Đáp án biên soạn từ nội dung đoạn I; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Reading\\R_Memory and Age.docx",
+            "LVC1_JobAndDreams\\Vacabulary\\Từ Vựng.docx"
+          ],
+          "reviewNotes": [
+            "Bốn đáp án suy ra từ đoạn đọc, cần giáo viên rà soát; riêng câu thí nghiệm chuột diễn đạt lựa chọn chưa rõ."
+          ]
+        },
+        {
+          "key": "voyage",
+          "request": {
+            "title": "Voyage of Going Beyond the Blue Line",
+            "skillType": "reading",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 40,
+            "isActive": true,
+            "reading": {
+              "passageTitle": "Voyage of Going Beyond the Blue Line",
+              "passage": "A\n\nOne feels a certain sympathy for Captain James Cook on the day in 1778 that he “discovered” Hawaii. Then on his third expedition to the Pacific, the British navigator had explored scores of islands across the breadth of the sea, from lush New Zealand to the lonely wastes of Easter Island. This latest voyage had taken him thousands of miles north from the Society Islands to an archipelago so remote that even the old Polynesians back on Tahiti knew nothing about it. Imagine Cook’s surprise, then, when the natives of Hawaii came paddling out in their canoes and greeted him in a familiar tongue, one he had heard on virtually every mote of inhabited land he had visited. Marvelling at the ubiquity of this Pacific language and culture, he later wondered in his journal: “How shall we account for this Nation spreading itself so far over this Vast ocean?”\n\nB\n\nAnswers have been slow in coming. But now a startling archaeological find on the island of Éfaté, in the Pacific nation of Vanuatu, has revealed an ancient seafaring people, the distant ancestors of today’s Polynesians, taking their first steps into the unknown. The discoveries there have also opened a window into the shadowy world of those early voyagers. At the same time, other pieces of this human puzzle are turning up in unlikely places. Climate data gleaned from slow-growing corals around the Pacific and from sediments in alpine lakes in South America may help explain how, more than a thousand years later, the second wave of seafarers beat their way across the entire Pacific.\n\nC\n\n“What we have is a first- or second-generation site containing the graves of some of the Pacific’s first explorers,” says Spriggs, professor of archaeology at the Australian National University and co-leader of an international team excavating the site. It came to light only by luck. A backhoe operator, digging up topsoil on the grounds of a derelict coconut plantation, scraped open a grave – the first of dozens in a burial ground some 3,000 years old. It is the oldest cemetery ever found in the Pacific islands, and it harbors the bones of an ancient people archaeologists call the Lapita, a label that derives from a beach in New Caledonia where a landmark cache of their pottery was found in the 1950s. They were daring blue-water adventurers who roved the sea not just as explorers but also as pioneers, bringing along everything they would need to build new lives – their families and livestock, taro seedlings and stone tools.\n\nD\n\nWithin the span of few centuries, the Lapita stretched the boundaries of their world from the jungle-clad volcanoes of Papua New Guinea to the loneliest coral outliers of Tonga, at least 2,000 miles eastward in the Pacific. Along the way they explored millions of square miles of an unknown sea, discovering and colonizing scores of tropical islands never before seen by human eyes: Vanuatu, New Caledonia, Fiji, Samoa.\n\nE\n\nWhat little is known or surmised about them has been pieced together from fragments of pottery, animal bones, obsidian flakes, and such oblique sources as comparative linguistics and geochemistry. Although their voyages can be traced back to the northern islands of Papua New Guinea, their language – variants of which are still spoken across the Pacific – came from Taiwan. And their peculiar style of pottery decoration, created by pressing a carved stamp into the clay, probably had its roots in the northern Philippines. With the discovery of the Lapita cemetery on Éfaté, the volume of data available to researchers has expanded dramatically. The bones of at least 62 individuals have been uncovered so far – including old men, young women, even babies – and more skeletons are known to be in the ground. Archaeologists were also thrilled to discover six complete Lapita pots. It’s an important find, Spriggs says, for it conclusively identifies the remains as Lapita. “It would be hard for anyone to argue that these aren’t Lapita when you have human bones enshrined inside what is unmistakably a Lapita urn.”\n\nF\n\nSeveral lines of evidence also undergird Spriggs’s conclusion that this was a community of pioneers making their first voyages into the remote reaches of Oceania. For one thing, the radiocarbon dating of bones and charcoal places them early in the Lapita expansion. For another, the chemical makeup of the obsidian flakes littering the site indicates that the rock wasn’t local; instead, it was imported from a large island in Papua New Guinea’s the Bismarck Archipelago, the springboard for the Lapita’s thrust into the Pacific. A particularly intriguing clue comes from chemical tests on the teeth of several skeletons. DNA teased from these ancient bones may also help answer one of the most puzzling questions in Pacific anthropology: Did all Pacific islanders spring from one source or many? Was there only one outward migration from a single point in Asia, or several from different points? “This represents the best opportunity we’ve had yet,” says Spriggs, “to find out who the Lapita actually were, where they came from, and who their closest descendants are today.”\n\nG\n\n“There is one stubborn question for which archaeology has yet to provide any answers: How did the Lapita accomplish the ancient equivalent of a moon landing, many times over? No one has found one of their canoes or any rigging, which could reveal how the canoes were sailed. Nor do the oral histories and traditions of later Polynesians offer any insights, for they segue into myth long before they reach as far back in time as the Lapita.” All we can say for certain is that the Lapita had canoes that were capable of ocean voyages, and they had the ability to sail them,” says Geoff Irwin, a professor of archaeology at the University of Auckland and an avid yachtsman. Those sailing skills, he says, were developed and passed down over thousands of years by earlier mariners who worked their way through the archipelagoes of the western Pacific making short crossings to islands within sight of each other. Reaching Fiji, as they did a century or so later, meant crossing more than 500 miles of ocean, pressing on day after day into the great blue void of the Pacific. What gave them the courage to lunch out on such a risky voyage?\n\nH\n\nThe Lapita’s thrust into the Pacific was eastward, against the prevailing trade winds, Irwin notes. Those nagging headwinds, he argues, may have been the key to their success. “They could sail out for days into the unknown and reconnoiter, secure in the knowledge that if they didn’t find anything, they could turn about and catch a swift ride home on the trade winds. It’s what made the whole thing work.” Once out there, skilled seafarers would detect abundant leads to follow to land: seabirds and turtles, coconuts and twigs carried out to sea by the tides and the afternoon pileup of clouds on the horizon that often betokens an island in the distance. Some islands may have broadcast their presence with far less subtlety than a cloud bank. Some of the most violent eruptions anywhere on the planet during the past 10,000 years occurred in Melanesia, which sits nervously in one of the most explosive volcanic regions on Earth. Even less spectacular eruptions would have sent plumes of smoke billowing into the stratosphere and rained ash for hundreds of miles. It’s possible that the Lapita saw these signs of distant islands and later sailed off in their direction, knowing they would find land. For returning explorers, successful or not, the geography of their own archipelagoes provided a safety net to keep them from overshooting their home ports and sailing off into eternity.\n\nI\n\nHowever they did it, the Lapita spread themselves a third of the way across the Pacific, the called it quits for reasons known only to them. Ahead lay the vast emptiness of the central Pacific, and perhaps they were too thinly stretched to venture farther. They probably never numbered more than a few thousand in total, and in their rapid migration eastward they encountered hundreds of islands – more than 300 in Fiji alone. Still, more than a millennium would pass before the Lapita’s descendants, a people we now call the Polynesians, struck out in search of new territory.",
+              "category": "Course materials",
+              "instructions": "Read the text and answer the questions.",
+              "vocabulary": [
+                {
+                  "word": "Carry off",
+                  "meaning": "Thành công vượt qua hoặc đạt được một việc khó khăn (ví dụ: giành giải thưởng, xử lý tình huống bất ngờ).",
+                  "example": "To carry off a difficult task."
+                },
+                {
+                  "word": "Carry out",
+                  "meaning": "Tiến hành, thực hiện (kế hoạch, nghiên cứu, cải cách).",
+                  "example": "To carry out cultural reform (Thực hiện cải cách văn hóa)."
+                },
+                {
+                  "word": "Carry on with",
+                  "meaning": "Tiếp tục làm việc gì đó.",
+                  "example": "To carry on with bilateral projects (Tiếp tục các dự án song phương)."
+                },
+                {
+                  "word": "Carry through",
+                  "meaning": "Hoàn thành trọn vẹn, vượt qua khó khăn để đạt mục đích (như thực hiện các điều chỉnh lớn - readjustments).",
+                  "example": ""
+                },
+                {
+                  "word": "Carry away",
+                  "meaning": "Làm cho ai đó mất kiểm soát cảm xúc hoặc bị cuốn đi bởi sự hào hứng/tức giận. (Thường dùng ở dạng bị động: get carried away).",
+                  "example": ""
+                },
+                {
+                  "word": "Intoxicating",
+                  "meaning": "Say đắm, làm say mê (nghĩa bóng) hoặc gây say (nghĩa đen - đồ uống có cồn).",
+                  "example": "Intoxicating drink / spices (Đồ uống/gia vị làm say đắm lòng người)."
+                },
+                {
+                  "word": "Retain",
+                  "meaning": "Giữ lại, duy trì (đặc tính, vẻ đẹp, sự bí ẩn).",
+                  "example": "Thai cuisine still retains an element of mystery."
+                },
+                {
+                  "word": "Particularly",
+                  "meaning": "Đặc biệt là, cực kỳ.",
+                  "example": "Particularly adept at perfecting dishes (Đặc biệt thành thạo trong việc hoàn thiện các món ăn)."
+                },
+                {
+                  "word": "Exquisite",
+                  "meaning": "Tinh tế, thanh nhã, tuyệt mỹ (dùng để khen đồ ăn, nghệ thuật, dịch vụ cao cấp).",
+                  "example": "Exquisite cuisine and service."
+                },
+                {
+                  "word": "Evoke",
+                  "meaning": "Gợi lên, khơi gợi (cảm xúc, ký ức, sự hoài niệm).",
+                  "example": "European cuisine always evokes a sense of nostalgia."
+                },
+                {
+                  "word": "Sack / Give the sack",
+                  "meaning": "Sa thải, đuổi việc (thông tục nhưng rất phổ biến trong văn hóa Anh - Mỹ).",
+                  "example": "I've just been given the sack."
+                },
+                {
+                  "word": "Dismiss",
+                  "meaning": "Sa thải, cho thôi việc (từ trang trọng hơn của fire).",
+                  "example": ""
+                },
+                {
+                  "word": "Hand someone their papers / cards",
+                  "meaning": "Phát quyết định sa thải nhân viên.",
+                  "example": ""
+                },
+                {
+                  "word": "Get rid of",
+                  "meaning": "Loại bỏ, tống khứ ai/cái gì.",
+                  "example": ""
+                },
+                {
+                  "word": "Redundant / Make someone redundant",
+                  "meaning": "Dư thừa nhân sự, mất việc do công ty cắt giảm biên chế/không còn nhu cầu vị trí đó.",
+                  "example": "She has been made redundant."
+                },
+                {
+                  "word": "Downsize",
+                  "meaning": "Thu hẹp quy mô doanh nghiệp (cắt giảm nhân sự để tối ưu hóa).",
+                  "example": ""
+                },
+                {
+                  "word": "Surplus to requirements",
+                  "meaning": "Dư thừa so với nhu cầu thực tế của công ty (không còn cần thiết nữa).",
+                  "example": "Considered to be surplus to requirements."
+                },
+                {
+                  "word": "Bother",
+                  "meaning": "Phiền lòng, bận tâm (trong ngữ cảnh câu 19: không cần bận tâm quay lại làm việc nữa).",
+                  "example": ""
+                },
+                {
+                  "word": "Notice / One month's notice",
+                  "meaning": "Thời gian báo trước trước khi nghỉ việc hoặc bị sa thải (thường là 1 tháng).",
+                  "example": ""
+                },
+                {
+                  "word": "Convince",
+                  "meaning": "Thuyết phục ai đó tin vào điều gì.",
+                  "example": "To convince potential customers."
+                },
+                {
+                  "word": "Inspired",
+                  "meaning": "Đầy cảm hứng, nhiệt huyết.",
+                  "example": ""
+                },
+                {
+                  "word": "Satisfied",
+                  "meaning": "Hài lòng.",
+                  "example": "A satisfied customer will always return."
+                },
+                {
+                  "word": "Fad",
+                  "meaning": "Mốt nhất thời, trào lưu qua nhanh (khác với xu hướng lâu dài).",
+                  "example": "That style was considered to be a fad."
+                },
+                {
+                  "word": "Market",
+                  "meaning": "Tiếp thị, thương mại hóa một sản phẩm mới ra thị trường.",
+                  "example": ""
+                },
+                {
+                  "word": "Productive",
+                  "meaning": "Năng suất, hiệu quả cao.",
+                  "example": ""
+                },
+                {
+                  "word": "Compare",
+                  "meaning": "So sánh (giá cả, chất lượng).",
+                  "example": ""
+                },
+                {
+                  "word": "Keep current",
+                  "meaning": "Cập nhật thông tin mới nhất, bắt nhịp thời đại.",
+                  "example": ""
+                }
+              ],
+              "questions": [
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "Captain cook once expected Hawaii might speak another language of people from other pacific islands.",
+                  "answer": "true",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "Captain cook depicted a number of cultural aspects of Polynesians in his journal.",
+                  "answer": "not_given",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "Professor Spriggs and his research team went to the Efate to try to find the site of the ancient cemetery.",
+                  "answer": "false",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "The Lapita completed a journey of around 2,000 miles in a period less than a centenary.",
+                  "answer": "false",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "The Lapita were the first inhabitants in many pacific islands.",
+                  "answer": "true",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "The unknown pots discovered in Efate had once been used for cooking.",
+                  "answer": "not_given",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                },
+                {
+                  "type": "true_false_not_given",
+                  "prompt": "The um buried in Efate site was plain as it was without any decoration.",
+                  "answer": "false",
+                  "explanation": "Đáp án biên soạn từ đoạn đọc; nguồn chưa có bảng đáp án.",
+                  "focus": "scanning",
+                  "points": 1
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Reading\\Voyage of Going_ beyond the blue line 2.docx",
+            "LVC1_JobAndDreams\\Vacabulary\\Từ Vựng.docx"
+          ],
+          "reviewNotes": [
+            "Bảy đáp án suy ra từ đoạn đọc, cần giáo viên rà soát trước khi xuất bản."
+          ]
+        },
+        {
+          "key": "dream-speaking",
+          "request": {
+            "title": "Talk About Your Dream",
+            "skillType": "speaking",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "(Tôi luôn ấp ủ một ước vọng lớn lao là theo đuổi sự nghiệp y khoa và trở thành một bác sĩ tận tụy.)\n(Được thúc đẩy bởi mong muốn xoa dịu nỗi đau của con người, tôi hy vọng sẽ tạo ra một sự thay đổi thiết thực trong cuộc sống của bệnh nhân.)\n(Để biến nguyện vọng này thành hiện thực, tôi cam kết duy trì thành tích học tập xuất sắc, đặc biệt là trong các môn khoa học sinh học.)\n(Tôi cực kỳ may mắn khi có một điểm tựa vững chắc từ gia đình, những người luôn tiếp thêm ngọn lửa đam mê cho tôi.)\n(Cuối cùng, tôi tin tưởng mạnh mẽ rằng với sự kiên trì và nỗ lực không ngừng, tôi sẽ hoàn thành được mục tiêu cao nhất của mình.)\nHarbor an ambition: Ẩn chứa / ấp ủ một hoài bão.\nMake a tangible difference: Tạo ra sự thay đổi rõ rệt, thiết thực.\nUnwavering support system: Hệ thống hỗ trợ / điểm tựa vững chắc, không lay chuyển.\nOversee / Facilitate / Hone: Các động từ hành động cao cấp thay cho manage / help / improve.\nCareer trajectory: Lộ trình phát triển sự nghiệp.",
+              "sentences": [
+                {
+                  "text": "I have always harbored a strong ambition to pursue a career in medicine and become a dedicated physician."
+                },
+                {
+                  "text": "Driven by a desire to alleviate human suffering, I hope to make a tangible difference in patients' lives."
+                },
+                {
+                  "text": "To turn this aspiration into reality, I am committed to maintaining academic excellence, particularly in biological sciences."
+                },
+                {
+                  "text": "I am extremely fortunate to have an unwavering support system in my family, who consistently fuel my passion."
+                },
+                {
+                  "text": "Ultimately, I firmly believe that with relentless perseverance and dedication, I will fulfill my ultimate ambition."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Speaking\\dream and job.docx"
+          ]
+        },
+        {
+          "key": "job-speaking",
+          "request": {
+            "title": "Talk About Your Current Job",
+            "skillType": "speaking",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 15,
+            "isActive": true,
+            "speaking": {
+              "goals": "(Hiện tại tôi đang đảm nhiệm vị trí quản trị văn phòng, giám sát nhiều công việc vận hành trong một môi trường doanh nghiệp năng động.)\n(Nhiệm vụ chính của tôi bao gồm điều phối quy trình làm việc giữa các phòng ban, quản lý dữ liệu quan trọng và hỗ trợ các tương tác công việc hàng ngày diễn ra trơn tru.)\n(Điều tôi trân trọng nhất ở vị trí này là văn hóa hợp tác và những cơ hội mà nó mang lại cho sự phát triển chuyên môn liên tục.)\n(Vị trí này không chỉ rèn giũa khả năng giải quyết vấn đề mà còn nâng cao khả năng thích ứng của tôi trong các tình huống áp lực cao.)\n(Trong thời gian tới, tôi quyết tâm tối đa hóa sự đóng góp của mình cho đội ngũ, đồng thời từng bước thúc đẩy lộ trình phát triển sự nghiệp.)\nHarbor an ambition: Ẩn chứa / ấp ủ một hoài bão.\nMake a tangible difference: Tạo ra sự thay đổi rõ rệt, thiết thực.\nUnwavering support system: Hệ thống hỗ trợ / điểm tựa vững chắc, không lay chuyển.\nOversee / Facilitate / Hone: Các động từ hành động cao cấp thay cho manage / help / improve.\nCareer trajectory: Lộ trình phát triển sự nghiệp.",
+              "sentences": [
+                {
+                  "text": "I am currently serving as an office administrator, overseeing various operational tasks within a dynamic corporate environment."
+                },
+                {
+                  "text": "My primary duties involve coordinating interdepartmental workflows, managing critical data, and facilitating smooth everyday business interactions."
+                },
+                {
+                  "text": "What I value most about this role is the collaborative culture and the opportunities it offers for continuous professional growth."
+                },
+                {
+                  "text": "This position not only hones my problem-solving abilities but also enhances my adaptability in high-pressure situations."
+                },
+                {
+                  "text": "Moving forward, I am dedicated to maximizing my contributions to the team while progressively advancing my career trajectory."
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Speaking\\dream and job.docx"
+          ]
+        },
+        {
+          "key": "dream-career",
+          "request": {
+            "title": "Pursuing a Dream Career vs Practical Choices",
+            "skillType": "writing",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 30,
+            "isActive": true,
+            "writing": {
+              "taskType": "essay",
+              "topic": "Pursuing a Dream Career vs Practical Choices",
+              "prompt": "Some people believe that young people should follow their passion and pursue their dream career at all costs. Others, however, argue that it is more important to choose a practical job that guarantees financial stability, regardless of personal interests.\nDiscuss both views and give your own opinion.",
+              "instructions": "Dạng bài: Discussion Essay (Bàn luận hai chiều và đưa ra quan điểm cá nhân).\nGợi ý hướng viết:\nMặt 1 (Passion): Tạo động lực dài hạn, mang lại sự thỏa mãn cá nhân (job satisfaction), dễ đạt thành tựu nhờ sự tận tụy.\nMặt 2 (Practicality): Đảm bảo an sinh tài chính (financial stability), giảm áp lực cuộc sống, tính an toàn trong thị trường lao động biến động.",
+              "sampleAnswer": "",
+              "minWords": 250,
+              "maxWords": 500,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Writing\\Tài liệu không có tiêu đề.docx"
+          ]
+        },
+        {
+          "key": "job-satisfaction",
+          "request": {
+            "title": "Job Satisfaction and Workplace Success",
+            "skillType": "writing",
+            "difficultyLevel": "C1",
+            "estimatedMinutes": 30,
+            "isActive": true,
+            "writing": {
+              "taskType": "essay",
+              "topic": "Job Satisfaction and Workplace Success",
+              "prompt": "In today's fast-changing corporate world, employee retention and productivity are heavily influenced by the work environment. While some people claim that a high salary is the most effective motivator for employees, others believe that working conditions, company culture, and career advancement opportunities are far more significant.\nTo what extent do you agree or disagree with this statement?",
+              "instructions": "Dạng bài: Opinion / Agree or Disagree Essay (Nêu mức độ đồng ý hoặc không đồng ý).\nGợi ý hướng viết:\nLương thưởng (Salary): Là yếu tố nền tảng để đáp ứng nhu cầu sống cơ bản và tạo động lực ban đầu.\nMôi trường & Cơ hội phát triển: Giúp gắn bó lâu dài, phát triển kỹ năng (professional growth), giảm căng thẳng (burnout) và tạo cảm giác thuộc về tập thể (collaborative culture).",
+              "sampleAnswer": "",
+              "minWords": 250,
+              "maxWords": 500,
+              "rubric": [
+                {
+                  "name": "Task achievement",
+                  "description": "Đáp ứng yêu cầu và triển khai đủ ý của đề bài.",
+                  "weight": 25
+                },
+                {
+                  "name": "Coherence and cohesion",
+                  "description": "Sắp xếp ý rõ ràng và liên kết câu hợp lý.",
+                  "weight": 25
+                },
+                {
+                  "name": "Vocabulary",
+                  "description": "Sử dụng từ vựng phù hợp chủ đề và trình độ.",
+                  "weight": 25
+                },
+                {
+                  "name": "Grammar and accuracy",
+                  "description": "Sử dụng cấu trúc ngữ pháp và chính tả chính xác.",
+                  "weight": 25
+                }
+              ]
+            }
+          },
+          "sourceFiles": [
+            "LVC1_JobAndDreams\\Writing\\Tài liệu không có tiêu đề.docx"
+          ]
+        }
+      ]
+    }
+  ]
+}

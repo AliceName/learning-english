@@ -6,7 +6,7 @@ import {getCurrentUser} from "@/lib/server-auth";
 import AdminShell from "@/components/admin/admin-shell";
 import AdminRetry from "@/components/admin/admin-retry";
 import styles from "@/components/admin/admin.module.css";
-export const metadata:Metadata={title:{default:"Studio Admin | LinguaAI",template:"%s | LinguaAI Admin"}};
+export const metadata:Metadata={title:{default:"Studio Admin | LEWA",template:"%s | LEWA Admin"}};
 // This boundary waits for a fresh role check and may redirect; it is not an instant navigation segment.
 export const instant=false;
 async function AdminAccess({children}:{children:ReactNode}) {

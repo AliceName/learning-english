@@ -5,6 +5,7 @@ using EnglishLearning.Api.Authentication;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -37,6 +38,8 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
         ExecuteAsync(_ => authoring.SaveLessonAsync(id, lessonId, request, ct), true, ct);
     [HttpPost("{id:int:min(1)}/publish")]
     public Task<ActionResult<AdminCourseResponse>> Publish(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.PublishAsync(id, ct), true, ct);
+    [HttpPost("{id:int:min(1)}/hide")]
+    public Task<ActionResult<AdminCourseResponse>> Hide(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.HideAsync(id, ct), true, ct);
 
     private async Task<ActionResult<T>> ExecuteAsync<T>(Func<int, Task<T>> action, bool write, CancellationToken ct, bool created = false)
     {
@@ -47,7 +50,7 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
             var user = await db.Users.AsNoTracking().SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, ct);
             if (user is null) return Unauthorized();
             if (user.Role != UserRoles.Admin) return Forbid();
-            // Serialize editing/publishing of drafts; reuse the enclosing rollback transaction in integration tests.
+            // Serialize editing and visibility changes; reuse the enclosing rollback transaction in integration tests.
             await using var transaction = write && db.Database.CurrentTransaction is null
                 ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
             var result = await action(userId);
@@ -55,6 +58,12 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
             return created ? StatusCode(StatusCodes.Status201Created, result) : Ok(result);
         }
         catch (AuthoringException error) { return Problem(statusCode: error.Status, title: error.Message); }
+        catch (CloudMediaException error)
+        {
+            logger.LogWarning("Course media verification failed ({Code}).", error.Code);
+            if (error.RetryAfterSeconds is int seconds) Response.Headers.RetryAfter = seconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return Problem(statusCode: error.Status, title: "Chưa xác minh được media khóa học. Vui lòng thử lại.", extensions: new Dictionary<string, object?> { ["code"] = error.Code });
+        }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
         catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException)
         {

@@ -1,0 +1,420 @@
+.page { --ink: #131b2e; --muted: #434655; --primary: #004ac6; --surface: #faf8ff; background: var(--surface); color: var(--ink); font-family: var(--font-jakarta), Arial, sans-serif; font-size: 14px; line-height: 1.6; }
+/* Share the visible skill's palette with both public and signed-in home navbars. */
+.page:has(.sectionNav > button:nth-child(2)[aria-current]) {
+  --nav-background: color-mix(in srgb, var(--tint) 35%, #fffdf5);
+  --nav-surface: #fffdf7;
+  --nav-foreground: #292722;
+  --nav-muted: #5a5a51;
+  --nav-accent: var(--accent);
+  --nav-accent-hover: color-mix(in srgb, var(--accent) 88%, #15351d);
+  --nav-highlight: var(--tint);
+  --nav-hover: color-mix(in srgb, var(--tint) 65%, #fffdf5);
+  --nav-border: color-mix(in srgb, var(--accent) 22%, #fffdf5);
+  --nav-shadow: color-mix(in srgb, var(--accent) 15%, transparent);
+  --nav-focus: color-mix(in srgb, var(--accent) 60%, white);
+}
+.page :where(svg) { width: 20px; height: 20px; flex-shrink: 0; }
+.page :where(button, input) { font: inherit; }
+.page :where(button) { cursor: pointer; }
+.page :where(a, button, input):focus-visible, .carousel:focus-visible { outline: 3px solid #40c2fd; outline-offset: 4px; }
+.page button:disabled { cursor: not-allowed; opacity: .45; }
+.scrollContainer { position: relative; height: 100dvh; overflow-y: auto; overflow-x: hidden; scroll-snap-type: y mandatory; scroll-behavior: smooth; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: #c3c6d7 transparent; }
+.scrollContainer:focus, .slide:focus { outline: none; }
+.slide { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 100dvh; padding: 104px 80px 26px; scroll-snap-align: start; scroll-snap-stop: always; background: radial-gradient(ellipse at 8% 25%, #e0f2fe88, transparent 45%), radial-gradient(ellipse at 90% 55%, #ffe2eb55, transparent 48%), linear-gradient(#faf8ff, #f2f3ff55, #faf8ff); }
+.heroGrid { flex: 1; display: grid; grid-template-columns: 5fr 7fr; align-items: center; gap: 48px; width: 100%; max-width: 1152px; margin: auto; padding: 24px 0; }
+.heroMascot { display: flex; align-items: center; justify-content: center; padding: 28px 0; }
+.bearOrb { position: relative; display: flex; align-items: center; justify-content: center; width: 328px; height: 328px; max-width: 100%; border: 4px solid white; border-radius: 50%; background: linear-gradient(white, #f2f3ff); box-shadow: 0 22px 50px #28304420, 0 0 80px 14px #c4e7ff77; animation: float 3.6s ease-in-out infinite; }
+.bear { max-width: 100%; max-height: 100%; filter: drop-shadow(0 10px 8px #28304418); border-radius: 50%; }
+.heroCopy { min-width: 0; }
+.speechBubble { position: relative; padding: 32px; border: 2px solid #dbe1ff; border-radius: 24px; background: #ffffffee; box-shadow: 0 15px 30px #2830440d; }
+.speechBubble::before { position: absolute; content: ""; width: 22px; height: 22px; left: -13px; top: 44px; transform: rotate(45deg); border-left: 2px solid #dbe1ff; border-bottom: 2px solid #dbe1ff; background: white; }
+.greeting { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; margin-bottom: 14px; border-radius: 50px; background: #dbe1ff99; color: var(--primary); font-size: 11px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; }
+.greeting svg { width: 16px; height: 16px; }
+.speechBubble h1 { margin: 0 0 16px; font-size: clamp(28px, 2.8vw, 38px); line-height: 1.25; letter-spacing: -1.1px; font-weight: 800; text-wrap: balance; }
+.speechBubble h1 span, .sectionHeading h2 span { background: linear-gradient(100deg, #004ac6, #00668a); background-clip: text; -webkit-text-fill-color: transparent; }
+.speechBubble > p { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.85; color: var(--muted); }
+.heroActions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+.primaryButton, .secondaryButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 12px 30px; border-radius: 16px; font-size: 16px; font-weight: 800; text-decoration: none; transition: transform .2s, box-shadow .2s; }
+.primaryButton { color: white; border: 0; background: linear-gradient(110deg, #004ac6, #2563eb); box-shadow: 0 8px 20px #004ac62b; }
+.secondaryButton { color: var(--ink); border: 2px solid #c3c6d766; background: #ffffffdd; box-shadow: 0 2px 5px #131b2e08; }
+.secondaryButton svg { color: var(--primary); }
+.primaryButton:hover, .secondaryButton:hover { transform: translateY(-3px); box-shadow: 0 12px 24px #004ac624; }
+.scrollCue { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border: 2px solid #004ac64d; border-radius: 50%; background: white; color: var(--primary); box-shadow: 0 4px 9px #004ac615; animation: bounce 1.6s ease-in-out infinite; }
+.scrollCue svg { width: 23px; height: 23px; transform: rotate(90deg); }
+.scrollCue:hover { background: var(--primary); color: white; }
+.sectionNav { position: fixed; top: 50%; right: 22px; transform: translateY(-50%); z-index: 40; display: grid; gap: 10px; padding: 12px 7px; border: 1px solid #c3c6d766; border-radius: 50px; background: #ffffffd9; box-shadow: 0 8px 25px #28304416; backdrop-filter: blur(12px); }
+.sectionNav button { position: relative; display: grid; place-items: center; min-width: 24px; min-height: 26px; padding: 4px; border: 0; border-radius: 50px; background: none; }
+.sectionNav i { width: 9px; height: 9px; border-radius: 50px; background: #c3c6d7; transition: height .25s, background .25s; }
+.sectionNav button[aria-current] i { height: 28px; background: var(--primary); box-shadow: 0 0 12px #004ac633; }
+.sectionTooltip { position: absolute; right: calc(100% + 14px); padding: 4px 10px; color: white; background: var(--ink); border-radius: 8px; font-size: 11px; font-weight: 700; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.sectionNav button:hover .sectionTooltip, .sectionNav button:focus-visible .sectionTooltip { opacity: 1; }
+.skillsSlide { padding-left: 64px; padding-right: 72px; gap: 12px; }
+.skillsContent { display: flex; flex-direction: column; justify-content: center; width: 100%; max-width: 1280px; flex: 1; min-width: 0; padding: 12px 0; }
+.sectionHeading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.sectionHeading h2 { margin: 0; font-size: clamp(25px, 2.8vw, 36px); font-weight: 800; line-height: 1.3; letter-spacing: -1px; }
+.skillStage { position: relative; min-height: 0; }
+.skillArrow { position: absolute; z-index: 3; top: 50%; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 50%; background: #fffdf5ee; color: var(--accent); transform: translateY(-50%); box-shadow: 0 3px 9px #30422110; transition: background .2s, color .2s; }
+.skillArrow:not(:disabled):hover { color: #fffdf5; background: var(--accent); }
+.skillArrow:disabled { opacity: .25; }
+.previousSkill { left: -18px; }
+.previousSkill svg { transform: rotate(180deg); }
+.nextSkill { right: -18px; }
+.carousel { position: relative; overflow: clip; isolation: isolate; cursor: grab; user-select: none; touch-action: pan-y pinch-zoom; }
+.carousel[data-dragging="true"] { cursor: grabbing; }
+.carouselTrack { --skill-gap: 28px; display: flex; gap: var(--skill-gap); width: 100%; height: 100%; transform: translate3d(calc(var(--skill-position, 0) * (-100% - var(--skill-gap))), 0, 0); transition: transform 760ms cubic-bezier(.22, .8, .28, 1); will-change: transform; }
+.carousel[data-dragging="true"] :is(.carouselTrack, .skillCard) { transition: none; }
+.skillCard { display: flex; flex-direction: column; flex: 0 0 100%; max-width: 100%; min-width: 0; padding: 24px 28px; border: 2px solid color-mix(in srgb, var(--accent) 78%, #15351d); border-radius: 32px; background: #fffdf7; box-shadow: 0 4px 0 #fff, 0 8px 20px #5b6a3c08; opacity: calc(1 - var(--panel-distance, 0) * .85); filter: blur(calc(var(--panel-distance, 0) * 3px)); transition: opacity 640ms ease, filter 700ms ease; }
+.speaking, .skillsSlide[data-skill-theme="speaking"], .page:has(.sectionNav > button:nth-child(2)[aria-current]):has(.skillsSlide[data-skill-theme="speaking"]) { --accent: #47796c; --tint: #e0ebe1; }
+.reading, .skillsSlide[data-skill-theme="reading"], .page:has(.sectionNav > button:nth-child(2)[aria-current]):has(.skillsSlide[data-skill-theme="reading"]) { --accent: #4b7d35; --tint: #e1ebce; }
+.writing, .skillsSlide[data-skill-theme="writing"], .page:has(.sectionNav > button:nth-child(2)[aria-current]):has(.skillsSlide[data-skill-theme="writing"]) { --accent: #8a7544; --tint: #eee7d1; }
+.listening, .skillsSlide[data-skill-theme="listening"], .page:has(.sectionNav > button:nth-child(2)[aria-current]):has(.skillsSlide[data-skill-theme="listening"]) { --accent: #447e85; --tint: #dfeded; }
+.grammar, .skillsSlide[data-skill-theme="grammar"], .page:has(.sectionNav > button:nth-child(2)[aria-current]):has(.skillsSlide[data-skill-theme="grammar"]) { --accent: #776888; --tint: #eae4ef; }
+.skillHeader { position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid #e9e9df; }
+.skillHeader::before { content: ""; width: min(65%, 90px); height: 2px; justify-self: center; border-radius: 4px; background: color-mix(in srgb, var(--accent) 55%, #fffdf7); }
+.skillIdentity { display: flex; align-items: center; gap: 16px; min-width: 0; grid-column: 2; }
+.skillIcon { display: grid; place-items: center; width: 76px; height: 76px; flex-shrink: 0; color: var(--accent); border-radius: 20px; }
+.skillIcon svg { width: 27px; height: 27px; }
+.skillTitle { flex: 1; min-width: 0; }
+.skillTitle h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 6px; font-size: 32px; font-weight: 800; letter-spacing: -.8px; }
+.skillTitle h3 small { padding: 5px 12px; border-radius: 30px; background: var(--tint); color: var(--accent); font-size: 12px; font-weight: 750; letter-spacing: 0; }
+.skillTitle p { margin: 0; color: var(--muted); font-size: 13px; font-weight: 500; }
+.skillMetric { display: flex; grid-column: 3; flex-direction: column; justify-self: end; align-items: center; gap: 3px; padding: 9px 16px; border: 1.5px solid #d0d5c7; border-radius: 18px; background: #f7f7ef; }
+.skillMetric span { color: var(--muted); font-size: 11px; font-weight: 500; }
+.skillMetric strong { color: var(--accent); font-size: 19px; font-weight: 800; }
+.skillBody { display: flex; flex: 1; flex-direction: column; gap: 12px; }
+.coachRow { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 12px; padding: 8px 12px; border: 1px solid #c3c6d740; border-radius: 16px; background: #f2f3ffb3; }
+.coachIdentity { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.coachAvatar { width: 64px; height: 64px; flex-shrink: 0; border-radius: 16px; background: white; }
+.coachIdentity strong { display: block; font-size: 12px; font-weight: 750; }
+.coachIdentity small { display: block; color: var(--muted); font-size: 10px; }
+.wave { display: flex; align-items: center; justify-content: center; gap: 5px; height: 40px; overflow: hidden; }
+.wave i { display: block; width: 5px; flex-shrink: 0; border-radius: 10px; background: var(--accent); animation: soundwave 1.2s ease-in-out infinite alternate; }
+.wave i:nth-child(3n) { background: #00668a; }
+.wave i:nth-child(5n) { background: #d22348; }
+.largeWave { height: 60px; margin: 10px 0; }
+.largeWave i { flex: 1; max-width: 8px; }
+.phonetics { margin: 0; text-align: center; font-family: var(--font-geist-mono), monospace; font-size: 10px; color: var(--accent); }
+.previewBox { padding: 14px; border: 1px solid #c3c6d740; border-radius: 16px; background: #f2f3ff99; }
+.boxHeading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; font-size: 11px; }
+.boxHeading strong { display: flex; align-items: center; gap: 5px; color: var(--accent); font-weight: 750; }
+.boxHeading svg { width: 16px; height: 16px; }
+.boxHeading > span { color: var(--muted); font-size: 10px; }
+.boxHeading .good { color: #187445; }
+.previewBox blockquote { padding-left: 10px; border-left: 2px solid var(--accent); margin: 0 0 12px; font-size: 14px; font-weight: 650; line-height: 1.75; }
+.wordTags { display: flex; flex-wrap: wrap; gap: 7px; }
+.wordTags span { padding: 3px 8px; border-radius: 6px; background: #e2f5e9; color: #19603d; font-size: 10px; }
+.wordTags span:last-child { color: #855c13; background: #fff1cf; }
+.sampleAudio { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.sampleAudio button { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #c3c6d766; border-radius: 10px; padding: 7px 12px; color: var(--accent); background: white; font-size: 11px; font-weight: 700; }
+.sampleAudio svg { width: 16px; height: 16px; }
+.sampleAudio > span:empty { display: none; }
+.sampleAudio > span { color: #ad0033; font-size: 11px; }
+.skillFooter { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 18px; margin-top: auto; }
+.skillFooter > span { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
+.skillFooter svg { width: 16px; height: 16px; }
+.skillFooter > a { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 6px; padding: 10px 16px; border-radius: 12px; background: var(--accent); color: white; font-size: 11px; font-weight: 750; text-decoration: none; }
+.skillFooter > a:hover { filter: brightness(1.1); }
+.readingText { font-size: 14px; line-height: 1.85; margin: 0 0 12px; }
+.readingText button { padding: 0 5px; border: 1px solid #00668a40; border-radius: 5px; background: #c4e7ff; color: #00668a; font-weight: 750; }
+.definition { padding: 10px 12px; border: 1px solid #00668a40; border-radius: 12px; background: white; }
+.definition > div { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; font-size: 12px; }
+.definition > div span { font-family: var(--font-geist-mono), monospace; color: var(--accent); font-size: 10px; }
+.definition p { font-size: 11px; color: var(--muted); margin: 4px 0 0; }
+.question { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; font-size: 12px; margin-bottom: 10px; }
+.question svg { width: 17px; height: 17px; color: var(--accent); }
+.question > span { color: var(--accent); }
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.answers button { padding: 9px 10px; border: 1px solid #c3c6d766; border-radius: 10px; background: white; color: var(--muted); text-align: left; font-size: 11px; }
+.answers button[data-result="correct"] { color: #19603d; border-color: #80cfa6; background: #eaf9ef; }
+.answers button[data-result="incorrect"] { color: #93000a; border-color: #e8a8ab; background: #fff1f0; }
+.feedback { font-size: 11px; line-height: 1.75; color: var(--muted); margin: 8px 0 0; }
+.editor { padding: 13px; border: 1px solid #c3c6d740; border-radius: 10px; background: white; font-family: var(--font-geist-mono), monospace; font-size: 12px; line-height: 1.9; margin: 0; }
+.editor del { background: #ffe2eb; color: #ad0033; padding: 1px 3px; border-radius: 4px; }
+.editor ins { background: #e2f5e9; color: #19603d; padding: 1px 3px; border-radius: 4px; text-decoration: none; }
+.editor mark { background: #fff1cf; color: #855c13; border-bottom: 2px solid #e1aa47; padding: 1px 3px; border-radius: 4px; }
+.suggestion { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid #ad003326; border-radius: 10px; background: #ffdadb44; }
+.suggestion > svg { width: 19px; height: 19px; color: var(--accent); }
+.suggestion p { flex: 1; color: var(--muted); font-size: 10px; margin: 0; }
+.suggestion p strong { color: var(--accent); display: block; }
+.suggestion button { padding: 5px 8px; border: 0; border-radius: 5px; background: var(--accent); color: white; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.writingScores { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; margin: 0; }
+.writingScores > div { padding: 10px; border: 1px solid #c3c6d740; border-radius: 12px; background: #f2f3ff; }
+.writingScores dt { color: var(--muted); font-size: 10px; }
+.writingScores dd { color: var(--accent); font-size: 12px; font-weight: 750; margin: 4px 0 0; }
+.playerRow { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.rates { display: flex; gap: 4px; }
+.rates button { border: 0; border-radius: 7px; padding: 5px 9px; background: white; color: var(--muted); font-size: 11px; }
+.rates button[aria-pressed="true"] { background: var(--accent); color: white; }
+.listeningQuiz { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+.listeningQuiz label { flex: 1; font-size: 13px; line-height: 2.6; }
+.listeningQuiz input { width: 90px; height: 30px; padding: 2px 8px; border: 1px solid #c3c6d7; border-radius: 6px; background: white; color: var(--accent); font-weight: 700; font-size: 12px; text-align: center; user-select: text; }
+.listeningQuiz > button { display: flex; align-items: center; gap: 4px; border: 0; border-radius: 8px; padding: 7px 9px; background: var(--accent); color: white; font-size: 11px; }
+.listeningQuiz > button svg { width: 15px; height: 15px; }
+.mindmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+.mindmap > div { padding: 12px; border: 2px solid #004ac633; border-radius: 12px; background: white; }
+.mindmap > div:nth-child(2) { border-color: #00668a44; }.mindmap > div:nth-child(3) { border-color: #ad003333; }
+.mindmap strong { display: block; font-size: 10px; color: var(--accent); text-transform: uppercase; }
+.mindmap p { margin: 6px 0 0; font-family: var(--font-geist-mono), monospace; font-size: 11px; line-height: 1.7; }
+.skillStatus { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.demoNote { margin: 12px 0 0; text-align: center; color: #737686; font-size: 10px; }
+.demoNote a { color: var(--primary); text-decoration: none; font-weight: 650; }
+.nextSection { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 10px; }
+.nextSection > span { color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.coursesContent { display: flex; flex: 1; flex-direction: column; justify-content: center; width: 100%; max-width: 1152px; padding: 24px 0 32px; }
+.coursesContent > h2 { margin: 0 0 32px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.3; letter-spacing: -1.5px; }
+.courseGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
+.courseCard { --accent: #004ac6; --tint: #c4e7ff; display: flex; flex-direction: column; padding: 26px; border: 2px solid #004ac633; border-radius: 24px; background: #fffffff5; box-shadow: 0 8px 20px #28304412; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.courseCard[data-tone="1"] { --accent: #00668a; --tint: #dbe1ff; border-color: #40c2fd4d; }
+.courseCard[data-tone="2"] { --accent: #ad0033; --tint: #ffdadb; border-color: #ad003333; }
+.courseCard:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 18px 30px #2830441a; }
+.courseTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 18px; }
+.courseTop > span { padding: 4px 9px; border-radius: 10px; background: var(--tint); color: var(--ink); font-size: 11px; font-weight: 800; }
+.courseTop > strong { display: flex; align-items: center; gap: 3px; color: #bd840b; font-size: 11px; }
+.courseTop svg { width: 16px; height: 16px; fill: currentColor; }
+.courseIcon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: var(--tint); color: var(--accent); margin-bottom: 18px; }
+.courseIcon svg { width: 31px; height: 31px; }
+.courseCard h3 { font-size: 18px; font-weight: 750; line-height: 1.5; margin: 0 0 12px; letter-spacing: -.3px; }
+.courseCard > p { color: var(--muted); font-size: 13px; line-height: 1.85; margin: 0 0 20px; }
+.courseMeta { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid #c3c6d733; margin-top: auto; margin-bottom: 20px; }
+.courseMeta > span { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.courseMeta svg { width: 16px; height: 16px; color: var(--accent); }
+.courseCard > a { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px; border-radius: 14px; color: white; background: var(--accent); font-size: 12px; font-weight: 750; text-decoration: none; }
+.courseCard > a:hover { filter: brightness(1.1); }
+.courseCard > a svg { width: 17px; height: 17px; }
+.footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; width: 100%; max-width: 1152px; padding-top: 20px; border-top: 1px solid #c3c6d740; color: var(--muted); font-size: 11px; }
+.footer > span strong { color: var(--ink); }
+.footer > div { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+.footer button { border: 0; padding: 0; background: none; color: var(--muted); font-size: 11px; }
+.footer button:hover, .footer a { color: var(--primary); text-decoration: none; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes bounce { 0%, 100% { translate: 0 0; } 50% { translate: 0 7px; } }
+@keyframes soundwave { from { transform: scaleY(.65); } to { transform: scaleY(1.1); } }
+@media (max-width: 1150px) {
+  .slide { padding-left: 40px; padding-right: 64px; }.heroGrid { gap: 32px; grid-template-columns: 4fr 6fr; }.bearOrb { width: 288px; height: 288px; }.speechBubble { padding: 26px; }.speechBubble > p { font-size: 15px; }.sectionNav { right: 12px; }.courseGrid { gap: 18px; }.courseCard { padding: 22px; }
+}
+@media (max-width: 900px) {
+  .slide { padding: 104px 48px 28px 28px; }.heroGrid { grid-template-columns: 1fr; max-width: 650px; gap: 28px; padding: 12px 0 32px; }.heroMascot { padding: 10px 0 0; }.bearOrb { width: 232px; height: 232px; }.speechBubble::before { left: calc(50% - 12px); top: -13px; transform: rotate(135deg); }.heroActions { justify-content: center; margin-top: 22px; }.speechBubble h1 { font-size: 30px; }.sectionHeading { align-items: center; }.sectionHeading h2 { font-size: 28px; }.courseGrid { grid-template-columns: 1fr; max-width: 560px; width: 100%; margin: auto; }.courseCard { padding: 24px; }.courseCard h3 { font-size: 20px; }.coursesContent > h2 { font-size: 38px; }.footer { justify-content: center; text-align: center; }.footer > div { justify-content: center; }
+}
+@media (max-width: 600px) {
+  .slide { padding: 96px 34px 24px 16px; }.introduction { padding-right: 16px; }.heroGrid { gap: 23px; padding-top: 8px; }.bearOrb { width: 190px; height: 190px; }.speechBubble { padding: 23px; border-radius: 22px; }.greeting { font-size: 9px; padding: 4px 9px; }.speechBubble h1 { font-size: 27px; margin-bottom: 12px; }.speechBubble > p { font-size: 14px; line-height: 1.8; }.primaryButton, .secondaryButton { min-height: 48px; padding: 11px 26px; font-size: 14px; border-radius: 13px; }.heroActions { margin-top: 20px; }.sectionNav { right: 5px; padding: 9px 3px; gap: 6px; }.sectionNav button { min-width: 18px; min-height: 24px; padding: 3px; }.sectionNav i { width: 7px; height: 7px; }.sectionNav button[aria-current] i { height: 22px; }.sectionTooltip { display: none; }
+  .sectionHeading { align-items: flex-start; gap: 12px; }.sectionHeading h2 { font-size: 25px; letter-spacing: -.7px; }.carousel { gap: 16px; padding-bottom: 14px; }.skillCard { padding: 16px; border-radius: 20px; }.skillHeader { gap: 9px; flex-wrap: wrap; }.skillIcon { width: 40px; height: 40px; border-radius: 12px; }.skillIcon svg { width: 23px; height: 23px; }.skillTitle h3 { font-size: 20px; gap: 6px; }.skillTitle h3 small { font-size: 8px; padding: 2px 6px; }.skillTitle p { font-size: 10px; }.skillMetric { flex-direction: row; align-items: center; gap: 8px; padding: 4px 9px; margin-left: 49px; }.skillMetric strong { font-size: 11px; }.coachRow { grid-template-columns: 1fr; padding: 8px; gap: 4px; }.coachAvatar { width: 52px; height: 52px; }.coachIdentity { gap: 8px; }.coachIdentity small { font-size: 9px; }.phonetics { font-size: 9px; }.wave { height: 34px; gap: 4px; }.wave i { width: 4px; }.previewBox { padding: 11px; border-radius: 12px; }.boxHeading { font-size: 10px; }.boxHeading > span { font-size: 9px; }.previewBox blockquote, .readingText { font-size: 12px; }.wordTags { gap: 5px; }.wordTags span { font-size: 9px; padding: 3px 5px; }.skillFooter { flex-direction: column; align-items: stretch; gap: 10px; padding-top: 14px; }.skillFooter > span { font-size: 9px; }.skillFooter > a { width: 100%; font-size: 11px; }.demoNote { font-size: 9px; line-height: 1.8; }.nextSection > span { font-size: 9px; letter-spacing: .5px; }.nextSection { gap: 10px; padding-top: 6px; }.answers { grid-template-columns: 1fr; }.answers button { font-size: 10px; }.definition > div { font-size: 11px; }.definition > div span { font-size: 9px; }.editor { font-size: 10px; padding: 10px; }.suggestion { flex-wrap: wrap; gap: 6px; }.suggestion p { min-width: 130px; }.writingScores > div { padding: 8px 5px; }.writingScores dt { font-size: 8px; }.writingScores dd { font-size: 10px; }.mindmap { grid-template-columns: 1fr; }.mindmap > div { padding: 9px; }.mindmap p { font-size: 10px; }.playerRow { gap: 10px; }.rates button { padding: 5px 7px; font-size: 10px; }.listeningQuiz label { font-size: 12px; }.coursesContent { padding-top: 10px; }.coursesContent > h2 { font-size: 34px; margin-bottom: 24px; }.courseGrid { gap: 20px; }.courseCard { padding: 23px; }.courseCard h3 { font-size: 18px; }.courseCard > p { font-size: 12px; }.footer { font-size: 10px; gap: 12px; }.footer > div { gap: 16px; }.footer button { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .scrollContainer { scroll-behavior: auto; }.page *, .page *::before, .page *::after { animation: none; transition: none; scroll-behavior: auto; } }
+/* Keep the skill carousel inside the viewport, including its actions and navigation. */
+.skillsSlide {
+  --accent: #4b7d35;
+  --tint: #e1ebce;
+  --ink: #292722;
+  --muted: #5a5a51;
+  --primary: var(--accent);
+  height: 100dvh;
+  min-height: 0;
+  padding-top: 96px;
+  padding-bottom: 80px;
+  gap: 12px;
+  overflow: clip;
+  color: var(--ink);
+  background: #fffdf5;
+}
+.skillsSlide::before, .skillsSlide::after { content: ""; position: absolute; pointer-events: none; width: 370px; height: 290px; border-radius: 48% 60% 45% 58%; background: color-mix(in srgb, var(--tint) 70%, #fffdf5); transition: background .7s ease; }
+.skillsSlide::before { left: -240px; top: 100px; transform: rotate(30deg); }
+.skillsSlide::after { right: -235px; top: 130px; transform: rotate(-20deg); }
+.skillsContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  justify-content: normal;
+  gap: 10px;
+  flex: 1 1 0;
+  min-height: 0;
+  padding: 0;
+  max-width: 1180px;
+}
+.skillsContent .sectionHeading { position: relative; min-height: 76px; align-items: center; padding: 0 210px 0 36px; margin: 0; }
+.skillsContent .sectionHeading h2 { position: relative; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.35; text-wrap: balance; }
+.skillsContent .sectionHeading h2::after { content: ""; position: absolute; width: 45%; height: 7px; left: 4%; bottom: -10px; border-top: 3px solid #d9e5c4; border-radius: 50%; transform: rotate(-1deg); }
+.skillsContent .sectionHeading h2 span { background: none; color: #427135; -webkit-text-fill-color: currentColor; }
+.peekingCat { position: absolute; right: 13%; bottom: -14px; z-index: 2; width: 175px; pointer-events: none; }
+.skillsContent .carousel { height: 100%; min-height: 0; padding: 0; border-radius: 32px; }
+.skillsContent .skillCard { container: skill-card / size; height: 100%; min-height: 0; padding: 20px 28px; flex-basis: 100%; }
+.skillsContent .skillHeader { flex-shrink: 0; padding-bottom: 14px; margin-bottom: 12px; }
+.skillsContent .skillBody { width: 100%; max-width: 960px; margin-inline: auto; min-height: 0; gap: 12px; justify-content: center; }
+.skillsContent .skillBody > * { flex-shrink: 0; }
+.skillsContent .skillFooter { flex-shrink: 0; padding-top: 16px; }
+.skillsContent .skillFooter > span { color: var(--ink); font-size: 12px; }
+.skillsContent .skillFooter > a { min-height: 44px; border-radius: 18px; padding: 10px 22px; font-size: 13px; box-shadow: inset 0 1px 0 #ffffff29; }
+.skillsContent .feedback:empty { display: none; }
+.skillsContent .coachRow { grid-template-columns: 1fr 1fr; padding: 8px 12px; background: color-mix(in srgb, var(--tint) 30%, #fffdf7); border-color: #e5e7dd; }
+.skillsContent .coachAvatar { width: 48px; height: 48px; }
+.skillsContent .previewBox { padding: 16px 18px; border-radius: 22px; border-color: #e9eae1; background: color-mix(in srgb, var(--tint) 22%, #fafaf5); }
+.skillsContent .boxHeading { margin-bottom: 10px; font-size: 12px; }
+.skillsContent .boxHeading strong { font-size: 14px; }
+.skillsContent .boxHeading > span { font-size: 11px; color: var(--muted); }
+.skillsContent .readingText, .skillsContent .previewBox blockquote { color: var(--ink); font-size: 16px; line-height: 1.7; }
+.skillsContent .readingText button { border: 1px solid #abc38c; border-radius: 9px; background: var(--tint); color: #315d29; }
+.skillsContent .definition { padding: 9px 14px; border-color: #d9d9d1; border-radius: 16px; background: #fffffff0; }
+.skillsContent .definition > div { display: none; }
+.skillsContent .definition p { margin: 0; font-size: 13px; }
+.skillsContent .question { font-size: 14px; }
+.skillsContent .answers button { padding: 10px 14px; border: 1px solid #ddded5; border-radius: 15px; background: #fffffff0; font-size: 13px; }
+.skillsContent .sampleAudio button, .skillsContent .rates button, .skillsContent .suggestion button { border-color: color-mix(in srgb, var(--accent) 30%, white); }
+.skillsContent .sampleAudio button { background: #fffdf7; }
+.skillsContent .editor { background: #fffffff0; border-color: #e1dfd4; border-radius: 14px; }
+.skillsContent .suggestion { background: color-mix(in srgb, var(--tint) 50%, #fffdf7); border-color: var(--tint); }
+.skillsContent .writingScores > div { background: color-mix(in srgb, var(--tint) 24%, #fffdf7); border-color: var(--tint); }
+.skillsContent .mindmap { display: flex; flex-wrap: wrap; gap: 6px; }
+.skillsContent .mindmap > div { flex: 1 1 140px; padding: 8px 10px; border-width: 1px; border-color: var(--tint); background: #fffdf7; }
+.skillsContent .mindmap p { margin-top: 4px; }
+
+@media (max-width: 600px) {
+  .skillsSlide { padding: 90px 36px 76px 18px; gap: 10px; }
+  .skillsContent { gap: 8px; }
+  .skillsContent .sectionHeading { min-height: 74px; padding: 0 96px 0 0; }
+  .skillsContent .sectionHeading h2 { font-size: 21px; line-height: 1.3; }
+  .skillsContent .sectionHeading h2::after { bottom: -6px; }
+  .peekingCat { right: 0; bottom: -8px; width: 102px; }
+  .skillArrow { width: 30px; height: 34px; }
+  .previousSkill { left: -14px; }
+  .nextSkill { right: -14px; }
+  .skillArrow svg { width: 18px; height: 18px; }
+  .carouselTrack { --skill-gap: 16px; }
+  .skillsContent .carousel { border-radius: 24px; }
+  .skillsContent .skillCard { padding: 12px 16px; border-radius: 24px; }
+  .skillsContent .skillHeader { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding-bottom: 10px; margin-bottom: 10px; }
+  .skillsContent .skillHeader::before { display: none; }
+  .skillsContent .skillIdentity { grid-column: 1; gap: 9px; }
+  .skillsContent .skillIcon { width: 48px; height: 48px; border-radius: 12px; }
+  .skillsContent .skillIcon svg { width: 21px; height: 21px; }
+  .skillsContent .skillTitle h3 { font-size: 20px; margin: 0 0 3px; }
+  .skillsContent .skillTitle h3 small { display: none; }
+  .skillsContent .skillTitle p { font-size: 11px; line-height: 1.4; }
+  .skillsContent .skillMetric { grid-column: 2; margin: 0; padding: 6px 7px; border-radius: 12px; }
+  .skillsContent .skillMetric span { display: none; }
+  .skillsContent .skillMetric strong { font-size: 10px; }
+  .skillsContent .skillBody { gap: 8px; }
+  .skillsContent .coachRow { padding: 6px; gap: 6px; }
+  .skillsContent .coachAvatar { width: 42px; height: 42px; }
+  .skillsContent .coachIdentity { gap: 5px; }
+  .skillsContent .coachIdentity strong { font-size: 11px; }
+  .skillsContent .coachIdentity small { display: none; }
+  .skillsContent .wave { height: 28px; gap: 3px; }
+  .skillsContent .wave i { width: 3px; }
+  .skillsContent .phonetics { font-size: 8px; }
+  .skillsContent .previewBox { padding: 10px; border-radius: 12px; }
+  .skillsContent .boxHeading { margin-bottom: 6px; gap: 4px; }
+  .skillsContent .boxHeading > span { display: none; }
+  .skillsContent .boxHeading strong { font-size: 11px; }
+  .skillsContent .readingText, .skillsContent .previewBox blockquote { font-size: 13px; line-height: 1.65; margin-bottom: 8px; }
+  .skillsContent .definition { padding: 7px 8px; }
+  .skillsContent .definition p { font-size: 11px; }
+  .skillsContent .definition > div span { display: none; }
+  .skillsContent .question { font-size: 12px; line-height: 1.5; margin-bottom: 7px; }
+  .skillsContent .answers { gap: 6px; }
+  .skillsContent .answers button { padding: 7px 8px; font-size: 11px; line-height: 1.45; }
+  .skillsContent .feedback { font-size: 11px; line-height: 1.5; margin-top: 6px; }
+  .skillsContent .editor { padding: 8px; font-size: 11px; line-height: 1.65; }
+  .skillsContent .suggestion { padding: 7px; margin-top: 7px; }
+  .skillsContent .suggestion > svg { display: none; }
+  .skillsContent .suggestion p { min-width: 0; font-size: 10px; }
+  .skillsContent .writingScores > div { padding: 6px 4px; }
+  .skillsContent .writingScores dt { font-size: 9px; }
+  .skillsContent .writingScores dd { font-size: 10px; margin-top: 2px; }
+  .skillsContent .largeWave { height: 30px; margin: 5px 0; }
+  .skillsContent .playerRow { gap: 8px; }
+  .skillsContent .rates { gap: 3px; }
+  .skillsContent .rates button { padding: 6px; }
+  .skillsContent .listeningQuiz { gap: 6px; align-items: center; }
+  .skillsContent .listeningQuiz label { font-size: 12px; line-height: 2.3; }
+  .skillsContent .listeningQuiz input { width: 72px; height: 28px; }
+  .skillsContent .listeningQuiz > button { padding: 6px 8px; }
+  .skillsContent .mindmap > div { flex: 1 1 auto; padding: 6px 8px; }
+  .skillsContent .mindmap strong { font-size: 10px; }
+  .skillsContent .mindmap p { display: none; }
+  .skillsContent .skillFooter { display: block; padding-top: 8px; }
+  .skillsContent .skillFooter > span { display: none; }
+  .skillsContent .skillFooter > a { padding: 9px 12px; min-height: 40px; font-size: 12px; border-radius: 13px; }
+}
+
+/* Compact secondary examples according to the card's available height. */
+@container skill-card (max-height: 500px) {
+  .skillsContent .previewBox { padding: 12px 14px; }
+  .skillsContent .skillBody { gap: 10px; }
+}
+@container skill-card (max-height: 440px) {
+  .skillsContent .writingScores { display: none; }
+  .skillsContent .skillBody { gap: 6px; }
+  .skillsContent .previewBox { padding: 7px; }
+  .skillsContent .mindmap p { display: none; }
+  .skillsContent .mindmap > div { flex: 1 1 auto; padding: 6px 8px; }
+  .skillsContent .boxHeading { margin-bottom: 6px; }
+  .skillsContent .previewBox blockquote, .skillsContent .readingText { line-height: 1.6; }
+  .skillsContent .definition { padding: 7px 10px; }
+  .skillsContent .definition > div, .skillsContent .grammarOverview > .question { display: none; }
+  .skillsContent .question { margin-bottom: 6px; }
+  .skillsContent .answers button { padding: 7px 8px; }
+  .skillsContent .largeWave { height: 30px; margin: 5px 0; }
+}
+@container skill-card (max-height: 360px) {
+  .skillsContent .readingQuiz, .skillsContent .grammarOverview, .skillsContent .writingScores, .skillsContent .coachRow, .skillsContent .wordTags { display: none; }
+  .skillsContent .skillBody { justify-content: center; gap: 4px; }
+  .skillsContent .previewBox { padding: 8px; }
+  .skillsContent .editor { padding: 7px; line-height: 1.5; }
+  .skillsContent .suggestion { padding: 6px; margin-top: 6px; }
+  .skillsContent .skillBody > .feedback { margin-top: 0; }
+  .skillsContent .boxHeading > span, .skillsContent .largeWave { display: none; }
+  .skillsContent .boxHeading { display: none; }
+  .skillsContent .question { margin-bottom: 6px; }
+  .skillsContent .answers { grid-template-columns: 1fr 1fr; }
+  .skillsContent .answers button { padding: 6px 8px; }
+  .skillsContent .sampleAudio button { gap: 4px; min-height: 28px; padding: 5px 8px; font-size: 10px; }
+  .skillsContent .sampleAudio svg { width: 14px; height: 14px; }
+  .skillsContent .playerRow { gap: 6px; }
+  .skillsContent .rates button { min-height: 28px; padding: 4px; font-size: 10px; }
+}
+
+@container skill-card (max-height: 260px) {
+  .skillsContent .skillBody { gap: 2px; }
+  .skillsContent .writing .editor { padding: 5px; }
+  .skillsContent .writing .skillBody > .feedback { font-size: 10px; line-height: 1.3; }
+}
+
+@media (max-width: 600px) and (max-height: 650px) {
+  .skillsSlide { padding-top: 88px; padding-bottom: 76px; gap: 8px; }
+  .skillsContent .sectionHeading h2 { font-size: 20px; }
+  .skillsContent .sectionHeading h2 span { display: none; }
+  .skillsContent .skillCard { padding: 10px; }
+  .skillsContent .sectionHeading { min-height: 64px; }
+  .skillsContent .skillHeader { grid-template-columns: minmax(0, 1fr); }
+  .skillsContent .skillIcon { width: 36px; height: 36px; }
+  .skillsContent .skillTitle p, .skillsContent .skillMetric { display: none; }
+}
+
+@media (max-height: 650px) and (min-width: 600px) {
+  .skillsSlide { padding: 90px 48px 76px 24px; gap: 8px; }
+  .skillsContent { grid-template-columns: 156px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); column-gap: 20px; }
+  .skillsContent .sectionHeading { grid-column: 1; grid-row: 1; align-items: flex-start; padding: 8px 0 0; }
+  .skillsContent .sectionHeading h2 { font-size: 22px; }
+  .skillsContent .peekingCat { width: 145px; right: 0; top: 140px; bottom: auto; }
+  .skillsContent .skillStage { grid-column: 2; grid-row: 1; }
+  .skillsContent .skillCard { flex-basis: 100%; padding: 10px; }
+  .skillsContent .skillHeader { grid-template-columns: 1fr; gap: 8px; padding-bottom: 6px; margin-bottom: 6px; }
+  .skillsContent .skillHeader::before { display: none; }
+  .skillsContent .skillIdentity { grid-column: 1; justify-content: center; gap: 10px; }
+  .skillsContent .skillIcon { width: 32px; height: 32px; }
+  .skillsContent .skillIcon svg { width: 20px; height: 20px; }
+  .skillsContent .skillTitle h3 { font-size: 18px; margin: 0; }
+  .skillsContent .skillTitle h3 small, .skillsContent .skillMetric, .skillsContent .skillFooter > span { display: none; }
+  .skillsContent .skillTitle p { display: none; }
+  .skillsContent .skillFooter { padding-top: 6px; }
+  .skillsContent .skillFooter > a { width: 100%; padding: 6px 10px; min-height: 32px; border-radius: 12px; }
+  .skillsContent .listening .skillBody { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; }
+  .skillsContent .writing .previewBox { padding: 6px; }
+  .skillsContent .writing .suggestion { padding: 4px; margin-top: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carouselTrack, .skillCard, .skillsSlide::before, .skillsSlide::after { transition: none; }
+  .skillCard { filter: none; }
+}

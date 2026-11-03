@@ -9,7 +9,9 @@ export type CourseItem = {
   enrollment: { status: string; progressPercent: number } | null;
 };
 export type CourseList = { items: CourseItem[]; totalCount: number; page: number; pageSize: number; totalPages: number; summary: { totalCourses: number; inProgress: number; completed: number } };
-export type CourseDetail = { course: CourseItem; lessons: { lessonId: number; title: string; skillType: string; difficultyLevel: string | null; estimatedMinutes: number | null; orderIndex: number }[] };
+export type CourseDetail = { course: CourseItem; lessons: { lessonId: number; title: string; skillType: string; difficultyLevel: string | null; estimatedMinutes: number | null; orderIndex: number;
+  listeningStatus?: { attemptCount: number; latestScore: number } | null }[];
+  listeningProgress?: { completedLessons: number; totalLessons: number; percent: number } | null };
 
 export function parseCourseQuery(params: Record<string, string | string[] | undefined>): CourseQuery {
   const value = (key: string) => typeof params[key] === "string" ? params[key] as string : "";

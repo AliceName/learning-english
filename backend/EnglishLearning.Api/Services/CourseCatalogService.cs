@@ -75,13 +75,24 @@ public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
         if (course is null) return null;
         var lessons = await dbContext.Lessons.AsNoTracking().Where(item => item.CourseId == courseId && item.IsActive)
             .OrderBy(item => item.OrderIndex).ThenBy(item => item.LessonId)
-            .Select(item => new CourseLessonSummary(item.LessonId, item.Title, item.SkillType, item.DifficultyLevel, item.EstimatedMinutes, item.OrderIndex))
+            .Select(item => new CourseLessonSummary(item.LessonId, item.Title, item.SkillType, item.DifficultyLevel, item.EstimatedMinutes, item.OrderIndex, null))
             .ToListAsync(cancellationToken);
         var enrollment = await dbContext.UserCourses.AsNoTracking().SingleOrDefaultAsync(item => item.CourseId == courseId && item.UserId == userId, cancellationToken);
         var count = await dbContext.UserCourses.CountAsync(item => item.CourseId == courseId && item.Status != "abandoned", cancellationToken);
+        var listeningIds = lessons.Where(item => item.SkillType == "listening").Select(item => item.LessonId).ToArray();
+        var attempts = await dbContext.ExerciseResults.AsNoTracking().Where(item => item.UserId == userId && listeningIds.Contains(item.LessonId))
+            .GroupBy(item => item.LessonId).Select(group => new
+            {
+                LessonId = group.Key, Count = group.Count(),
+                LatestScore = group.OrderByDescending(item => item.SubmittedAt).ThenByDescending(item => item.ResultId).Select(item => item.Score).First()
+            }).ToDictionaryAsync(item => item.LessonId, cancellationToken);
+        lessons = lessons.Select(item => attempts.TryGetValue(item.LessonId, out var attempt)
+            ? item with { ListeningStatus = new(attempt.Count, attempt.LatestScore) } : item).ToList();
+        var listeningProgress = listeningIds.Length == 0 ? null : new ListeningCourseProgress(attempts.Count,
+            listeningIds.Length, decimal.Round(100m * attempts.Count / listeningIds.Length, 2));
         return new CourseDetailResponse(ToListItem(course, lessons.Count, lessons.Sum(item => item.EstimatedMinutes ?? 0),
             lessons.Count(item => item.EstimatedMinutes.HasValue), lessons.Select(item => item.DifficultyLevel),
-            lessons.Select(item => item.SkillType), count, enrollment), lessons);
+            lessons.Select(item => item.SkillType), count, enrollment), lessons, listeningProgress);
     }
 
     private static CourseListItem ToListItem(Course course, int count, int minutes, int timedCount,

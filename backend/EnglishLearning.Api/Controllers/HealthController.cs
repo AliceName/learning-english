@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using EnglishLearning.Api.Services;
 
 namespace EnglishLearning.Api.Controllers;
 
@@ -15,6 +16,9 @@ namespace EnglishLearning.Api.Controllers;
 [Produces("application/json")]
 public sealed class HealthController : ControllerBase
 {
+    [HttpGet("media")]
+    public ActionResult<MediaRuntimeStatus> GetMediaRuntime([FromServices] MediaRuntimeState runtime)
+    { Response.Headers.CacheControl = "no-store"; return Ok(runtime.Status()); }
     [HttpGet("mongodb")]
     [ProducesResponseType<HealthResponse>(200)]
     [ProducesResponseType<HealthResponse>(503)]

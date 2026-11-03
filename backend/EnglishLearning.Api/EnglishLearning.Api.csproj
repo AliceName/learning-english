@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CloudinaryDotNet" Version="1.29.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.21" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.21" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.21" />
@@ -25,6 +26,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\Pronunciation\en_US.txt.gz" />
+    <EmbeddedResource Include="Resources\Vocabulary\schema.json" />
+    <EmbeddedResource Include="Resources\Cloudinary\smoke-match.ogg" />
     <Content Include="Resources\Pronunciation\*.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 

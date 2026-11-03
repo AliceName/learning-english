@@ -69,6 +69,9 @@ public sealed class ReadingContent : IValidatableObject
 {
     [StringLength(255)] public string PassageTitle { get; init; } = "";
     [StringLength(255)] public string Category { get; init; } = "";
+    [StringLength(500), MediaUrl] public string? ImageUrl { get; init; }
+    [StringLength(500)] public string ImageAlt { get; init; } = "";
+    [StringLength(1000)] public string ImageCaption { get; init; } = "";
     [StringLength(30000)] public string Passage { get; init; } = "";
     [StringLength(30000)] public string Translation { get; init; } = "";
     [StringLength(3000)] public string Instructions { get; init; } = "";

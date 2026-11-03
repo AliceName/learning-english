@@ -7,6 +7,7 @@ const icons = {
   save: <><path d="M4 3h13l4 4v14H3V3h1Zm3 0v6h10V3M7 21v-8h10v8" /></>,
   eye: <><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></>,
   search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
+  home: <><path d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9" /></>,
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
   cards: <><path d="m5 5 12-3 4 16-12 3-4-16Z" /><path d="M3 9 1 10l4 12 3-1M9 8l7-2m-6 7 7-2" /></>,
   replay: <><path d="M3 10a9 9 0 1 1 2 9M3 4v6h6" /><path d="M12 7v5l3 2" /></>,

@@ -1,0 +1,46 @@
+{
+  "Health": [
+    {
+      "Path": "/api/v1/health",
+      "Status": 200,
+      "Body": {
+        "status": "healthy",
+        "message": "English Learning API is running"
+      }
+    },
+    {
+      "Path": "/api/v1/health/database",
+      "Status": 200,
+      "Body": {
+        "status": "healthy",
+        "message": "SQL Server connection successful"
+      }
+    },
+    {
+      "Path": "/api/v1/health/mongodb",
+      "Status": 200,
+      "Body": {
+        "status": "healthy",
+        "message": "MongoDB connection successful"
+      }
+    },
+    {
+      "Path": "/api/v1/health/media",
+      "Status": 200,
+      "Body": {
+        "revision": "cloud-cutover-v1",
+        "mode": "local-development",
+        "targetHash": null,
+        "instanceId": "d360d279c3694e3fa1a22c89f01c7420",
+        "startedAtUtc": "2026-11-03T17:20:37.0536924Z"
+      }
+    }
+  ],
+  "RouteCounts": {
+    "Speaking": 5,
+    "Listening": 7,
+    "Vocabulary": 3,
+    "Flashcards": 6
+  },
+  "ProfileUpdateRoutePresent": true
+}
