@@ -166,6 +166,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
     try {
       const body = new FormData();
       body.append("file", clip.blob, "recording.wav"); body.append("lessonId", String(lesson.lessonId)); body.append("sentenceIndex", String(index));
+      body.append("sentenceText", sentence.text);
       if (target.segmentIndex !== null) body.append("segmentIndex", String(target.segmentIndex));
       const response = await fetch("/api/speaking/attempts", { method: "POST", body, signal: controller.signal });
       const data = await response.json().catch(() => ({}));

@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using EnglishLearning.Api.Contracts;
 
 namespace EnglishLearning.Api.Services;
@@ -49,7 +48,7 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
 
     public static bool IsValid(SpeakingAssessment result, string text)
     {
-        var words = Regex.Matches(text.Replace('’', '\''), @"[A-Za-z]+(?:'[A-Za-z]+)*").Select(m => m.Value).ToArray();
+        var words = SpeakingReferenceText.Words.Matches(text.Replace('’', '\'')).Select(m => m.Value).ToArray();
         if (result.Status is not ("scored" or "partial") || string.IsNullOrWhiteSpace(result.ModelVersion) || result.ModelVersion.Length > 200
             || !double.IsFinite(result.DurationSeconds) || result.DurationSeconds is < .3 or > 12.03
             || !double.IsFinite(result.OverallScore) || result.OverallScore is < 0 or > 100

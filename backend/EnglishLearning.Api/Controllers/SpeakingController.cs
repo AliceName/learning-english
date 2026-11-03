@@ -27,6 +27,8 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
         if (lesson is null) return NotFound();
         if (request.SentenceIndex >= lesson.Sentences.Length) return Problem(statusCode: 400, title: "Câu luyện nói không tồn tại.");
         var text = lesson.Sentences[request.SentenceIndex].Text;
+        if (request.SentenceText is { } sentenceText && sentenceText != text)
+            return Problem(statusCode: 409, title: "Câu luyện nói đã thay đổi. Hãy tải lại bài học trước khi ghi âm lại.");
         SpeakingAttemptScope? scope = null;
         if (request.SegmentIndex is { } segmentIndex)
         {
@@ -37,6 +39,8 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
             scope = new("segment", segment.Index, segment.StartWordIndex, segment.WordCount, text, SpeakingPhraseSegmenter.Version);
             text = segment.Text;
         }
+        if (SpeakingReferenceText.GetError(text) is { } error)
+            return Problem(statusCode: 400, title: error);
         var wav = await SpeakingStorage.ReadWavAsync(request.File, ct);
         var assessment = await scorer.ScoreAsync(wav, text, ct);
         if (!SpeakingScorerClient.IsValid(assessment, text)) throw new SpeakingException(502, "Kết quả chấm không hợp lệ.");

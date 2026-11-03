@@ -142,8 +142,15 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, I
         {
             var audioValid = true;
             if (lesson.SkillType == "speaking" && lesson.Speaking?.Sentences is { } sentences)
-                foreach (var sentence in sentences)
-                    if (sentence.AudioUrl is not null && !await ExistsAsync(sentence.AudioUrl, "audio/")) { audioValid = false; break; }
+            {
+                for (var index = 0; index < sentences.Length; index++)
+                {
+                    var sentence = sentences[index];
+                    if (SpeakingReferenceText.GetError(sentence?.Text) is { } error)
+                        throw new AuthoringException(400, $"Bài “{lesson.Title}”, câu {index + 1}. {error}");
+                    if (sentence?.AudioUrl is { } audioUrl && !await ExistsAsync(audioUrl, "audio/")) { audioValid = false; break; }
+                }
+            }
             if (lesson.SkillType == "listening") audioValid = !string.IsNullOrWhiteSpace(lesson.AudioUrl) && await ExistsAsync(lesson.AudioUrl, "audio/");
             if (lesson.SkillType == "reading" && !string.IsNullOrWhiteSpace(lesson.Reading?.ImageUrl)
                 && !await ExistsAsync(lesson.Reading.ImageUrl, "image/"))

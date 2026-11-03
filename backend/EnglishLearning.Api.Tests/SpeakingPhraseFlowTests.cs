@@ -64,8 +64,10 @@ public sealed class SpeakingPhraseFlowTests
             }
             using (var privateForm = Form(personal.LessonId, 0))
                 Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsync("/api/v1/speaking/attempts", privateForm)).StatusCode);
+            using (var stale = Form(lesson.LessonId, 1, "The previous sentence."))
+                Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsync("/api/v1/speaking/attempts", stale)).StatusCode);
             Assert.Equal(0, scorer.Calls);
-            using var phraseForm = Form(lesson.LessonId, 1);
+            using var phraseForm = Form(lesson.LessonId, 1, text);
             var response = await client.PostAsync("/api/v1/speaking/attempts", phraseForm);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var phrase = (await response.Content.ReadFromJsonAsync<SpeakingAttemptResponse>())!;
@@ -104,11 +106,12 @@ public sealed class SpeakingPhraseFlowTests
         Assert.NotNull(value); Assert.Null(value.Scope); Assert.Equal(1, value.Version);
     }
 
-    private static MultipartFormDataContent Form(int lessonId, int? segment)
+    private static MultipartFormDataContent Form(int lessonId, int? segment, string? sentenceText = null)
     {
         var form = new MultipartFormDataContent();
         form.Add(new StringContent(lessonId.ToString()), "lessonId"); form.Add(new StringContent("0"), "sentenceIndex");
         if (segment is { } index) form.Add(new StringContent(index.ToString()), "segmentIndex");
+        if (sentenceText is not null) form.Add(new StringContent(sentenceText), "sentenceText");
         form.Add(new StringContent("Attacker text must not be scored"), "text");
         form.Add(new ByteArrayContent([.. "RIFF"u8, 0, 0, 0, 0, .. "WAVE"u8, .. new byte[40]]), "file", "recording.wav");
         return form;

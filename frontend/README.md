@@ -129,6 +129,8 @@ Danh sách `/admin/courses` có Chỉnh sửa và Ẩn khóa học/Hiện khóa 
 
 Python lấy từ biến `SPEAKING_TRAINING_ROOT` hoặc thư mục train bên cạnh repository theo bố cục máy hiện tại. Log ở `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Dịch vụ Python tiếp tục chạy khi dừng frontend, lần chạy frontend sau sẽ dùng lại. Nếu không cần Speaking khi phát triển, đặt `$env:SPEAKING_AUTO_START='0'` trước khi chạy npm để bỏ qua bước này. Chạy trực tiếp `next dev` không đi qua bước khởi động tự động.
 
+Nếu thiếu Python ở đường dẫn này, frontend vẫn khởi động và in cảnh báo. Gửi bản ghi để chấm cần dịch vụ Speaking đang chạy.
+
 Bài Speaking trong khóa học đã xuất bản có nút **Luyện nói** dẫn tới `/courses/[courseId]/speaking/[lessonId]`. Giao diện ghi âm PCM16 16 kHz, nghe lại, gửi chấm, xem điểm âm/từ, coverage và 20 lần luyện gần nhất. Có thể chọn WAV thay microphone. Proxy `/api/speaking` giữ JWT ở server; audio đã lưu chỉ chủ sở hữu đọc được.
 
 Xem `../SPEAKING.md` để khởi động dịch vụ mô hình Python, API .NET và frontend. Kết quả là điểm thử nghiệm trên các âm được hỗ trợ; chưa chấm trọng âm/độ trôi chảy hoặc xác định âm thay thế.

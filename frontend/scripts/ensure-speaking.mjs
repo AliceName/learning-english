@@ -43,6 +43,12 @@ async function waitReady(child) {
 async function main() {
   if (process.env.SPEAKING_AUTO_START === "0") { console.log("[Speaking] Automatic startup disabled (SPEAKING_AUTO_START=0)."); return; }
   if (await ready()) { console.log("[Speaking] Service already ready; reusing it."); return; }
+  const training = path.resolve(process.env.SPEAKING_TRAINING_ROOT ?? path.join(repo, "..", "EnglishPronunciationTraining", "EnglishPronunciationTraining"));
+  const python = process.platform === "win32" ? path.join(training, ".venv", "Scripts", "python.exe") : path.join(training, ".venv", "bin", "python");
+  if (!fs.existsSync(python)) {
+    console.warn(`[Speaking] Starting frontend without the local scorer. Python not found: ${python}. Set SPEAKING_TRAINING_ROOT to the prepared training project to enable automatic startup.`);
+    return;
+  }
   fs.mkdirSync(storage, { recursive: true });
   let lock;
   try { lock = fs.openSync(lockPath, "wx"); }
@@ -62,9 +68,6 @@ async function main() {
       console.log("[Speaking] Port 8001 is in use. Waiting for the existing service; no duplicate will be launched.");
       await waitReady(); return;
     }
-    const training = path.resolve(process.env.SPEAKING_TRAINING_ROOT ?? path.join(repo, "..", "EnglishPronunciationTraining", "EnglishPronunciationTraining"));
-    const python = process.platform === "win32" ? path.join(training, ".venv", "Scripts", "python.exe") : path.join(training, ".venv", "bin", "python");
-    if (!fs.existsSync(python)) throw new Error(`Python not found: ${python}. Set SPEAKING_TRAINING_ROOT to the prepared training project.`);
     const log = fs.openSync(logPath, "a");
     let child;
     try {
