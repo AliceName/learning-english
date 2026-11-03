@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using EnglishLearning.Api.Authentication;
+using EnglishLearning.Api.Configuration;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Services;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,6 +114,20 @@ builder.Services.AddOpenApi(options =>
     });
 });
 builder.Services.AddProblemDetails();
+
+builder.Services.AddOptions<MongoDbSettings>().Bind(builder.Configuration.GetSection(MongoDbSettings.SectionName))
+    .ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddSingleton<IMongoClient>(services =>
+{
+    var configured = services.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+    var settings = MongoClientSettings.FromConnectionString(configured.ConnectionString);
+    settings.ServerSelectionTimeout = TimeSpan.FromMilliseconds(configured.OperationTimeoutMs);
+    settings.ConnectTimeout = TimeSpan.FromMilliseconds(configured.OperationTimeoutMs);
+    settings.RetryWrites = false;
+    return new MongoClient(settings);
+});
+builder.Services.AddSingleton(services => services.GetRequiredService<IMongoClient>()
+    .GetDatabase(services.GetRequiredService<IOptions<MongoDbSettings>>().Value.DatabaseName));
 
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? [];

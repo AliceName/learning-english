@@ -31,8 +31,17 @@ Khóa được lưu ngoài repository tại `%APPDATA%\Microsoft\UserSecrets\464
 - OpenAPI JSON: http://localhost:5000/openapi/v1.json
 - Kiểm tra ứng dụng: `GET http://localhost:5000/api/v1/health`
 - Kiểm tra SQL Server: `GET http://localhost:5000/api/v1/health/database`
+- Kiểm tra MongoDB: `GET http://localhost:5000/api/v1/health/mongodb`
 
 API kiểm tra SQL Server trả `200` khi kết nối thành công và `503` khi thất bại. API ứng dụng không truy vấn CSDL.
+
+## Kết nối MongoDB local trên Dat
+
+API sử dụng `MongoDB.Driver` 3.13.0 và cấu hình `MongoDbSettings`. Máy local dùng `mongodb://127.0.0.1:27017` trong `EnglishLearning.Api/appsettings.Development.json`, database được cấu hình là `EnglishLearningDB`, collection từ điển dự kiến là `VocabularyEntries`. Có thể ghi đè bằng User Secrets hoặc biến môi trường `MongoDbSettings__ConnectionString`, `MongoDbSettings__DatabaseName`.
+
+`GET /api/v1/health/mongodb` chạy lệnh `ping: 1`, trả `200` khi kết nối được, `503` khi không kết nối được và không trả URI hoặc chi tiết credentials. Client dùng lại qua DI, có giới hạn thời gian và tắt retry writes để tương thích MongoDB standalone local.
+
+Phần này chỉ bổ sung kết nối và health check. Chưa đưa chức năng từ điển/cache của nhánh `nga` vào Dat. Khởi động API và gọi health không tạo database, collection, validator, index hoặc dữ liệu. MongoDB local hiện chưa có database ứng dụng có dữ liệu; tên database cấu hình sẽ chỉ xuất hiện trong MongoDB Compass khi có dữ liệu được tạo qua luồng được triển khai và cho phép riêng.
 
 ## Cấu hình CSDL
 

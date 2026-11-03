@@ -1,7 +1,11 @@
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Configuration;
 using EnglishLearning.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace EnglishLearning.Api.Controllers;
 
@@ -11,6 +15,24 @@ namespace EnglishLearning.Api.Controllers;
 [Produces("application/json")]
 public sealed class HealthController : ControllerBase
 {
+    [HttpGet("mongodb")]
+    [ProducesResponseType<HealthResponse>(200)]
+    [ProducesResponseType<HealthResponse>(503)]
+    public async Task<ActionResult<HealthResponse>> GetMongoHealth([FromServices] IMongoDatabase database,
+        [FromServices] IOptions<MongoDbSettings> options, CancellationToken cancellationToken)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(options.Value.OperationTimeoutMs);
+        try
+        {
+            await database.RunCommandAsync<BsonDocument>(new BsonDocument("ping", 1), cancellationToken: deadline.Token);
+            return Ok(new HealthResponse("healthy", "MongoDB connection successful"));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { return StatusCode(499); }
+        catch (Exception error) when (error is MongoException or OperationCanceledException or TimeoutException)
+        { return StatusCode(503, new HealthResponse("unavailable", "MongoDB connection failed")); }
+    }
+
     [HttpGet]
     [ProducesResponseType<HealthResponse>(StatusCodes.Status200OK)]
     public ActionResult<HealthResponse> GetHealth() =>
