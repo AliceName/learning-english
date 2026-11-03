@@ -1,0 +1,671 @@
+{
+  "sentenceCount": 921,
+  "courseCount": 13,
+  "verifiedAtUtc": "2026-10-27T13:54:49.7473762Z",
+  "existingSpeechOceanCourses": 44,
+  "existingSpeechOceanLessons": 501,
+  "lessonCount": 95,
+  "courses": [
+    {
+      "level": "A1",
+      "title": "CEFR-SP A1 — SCoRE · Phần 01",
+      "courseId": 51,
+      "lessons": [
+        {
+          "title": "Luyện đọc A1 — Bộ câu 01",
+          "lessonId": 520,
+          "practiceUrl": "http://localhost:3000/courses/51/speaking/520",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A1 — Bộ câu 02",
+          "lessonId": 521,
+          "practiceUrl": "http://localhost:3000/courses/51/speaking/521",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A1 — Bộ câu 03",
+          "lessonId": 522,
+          "practiceUrl": "http://localhost:3000/courses/51/speaking/522",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A1 — Bộ câu 04",
+          "lessonId": 523,
+          "practiceUrl": "http://localhost:3000/courses/51/speaking/523",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A1 — Bộ câu 05",
+          "lessonId": 524,
+          "practiceUrl": "http://localhost:3000/courses/51/speaking/524",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "A1",
+      "title": "CEFR-SP A1 — Wiki-Auto · Phần 01",
+      "courseId": 52,
+      "lessons": [
+        {
+          "title": "Luyện đọc A1 — Bộ câu 01",
+          "lessonId": 525,
+          "practiceUrl": "http://localhost:3000/courses/52/speaking/525",
+          "sentenceCount": 3
+        }
+      ]
+    },
+    {
+      "level": "A2",
+      "title": "CEFR-SP A2 — SCoRE · Phần 01",
+      "courseId": 53,
+      "lessons": [
+        {
+          "title": "Luyện đọc A2 — Bộ câu 01",
+          "lessonId": 526,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/526",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 02",
+          "lessonId": 527,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/527",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 03",
+          "lessonId": 528,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/528",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 04",
+          "lessonId": 529,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/529",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 05",
+          "lessonId": 530,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/530",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 06",
+          "lessonId": 531,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/531",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 07",
+          "lessonId": 532,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/532",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 08",
+          "lessonId": 533,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/533",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 09",
+          "lessonId": 534,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/534",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 10",
+          "lessonId": 535,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/535",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 11",
+          "lessonId": 536,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/536",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 12",
+          "lessonId": 537,
+          "practiceUrl": "http://localhost:3000/courses/53/speaking/537",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "A2",
+      "title": "CEFR-SP A2 — SCoRE · Phần 02",
+      "courseId": 54,
+      "lessons": [
+        {
+          "title": "Luyện đọc A2 — Bộ câu 01",
+          "lessonId": 538,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/538",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 02",
+          "lessonId": 539,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/539",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 03",
+          "lessonId": 540,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/540",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 04",
+          "lessonId": 541,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/541",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 05",
+          "lessonId": 542,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/542",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 06",
+          "lessonId": 543,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/543",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 07",
+          "lessonId": 544,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/544",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 08",
+          "lessonId": 545,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/545",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 09",
+          "lessonId": 546,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/546",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 10",
+          "lessonId": 547,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/547",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 11",
+          "lessonId": 548,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/548",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 12",
+          "lessonId": 549,
+          "practiceUrl": "http://localhost:3000/courses/54/speaking/549",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "A2",
+      "title": "CEFR-SP A2 — SCoRE · Phần 03",
+      "courseId": 55,
+      "lessons": [
+        {
+          "title": "Luyện đọc A2 — Bộ câu 01",
+          "lessonId": 550,
+          "practiceUrl": "http://localhost:3000/courses/55/speaking/550",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 02",
+          "lessonId": 551,
+          "practiceUrl": "http://localhost:3000/courses/55/speaking/551",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 03",
+          "lessonId": 552,
+          "practiceUrl": "http://localhost:3000/courses/55/speaking/552",
+          "sentenceCount": 1
+        }
+      ]
+    },
+    {
+      "level": "A2",
+      "title": "CEFR-SP A2 — Wiki-Auto · Phần 01",
+      "courseId": 56,
+      "lessons": [
+        {
+          "title": "Luyện đọc A2 — Bộ câu 01",
+          "lessonId": 553,
+          "practiceUrl": "http://localhost:3000/courses/56/speaking/553",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 02",
+          "lessonId": 554,
+          "practiceUrl": "http://localhost:3000/courses/56/speaking/554",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 03",
+          "lessonId": 555,
+          "practiceUrl": "http://localhost:3000/courses/56/speaking/555",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc A2 — Bộ câu 04",
+          "lessonId": 556,
+          "practiceUrl": "http://localhost:3000/courses/56/speaking/556",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "B1",
+      "title": "CEFR-SP B1 — SCoRE · Phần 01",
+      "courseId": 57,
+      "lessons": [
+        {
+          "title": "Luyện đọc B1 — Bộ câu 01",
+          "lessonId": 557,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/557",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 02",
+          "lessonId": 558,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/558",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 03",
+          "lessonId": 559,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/559",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 04",
+          "lessonId": 560,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/560",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 05",
+          "lessonId": 561,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/561",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 06",
+          "lessonId": 562,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/562",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 07",
+          "lessonId": 563,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/563",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 08",
+          "lessonId": 564,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/564",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 09",
+          "lessonId": 565,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/565",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 10",
+          "lessonId": 566,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/566",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 11",
+          "lessonId": 567,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/567",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 12",
+          "lessonId": 568,
+          "practiceUrl": "http://localhost:3000/courses/57/speaking/568",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "B1",
+      "title": "CEFR-SP B1 — SCoRE · Phần 02",
+      "courseId": 58,
+      "lessons": [
+        {
+          "title": "Luyện đọc B1 — Bộ câu 01",
+          "lessonId": 569,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/569",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 02",
+          "lessonId": 570,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/570",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 03",
+          "lessonId": 571,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/571",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 04",
+          "lessonId": 572,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/572",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 05",
+          "lessonId": 573,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/573",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 06",
+          "lessonId": 574,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/574",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 07",
+          "lessonId": 575,
+          "practiceUrl": "http://localhost:3000/courses/58/speaking/575",
+          "sentenceCount": 6
+        }
+      ]
+    },
+    {
+      "level": "B1",
+      "title": "CEFR-SP B1 — Wiki-Auto · Phần 01",
+      "courseId": 59,
+      "lessons": [
+        {
+          "title": "Luyện đọc B1 — Bộ câu 01",
+          "lessonId": 576,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/576",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 02",
+          "lessonId": 577,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/577",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 03",
+          "lessonId": 578,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/578",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 04",
+          "lessonId": 579,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/579",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 05",
+          "lessonId": 580,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/580",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 06",
+          "lessonId": 581,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/581",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 07",
+          "lessonId": 582,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/582",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 08",
+          "lessonId": 583,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/583",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 09",
+          "lessonId": 584,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/584",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 10",
+          "lessonId": 585,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/585",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 11",
+          "lessonId": 586,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/586",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 12",
+          "lessonId": 587,
+          "practiceUrl": "http://localhost:3000/courses/59/speaking/587",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "B1",
+      "title": "CEFR-SP B1 — Wiki-Auto · Phần 02",
+      "courseId": 60,
+      "lessons": [
+        {
+          "title": "Luyện đọc B1 — Bộ câu 01",
+          "lessonId": 588,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/588",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 02",
+          "lessonId": 589,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/589",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 03",
+          "lessonId": 590,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/590",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 04",
+          "lessonId": 591,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/591",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 05",
+          "lessonId": 592,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/592",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 06",
+          "lessonId": 593,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/593",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 07",
+          "lessonId": 594,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/594",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 08",
+          "lessonId": 595,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/595",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 09",
+          "lessonId": 596,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/596",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 10",
+          "lessonId": 597,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/597",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B1 — Bộ câu 11",
+          "lessonId": 598,
+          "practiceUrl": "http://localhost:3000/courses/60/speaking/598",
+          "sentenceCount": 8
+        }
+      ]
+    },
+    {
+      "level": "B2",
+      "title": "CEFR-SP B2 — SCoRE · Phần 01",
+      "courseId": 61,
+      "lessons": [
+        {
+          "title": "Luyện đọc B2 — Bộ câu 01",
+          "lessonId": 599,
+          "practiceUrl": "http://localhost:3000/courses/61/speaking/599",
+          "sentenceCount": 10
+        }
+      ]
+    },
+    {
+      "level": "B2",
+      "title": "CEFR-SP B2 — Wiki-Auto · Phần 01",
+      "courseId": 62,
+      "lessons": [
+        {
+          "title": "Luyện đọc B2 — Bộ câu 01",
+          "lessonId": 600,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/600",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 02",
+          "lessonId": 601,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/601",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 03",
+          "lessonId": 602,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/602",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 04",
+          "lessonId": 603,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/603",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 05",
+          "lessonId": 604,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/604",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 06",
+          "lessonId": 605,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/605",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 07",
+          "lessonId": 606,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/606",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 08",
+          "lessonId": 607,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/607",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 09",
+          "lessonId": 608,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/608",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 10",
+          "lessonId": 609,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/609",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 11",
+          "lessonId": 610,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/610",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc B2 — Bộ câu 12",
+          "lessonId": 611,
+          "practiceUrl": "http://localhost:3000/courses/62/speaking/611",
+          "sentenceCount": 9
+        }
+      ]
+    },
+    {
+      "level": "C1",
+      "title": "CEFR-SP C1 — Wiki-Auto · Phần 01",
+      "courseId": 63,
+      "lessons": [
+        {
+          "title": "Luyện đọc C1 — Bộ câu 01",
+          "lessonId": 612,
+          "practiceUrl": "http://localhost:3000/courses/63/speaking/612",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc C1 — Bộ câu 02",
+          "lessonId": 613,
+          "practiceUrl": "http://localhost:3000/courses/63/speaking/613",
+          "sentenceCount": 10
+        },
+        {
+          "title": "Luyện đọc C1 — Bộ câu 03",
+          "lessonId": 614,
+          "practiceUrl": "http://localhost:3000/courses/63/speaking/614",
+          "sentenceCount": 4
+        }
+      ]
+    }
+  ]
+}

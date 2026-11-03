@@ -1,0 +1,24 @@
+[
+  {
+    "level":"A1",
+    "title":"Speaking A1 — Câu cơ bản từ SpeechOcean762",
+    "description":"9 câu ngắn được chọn và rà soát từ tập train SpeechOcean762 trong EnglishPronunciationTraining: động vật, màu sắc và thức ăn. Chỉ chuẩn hóa viết hoa và dấu câu. A1 là mức nội dung tham khảo do dự án phân loại, không phải nhãn của bộ dữ liệu. Dùng giọng đọc trình duyệt nếu có; không dùng bản ghi người học làm mẫu chuẩn.",
+    "source":{"dataset":"SpeechOcean762","repository":"https://github.com/jimbozhang/speechocean762","manifest":"data/manifests/train.jsonl","split":"train"},
+    "lessons":[
+      {"title":"Nhìn và gọi tên động vật","goals":"Luyện câu ngắn với sheep, hen và tiger. Chú ý phát âm rõ từng từ. Câu lấy từ tập train SpeechOcean762; nghe mẫu bằng chức năng đọc của trình duyệt.","sourceIds":["000480014","000260011","000530019"],"sentences":["John can see the sheep.","Andy can see the hen.","Lilly can draw the tiger."]},
+      {"title":"Màu sắc và quần áo","goals":"Luyện white, orange và red; chú ý âm cuối của likes và jeans. Câu lấy từ tập train SpeechOcean762.","sourceIds":["000050003","000530003","000260091"],"sentences":["Mike likes the white one.","Mike likes the orange one.","Dora likes your red jeans."]},
+      {"title":"Thức ăn quen thuộc","goals":"Đọc rõ tomato, mushroom và cake. Luyện từng câu riêng, không cần tăng tốc. Câu lấy từ tập train SpeechOcean762.","sourceIds":["000010133","000260133","000530077"],"sentences":["Kate got the tomato.","Andy got the mushroom.","Jim ate a little cake."]}
+    ]
+  },
+  {
+    "level":"A2",
+    "title":"Speaking A2 — Tình huống từ SpeechOcean762",
+    "description":"9 câu được chọn và rà soát từ tập train SpeechOcean762 trong EnglishPronunciationTraining: địa điểm, đi lại và hội thoại ngắn. Chỉ chuẩn hóa viết hoa và dấu câu. A2 là mức nội dung tham khảo do dự án phân loại, không phải nhãn CEFR chính thức. Không dùng các câu này để báo cáo đánh giá độc lập của mô hình đã train.",
+    "source":{"dataset":"SpeechOcean762","repository":"https://github.com/jimbozhang/speechocean762","manifest":"data/manifests/train.jsonl","split":"train"},
+    "lessons":[
+      {"title":"Địa điểm và đồ vật","goals":"Luyện tên địa điểm New York, Cairo và từ jeep; chú ý âm cuối lived và lives. Câu lấy từ tập train SpeechOcean762.","sourceIds":["000010145","000010149","000480108"],"sentences":["Mark lived in New York.","Bob lives in Cairo now.","Look at this big jeep."]},
+      {"title":"Đi lại và địa điểm công cộng","goals":"Đọc rõ bus, restroom và pet shop. Mỗi lần chỉ ghi một câu. Câu lấy từ tập train SpeechOcean762.","sourceIds":["000010106","000010115","000480125"],"sentences":["What about the bus?","Let's go to the restroom.","So Billy went into the pet shop."]},
+      {"title":"Các câu hội thoại ngắn","goals":"Luyện diễn đạt câu giao tiếp quen thuộc, chú ý nice, break và truth. Câu lấy từ tập train SpeechOcean762.","sourceIds":["000360132","000360036","000360314"],"sentences":["It is always so nice to see you.","I could do with a break.","But tell me the truth."]}
+    ]
+  }
+]

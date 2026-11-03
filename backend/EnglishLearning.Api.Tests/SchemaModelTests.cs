@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Globalization;
 using EnglishLearning.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -34,7 +35,9 @@ public sealed class SchemaModelTests
                 Assert.Equal(column.Identity, property.GetValueGenerationStrategy() == SqlServerValueGenerationStrategy.IdentityColumn);
                 Assert.Equal(column.Rules.Contains("PK"), property.IsPrimaryKey());
                 Assert.False(property.IsShadowProperty());
-                var actualDefault = property.GetDefaultValueSql() ?? property.FindAnnotation(RelationalAnnotationNames.DefaultValue)?.Value?.ToString();
+                var literalDefault = property.FindAnnotation(RelationalAnnotationNames.DefaultValue)?.Value;
+                var actualDefault = property.GetDefaultValueSql() ?? (literalDefault is null
+                    ? null : Convert.ToString(literalDefault, CultureInfo.InvariantCulture));
                 Assert.Equal(ApprovedSchema.NormalizeDefault(column.Default), ApprovedSchema.NormalizeDefault(actualDefault));
             }
         }

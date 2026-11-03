@@ -480,3 +480,9 @@ POST `/api/v1/admin/courses/{id}/hide` đặt Courses.IsPublished=false; POST `.
 Khóa ẩn vắng khỏi catalog/summary, chi tiết và luồng luyện nghe trả 404; media được quản lý cũng bị chặn với học viên. Admin vẫn xem trước/chỉnh sửa được. Ẩn/hiện không xóa Lessons, UserCourses, LearningProgress hoặc ExerciseResults. Bài nghe sửa nội dung dùng contentVersion hiện có để từ chối bài nộp cũ 409. URL ngoài hệ thống không chịu quyền truy cập của media proxy.
 
 `PublishedCourseManagementTests.cs` kiểm tra sửa đủ năm loại bài, cập nhật ứng viên bị từ chối không ghi dở, thêm bài, tắt bài cuối cùng, ẩn/hiện, quyền admin/user và phạm vi system, catalog/practice/media, giữ bài nộp/đăng ký học và phiên bản bài nghe. Các dữ liệu SQL trong kiểm thử được rollback.
+
+## Speaking cho học viên
+
+Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
+
+Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.

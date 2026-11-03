@@ -1,0 +1,169 @@
+{
+  "phase": "before",
+  "syntheticAudio": true,
+  "humanAccuracyMeasured": false,
+  "samples": [
+    {
+      "level": "A1",
+      "id": "14c487feb1e830b0bba9",
+      "text": "There were mice scratching in the walls .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    },
+    {
+      "level": "A2",
+      "id": "4201b80a314168903466",
+      "text": "That was the day when we saw it .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    },
+    {
+      "level": "B1",
+      "id": "bd5d22d1ef75731f9d1f",
+      "text": "She was eagerly waiting for the tooth fairy .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    },
+    {
+      "level": "B2",
+      "id": "1253c05ac57b7ac98c6e",
+      "text": "The burden of proof is always on the person who brings a claim in a dispute .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    },
+    {
+      "level": "C1",
+      "id": "4a7b4f257b12e399d49c",
+      "text": "In angiosperms , after the pollen grain has landed on the stigma , it develops a pollen tube which grows down the style until it reaches an ovary .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    },
+    {
+      "level": "C2",
+      "id": "7f02cc0f80eb513a8661",
+      "text": "In the past , non-photosynthetic plants were mistakenly thought to get food by breaking down organic matter in a manner similar to saprotrophic fungi .",
+      "statusCode": 422,
+      "result": {
+        "title": "Chưa tách được ranh giới từ của câu mẫu này."
+      }
+    }
+  ],
+  "health": {
+    "status": "ready",
+    "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8",
+    "maxRecordingSeconds": 12
+  },
+  "realDatasetSample": {
+    "audioSource": "D:\\EnglishPronunciationTraining\\EnglishPronunciationTraining\\speechocean762-main\\WAVE\\SPEAKER0001\\000010011.WAV",
+    "text": "We call it bear",
+    "statusCode": 200,
+    "result": {
+      "status": "partial",
+      "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8",
+      "durationSeconds": 2.58,
+      "overallScore": 96.82,
+      "coverage": 0.777778,
+      "referenceTokenCount": 9,
+      "words": [
+        {
+          "index": 0,
+          "text": "We",
+          "status": "scored",
+          "score": 1.9541,
+          "phones": [
+            {
+              "sourcePhone": "W",
+              "symbol": "w",
+              "score": 1.9889,
+              "startSeconds": 0.66,
+              "endSeconds": 0.685
+            },
+            {
+              "sourcePhone": "IY1",
+              "symbol": "iː",
+              "score": 1.9194,
+              "startSeconds": 0.72,
+              "endSeconds": 0.745
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 1,
+          "text": "call",
+          "status": "scored",
+          "score": 1.9238,
+          "phones": [
+            {
+              "sourcePhone": "K",
+              "symbol": "k",
+              "score": 1.9786,
+              "startSeconds": 1.02,
+              "endSeconds": 1.045
+            },
+            {
+              "sourcePhone": "AO1",
+              "symbol": "ɔː",
+              "score": 1.8958,
+              "startSeconds": 1.12,
+              "endSeconds": 1.145
+            },
+            {
+              "sourcePhone": "L",
+              "symbol": "l",
+              "score": 1.897,
+              "startSeconds": 1.22,
+              "endSeconds": 1.245
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 2,
+          "text": "it",
+          "status": "scored",
+          "score": 1.9379,
+          "phones": [
+            {
+              "sourcePhone": "IH1",
+              "symbol": "ɪ",
+              "score": 1.9517,
+              "startSeconds": 1.34,
+              "endSeconds": 1.365
+            },
+            {
+              "sourcePhone": "T",
+              "symbol": "t",
+              "score": 1.9241,
+              "startSeconds": 1.44,
+              "endSeconds": 1.465
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 3,
+          "text": "bear",
+          "status": "unsupported",
+          "score": null,
+          "phones": [],
+          "reason": "Chưa đối chiếu được âm vị của từ này."
+        }
+      ],
+      "warnings": [
+        "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+      ],
+      "feedback": "Nghe lại bản ghi và luyện lại các âm có điểm thấp. Điểm chưa xác định lỗi thay âm cụ thể."
+    }
+  }
+}

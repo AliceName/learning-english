@@ -1,0 +1,38 @@
+[
+  {
+    "id": "14c487feb1e830b0bba9",
+    "level": "A1",
+    "text": "There were mice scratching in the walls .",
+    "coverage": 0.9545454545454546
+  },
+  {
+    "id": "4201b80a314168903466",
+    "level": "A2",
+    "text": "That was the day when we saw it .",
+    "coverage": 1.0
+  },
+  {
+    "id": "bd5d22d1ef75731f9d1f",
+    "level": "B1",
+    "text": "She was eagerly waiting for the tooth fairy .",
+    "coverage": 1.0
+  },
+  {
+    "id": "1253c05ac57b7ac98c6e",
+    "level": "B2",
+    "text": "The burden of proof is always on the person who brings a claim in a dispute .",
+    "coverage": 1.0
+  },
+  {
+    "id": "4a7b4f257b12e399d49c",
+    "level": "C1",
+    "text": "In angiosperms , after the pollen grain has landed on the stigma , it develops a pollen tube which grows down the style until it reaches an ovary .",
+    "coverage": 0.85
+  },
+  {
+    "id": "7f02cc0f80eb513a8661",
+    "level": "C2",
+    "text": "In the past , non-photosynthetic plants were mistakenly thought to get food by breaking down organic matter in a manner similar to saprotrophic fungi .",
+    "coverage": 0.6190476190476191
+  }
+]

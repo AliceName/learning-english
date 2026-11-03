@@ -122,3 +122,13 @@ Trắc nghiệm Reading/Listening/Grammar khởi tạo với 2 lựa chọn. Com
 Danh sách `/admin/courses` có Chỉnh sửa và Ẩn khóa học/Hiện khóa học cho từng dòng. Cả thông tin chung và năm loại bài được biên soạn dù khóa đã xuất bản. Bước 4 **Hiển thị** có nút ẩn/hiện, xem trước và quay lại chỉnh sửa. Nút bật hiển thị bị khóa khi còn thay đổi chưa lưu hoặc checklist chưa đủ; máy chủ kiểm tra media/nội dung đầy đủ. Khóa hiển thị cập nhật cho học viên ngay khi lưu; muốn soạn dở, ẩn trước. Trạng thái false hiển thị “Đang ẩn / Bản nháp”.
 
 Ẩn/hiện dùng BFF POST `courses/{id}/hide` và `courses/{id}/publish`, giữ cookie HttpOnly, kiểm tra cùng nguồn và cache no-store. Các thao tác lưu có thể kiểm tra media nên proxy chờ tối đa 120 giây. Ẩn khóa không xóa bài học, bài nộp hoặc tiến độ.
+
+## Luyện Speaking với mô hình đã train
+
+`npm run dev` và `npm start` tự chạy `scripts/ensure-speaking.mjs` qua predev/prestart. Script kiểm tra health ở 127.0.0.1:8001, dùng lại dịch vụ sẵn có hoặc khởi động Python nền (ẩn cửa sổ trên Windows), rồi đợi ready tối đa 180 giây. Không khởi động API .NET; vẫn chạy API bằng Visual Studio như trước. Mô hình có thể mất một lúc để nạp trước khi frontend bắt đầu.
+
+Python lấy từ biến `SPEAKING_TRAINING_ROOT` hoặc thư mục train bên cạnh repository theo bố cục máy hiện tại. Log ở `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Dịch vụ Python tiếp tục chạy khi dừng frontend, lần chạy frontend sau sẽ dùng lại. Nếu không cần Speaking khi phát triển, đặt `$env:SPEAKING_AUTO_START='0'` trước khi chạy npm để bỏ qua bước này. Chạy trực tiếp `next dev` không đi qua bước khởi động tự động.
+
+Bài Speaking trong khóa học đã xuất bản có nút **Luyện nói** dẫn tới `/courses/[courseId]/speaking/[lessonId]`. Giao diện ghi âm PCM16 16 kHz, nghe lại, gửi chấm, xem điểm âm/từ, coverage và 20 lần luyện gần nhất. Có thể chọn WAV thay microphone. Proxy `/api/speaking` giữ JWT ở server; audio đã lưu chỉ chủ sở hữu đọc được.
+
+Xem `../SPEAKING.md` để khởi động dịch vụ mô hình Python, API .NET và frontend. Kết quả là điểm thử nghiệm trên các âm được hỗ trợ; chưa chấm trọng âm/độ trôi chảy hoặc xác định âm thay thế.

@@ -1,0 +1,244 @@
+{
+  "scope": "All rows parsed; exact serving mapping tested only on annotator-agreement rows passing reference_words.",
+  "reference_mapping_sha256": "470077d127dbf4b4f2ff83a89f614f49afe47e304f8873aa872ced6ad5230a4e",
+  "acoustic_model_loaded": false,
+  "mapping_sha256": "9c83c28585ba0d4eb90966073576278b58ee69beb3219ed7edc7bd43a1443dcc",
+  "acoustic_model": {
+    "id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+    "revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4",
+    "frozen": true,
+    "device": "cuda",
+    "dtype": "float32",
+    "inference_batch_size": 1,
+    "attention_implementation": "eager",
+    "max_audio_seconds": 12
+  },
+  "source_sha256": {
+    "CEFR-SP\\SCoRE\\CEFR-SP_SCoRE_dev.txt": "860ef3f6811ec9d84909da67032079c42f9f37d21c07cbdf2fdc02a5d69e18b5",
+    "CEFR-SP\\SCoRE\\CEFR-SP_SCoRE_test.txt": "f3fefa06cdeb8307e2e81bc8031416068a26d74149aff84cbe414a453b98cbbb",
+    "CEFR-SP\\SCoRE\\CEFR-SP_SCoRE_train.txt": "230c13137f5025170e764cc910f62a494fb03a47e96bdfa5584075c83dfec826",
+    "CEFR-SP\\Wiki-Auto\\CEFR-SP_Wikiauto_dev.txt": "56624765518bf6aa65b24464c2bb325a4733fabe111c370dbb81830b5c6faf3c",
+    "CEFR-SP\\Wiki-Auto\\CEFR-SP_Wikiauto_test.txt": "406b2653555680178f9b07d6ca21c474a25cc0f88011c5780e55bebb9698c6b1",
+    "CEFR-SP\\Wiki-Auto\\CEFR-SP_Wikiauto_train.txt": "18e1683e4afb43b07fd6a808c938739fd83a733dc275cc46049422ec9670f36a"
+  },
+  "counts": {
+    "source_rows": 10004,
+    "agreed_rows": 4145,
+    "reference_format_pass": 3313,
+    "mapped_partial": 2671,
+    "mapped_full": 326,
+    "rejected_reference_format": 832,
+    "not_audited_label_disagreement": 5859,
+    "rejected_phone_mapping": 316
+  },
+  "levels": {
+    "A1": {
+      "agreed": 124,
+      "reference_format_pass": 76,
+      "mapped_partial": 41,
+      "coverage_ge_80pct": 64,
+      "mapped_full": 34,
+      "rejected_phone_mapping": 1
+    },
+    "A2": {
+      "agreed": 723,
+      "reference_format_pass": 573,
+      "mapped_full": 157,
+      "coverage_ge_80pct": 400,
+      "mapped_partial": 388,
+      "rejected_phone_mapping": 28
+    },
+    "B1": {
+      "agreed": 1601,
+      "reference_format_pass": 1237,
+      "mapped_full": 118,
+      "coverage_ge_80pct": 687,
+      "mapped_partial": 1013,
+      "rejected_phone_mapping": 106
+    },
+    "B2": {
+      "agreed": 1227,
+      "reference_format_pass": 1008,
+      "mapped_partial": 855,
+      "coverage_ge_80pct": 306,
+      "mapped_full": 17,
+      "rejected_phone_mapping": 136
+    },
+    "C1": {
+      "agreed": 437,
+      "reference_format_pass": 393,
+      "mapped_partial": 352,
+      "coverage_ge_80pct": 53,
+      "rejected_phone_mapping": 41
+    },
+    "C2": {
+      "agreed": 33,
+      "reference_format_pass": 26,
+      "mapped_partial": 22,
+      "coverage_ge_80pct": 1,
+      "rejected_phone_mapping": 4
+    }
+  },
+  "most_common_unsupported_words": [
+    [
+      "are",
+      384
+    ],
+    [
+      "the",
+      289
+    ],
+    [
+      "to",
+      148
+    ],
+    [
+      "or",
+      146
+    ],
+    [
+      "n't",
+      62
+    ],
+    [
+      "into",
+      60
+    ],
+    [
+      "during",
+      59
+    ],
+    [
+      "species",
+      54
+    ],
+    [
+      "usually",
+      52
+    ],
+    [
+      "number",
+      39
+    ],
+    [
+      "were",
+      36
+    ],
+    [
+      "as",
+      36
+    ],
+    [
+      "popular",
+      31
+    ],
+    [
+      "around",
+      30
+    ],
+    [
+      "generally",
+      27
+    ],
+    [
+      "animals",
+      27
+    ],
+    [
+      "other",
+      25
+    ],
+    [
+      "history",
+      24
+    ],
+    [
+      "across",
+      21
+    ],
+    [
+      "similar",
+      21
+    ],
+    [
+      "written",
+      19
+    ],
+    [
+      "including",
+      18
+    ],
+    [
+      "reviews",
+      18
+    ],
+    [
+      "reaction",
+      17
+    ],
+    [
+      "natural",
+      17
+    ],
+    [
+      "even",
+      16
+    ],
+    [
+      "multiple",
+      16
+    ],
+    [
+      "here",
+      15
+    ],
+    [
+      "after",
+      15
+    ],
+    [
+      "temperature",
+      15
+    ],
+    [
+      "acid",
+      15
+    ],
+    [
+      "her",
+      14
+    ],
+    [
+      "women",
+      14
+    ],
+    [
+      "difficult",
+      14
+    ],
+    [
+      "regular",
+      14
+    ],
+    [
+      "beautiful",
+      13
+    ],
+    [
+      "water",
+      13
+    ],
+    [
+      "variety",
+      13
+    ],
+    [
+      "real",
+      12
+    ],
+    [
+      "include",
+      12
+    ]
+  ]
+}

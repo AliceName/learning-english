@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/ensure-speaking.mjs",
     "dev": "next dev",
     "build": "next build",
+    "prestart": "node scripts/ensure-speaking.mjs",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:speaking": "node --test tests/speaking-wav.test.mjs tests/speaking-feedback.test.mjs tests/speaking-practice.test.mjs tests/recording-silence.test.mjs"
   },
   "dependencies": {
     "next": "16.4.2",

@@ -109,6 +109,42 @@ public sealed class AuthController(
     }
 
     [Authorize]
+    [HttpPut("me")]
+    [RequestSizeLimit(16 * 1024)]
+    [ProducesResponseType<CurrentUserResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<ActionResult<CurrentUserResponse>> UpdateProfile(UpdateProfileRequest request, CancellationToken cancellationToken)
+    {
+        Response.Headers.CacheControl = "no-store";
+        if (!int.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId) || userId <= 0)
+            return Unauthorized();
+        try
+        {
+            var user = await dbContext.Users.SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, cancellationToken);
+            if (user is null) return Unauthorized();
+            user.FullName = request.FullName;
+            user.TargetLevel = request.TargetLevel;
+            user.AvatarUrl = request.AvatarUrl;
+            user.UpdatedAt = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return Ok(new CurrentUserResponse(user.UserId, user.Email, user.FullName, user.TargetLevel,
+                user.CreatedAt, user.CurrentStreak, user.AvatarUrl, user.Role));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException)
+        {
+            logger.LogError(error, "Database request failed while updating current user profile.");
+            return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
+                title: "Chưa thể lưu hồ sơ.", detail: "Vui lòng thử lại sau.");
+        }
+    }
+
+    [Authorize]
     [HttpGet("me")]
     [ProducesResponseType<CurrentUserResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -8,6 +8,7 @@ import MemberShell from "@/components/navigation/member-shell";
 import CourseCard from "@/components/courses/course-card";
 import CourseFilters from "@/components/courses/course-filters";
 import CatalogState from "@/components/courses/catalog-state";
+import SpeakingLevels from "@/components/speaking/speaking-levels";
 import { getCurrentUser } from "@/lib/server-auth";
 import { getCourses } from "@/lib/server-courses";
 import { catalogHref, parseCourseQuery } from "@/lib/course-catalog";
@@ -38,6 +39,7 @@ async function Catalog({ searchParams }: PageProps<"/courses">) {
           <div className={styles.aiPromo}><Icon name="sparkles" /><div><strong>Tạo khóa học AI <small>SẮP CÓ</small></strong><span>Từ tài liệu, theo mục tiêu của bạn</span></div></div>
         </div>
       </section>
+      {query.skill === "speaking" && <SpeakingLevels query={query} />}
       <CourseFilters key={catalogHref(query, { page: query.page })} query={query} />
       <div className={styles.resultsHeading}><div><h2>{query.status === "in_progress" ? "Khóa học đang học" : query.status === "completed" ? "Khóa học đã hoàn thành" : "Tất cả khóa học"}</h2>{data && <span>{data.totalCount} kết quả{query.search ? ` cho “${query.search}”` : " dành cho bạn"}</span>}</div>{filtered && <Link href="/courses" className={styles.clearFilters}>Xóa bộ lọc <Icon name="close" /></Link>}</div>
       {!data ? <CatalogState error retry={catalogHref(query, { page: query.page })} /> : data.items.length === 0 ? <CatalogState filtered={filtered} /> : <>

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import MemberShell from "@/components/navigation/member-shell";
 import { getCurrentUser } from "@/lib/server-auth";
-import shared from "../register/register.module.css";
+import ProfileForm from "./profile-form";
 import styles from "./account.module.css";
 
 export const metadata: Metadata = { title: "Tài khoản của bạn | LEWA" };
@@ -17,11 +17,7 @@ async function AccountContent() {
   return (
     <MemberShell user={user}>
       <main id="main-content" className={styles.panel} tabIndex={-1}>
-        <span className={styles.avatar} aria-hidden="true">{Array.from(user.fullName)[0]?.toUpperCase()}</span>
-        <span className={shared.eyebrow}>CHÀO MỪNG BẠN TRỞ LẠI</span>
-        <h1>Xin chào, {user.fullName}!</h1>
-        <p>Bạn đã đăng nhập thành công. Một ngày mới, một bước tiến mới cùng tiếng Anh.</p>
-        <dl id="profile" className={styles.details}><div><dt>Địa chỉ email</dt><dd>{user.email}</dd></div><div><dt>Mục tiêu CEFR</dt><dd>{user.targetLevel ?? "Chưa chọn"}</dd></div><div><dt>Ngày tạo tài khoản</dt><dd>{new Date(user.createdAt).toLocaleDateString("vi-VN")}</dd></div></dl>
+        <ProfileForm key={user.userId} user={user} />
         <Link href="/courses" className={styles.homeLink}>Khám phá khóa học →</Link>
       </main>
     </MemberShell>

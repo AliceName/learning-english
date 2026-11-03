@@ -1,0 +1,229 @@
+{
+  "selection": "Lowest speaker-grouped OOF validation MAE, minimum improvement 0.002. Test never used for selection.",
+  "calibration_id": "cal1-f38fe9a705ac1e16",
+  "selected_transform": "identity",
+  "oof_validation": {
+    "identity": {
+      "count": 5891,
+      "mae": 0.07821139008964963,
+      "rmse": 0.1994338307380128
+    },
+    "affine": {
+      "count": 5891,
+      "mae": 0.09234523757297276,
+      "rmse": 0.20310648387121985
+    },
+    "isotonic": {
+      "count": 5891,
+      "mae": 0.0906545025852566,
+      "rmse": 0.20216692415693926
+    }
+  },
+  "group_folds": [
+    {
+      "fit_speakers": [
+        "0006",
+        "0070",
+        "0482",
+        "0813",
+        "1092",
+        "1203",
+        "2059",
+        "2380",
+        "2402",
+        "2427",
+        "2621",
+        "2981",
+        "3046",
+        "3423",
+        "3837",
+        "5401",
+        "6401",
+        "7001",
+        "8002",
+        "9034"
+      ],
+      "holdout_speakers": [
+        "1362",
+        "2242",
+        "3021",
+        "8057",
+        "9634"
+      ]
+    },
+    {
+      "fit_speakers": [
+        "0006",
+        "0482",
+        "0813",
+        "1362",
+        "2059",
+        "2242",
+        "2380",
+        "2402",
+        "2427",
+        "2621",
+        "2981",
+        "3021",
+        "3046",
+        "3423",
+        "3837",
+        "5401",
+        "7001",
+        "8002",
+        "8057",
+        "9634"
+      ],
+      "holdout_speakers": [
+        "0070",
+        "1092",
+        "1203",
+        "6401",
+        "9034"
+      ]
+    },
+    {
+      "fit_speakers": [
+        "0070",
+        "0482",
+        "1092",
+        "1203",
+        "1362",
+        "2059",
+        "2242",
+        "2380",
+        "2402",
+        "2427",
+        "2621",
+        "2981",
+        "3021",
+        "3423",
+        "3837",
+        "6401",
+        "7001",
+        "8057",
+        "9034",
+        "9634"
+      ],
+      "holdout_speakers": [
+        "0006",
+        "0813",
+        "3046",
+        "5401",
+        "8002"
+      ]
+    },
+    {
+      "fit_speakers": [
+        "0006",
+        "0070",
+        "0813",
+        "1092",
+        "1203",
+        "1362",
+        "2059",
+        "2242",
+        "2380",
+        "2402",
+        "3021",
+        "3046",
+        "3423",
+        "3837",
+        "5401",
+        "6401",
+        "8002",
+        "8057",
+        "9034",
+        "9634"
+      ],
+      "holdout_speakers": [
+        "0482",
+        "2427",
+        "2621",
+        "2981",
+        "7001"
+      ]
+    },
+    {
+      "fit_speakers": [
+        "0006",
+        "0070",
+        "0482",
+        "0813",
+        "1092",
+        "1203",
+        "1362",
+        "2242",
+        "2427",
+        "2621",
+        "2981",
+        "3021",
+        "3046",
+        "5401",
+        "6401",
+        "7001",
+        "8002",
+        "8057",
+        "9034",
+        "9634"
+      ],
+      "holdout_speakers": [
+        "2059",
+        "2380",
+        "2402",
+        "3423",
+        "3837"
+      ]
+    }
+  ],
+  "threshold_selection": "Max recall subject to >=30 flagged, precision>=0.8 and Wilson95 lower>=0.7 on OOF validation.",
+  "threshold": {
+    "threshold": 1.1,
+    "flagged": 108,
+    "teacher_below_1_5": 258,
+    "true_positive": 88,
+    "false_positive": 20,
+    "precision": 0.8148148148148148,
+    "recall": 0.34108527131782945,
+    "f1": 0.4808743169398907,
+    "precision_wilson95_lower": 0.7312013484654959
+  },
+  "threshold_fitted": true,
+  "test_supported_subset": {
+    "raw": {
+      "count": 30865,
+      "mae": 0.10792366111739775,
+      "rmse": 0.269178743080454
+    },
+    "adjusted": {
+      "count": 30865,
+      "mae": 0.10792366111739775,
+      "rmse": 0.269178743080454
+    },
+    "old_threshold_1_5": {
+      "flagged": 1211,
+      "teacher_below_1_5": 1977,
+      "true_positive": 809,
+      "false_positive": 402,
+      "precision": 0.6680429397192403,
+      "recall": 0.4092058674759737,
+      "f1": 0.5075282308657465,
+      "precision_wilson95_lower": 0.6410249141471247
+    },
+    "new_threshold": {
+      "flagged": 759,
+      "teacher_below_1_5": 1977,
+      "true_positive": 585,
+      "false_positive": 174,
+      "precision": 0.7707509881422925,
+      "recall": 0.2959028831562974,
+      "f1": 0.4276315789473685,
+      "precision_wilson95_lower": 0.7395266122778897
+    }
+  },
+  "scorer_sha256": "68505cc756b1fbf8b475ae799f394bc635b6abade4a63fb6f047159ff3a484ff",
+  "validation_manifest_sha256": "b65d04298bd2e09160e34e71ce8b17ad5e71a8459437a74d2d1787e05560180a",
+  "test_manifest_sha256": "ddbd116a54b7ef60bb920017d647e54200be216c5d4748f34bd703a71ef22d68",
+  "limitations": "Same validation split previously used for MLP model selection. Cached reference-v1 supported phonemes. Ref2-only phones and Vietnamese speakers are not independently calibrated.",
+  "human_vietnamese_validated": false
+}

@@ -1,0 +1,11 @@
+{
+  "apiUrl": "http://localhost:5000",
+  "apiPhraseContractPresent": true,
+  "modelStatus": "ready",
+  "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+  "segmentationVersion": "phrase-v1",
+  "sqlWritesDuringTests": false,
+  "livePhraseTestPassed": true,
+  "offlineBackendPassed": 59,
+  "frontendPassed": 43
+}

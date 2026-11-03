@@ -1,0 +1,3245 @@
+{
+  "phase": "after",
+  "syntheticAudio": true,
+  "humanAccuracyMeasured": false,
+  "samples": [
+    {
+      "level": "A1",
+      "id": "14c487feb1e830b0bba9",
+      "text": "There were mice scratching in the walls .",
+      "statusCode": 200,
+      "result": {
+        "status": "partial",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 2.68,
+        "overallScore": 99.88,
+        "coverage": 0.954545,
+        "referenceTokenCount": 22,
+        "words": [
+          {
+            "index": 0,
+            "text": "There",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.12,
+                "endSeconds": 0.145
+              }
+            ],
+            "reason": "Từ này chỉ được chấm một phần; các âm gộp hoặc chưa đủ chắc chắn chưa được đánh giá."
+          },
+          {
+            "index": 1,
+            "text": "were",
+            "status": "scored",
+            "score": 1.9994,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.3,
+                "endSeconds": 0.325
+              },
+              {
+                "sourcePhone": "ER1",
+                "symbol": "ɜː",
+                "score": 1.9989,
+                "rawScore": 1.9989,
+                "startSeconds": 0.34,
+                "endSeconds": 0.365
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 2,
+            "text": "mice",
+            "status": "scored",
+            "score": 1.9998,
+            "phones": [
+              {
+                "sourcePhone": "M",
+                "symbol": "m",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.5,
+                "endSeconds": 0.525
+              },
+              {
+                "sourcePhone": "AY1",
+                "symbol": "aɪ",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.54,
+                "endSeconds": 0.565
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.7,
+                "endSeconds": 0.725
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "scratching",
+            "status": "scored",
+            "score": 1.9994,
+            "phones": [
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 1.9963,
+                "rawScore": 1.9963,
+                "startSeconds": 0.74,
+                "endSeconds": 0.765
+              },
+              {
+                "sourcePhone": "K",
+                "symbol": "k",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.82,
+                "endSeconds": 0.845
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.86,
+                "endSeconds": 0.905
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.9,
+                "endSeconds": 0.925
+              },
+              {
+                "sourcePhone": "CH",
+                "symbol": "tʃ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.04,
+                "endSeconds": 1.065
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 1.12,
+                "endSeconds": 1.145
+              },
+              {
+                "sourcePhone": "NG",
+                "symbol": "ŋ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.18,
+                "endSeconds": 1.205
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "in",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.24,
+                "endSeconds": 1.265
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.3,
+                "endSeconds": 1.345
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 5,
+            "text": "the",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.34,
+                "endSeconds": 1.365
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.36,
+                "endSeconds": 1.385
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "walls",
+            "status": "scored",
+            "score": 1.9893,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.48,
+                "endSeconds": 1.505
+              },
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔː",
+                "score": 1.9971,
+                "rawScore": 1.9971,
+                "startSeconds": 1.56,
+                "endSeconds": 1.585
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.7,
+                "endSeconds": 1.765
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9604,
+                "rawScore": 1.9604,
+                "startSeconds": 1.8,
+                "endSeconds": 1.825
+              }
+            ],
+            "reason": null
+          }
+        ],
+        "warnings": [
+          "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+        ],
+        "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "normal",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    },
+    {
+      "level": "A2",
+      "id": "4201b80a314168903466",
+      "text": "That was the day when we saw it .",
+      "statusCode": 200,
+      "result": {
+        "status": "scored",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 2.285,
+        "overallScore": 99.87,
+        "coverage": 1.0,
+        "referenceTokenCount": 19,
+        "words": [
+          {
+            "index": 0,
+            "text": "That",
+            "status": "scored",
+            "score": 1.9997,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.12,
+                "endSeconds": 0.145
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.16,
+                "endSeconds": 0.185
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 1.9995,
+                "rawScore": 1.9995,
+                "startSeconds": 0.26,
+                "endSeconds": 0.285
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 1,
+            "text": "was",
+            "status": "scored",
+            "score": 1.9902,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.3,
+                "endSeconds": 0.345
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ʌ",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.34,
+                "endSeconds": 0.365
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9707,
+                "rawScore": 1.9707,
+                "startSeconds": 0.4,
+                "endSeconds": 0.425
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 2,
+            "text": "the",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.48,
+                "endSeconds": 0.505
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.52,
+                "endSeconds": 0.545
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "day",
+            "status": "scored",
+            "score": 1.9996,
+            "phones": [
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.6,
+                "endSeconds": 0.625
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 1.9993,
+                "rawScore": 1.9993,
+                "startSeconds": 0.66,
+                "endSeconds": 0.685
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "when",
+            "status": "scored",
+            "score": 1.9991,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.82,
+                "endSeconds": 0.845
+              },
+              {
+                "sourcePhone": "EH1",
+                "symbol": "ɛ",
+                "score": 1.9977,
+                "rawScore": 1.9977,
+                "startSeconds": 0.84,
+                "endSeconds": 0.865
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 1.9997,
+                "rawScore": 1.9997,
+                "startSeconds": 0.92,
+                "endSeconds": 0.945
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 5,
+            "text": "we",
+            "status": "scored",
+            "score": 1.9981,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.98,
+                "endSeconds": 1.005
+              },
+              {
+                "sourcePhone": "IY1",
+                "symbol": "iː",
+                "score": 1.9963,
+                "rawScore": 1.9963,
+                "startSeconds": 1.0,
+                "endSeconds": 1.025
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "saw",
+            "status": "scored",
+            "score": 1.995,
+            "phones": [
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 1.9993,
+                "rawScore": 1.9993,
+                "startSeconds": 1.12,
+                "endSeconds": 1.145
+              },
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔː",
+                "score": 1.9908,
+                "rawScore": 1.9908,
+                "startSeconds": 1.22,
+                "endSeconds": 1.245
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 7,
+            "text": "it",
+            "status": "scored",
+            "score": 1.999,
+            "phones": [
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 1.9989,
+                "rawScore": 1.9989,
+                "startSeconds": 1.38,
+                "endSeconds": 1.405
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 1.9992,
+                "rawScore": 1.9992,
+                "startSeconds": 1.48,
+                "endSeconds": 1.505
+              }
+            ],
+            "reason": null
+          }
+        ],
+        "warnings": [],
+        "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "normal",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    },
+    {
+      "level": "B1",
+      "id": "bd5d22d1ef75731f9d1f",
+      "text": "She was eagerly waiting for the tooth fairy .",
+      "statusCode": 200,
+      "result": {
+        "status": "scored",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 2.91,
+        "overallScore": 99.9,
+        "coverage": 1.0,
+        "referenceTokenCount": 26,
+        "words": [
+          {
+            "index": 0,
+            "text": "She",
+            "status": "scored",
+            "score": 1.999,
+            "phones": [
+              {
+                "sourcePhone": "SH",
+                "symbol": "ʃ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.16,
+                "endSeconds": 0.185
+              },
+              {
+                "sourcePhone": "IY1",
+                "symbol": "iː",
+                "score": 1.9981,
+                "rawScore": 1.9981,
+                "startSeconds": 0.24,
+                "endSeconds": 0.265
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 1,
+            "text": "was",
+            "status": "scored",
+            "score": 1.9922,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.34,
+                "endSeconds": 0.365
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ʌ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.36,
+                "endSeconds": 0.385
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9768,
+                "rawScore": 1.9768,
+                "startSeconds": 0.44,
+                "endSeconds": 0.465
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 2,
+            "text": "eagerly",
+            "status": "scored",
+            "score": 1.9994,
+            "phones": [
+              {
+                "sourcePhone": "IY1",
+                "symbol": "iː",
+                "score": 1.9984,
+                "rawScore": 1.9984,
+                "startSeconds": 0.52,
+                "endSeconds": 0.545
+              },
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.62,
+                "endSeconds": 0.645
+              },
+              {
+                "sourcePhone": "ER0",
+                "symbol": "ɚ",
+                "score": 1.9991,
+                "rawScore": 1.9991,
+                "startSeconds": 0.66,
+                "endSeconds": 0.685
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 0.76,
+                "endSeconds": 0.785
+              },
+              {
+                "sourcePhone": "IY0",
+                "symbol": "i",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 0.8,
+                "endSeconds": 0.825
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "waiting",
+            "status": "scored",
+            "score": 1.9995,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.92,
+                "endSeconds": 0.945
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 1.9985,
+                "rawScore": 1.9985,
+                "startSeconds": 0.96,
+                "endSeconds": 0.985
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "ɾ",
+                "score": 1.9995,
+                "rawScore": 1.9995,
+                "startSeconds": 1.06,
+                "endSeconds": 1.085
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 1.9997,
+                "rawScore": 1.9997,
+                "startSeconds": 1.1,
+                "endSeconds": 1.125
+              },
+              {
+                "sourcePhone": "NG",
+                "symbol": "ŋ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.16,
+                "endSeconds": 1.185
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "for",
+            "status": "scored",
+            "score": 1.9921,
+            "phones": [
+              {
+                "sourcePhone": "F",
+                "symbol": "f",
+                "score": 1.9991,
+                "rawScore": 1.9991,
+                "startSeconds": 1.24,
+                "endSeconds": 1.265
+              },
+              {
+                "sourcePhone": "ER0",
+                "symbol": "ɚ",
+                "score": 1.985,
+                "rawScore": 1.985,
+                "startSeconds": 1.3,
+                "endSeconds": 1.325
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 5,
+            "text": "the",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.36,
+                "endSeconds": 1.385
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.4,
+                "endSeconds": 1.425
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "tooth",
+            "status": "scored",
+            "score": 1.9985,
+            "phones": [
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 1.9994,
+                "rawScore": 1.9994,
+                "startSeconds": 1.48,
+                "endSeconds": 1.505
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 1.9993,
+                "rawScore": 1.9993,
+                "startSeconds": 1.58,
+                "endSeconds": 1.605
+              },
+              {
+                "sourcePhone": "TH",
+                "symbol": "θ",
+                "score": 1.9969,
+                "rawScore": 1.9969,
+                "startSeconds": 1.7,
+                "endSeconds": 1.725
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 7,
+            "text": "fairy",
+            "status": "scored",
+            "score": 1.9992,
+            "phones": [
+              {
+                "sourcePhone": "F",
+                "symbol": "f",
+                "score": 1.9987,
+                "rawScore": 1.9987,
+                "startSeconds": 1.8,
+                "endSeconds": 1.825
+              },
+              {
+                "sourcePhone": "EH1",
+                "symbol": "ɛ",
+                "score": 1.9991,
+                "rawScore": 1.9991,
+                "startSeconds": 1.86,
+                "endSeconds": 1.885
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 1.9992,
+                "rawScore": 1.9992,
+                "startSeconds": 1.96,
+                "endSeconds": 1.985
+              },
+              {
+                "sourcePhone": "IY0",
+                "symbol": "i",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 2.02,
+                "endSeconds": 2.045
+              }
+            ],
+            "reason": null
+          }
+        ],
+        "warnings": [],
+        "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "normal",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    },
+    {
+      "level": "B2",
+      "id": "1253c05ac57b7ac98c6e",
+      "text": "The burden of proof is always on the person who brings a claim in a dispute .",
+      "statusCode": 200,
+      "result": {
+        "status": "scored",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 4.575,
+        "overallScore": 100.0,
+        "coverage": 1.0,
+        "referenceTokenCount": 51,
+        "words": [
+          {
+            "index": 0,
+            "text": "The",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.1,
+                "endSeconds": 0.145
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.14,
+                "endSeconds": 0.165
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 1,
+            "text": "burden",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "B",
+                "symbol": "b",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.26,
+                "endSeconds": 0.285
+              },
+              {
+                "sourcePhone": "ER1",
+                "symbol": "ɜː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.3,
+                "endSeconds": 0.325
+              },
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.42,
+                "endSeconds": 0.445
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.46,
+                "endSeconds": 0.485
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.52,
+                "endSeconds": 0.545
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 2,
+            "text": "of",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH1",
+                "symbol": "ʌ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.58,
+                "endSeconds": 0.605
+              },
+              {
+                "sourcePhone": "V",
+                "symbol": "v",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.64,
+                "endSeconds": 0.665
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "proof",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.74,
+                "endSeconds": 0.765
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.78,
+                "endSeconds": 0.825
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.84,
+                "endSeconds": 0.865
+              },
+              {
+                "sourcePhone": "F",
+                "symbol": "f",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.98,
+                "endSeconds": 1.005
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "is",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.04,
+                "endSeconds": 1.065
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.1,
+                "endSeconds": 1.145
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 5,
+            "text": "always",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔː",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 1.22,
+                "endSeconds": 1.245
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.3,
+                "endSeconds": 1.325
+              },
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.34,
+                "endSeconds": 1.365
+              },
+              {
+                "sourcePhone": "EY2",
+                "symbol": "eɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.38,
+                "endSeconds": 1.405
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9996,
+                "rawScore": 1.9996,
+                "startSeconds": 1.46,
+                "endSeconds": 1.485
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "on",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.54,
+                "endSeconds": 1.565
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.62,
+                "endSeconds": 1.665
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 7,
+            "text": "the",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.66,
+                "endSeconds": 1.685
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.68,
+                "endSeconds": 1.705
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 8,
+            "text": "person",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.78,
+                "endSeconds": 1.805
+              },
+              {
+                "sourcePhone": "ER1",
+                "symbol": "ɜː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.86,
+                "endSeconds": 1.885
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.98,
+                "endSeconds": 2.005
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.06,
+                "endSeconds": 2.085
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.1,
+                "endSeconds": 2.145
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 9,
+            "text": "who",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "HH",
+                "symbol": "h",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.18,
+                "endSeconds": 2.225
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.24,
+                "endSeconds": 2.265
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 10,
+            "text": "brings",
+            "status": "scored",
+            "score": 1.9998,
+            "phones": [
+              {
+                "sourcePhone": "B",
+                "symbol": "b",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.38,
+                "endSeconds": 2.405
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.4,
+                "endSeconds": 2.445
+              },
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.44,
+                "endSeconds": 2.465
+              },
+              {
+                "sourcePhone": "NG",
+                "symbol": "ŋ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.54,
+                "endSeconds": 2.565
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9989,
+                "rawScore": 1.9989,
+                "startSeconds": 2.6,
+                "endSeconds": 2.625
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 11,
+            "text": "a",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.66,
+                "endSeconds": 2.685
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 12,
+            "text": "claim",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "K",
+                "symbol": "k",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.76,
+                "endSeconds": 2.785
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.82,
+                "endSeconds": 2.865
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.88,
+                "endSeconds": 2.905
+              },
+              {
+                "sourcePhone": "M",
+                "symbol": "m",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.04,
+                "endSeconds": 3.065
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 13,
+            "text": "in",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.08,
+                "endSeconds": 3.105
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.14,
+                "endSeconds": 3.165
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 14,
+            "text": "a",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.18,
+                "endSeconds": 3.205
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 15,
+            "text": "dispute",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.26,
+                "endSeconds": 3.285
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.3,
+                "endSeconds": 3.325
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.36,
+                "endSeconds": 3.405
+              },
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.46,
+                "endSeconds": 3.485
+              },
+              {
+                "sourcePhone": "Y",
+                "symbol": "j",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.5,
+                "endSeconds": 3.545
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.54,
+                "endSeconds": 3.565
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.74,
+                "endSeconds": 3.765
+              }
+            ],
+            "reason": null
+          }
+        ],
+        "warnings": [],
+        "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "normal",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    },
+    {
+      "level": "C1",
+      "id": "4a7b4f257b12e399d49c",
+      "text": "In angiosperms , after the pollen grain has landed on the stigma , it develops a pollen tube which grows down the style until it reaches an ovary .",
+      "statusCode": 200,
+      "result": {
+        "status": "partial",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 9.3,
+        "overallScore": 99.99,
+        "coverage": 0.85,
+        "referenceTokenCount": 100,
+        "words": [
+          {
+            "index": 0,
+            "text": "In",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.12,
+                "endSeconds": 0.145
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.18,
+                "endSeconds": 0.205
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 1,
+            "text": "angiosperms",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          },
+          {
+            "index": 2,
+            "text": "after",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.66,
+                "endSeconds": 1.685
+              },
+              {
+                "sourcePhone": "F",
+                "symbol": "f",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.78,
+                "endSeconds": 1.805
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.82,
+                "endSeconds": 1.845
+              },
+              {
+                "sourcePhone": "ER0",
+                "symbol": "ɚ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.86,
+                "endSeconds": 1.885
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "the",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.92,
+                "endSeconds": 1.945
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.96,
+                "endSeconds": 1.985
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "pollen",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.06,
+                "endSeconds": 2.085
+              },
+              {
+                "sourcePhone": "AA1",
+                "symbol": "ɑː",
+                "score": 1.9998,
+                "rawScore": 1.9998,
+                "startSeconds": 2.14,
+                "endSeconds": 2.165
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.24,
+                "endSeconds": 2.265
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.28,
+                "endSeconds": 2.305
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.34,
+                "endSeconds": 2.365
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 5,
+            "text": "grain",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.44,
+                "endSeconds": 2.465
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.48,
+                "endSeconds": 2.525
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 2.52,
+                "endSeconds": 2.545
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.66,
+                "endSeconds": 2.705
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "has",
+            "status": "scored",
+            "score": 1.9997,
+            "phones": [
+              {
+                "sourcePhone": "HH",
+                "symbol": "h",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.72,
+                "endSeconds": 2.765
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.76,
+                "endSeconds": 2.785
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9991,
+                "rawScore": 1.9991,
+                "startSeconds": 2.84,
+                "endSeconds": 2.865
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 7,
+            "text": "landed",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.94,
+                "endSeconds": 2.985
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.0,
+                "endSeconds": 3.025
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.1,
+                "endSeconds": 3.125
+              },
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.14,
+                "endSeconds": 3.165
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ᵻ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.18,
+                "endSeconds": 3.205
+              },
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.24,
+                "endSeconds": 3.265
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 8,
+            "text": "on",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 3.3,
+                "endSeconds": 3.325
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.38,
+                "endSeconds": 3.425
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 9,
+            "text": "the",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.42,
+                "endSeconds": 3.445
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.44,
+                "endSeconds": 3.485
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 10,
+            "text": "stigma",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.52,
+                "endSeconds": 3.565
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.62,
+                "endSeconds": 3.645
+              },
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.68,
+                "endSeconds": 3.705
+              },
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.76,
+                "endSeconds": 3.785
+              },
+              {
+                "sourcePhone": "M",
+                "symbol": "m",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.84,
+                "endSeconds": 3.865
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 3.88,
+                "endSeconds": 3.905
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 11,
+            "text": "it",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.46,
+                "endSeconds": 4.485
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.54,
+                "endSeconds": 4.565
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 12,
+            "text": "develops",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.6,
+                "endSeconds": 4.625
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 4.64,
+                "endSeconds": 4.665
+              },
+              {
+                "sourcePhone": "V",
+                "symbol": "v",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 4.72,
+                "endSeconds": 4.745
+              },
+              {
+                "sourcePhone": "EH1",
+                "symbol": "ɛ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.76,
+                "endSeconds": 4.785
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.84,
+                "endSeconds": 4.865
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 4.88,
+                "endSeconds": 4.905
+              },
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.96,
+                "endSeconds": 4.985
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.02,
+                "endSeconds": 5.045
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 13,
+            "text": "a",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.08,
+                "endSeconds": 5.105
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 14,
+            "text": "pollen",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.2,
+                "endSeconds": 5.225
+              },
+              {
+                "sourcePhone": "AA1",
+                "symbol": "ɑː",
+                "score": 1.9997,
+                "rawScore": 1.9997,
+                "startSeconds": 5.28,
+                "endSeconds": 5.305
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.38,
+                "endSeconds": 5.405
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 5.42,
+                "endSeconds": 5.445
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.48,
+                "endSeconds": 5.505
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 15,
+            "text": "tube",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.56,
+                "endSeconds": 5.585
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.66,
+                "endSeconds": 5.685
+              },
+              {
+                "sourcePhone": "B",
+                "symbol": "b",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.82,
+                "endSeconds": 5.845
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 16,
+            "text": "which",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.88,
+                "endSeconds": 5.925
+              },
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 5.92,
+                "endSeconds": 5.945
+              },
+              {
+                "sourcePhone": "CH",
+                "symbol": "tʃ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.0,
+                "endSeconds": 6.025
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 17,
+            "text": "grows",
+            "status": "scored",
+            "score": 1.9994,
+            "phones": [
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.1,
+                "endSeconds": 6.125
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.14,
+                "endSeconds": 6.185
+              },
+              {
+                "sourcePhone": "OW1",
+                "symbol": "oʊ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 6.2,
+                "endSeconds": 6.225
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9978,
+                "rawScore": 1.9978,
+                "startSeconds": 6.36,
+                "endSeconds": 6.385
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 18,
+            "text": "down",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.46,
+                "endSeconds": 6.485
+              },
+              {
+                "sourcePhone": "AW1",
+                "symbol": "aʊ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.52,
+                "endSeconds": 6.545
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.66,
+                "endSeconds": 6.705
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 19,
+            "text": "the",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.7,
+                "endSeconds": 6.745
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.74,
+                "endSeconds": 6.765
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 20,
+            "text": "style",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.82,
+                "endSeconds": 6.845
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.9,
+                "endSeconds": 6.925
+              },
+              {
+                "sourcePhone": "AY1",
+                "symbol": "aɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.96,
+                "endSeconds": 6.985
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.14,
+                "endSeconds": 7.165
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 21,
+            "text": "until",
+            "status": "scored",
+            "score": 1.9999,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ʌ",
+                "score": 1.9996,
+                "rawScore": 1.9996,
+                "startSeconds": 7.2,
+                "endSeconds": 7.225
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.26,
+                "endSeconds": 7.285
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 7.3,
+                "endSeconds": 7.325
+              },
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 7.38,
+                "endSeconds": 7.405
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 7.44,
+                "endSeconds": 7.485
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 22,
+            "text": "it",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH1",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.52,
+                "endSeconds": 7.545
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 7.58,
+                "endSeconds": 7.605
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 23,
+            "text": "reaches",
+            "status": "scored",
+            "score": 1.9988,
+            "phones": [
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.64,
+                "endSeconds": 7.685
+              },
+              {
+                "sourcePhone": "IY1",
+                "symbol": "iː",
+                "score": 1.9996,
+                "rawScore": 1.9996,
+                "startSeconds": 7.68,
+                "endSeconds": 7.705
+              },
+              {
+                "sourcePhone": "CH",
+                "symbol": "tʃ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.8,
+                "endSeconds": 7.825
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ᵻ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 7.86,
+                "endSeconds": 7.885
+              },
+              {
+                "sourcePhone": "Z",
+                "symbol": "z",
+                "score": 1.9947,
+                "rawScore": 1.9947,
+                "startSeconds": 7.94,
+                "endSeconds": 7.965
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 24,
+            "text": "an",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 8.0,
+                "endSeconds": 8.025
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 8.06,
+                "endSeconds": 8.085
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 25,
+            "text": "ovary",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          }
+        ],
+        "warnings": [
+          "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+        ],
+        "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "normal",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    },
+    {
+      "level": "C2",
+      "id": "7f02cc0f80eb513a8661",
+      "text": "In the past , non-photosynthetic plants were mistakenly thought to get food by breaking down organic matter in a manner similar to saprotrophic fungi .",
+      "statusCode": 200,
+      "result": {
+        "status": "partial",
+        "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+        "durationSeconds": 9.365,
+        "overallScore": 100.0,
+        "coverage": 0.619048,
+        "referenceTokenCount": 105,
+        "words": [
+          {
+            "index": 0,
+            "text": "In",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.12,
+                "endSeconds": 0.145
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.18,
+                "endSeconds": 0.225
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 1,
+            "text": "the",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "DH",
+                "symbol": "ð",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.22,
+                "endSeconds": 0.245
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.24,
+                "endSeconds": 0.265
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 2,
+            "text": "past",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.34,
+                "endSeconds": 0.365
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.42,
+                "endSeconds": 0.445
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.62,
+                "endSeconds": 0.645
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 0.7,
+                "endSeconds": 0.725
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 3,
+            "text": "non",
+            "status": "scored",
+            "score": 1.9998,
+            "phones": [
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.22,
+                "endSeconds": 1.245
+              },
+              {
+                "sourcePhone": "AA1",
+                "symbol": "ɑː",
+                "score": 1.9995,
+                "rawScore": 1.9995,
+                "startSeconds": 1.26,
+                "endSeconds": 1.285
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 1.36,
+                "endSeconds": 1.385
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 4,
+            "text": "photosynthetic",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          },
+          {
+            "index": 5,
+            "text": "plants",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "P",
+                "symbol": "p",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.3,
+                "endSeconds": 2.325
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.36,
+                "endSeconds": 2.405
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.42,
+                "endSeconds": 2.445
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.54,
+                "endSeconds": 2.565
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.56,
+                "endSeconds": 2.625
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.62,
+                "endSeconds": 2.645
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 6,
+            "text": "were",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "W",
+                "symbol": "w",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.7,
+                "endSeconds": 2.745
+              },
+              {
+                "sourcePhone": "ER1",
+                "symbol": "ɜː",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 2.74,
+                "endSeconds": 2.765
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 7,
+            "text": "mistakenly",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "M",
+                "symbol": "m",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.84,
+                "endSeconds": 2.865
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.88,
+                "endSeconds": 2.905
+              },
+              {
+                "sourcePhone": "S",
+                "symbol": "s",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 2.94,
+                "endSeconds": 2.965
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.02,
+                "endSeconds": 3.045
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.08,
+                "endSeconds": 3.105
+              },
+              {
+                "sourcePhone": "K",
+                "symbol": "k",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.18,
+                "endSeconds": 3.205
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.22,
+                "endSeconds": 3.245
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.28,
+                "endSeconds": 3.325
+              },
+              {
+                "sourcePhone": "L",
+                "symbol": "l",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.34,
+                "endSeconds": 3.365
+              },
+              {
+                "sourcePhone": "IY0",
+                "symbol": "i",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.38,
+                "endSeconds": 3.405
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 8,
+            "text": "thought",
+            "status": "scored",
+            "score": 1.9998,
+            "phones": [
+              {
+                "sourcePhone": "TH",
+                "symbol": "θ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 3.5,
+                "endSeconds": 3.525
+              },
+              {
+                "sourcePhone": "AO1",
+                "symbol": "ɔː",
+                "score": 1.9995,
+                "rawScore": 1.9995,
+                "startSeconds": 3.58,
+                "endSeconds": 3.605
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.7,
+                "endSeconds": 3.725
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 9,
+            "text": "to",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.74,
+                "endSeconds": 3.765
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.8,
+                "endSeconds": 3.825
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 10,
+            "text": "get",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.88,
+                "endSeconds": 3.905
+              },
+              {
+                "sourcePhone": "EH1",
+                "symbol": "ɛ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 3.94,
+                "endSeconds": 3.965
+              },
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.02,
+                "endSeconds": 4.045
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 11,
+            "text": "food",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "F",
+                "symbol": "f",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.12,
+                "endSeconds": 4.145
+              },
+              {
+                "sourcePhone": "UW1",
+                "symbol": "uː",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.18,
+                "endSeconds": 4.205
+              },
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.32,
+                "endSeconds": 4.345
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 12,
+            "text": "by",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "B",
+                "symbol": "b",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.4,
+                "endSeconds": 4.425
+              },
+              {
+                "sourcePhone": "AY1",
+                "symbol": "aɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.44,
+                "endSeconds": 4.465
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 13,
+            "text": "breaking",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "B",
+                "symbol": "b",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.6,
+                "endSeconds": 4.625
+              },
+              {
+                "sourcePhone": "R",
+                "symbol": "ɹ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.64,
+                "endSeconds": 4.665
+              },
+              {
+                "sourcePhone": "EY1",
+                "symbol": "eɪ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 4.68,
+                "endSeconds": 4.705
+              },
+              {
+                "sourcePhone": "K",
+                "symbol": "k",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.8,
+                "endSeconds": 4.825
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.86,
+                "endSeconds": 4.885
+              },
+              {
+                "sourcePhone": "NG",
+                "symbol": "ŋ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 4.92,
+                "endSeconds": 4.945
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 14,
+            "text": "down",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "D",
+                "symbol": "d",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.02,
+                "endSeconds": 5.045
+              },
+              {
+                "sourcePhone": "AW1",
+                "symbol": "aʊ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.08,
+                "endSeconds": 5.105
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.22,
+                "endSeconds": 5.265
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 15,
+            "text": "organic",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "G",
+                "symbol": "ɡ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.44,
+                "endSeconds": 5.465
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.5,
+                "endSeconds": 5.525
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.58,
+                "endSeconds": 5.605
+              },
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.62,
+                "endSeconds": 5.645
+              },
+              {
+                "sourcePhone": "K",
+                "symbol": "k",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 5.7,
+                "endSeconds": 5.725
+              }
+            ],
+            "reason": "Từ này chỉ được chấm một phần; các âm gộp hoặc chưa đủ chắc chắn chưa được đánh giá."
+          },
+          {
+            "index": 16,
+            "text": "matter",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          },
+          {
+            "index": 17,
+            "text": "in",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "IH0",
+                "symbol": "ɪ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.12,
+                "endSeconds": 6.145
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.18,
+                "endSeconds": 6.205
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 18,
+            "text": "a",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ɐ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.2,
+                "endSeconds": 6.245
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 19,
+            "text": "manner",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "M",
+                "symbol": "m",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.32,
+                "endSeconds": 6.345
+              },
+              {
+                "sourcePhone": "AE1",
+                "symbol": "æ",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.36,
+                "endSeconds": 6.385
+              },
+              {
+                "sourcePhone": "N",
+                "symbol": "n",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 6.46,
+                "endSeconds": 6.485
+              },
+              {
+                "sourcePhone": "ER0",
+                "symbol": "ɚ",
+                "score": 1.9999,
+                "rawScore": 1.9999,
+                "startSeconds": 6.5,
+                "endSeconds": 6.525
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 20,
+            "text": "similar",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          },
+          {
+            "index": 21,
+            "text": "to",
+            "status": "scored",
+            "score": 2.0,
+            "phones": [
+              {
+                "sourcePhone": "T",
+                "symbol": "t",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.02,
+                "endSeconds": 7.045
+              },
+              {
+                "sourcePhone": "AH0",
+                "symbol": "ə",
+                "score": 2.0,
+                "rawScore": 2.0,
+                "startSeconds": 7.06,
+                "endSeconds": 7.105
+              }
+            ],
+            "reason": null
+          },
+          {
+            "index": 22,
+            "text": "saprotrophic",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          },
+          {
+            "index": 23,
+            "text": "fungi",
+            "status": "unsupported",
+            "score": null,
+            "phones": [],
+            "reason": "Chưa đối chiếu được âm vị của từ này."
+          }
+        ],
+        "warnings": [
+          "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+        ],
+        "feedback": "Chỉ đánh giá được 62% số âm tham chiếu; chưa đủ phần được chấm để nhận xét toàn câu. Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+        "interpretation": {
+          "calibrationVersion": "cal1-f38fe9a705ac1e16",
+          "calibrationMethod": "identity",
+          "practiceThreshold": 1.1,
+          "reviewThreshold": 1.5,
+          "thresholdFitted": true,
+          "minimumCoverage": 0.8,
+          "feedbackMode": "limited_coverage",
+          "evidenceScope": "speechocean762-supported-subset"
+        }
+      }
+    }
+  ],
+  "health": {
+    "status": "ready",
+    "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+    "maxRecordingSeconds": 12
+  },
+  "realDatasetSample": {
+    "audioSource": "D:\\EnglishPronunciationTraining\\EnglishPronunciationTraining\\speechocean762-main\\WAVE\\SPEAKER0001\\000010011.WAV",
+    "text": "We call it bear",
+    "statusCode": 200,
+    "result": {
+      "status": "partial",
+      "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+      "durationSeconds": 2.58,
+      "overallScore": 97.07,
+      "coverage": 0.888889,
+      "referenceTokenCount": 9,
+      "words": [
+        {
+          "index": 0,
+          "text": "We",
+          "status": "scored",
+          "score": 1.9541,
+          "phones": [
+            {
+              "sourcePhone": "W",
+              "symbol": "w",
+              "score": 1.9889,
+              "rawScore": 1.9889,
+              "startSeconds": 0.66,
+              "endSeconds": 0.685
+            },
+            {
+              "sourcePhone": "IY1",
+              "symbol": "iː",
+              "score": 1.9194,
+              "rawScore": 1.9194,
+              "startSeconds": 0.72,
+              "endSeconds": 0.745
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 1,
+          "text": "call",
+          "status": "scored",
+          "score": 1.9238,
+          "phones": [
+            {
+              "sourcePhone": "K",
+              "symbol": "k",
+              "score": 1.9786,
+              "rawScore": 1.9786,
+              "startSeconds": 1.02,
+              "endSeconds": 1.045
+            },
+            {
+              "sourcePhone": "AO1",
+              "symbol": "ɔː",
+              "score": 1.8958,
+              "rawScore": 1.8958,
+              "startSeconds": 1.12,
+              "endSeconds": 1.145
+            },
+            {
+              "sourcePhone": "L",
+              "symbol": "l",
+              "score": 1.897,
+              "rawScore": 1.897,
+              "startSeconds": 1.22,
+              "endSeconds": 1.245
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 2,
+          "text": "it",
+          "status": "scored",
+          "score": 1.9379,
+          "phones": [
+            {
+              "sourcePhone": "IH1",
+              "symbol": "ɪ",
+              "score": 1.9517,
+              "rawScore": 1.9517,
+              "startSeconds": 1.34,
+              "endSeconds": 1.365
+            },
+            {
+              "sourcePhone": "T",
+              "symbol": "t",
+              "score": 1.9241,
+              "rawScore": 1.9241,
+              "startSeconds": 1.44,
+              "endSeconds": 1.465
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 3,
+          "text": "bear",
+          "status": "scored",
+          "score": 1.9765,
+          "phones": [
+            {
+              "sourcePhone": "B",
+              "symbol": "b",
+              "score": 1.9765,
+              "rawScore": 1.9765,
+              "startSeconds": 1.66,
+              "endSeconds": 1.685
+            }
+          ],
+          "reason": "Từ này chỉ được chấm một phần; các âm gộp hoặc chưa đủ chắc chắn chưa được đánh giá."
+        }
+      ],
+      "warnings": [
+        "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+      ],
+      "feedback": "Chưa có âm đã chấm nào dưới ngưỡng gợi ý luyện lại. Bạn có thể nghe mẫu và đọc lại cả câu. Phần chưa hỗ trợ không được xem là phát âm sai; điểm không xác định lỗi thay âm cụ thể.",
+      "interpretation": {
+        "calibrationVersion": "cal1-f38fe9a705ac1e16",
+        "calibrationMethod": "identity",
+        "practiceThreshold": 1.1,
+        "reviewThreshold": 1.5,
+        "thresholdFitted": true,
+        "minimumCoverage": 0.8,
+        "feedbackMode": "normal",
+        "evidenceScope": "speechocean762-supported-subset"
+      }
+    }
+  }
+}

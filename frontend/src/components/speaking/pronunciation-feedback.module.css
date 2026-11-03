@@ -1,0 +1,24 @@
+.panel { padding: 18px; border: 1px solid #f2c78e; background: #fffcf7; border-radius: 12px; margin: 20px 0; line-height: 1.8; color: #252b39; overflow-wrap: anywhere; }
+.panel h3 { margin: 0 0 10px; color: #606a7c; font-size: 14px; }
+.sentence { margin: 0 0 12px; font-size: 19px; font-weight: 650; line-height: 2.2; }
+.sentenceWord { border-radius: 5px; padding: 3px 5px; box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: help; }
+.goodWord { color: #166534; background: #e4f5e9; }
+.listenWord { color: #854d0e; background: #fff1bd; }
+.practiceWord { color: #b42318; background: #fee4e2; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.unassessedWord { color: #536174; background: #edf0f4; }
+.partialWord { text-decoration: underline dashed; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 16px; padding: 0; margin: 10px 0; font-size: 12px; }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend span { padding: 1px 6px; border-radius: 4px; font-weight: 600; }
+.colorNote { margin: 8px 0 16px; font-size: 12px; line-height: 1.7; color: #666d79; }
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.tag { display: inline-block; padding: 2px 9px; background: #ffead6; color: #a64600; border-radius: 18px; font-size: 12px; }
+.listenTag { display: inline-block; padding: 2px 9px; background: #f4efdb; color: #796732; border-radius: 18px; font-size: 12px; }
+.qualityNote { padding: 12px; border-radius: 9px; background: #f4f0e6; color: #6e6246; font-size: 13px; }
+.target + .target { border-top: 1px solid #f2dfc8; padding-top: 16px; margin-top: 16px; }
+.target ul { margin: 10px 0; padding-left: 23px; font-size: 14px; }
+.target li { margin: 6px 0; }
+.panel button { cursor: pointer; font: inherit; font-size: 13px; background: #fff; color: #89420a; border: 1px solid #e1bc96; border-radius: 8px; padding: 7px 12px; margin: 6px 8px 6px 0; }
+.panel .note { margin: 12px 0 0; font-size: 12px; color: #776c60; }
+.summary { font-size: 14px; }
+@media(max-width:600px) { .panel { padding: 14px; } .sentence { font-size: 17px; } }

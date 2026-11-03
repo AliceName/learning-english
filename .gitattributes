@@ -1,0 +1,2 @@
+# Calibration verifies this file by its exact SHA256 bytes.
+backend/speaking-ai/reference_mapping.py -text
