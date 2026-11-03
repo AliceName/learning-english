@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { isProfileAvatar } from "@/lib/profile-avatar";
 import { usePathname } from "next/navigation";
 import { useRef } from "react";
 import type { PublicUser } from "@/lib/server-auth";
@@ -14,9 +16,9 @@ import styles from "./member-navbar.module.css";
 const links: { label: string; icon: SiteIconName; href?: string }[] = [
   { label: "Tổng quan", icon: "dashboard", href: "/account" },
   { label: "Khóa học", icon: "book", href: "/courses" },
-  { label: "Luyện tập kỹ năng", icon: "mic" },
+  { label: "Luyện nói", icon: "mic", href: "/courses?skill=speaking" },
   { label: "Tạo khóa học AI", icon: "sparkles" },
-  { label: "Flashcards", icon: "cards" },
+  { label: "Flashcards", icon: "cards", href: "/flashcards" },
   { label: "Ôn tập lỗi sai", icon: "replay" },
   { label: "Bookmark", icon: "bookmark" },
   { label: "Tiến độ", icon: "trend" },
@@ -27,8 +29,10 @@ export default function MemberNavbar({ user, variant = "workspace" }: { user?: P
   const pathname = usePathname();
   const drawer = useRef<HTMLDialogElement>(null);
   const initials = user?.fullName.trim().split(/\s+/).slice(-2).map(part => Array.from(part)[0]).join("").toUpperCase() || "?";
+  const avatar = user?.avatarUrl && isProfileAvatar(user.avatarUrl)
+    ? <Image src={user.avatarUrl} alt="" width={35} height={35} unoptimized style={{ borderRadius: "50%" }} /> : initials;
   if (variant === "compact") return <NavbarShell links={[{ href: "/", label: "Trang chủ" }, { href: "/courses", label: "Khóa học" }]}>
-    <Link href="/account" className={publicStyles.account}><span className={publicStyles.avatar}>{initials}</span><span className={publicStyles.accountName}>{user?.fullName ?? "Tài khoản của bạn"}</span></Link><LogoutButton />
+    <Link href="/account" className={publicStyles.account}><span className={publicStyles.avatar}>{avatar}</span><span className={publicStyles.accountName}>{user?.fullName ?? "Tài khoản của bạn"}</span></Link><LogoutButton />
   </NavbarShell>;
 
   const navigation = <>
@@ -55,7 +59,7 @@ export default function MemberNavbar({ user, variant = "workspace" }: { user?: P
         {user?.targetLevel && <Link href="/account#profile" className={styles.target}><Icon name="compass" /><span>Mục tiêu <strong>{user.targetLevel}</strong></span></Link>}
         {typeof user?.currentStreak === "number" && <span className={styles.streak}><Icon name="flame" /><strong>{user.currentStreak}</strong><span>ngày</span></span>}
         <span className={styles.divider} />
-        <Link href="/account#profile" className={styles.profile} aria-label="Xem hồ sơ của bạn"><span className={styles.userText}><strong>{user?.fullName ?? "Tài khoản của bạn"}</strong><small>{user?.email}</small></span><span className={styles.avatar}>{initials}</span></Link>
+        <Link href="/account#profile" className={styles.profile} aria-label="Xem hồ sơ của bạn"><span className={styles.userText}><strong>{user?.fullName ?? "Tài khoản của bạn"}</strong><small>{user?.email}</small></span><span className={styles.avatar}>{avatar}</span></Link>
       </div>
     </header>
   </>;

@@ -250,3 +250,9 @@ dotnet build EnglishLearningSystem.sln
 ```
 
 Câu trắc nghiệm Reading/Listening/Grammar (và chọn phần sai của Grammar) có 2–4 lựa chọn không trống, mỗi lựa chọn tối đa 500 ký tự và một correctOptionIndex hợp lệ. API từ chối ít hơn 2 hoặc nhiều hơn 4 lựa chọn. Không thay đổi schema database.
+
+## Speaking cho học viên
+
+Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
+
+Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.

@@ -1,0 +1,1584 @@
+[
+  {
+    "level": "A1",
+    "title": "CEFR-SP A1 — SCoRE · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP A1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Do you need something to eat ?",
+          "I have two fish in a bowl .",
+          "She wanted the grey coat .",
+          "I sent my girlfriend red roses .",
+          "She needs to use your phone .",
+          "Do you have a car ?",
+          "Sometimes I sleep until noon .",
+          "A monkey climbed on my shoulders .",
+          "We went by metro .",
+          "We have so many good things to eat for dinner ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "You should stay with your sister .",
+          "May I join you ?",
+          "Does he have a wife ?",
+          "He painted the house next to ours .",
+          "Roy did n't like his girlfriend 's meals .",
+          "Shall I go now ?",
+          "He gave her a loving look .",
+          "I want to sleep .",
+          "No one brought drinks .",
+          "I like your sister ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "She may leave early .",
+          "What do you want to do next year ?",
+          "Americans love eating beef .",
+          "I bought both of them .",
+          "Can you speak Thai ?",
+          "Please give me the time .",
+          "These seats are ours .",
+          "I am trying to help you .",
+          "I need a new one .",
+          "Do you have any last words ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A1 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The car took us to school .",
+          "Why is the sky blue ?",
+          "They put the food in bags .",
+          "Please tell your wife .",
+          "Her daughter wants to become a personal trainer .",
+          "Can I have his cake ?",
+          "Is it your birthday ?",
+          "Emma sat down next to her sister .",
+          "Our sun looks yellow .",
+          "Are you in a league ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A1 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Let 's try to read .",
+          "He 's always very nice .",
+          "Sheep and cows eat grass for food .",
+          "Say good - bye to her old life .",
+          "Give her the pen , please .",
+          "Is that your bike ?",
+          "I forgot to bring my umbrella .",
+          "The baby kept crying .",
+          "Do you know what you 're doing this weekend ?",
+          "No one had money ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "A1",
+    "title": "CEFR-SP A1 — Wiki-Auto · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP A1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Earth is very old .",
+          "The team 's colors are red and white .",
+          "He has many works ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "A2",
+    "title": "CEFR-SP A2 — SCoRE · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP A2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Roberta and I baked a pie made from fruit .",
+          "I 've been sitting in front of this computer for too many hours .",
+          "The Americans are training the Iraqi military .",
+          "I do n't know what to do about this problem .",
+          "This will look nice with your black pants .",
+          "It 's always crowded on Friday nights .",
+          "The man whom I called was not in .",
+          "If they found out , I 'd lose my job .",
+          "Do you have any money to contribute to the new program ?",
+          "Please do n't cause a scene ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Hana loved lemon flavored candy .",
+          "Please get some cat food at the store .",
+          "I would be happy if they were here .",
+          "It 's good of you to visit your sick grandmother .",
+          "Fewer homes are built of wood .",
+          "I 'm not confused , I 'm upset !",
+          "Is that the same spot where I found the other earring ?",
+          "The president lent them his support .",
+          "I saved Walter some cookies .",
+          "I will continue to fight for my rights ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I went whale watching this summer .",
+          "Amy was always wearing her brother 's sweater .",
+          "If he tried to run to the train , he would often get caught in the doors .",
+          "Who took the last slice of chocolate cake that I was saving ?",
+          "You need a fishing license to fish here .",
+          "There is a very smart student in my class .",
+          "If I were you , I would buy a lovely present for my wife .",
+          "I do n't need you to tell me what to do .",
+          "He knows when to catch the bus .",
+          "Ian was n't allowed to have snack today ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I knew all of them very well since middle school .",
+          "Have you ever been alone in a new country ?",
+          "Either finish now or do it tonight instead of going to the movie .",
+          "What would you do if she knew you were her real father ?",
+          "Could you show me how to use this ATM machine ?",
+          "Mr. Jackson 's office is big and it 's very easy to find .",
+          "It was good to visit my parents .",
+          "I went to the new dentist to have my teeth fixed .",
+          "If he were here now , he would be so proud of you .",
+          "No birds live in that forest ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Please remember to bring some money .",
+          "If it was new , I 'd buy it .",
+          "Do you think that Adam will be able to walk again ?",
+          "Sony has given me an interview next week .",
+          "The masked man ran from the bank .",
+          "We need someone to cover his shift .",
+          "The bill was paid yesterday .",
+          "Can you raise one eyebrow ?",
+          "Although I 'm turning twenty today , I still feel like a child .",
+          "Think about what you have learned here ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Please introduce me to your friend .",
+          "I 've never seen him use that racquet .",
+          "Mickey lent Goofy his gloves .",
+          "I do n't know how to make this any clearer .",
+          "Tom told Jess his phone number before he left .",
+          "She bought those pants five years ago .",
+          "Could you please teach me to use this website ?",
+          "I 've never seen a Dutch oven before .",
+          "They were sitting in the nurses ' station .",
+          "You might hear from your colleague about the new business project ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "If I wanted more , I could ask .",
+          "The painters all wore work pants .",
+          "The rookie is good but needs more practice .",
+          "Janet keeps her sewing room cluttered .",
+          "If you were an actor , what role would you want to play ?",
+          "I stayed behind in order to study .",
+          "James wanted nothing to do with Melissa .",
+          "I told them my dog would stay inside today because of the heat .",
+          "John and his wife have sold furniture for years .",
+          "What are the different phases of the Moon called ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Could you please dry clean my suits ?",
+          "I wish my boyfriend would stop looking at other girls .",
+          "I need someone who can fix my car .",
+          "Was there something you were concerned about ?",
+          "That is the world where they are from .",
+          "He said he thanked her but she ignored him .",
+          "Who left all that hair in the bathroom ?",
+          "They stood holding hands .",
+          "He was as sad as I was .",
+          "That cruise ship is huge !"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Carl decided to buy a new belt .",
+          "The chef had a very big knife .",
+          "Please write down what you think you should be paid .",
+          "Since you do not have children or any other family , you will have nobody to take care of you .",
+          "Let me know what you think is the best way to handle this situation .",
+          "Her foot blocked the ball .",
+          "She kept it on a shelf .",
+          "I am delighted to meet you .",
+          "Now I am being called by Softbank , too !",
+          "He 's very good at taking care of children ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Sushi is raw fish .",
+          "I will do it as soon as I return .",
+          "These are the friends whose names you know .",
+          "Do n't wear khakis to the business meeting .",
+          "Mother was too shy to wear a bikini .",
+          "This huge store only has three cashiers !",
+          "These were the men who ran the red light .",
+          "This iPad is as fast as a desktop computer .",
+          "He planned to kill the president .",
+          "Keep your knees up when you jump ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "It 's hard to tell if these are my socks or his .",
+          "Were there any dresses you wanted to buy ?",
+          "The divers were protected by a metal cage .",
+          "Those musicians ' guitars were stolen .",
+          "Do you know what to say if you are stopped by the police ?",
+          "John did n't know why Amanda was so angry at him .",
+          "She was as helpless as a baby .",
+          "Could you get my waiter , please ?",
+          "I buy my bread from a local baker .",
+          "If you wanted to talk to someone , who would you call ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 12",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Is there any of the vegetable spaghetti left from last night 's dinner ?",
+          "I made dinner while you were napping .",
+          "I will come with you to make sure you are okay .",
+          "We have to change planes in New York .",
+          "We rushed to the place where we last saw her .",
+          "I wish I could be more like you .",
+          "She keeps the key in a flower pot by the door .",
+          "She 's inviting all her friends to the picnic .",
+          "He needs to make it clear .",
+          "I wish I knew who broke in to our house ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "A2",
+    "title": "CEFR-SP A2 — SCoRE · Phần 02",
+    "description": "Bài đọc thử nghiệm CEFR-SP A2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "We saw a brown mouse run across the road .",
+          "Did you brush your teeth ?",
+          "I am very content with life and every day is filled with laughter .",
+          "I 've never seen a movie about frogs .",
+          "Not all people like to have their pictures taken .",
+          "Who is the Israeli prime minister now ?",
+          "We were very close to going to France , but the flight was canceled .",
+          "I shop where I see happy employees .",
+          "Have you made up your mind ?",
+          "These sneakers are so soft I could wear them to sleep in ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "He did n't know how he should state that .",
+          "They 'd be angry if she had gone too .",
+          "Nothing is as good as my mother 's homemade seafood pasta .",
+          "Not all adults are always correct in what they do or say .",
+          "A man dressed as a policeman was asking questions .",
+          "The teacher loves picking on me .",
+          "It was that time when you got sick .",
+          "Is the dog safe to pet ?",
+          "Do you know what the kids ate for dinner last night ?",
+          "The doors must be locked by midnight ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Since she was n't feeling well today , she was working badly .",
+          "Was there a man or a woman in the car ?",
+          "If I found myself in a new city , I 'd take a tour .",
+          "Your mother told me all about your new job when I called last night .",
+          "He has already opened all his birthday gifts .",
+          "I felt sad after watching that movie .",
+          "We had lobster for Jake 's birthday dinner .",
+          "There is a hole in my sneakers .",
+          "He never listens to what I say .",
+          "It 's too windy to sit outside ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Do you know what book he was reading ?",
+          "Every day he tells his wife not to worry but I know she does .",
+          "He has already left for his class .",
+          "Gloria always wore very big earrings .",
+          "Jack kept a white mouse as a pet .",
+          "I wish they would stop knocking on my door .",
+          "Have you been staying up late ?",
+          "If we were all alike , life would be boring .",
+          "We were planning to go together , but she got sick .",
+          "He never talks about his ex-wife ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The teacher asked him to close the windows .",
+          "Lady Gaga is a woman whom many young people enjoy .",
+          "I wish I could find my real parents .",
+          "I prefer mild climates .",
+          "This was hers , and she gave it to me a few years before she died .",
+          "He always had a toothpick in his mouth .",
+          "She will do it as soon as she comes back from lunch .",
+          "I wish I had a cat .",
+          "My printer ran out of ink .",
+          "I wish I could go out tonight ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I left the house on time but the train was late .",
+          "He asked the teacher what to do .",
+          "Would you hand me that white one ?",
+          "I have n't seen her since we were in high school together .",
+          "I wish I could find my other sock .",
+          "I have never met his girlfriend but I have seen her .",
+          "I do not always listen to music .",
+          "You ca n't pet service dogs or police dogs .",
+          "I wish I had known .",
+          "Can you teach her how to walk ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "He 's got a bad temper .",
+          "I would like you to do it before dinner .",
+          "My aunt had three daughters .",
+          "Shall I help you with your homework ?",
+          "I have n't mailed it yet .",
+          "I wish we could tell them .",
+          "Have you met the groom yet ?",
+          "Let 's wait in front of the store .",
+          "Many children picked the fruit .",
+          "If we had known , we 'd have come ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "If I had known it would be like this , I would n't have come !",
+          "I wish it would stop raining .",
+          "In order to save time , he drove .",
+          "She hoped to find a good job at the job fair .",
+          "She said she had something to tell you but she did n't say what it was .",
+          "This area is known for its peaches .",
+          "They planned to go to Canada .",
+          "If I had found it , you 'd know .",
+          "Jane had a nice jacket collection .",
+          "Have you ever been in a limo ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "She put makeup on every day .",
+          "My grandmother was always wonderful at telling bedtime stories .",
+          "Her hair was as soft as silk .",
+          "A baby sheep is called a lamb .",
+          "They may be at the restaurant already .",
+          "Do not listen to your older sister because she is not always right .",
+          "Because his fingers were broken , he could no longer play the piano .",
+          "He was n't allowed to have any alcohol .",
+          "Shall we start the conference now ?",
+          "I wish I was rich ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I do n't know what to do about those noisy neighbors .",
+          "I forgot my slippers but she let me borrow hers .",
+          "Obama is a person whose power is respected .",
+          "Limestone is often used in cement .",
+          "The plane was as small as a car .",
+          "This is the room where it all began .",
+          "I wish I could tell them good-bye .",
+          "I wish I could tell them that I forgive them .",
+          "Will you allow us to go ?",
+          "He learned when to start dancing ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I miss the way my mother laughed .",
+          "He could n't stop looking at her .",
+          "I wish I could go to bed instead of doing all this homework .",
+          "He gave the boys some money to buy their mother some flowers .",
+          "If you were me , what would you choose ?",
+          "My parents died many years ago .",
+          "Her grandfather loved his steak rare .",
+          "I have lived in Japan as well as in Canada .",
+          "He decided to buy flowers for his wife while he was out .",
+          "If I lived here , I 'd be so happy !"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 12",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I 'd be so happy if she lived here .",
+          "She always wore boots with heels .",
+          "She often shared her boots with her sister .",
+          "Did you tell her where to meet us ?",
+          "The train stopped before I arrived at my station .",
+          "That 's the house where we hope to live .",
+          "She made many friends before leaving the country .",
+          "We learned about clouds today .",
+          "Is this the spot where the restaurant is ?",
+          "Children are not allowed in bars ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "A2",
+    "title": "CEFR-SP A2 — SCoRE · Phần 03",
+    "description": "Bài đọc thử nghiệm CEFR-SP A2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "My sister might leave early today .",
+          "The second semester begins in September .",
+          "Her leg was broken in the crash .",
+          "That 's the house where they went to play video games last week .",
+          "Put away the winter pajamas .",
+          "She always put apples in her yogurt .",
+          "She would like you to come with us .",
+          "I wish I could find that book .",
+          "Have either of you guys finished the homework ?",
+          "Pass me that ball , would you ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The children have already gone to sleep .",
+          "That is the house where she works as a maid .",
+          "That 's the house where guests stay .",
+          "It will rain tonight so you should take an umbrella .",
+          "In order to get there on time , he left work early .",
+          "I wish I had a friend .",
+          "Sometimes the baby would not stop crying .",
+          "This school has many hard -working teachers .",
+          "Nobody had enough money .",
+          "She is a woman whom many people respect ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "What would you do if you were me ?"
+        ]
+      }
+    ]
+  },
+  {
+    "level": "A2",
+    "title": "CEFR-SP A2 — Wiki-Auto · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP A2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc A2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "She was an only child , born in London .",
+          "Magic is common in the game .",
+          "The pass is open only from May to November .",
+          "Exchange students from Italy and Germany help the students learn English .",
+          "After one year , she opened the bookshop again .",
+          "The museum also has a small Asian collection .",
+          "The game has now spread around the cricket world .",
+          "In the United States , each state has its own laws .",
+          "The state is divided into three divisions .",
+          "Three men are running along the riverside ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The other giant panda has dark brown and light brown fur .",
+          "Clocks use different ways to measure time .",
+          "The group also had success in the United States .",
+          "In the United States , the game is played by a group of people .",
+          "Although he was one of the leading players of his time , not much is known about his life .",
+          "They feed on insects and fruit .",
+          "The ball is made of plastic .",
+          "English has changed and developed over time .",
+          "Sometimes , voice- tracking is done so that people can do other jobs .",
+          "As an example , see the picture below : As one song ends , the next song begins ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The sea is mostly ice-covered .",
+          "The two teams have never played each other before .",
+          "The two teams had never met before .",
+          "This system is found in other fish as well .",
+          "The company also produces soft drinks .",
+          "The sea is frozen over most of the year .",
+          "Of his next nine fights , Rose won eight .",
+          "Usually , the female builds the nest , and the male helps her .",
+          "The phrase is used in many contexts .",
+          "Horse races are taking place on Thursday ."
+        ]
+      },
+      {
+        "title": "Luyện đọc A2 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp A2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Horse races take place in on Thursdays .",
+          "Up to five players can play at a time .",
+          "Like all eastern spices , pepper was historically both a seasoning and a medicine .",
+          "The French press has different names around the world .",
+          "Tor is an man one inch tall who can not fall asleep no matter what he tries .",
+          "The government is led by the Prime Minister , who selects all the remaining ministers .",
+          "The movie got very bad reviews from movie critics .",
+          "Not much is known about his life .",
+          "The airport was closed for about five hours after the crash .",
+          "Thus , the mean of the grouped data is"
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B1",
+    "title": "CEFR-SP B1 — SCoRE · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP B1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Lucy cleaned up the chemistry equipment .",
+          "You must be tired from your long week and heavy workload .",
+          "Jack sent his parents two suitcases full of clothes before coming home from university with another suitcase .",
+          "They all thought Lily disliked everyone because she was so unfriendly .",
+          "She put lip balm on her dry lips .",
+          "The dry weather keeps the fields barren .",
+          "Each photo captures a moment when something amazing happened .",
+          "The law does not allow us to make those kinds of deals anymore .",
+          "I keep thinking that if I had only called her sooner , she might still be alive .",
+          "She kept in touch with all of her friends during the holiday so she always knew what everyone was up to ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "After soccer practice , my leg suddenly started hurting .",
+          "We hope to meet at Whistler and go skiing together .",
+          "No one was able to eat their dinners knowing the girls were lost outside in the cold .",
+          "Is your shirt made from burlap ?",
+          "She may be having a welcome party for her step sister .",
+          "If they tried to steal it , they 'd be caught on camera .",
+          "You may need to adjust your schedule so you can find a balance between academics and leisure time .",
+          "Have you heard about the South African apartheid ?",
+          "See a doctor , or the infection may get worse .",
+          "They could not see their way along the road because it was dark ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I have to get back to work by one thirty this time , or I will lose my job .",
+          "Both of my friends will be studying abroad next year so I am a little sad .",
+          "It was built to last a long time .",
+          "She stopped thinking about the past so as not to make herself upset .",
+          "He refrained from telling her how to do her job because he knew it would cause conflict .",
+          "The only way to solve this is to have everyone come together to talk .",
+          "The author told us why the story ended the way it did .",
+          "The spider bite got infected .",
+          "What you read in the newspapers is not always accurate .",
+          "They got together to pray and wish the rains would stop flooding the river and drowning the crops ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "She must come from a very different cultural background from ours .",
+          "Dogs love belly rubs .",
+          "If he was just a few years older , he would be able to marry without permission .",
+          "His coworkers were very frustrated with him because he turned up late to the meeting .",
+          "All of the women in the room were dressed nicely .",
+          "You must not deceive people just to satisfy your goals .",
+          "I walked through the slush in my boots .",
+          "A traffic accident prevented us from taking the highway .",
+          "The coach wanted to get more information about the opposing team .",
+          "His wife is a lawyer at a big law firm just like him ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "My complaining son annoyed me this morning .",
+          "The meeting was called to discuss why campus crimes have risen .",
+          "It will soon be a day or two before you 're flying off to London for your study abroad program .",
+          "I wish those men would stop staring at me .",
+          "The windows and walls were covered with brightly colored art from the children .",
+          "Timid people are often afraid of others .",
+          "I know what I 'm doing is worthwhile when I see my students successful and happy with their lives .",
+          "That restaurant has delicious crab risotto .",
+          "If they were in an earthquake , the cell phones might not work .",
+          "The citizens worked hard after the war to make this country what it is today ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The problem was caused by ineffective management .",
+          "If you want to buy a new pair of scissors , you should go to the stationery store .",
+          "She is very good at teaching and she should be given much more credit than she receives .",
+          "Perhaps not all of the students were notified about the project .",
+          "Bees and ants make more complex shelters than mice .",
+          "While I was moving boxes , I heard a sudden loud noise and saw a big rip in my jeans .",
+          "American politics has n't changed --- unless it has gotten worse .",
+          "He is a passionate bird watcher .",
+          "The teacher has made some minor changes to the homework so it can be more easily understood .",
+          "I 'd like to take a trip somewhere to see new places and meet new people ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "This is why some procedures worked and others didn't .",
+          "It is amazing how far the computers have come in development .",
+          "The clasp on my necklace was broken .",
+          "The little boy put his tooth under the pillow to receive money from the tooth fairy .",
+          "The group became alarmed when they heard her scream .",
+          "I liked what Obama said about how we need to take care of the young , old and sick in our society .",
+          "The groom 's family is staying at the hotel .",
+          "The magician bent the spoon effortlessly .",
+          "In the movies , it seems like only the people who are good looking survive disasters .",
+          "The boys shouting at the man were upset because he had stolen their backpacks ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "You need to learn to work with William even though you dislike him .",
+          "George knew he was good at playing hide and seek , and advised Tina to hide between the wall and the tree .",
+          "Let 's catch snowflakes on our tongues .",
+          "During the summer , the children swim at the old pond .",
+          "Her shelf was crowded with swimming trophies .",
+          "I do n't mind working although I 'd rather be reading .",
+          "I believe it is awful to cheat .",
+          "I always wear an apron when I am cooking because I do n't want to spill anything on my clothes .",
+          "I hope to send out all the invitations by tonight .",
+          "The company changed its mind and decided not to fire us after all ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "What we have done is given consent so you can make your own legal decisions .",
+          "We just have to accept our son-in- law .",
+          "I 'll just take one and leave the rest for you .",
+          "It 's a good idea to plan to pay off some of your debts before you try to buy a house .",
+          "Israelis must serve in the military .",
+          "The copilot whom I met was dressed in an Air Canada uniform .",
+          "The main thing that I wanted to say was to tell you how grateful I am for your friendship .",
+          "Lisa was nervous at the party and stood next to her best friend the entire night .",
+          "I am sorry to bother you , but could you help me with this problem ?",
+          "The brothers were as plump as their sisters ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I 've run out of toothpaste and I need some badly .",
+          "As we just saw , stock investments are not as safe as we once assumed they would be .",
+          "The sea breeze came through the open window .",
+          "I told him the electric bill would be high if he left the lights on all the time .",
+          "Before flying off to America , Ally gave each of her siblings a big hug and a present .",
+          "Several black limousines were lined up outside .",
+          "I believe it was unlikely that John will be awarded a full scholarship but I 'm sure he will get a partial scholarship .",
+          "No animal can run as fast as a cheetah .",
+          "There will be more options for you to choose from if you are open-minded .",
+          "If I tried and failed , would you be disappointed in me ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "We had just finished the test when the bell rang .",
+          "Gemma got free potatoes from her neighbors .",
+          "Tomorrow we will wish we had not drunk so much .",
+          "No matter what anyone thinks , remember what you think is the right thing to do , and do it .",
+          "We used worms on our fishing hooks .",
+          "Even shells and beads were sometimes used as money in the distant past .",
+          "Sylvia keeps her grade-point average high so that she can get a scholarship .",
+          "Jamie absolutely hated mushroom .",
+          "Carla suddenly dropped her bags and ran out of the lecture room .",
+          "Put the puck in the back of the net ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 12",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Lana found a poisonous mushroom in the forest .",
+          "James is so organized that he 's never handed in late homework .",
+          "Do you know who your government representative is ?",
+          "When I dropped off my backpack in the locker room , I thought I saw yours in there too .",
+          "I wish we could go away and not come back until the trial was over and he was put in prison .",
+          "I got my cat a collar with bells .",
+          "The dogs got tired from running at the park this afternoon .",
+          "I could hear the monks chanting .",
+          "Please help me to make sense of this terrible news .",
+          "Exercising more will help you to lose weight ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B1",
+    "title": "CEFR-SP B1 — SCoRE · Phần 02",
+    "description": "Bài đọc thử nghiệm CEFR-SP B1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Dad never gives us permission to go to rock concerts .",
+          "The woman waiting in line in front of me began to shout when the clerks turned off the lights .",
+          "You should pull hard to ring the bell .",
+          "I wish NTT would stop calling me at night to try to sell me a new Internet plan .",
+          "The news of his death brought the meeting to a halt .",
+          "The hawk flew down and grabbed a snake .",
+          "That seems like a harsh punishment .",
+          "There is a big difference between what is happening now and what they see as the next steps in what should be happening now .",
+          "There is no need to get so upset about the situation .",
+          "Would you rather meet for lunch at your place or mine ?"
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "He forgot to walk the dog last night so now there is a big mess to clean .",
+          "Although you 've no doubt seen this kind of crime before , it is nevertheless shocking to see the violence .",
+          "She whispered so as not to wake him .",
+          "She was trying to find out what it was that was making them sick .",
+          "We hope to see that movie but I heard the tickets might be sold out .",
+          "Everyone stopped what they were doing when the earthquake shook the building .",
+          "By telling jokes in class Professor Allen kept his students alert and amused .",
+          "We learned how to predict typhoons .",
+          "Fresh fruit in the diet may protect against cancer .",
+          "It 's nice to see a paper you 've been working on for months finally completed ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Many buildings are made with steel beams .",
+          "She is our foster daughter .",
+          "Nobody spoke another word after the professor got mad .",
+          "Some teachers with large classes never get to know their students .",
+          "You can borrow ours , but please just be careful with it .",
+          "The students learned to check their papers with spell and grammar tools .",
+          "Elk meat is leaner than beef .",
+          "Your professor must be notified in advance if you are planning to take his classes next semester .",
+          "Take it from me , you are much better off thinking about all the things in life you are grateful for than complaining about things that upset you .",
+          "He always got a strawberry milkshake ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Amanda was pleased to see all of the residents happy in her newly built apartment .",
+          "The door was locked , the curtains were drawn , and the newspapers were piled up in the mailbox .",
+          "She always chose to eat lamb at restaurants .",
+          "I wish it could be someone else that drove the car off the bridge .",
+          "There is an urgent need for more doctors who are willing to volunteer in Africa .",
+          "He 's very keen on getting a puppy .",
+          "If the public wanted changes , they would demonstrate .",
+          "The president of the company claimed one of his employees stole the money .",
+          "He believed it was his hard work brought him success .",
+          "She leaned on her knee as she listened ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Shall I drop by the bookstore to pick up my textbook ?",
+          "They 've been calling around to find someone to cook .",
+          "The twins never got along and they were constantly arguing .",
+          "After boiling it , the lobster turned orange .",
+          "She asked her sister which purse to buy .",
+          "In order to communicate with each other , both the French girlfriend and the Japanese boyfriend decided to learn a third language .",
+          "To prevent break-ins , the locks were changed .",
+          "The men whom the reporters followed were famous musicians .",
+          "It is a story about a world where wizards live .",
+          "Emily quickly learned which teachers to rely on ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "I dream of a world where energy is clean and free .",
+          "Until recently , women were not allowed to vote in that country .",
+          "People who stare at computer screens all day often end up wearing glasses .",
+          "A monkey got loose in a train station .",
+          "He looked strange without his eyebrows .",
+          "The raindrops battered my umbrella .",
+          "She went to a school taught by nuns .",
+          "Too much alcohol prevents you from thinking properly .",
+          "It will only get hotter but at least we can go to the beach .",
+          "The government program helps the people whom you insist need support ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "She is allergic to oysters .",
+          "This is a neighborhood whose summer festivals become very crowded .",
+          "Sometimes I wish I had the power to go back in time and change some of the decisions I made .",
+          "Some students did not attend the revision session last week .",
+          "He is a man whom I have trusted with all my investments .",
+          "Copper has many uses ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B1",
+    "title": "CEFR-SP B1 — Wiki-Auto · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP B1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Some airports in Japan do not fall under the scope of the Japanese airport statutes .",
+          "The berry has a low sugar content and a mildly sweet taste .",
+          "A tables match is a match in which , to win , one 's opponent must somehow be driven through a table by their opponent .",
+          "The property became famous for its rose garden .",
+          "Two soundtrack albums were released , with the second coming after the huge success of the first one .",
+          "It is too small to have any general lumber usage .",
+          "Governments use different kinds of taxes and vary the tax rates .",
+          "She enjoyed discussing politics with her father , and later with her husband .",
+          "Because he always needed money , he raised taxes and sold towns .",
+          "Thin slices or strips of vegetables or seafood are dipped in the batter , then briefly deep-fried in hot oil ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Greek philosophy is one of the foundations of Western culture .",
+          "Juvenile birds do not have the white patches on either side of the neck .",
+          "The quintet decided to make this project serious and record an album .",
+          "Credits adapted from West 's official website .",
+          "Deep frying produces large amounts of waste oil , which must be disposed of properly .",
+          "However , the entry must be written to the backing store at some point in time .",
+          "A person who plays the trombone is called a trombonist or trombone player .",
+          "Although pin stripes are found in mostly in men's suits , any type of fabric can be pin striped .",
+          "LEED is not a standard but an evaluation grid .",
+          "The methods used cover both static and dynamic situations ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The Dr. I was used only in small numbers and it had many problems .",
+          "Today there are only six known species of lungfish , living only in Africa , South America and Australia .",
+          "Now known simply as Opera , the browser has become very popular despite the competition .",
+          "The notion of modern art is closely related to Modernism .",
+          "Car rentals are subject to many conditions which vary from one brand to another .",
+          "Many groups from India have set up training camps in the southern part of the country .",
+          "To the band 's surprise , the song became a hit at prom dances .",
+          "A Boiler Room Brawl is a match where two wrestlers fight in a boiler room .",
+          "It was never intended as a teaching tool .",
+          "The stage is empty while the music creates a thunder storm ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Reading right to left , top to bottom , the symbols are as follows .",
+          "One or more contestants would walk on .",
+          "A port of call is a place where a ship stops before it has finished its trip .",
+          "The two common forms of playing golf are match play and stroke play .",
+          "Over the next three to four days a massive nationwide hunt was launched to find the stolen items .",
+          "Though never intended as a teaching tool , various viewers used the knowledge they obtained watching the show .",
+          "The history of the city has always been closely connected to shipbuilding .",
+          "Regular hand washing reduces the spread of cold viruses .",
+          "The federal government owns about twenty - eight percent of the land in the United States .",
+          "The French were the first Europeans to live in Canada permanently ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Summer activities such as concerts and boxing matches often tear up the pitch .",
+          "Philosophy is the study of humans and the world by thinking and asking questions .",
+          "A safety is scored if a player causes the ball to become dead in his own end zone .",
+          "Assuming a comfortable position helps the baby to latch properly .",
+          "The movie is about aliens who want to stop humans from creating a weapon that will destroy the universe .",
+          "Three foot messengers are running along the riverside , one of them stops to take a drink from the river .",
+          "Ana again notices the same woman seeing her and Christian from a distance .",
+          "Animals respond to threats in many complex ways .",
+          "In other cultures , the name may include the place of residence , or the place of birth .",
+          "Games can be played on indoor or outdoor fields of varying sizes ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "This species breeds in colonies on coasts and lakes .",
+          "Inert gases are often used in the chemical industry .",
+          "These poems do not prove that the punishment took place at the time they were written .",
+          "Iola has hot , humid summers and generally mild to cool winters .",
+          "There is no effective treatment for Nipah virus infection until now .",
+          "Lemon sharks do not represent a large threat to humans .",
+          "When a person drinks a dangerous amount of alcohol , they can get alcohol poisoning .",
+          "When a system writes data to cache , it must at some point write that data to the backing store as well .",
+          "The best fluid is plain , clean water .",
+          "These are forest birds that tend to feed on insects at or near the ground ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "A group that makes more money than it spends can lend or invest the excess profit .",
+          "If two computers send data at the same time , a collision will occur .",
+          "Men and women are subject to different standards of modesty in dress .",
+          "A kick in wrestling is an attack using any part of the foot or lower leg to strike the opponent 's body or head .",
+          "The plant grows in wet , shady places .",
+          "In fast food chains , ketchup is often put in small packets that hold ketchup inside .",
+          "Baseball bats are often used as a club-like weapon .",
+          "Still , German influence in the state remains very strong and visible .",
+          "Some of the food waste produced by processing can be difficult to reduce without affecting the quality of the finished product .",
+          "The main economic activities of the town are tourism , commerce and fishing ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The mean of a list is all of the numbers added together and divided by the amount of numbers",
+          "He is credited as one of the first Japanese wrestlers to gain a fan base outside of his native Japan in the United States .",
+          "Planned economies contrast with command economies .",
+          "The amount of fuel used to find specific impulse can be measured in different ways .",
+          "The station was built in a modern airport style , with all of its many platforms sited underground .",
+          "Drug trafficking and illegal drug use is a big problem in the nation .",
+          "The Internet has made it easier for urban legends to spread , as people often spread them to their friends or family using e-mail .",
+          "It flies slowly with its head facing downwards , looking for its main food , the large apple snails .",
+          "A knee lift is a move where a wrestler uses their knee and brings it up to hit the opponent under the chin .",
+          "The cartful sells mainly two kinds of products , street food and clothes ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The authors suggest that oil dependence is a problem we need no longer have .",
+          "Because the bridge was not expected to have large amounts of traffic , the bridge was designed with only two lanes .",
+          "Another method of protection is the release of a sour liquid from the skin .",
+          "In the world , breast cancer is the fifth-most common cause of cancer death .",
+          "He is a key figure in landscape painting , and painted many works .",
+          "Ten days have passed since impact , and few dinosaurs remain .",
+          "In the days and weeks that follow , few dinosaurs remain .",
+          "The frog spends most of the year underground .",
+          "Although concentrated in London , the outbreak affected other areas of the country as well .",
+          "Color blindness is very sensitive to changes in material ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The head and thorax are white .",
+          "Students can also choose to attend a community college prior to further study at another college or university .",
+          "Its economy consists mainly of mining , agriculture and fishing .",
+          "Main industries in the province are mining , agriculture and fishing .",
+          "In understanding a process , the process is typically mapped out and the process is monitored using control charts .",
+          "POTS can be caused by many different things .",
+          "Late in life he suffered from depression .",
+          "Programs are composed of instructions which operate on values .",
+          "Butter cakes are often made by beating the butter and sugar until fluffy .",
+          "She went to school with in - depth study of foreign languages , and now knows three languages ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The episode features cover versions of six songs , which received mixed reviews from critics .",
+          "The Grade is mostly used in mountaineering and big wall climbing .",
+          "A serf had some freedom .",
+          "Chopsticks are used in cooking to stir materials in a pan , or to help move meals .",
+          "The movement is in sonata form .",
+          "The first movement is written in sonata form and is in the key of C major .",
+          "After that , many people contributed code to the project .",
+          "After the post , many people contributed code to the project .",
+          "The convention is about what a state is and what rights and duties a state has .",
+          "In Finland , peace and quiet in isolation is often the object of the pastime ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 12",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The buildings are not tall , but the complex covers a large area of land .",
+          "Most sea snakes are able to breathe through their skin .",
+          "Geordi was born blind and must wear a VISOR to help him see .",
+          "Some backpacks are specifically designed to carry certain items .",
+          "In the United States most employment in the field requires either a masters degree in statistics or a related field or a PhD .",
+          "Discord allows users to connect to their account to their Twitch . tv .",
+          "Oxygen is the most common element by mass on Earth .",
+          "The unit deals with many water issues in industry and mining .",
+          "In more recent years , many projects have attempted to bridge the gap in our knowledge caused by the Zone of Avoidance .",
+          "Polo is not always played on ponies ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B1",
+    "title": "CEFR-SP B1 — Wiki-Auto · Phần 02",
+    "description": "Bài đọc thử nghiệm CEFR-SP B1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The specimen was probably not fully grown at the time of its death .",
+          "Hopes that the ballet would be ready in May were dashed .",
+          "Hopes that the ballet would be ready in May were dashed and the opening night was postponed several times .",
+          "Strategic bombing was an idea first tried in World War I .",
+          "Strategic bombing was used in World War I , though it was not understood in its present form .",
+          "Today , the local economy is mostly shopping and handcraft , with the largest employer being a clothing maker .",
+          "There should be multiple ways of sending emergency information so that if one does not work , the others might .",
+          "Conscious thought is not necessary for knowledge of results to have its effect .",
+          "Over his next nine fights , Rose had a record of eight wins and one loss , with one knockout .",
+          "A seahorse is used as the company 's icon ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Call and response singing is common in modern Western popular music .",
+          "Call and response is common in modern Western popular music .",
+          "Many cultures hold some food preferences and some food taboos .",
+          "In most species , the female does most or all of the nest construction , though the male often helps .",
+          "The failure rate of a system usually depends on time , with the rate varying over the life cycle of the system .",
+          "Thousands of school children died because of badly built schools .",
+          "Green toads are typically bright to pale green in color , with black spotting .",
+          "BASE jumping grew out of skydiving .",
+          "The game was poorly received by critics and gamers alike .",
+          "The game received mixed reviews by critics and gamers alike ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Some fish change sex over the course of their life .",
+          "RIRs split their address pools into smaller chunks and give them to Internet service providers in their region .",
+          "Endgames can be studied according to the types of pieces that remain on board .",
+          "The tits are active , noisy , social birds .",
+          "The phrase is used in widely varying contexts .",
+          "The name used generally refers to the type of military that uses the base .",
+          "The name used generally refers to the type of military activity that takes place at the base .",
+          "Much of the railway track and rolling stock is in need of repair or replacement .",
+          "Matches may also be played on Tuesdays or Wednesdays instead of the regular Thursdays due to scheduling conflicts .",
+          "Matches where also be played on Tuesdays or Wednesdays instead of the normal Thursdays due to scheduling conflicts ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The Romans adopted the Greek tradition , becoming the first people to write history in a non-Greek language .",
+          "Black powder rocket motors are only made in small sizes .",
+          "Independence is another good thing about owning a small business .",
+          "Weight training is a safe form of exercise when the movements are controlled and carefully defined .",
+          "In the second season , the format of the show changed drastically .",
+          "He worked with major scientific figures and travelers on projects involving their studies .",
+          "The following table lays out the dates of construction of most of the major pyramids .",
+          "Recent editions have focused on record feats by human competitors .",
+          "Recent editions have focused on record feats by person competitors .",
+          "From the beginning , graphic designs were used to tell different teams apart ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The movie was well - liked by critics and audiences .",
+          "The film was very well received by critics and audiences .",
+          "The third rail is usually located outside the two running rails , but on some systems it is mounted between them .",
+          "An average adult American alligator 's weight and length is and , but they sometimes grow to long and weigh over .",
+          "Building construction is the process of adding structure to real property .",
+          "While admission to some concerts is free , charging for tickets is very common .",
+          "All hardcovers have the contents of the comics with the covers .",
+          "Eggs are laid singly under old leaves of a host plant and are green or grey blue .",
+          "In addition to the United States , Americans and people of American descent can be found internationally .",
+          "It was supposed that he possessed a healing power against snakebites ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Because of code sharing , a single flight may be shown with many different flight numbers .",
+          "Due to code sharing , a flight may be represented by a series of different flight numbers .",
+          "Like many eastern spices , pepper was historically both a seasoning and a folk medicine .",
+          "Gabrielle starts the series as a young girl who more or less stands behind Xena , and relies on Xena to protect her .",
+          "The first huts and shelters were constructed by hand or with simple tools .",
+          "The first buildings were huts and shelters , constructed by hand or with simple tools .",
+          "The great white shark has no known natural predators other than , on very rare occasions , the killer whale .",
+          "While the term may refer to spoken English , it can also describe written English .",
+          "The head of government of each state is called the premier , appointed by the state 's Governor .",
+          "The head of government of each state is called the Premier ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The tower is situated at the southern side of the place , where the land walls of the city join the sea walls .",
+          "The tower is at the south side of the place , where the land walls of the city join the sea walls .",
+          "The economic impact of the common cold is poorly understood in much of the world .",
+          "The economic impact of the common cold is not well understood in much of the world .",
+          "In the United States , the term is sometimes used in invitations , such as to weddings and office parties .",
+          "Note that the description of a device as either input or output depends on how it is viewed .",
+          "The Internet will give rise to a completely new understanding of private and public .",
+          "The Internet will give rise to a completely new understanding of what is private and public .",
+          "Many course themes are repeated throughout the series .",
+          "A significant issue with standard candles is the question of how standard they are ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "He was holidaying in Germany the following summer when World War I broke out .",
+          "The film received extremely negative reviews from critics .",
+          "Heavy rotation or power rotation is a list of songs that get the most airplay on a radio station .",
+          "Usually , such drives will be stamped with a company 's logo , as a form of advertising .",
+          "Police officers patrol the trains and stations , and police posts are available at some stations .",
+          "Police officers patrol on trains and stations , and police posts are available at some stations .",
+          "Thirty three first person poems that describe different times during an eleven year old boy 's day at the beach .",
+          "A foreign minister 's powers can vary from government to government .",
+          "Unlike war crimes , crimes against humanity can happen during peace or war .",
+          "Small handmade balls contain a lead pellet wrapped in rubber and wool with a leather cover ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "As of , there are eight living former Prime Ministers of Egypt , as seen below .",
+          "The film received negative reviews from critics .",
+          "Oats are also sometimes used in drinks .",
+          "CHP is most efficient when heat can be used on - site or very close to it .",
+          "Higher capacity Zip disks must be used in a drive with at least the same capacity ability .",
+          "One of the main industries in the town is tourism , most notably scuba diving .",
+          "The service sector makes up most of the local economy .",
+          "The band has seen many personnel changes .",
+          "The band has seen many changes to personnel .",
+          "Early Egyptian medicine was based on a mixture of magic and religious spells ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Early Egyptian medicine was based mostly on a mixture of magic and religious spells .",
+          "Mood and emotions at work are related to job satisfaction .",
+          "Moods and emotions at work are related to job satisfaction .",
+          "Bullet designs have to solve two main problems .",
+          "Seventy students and teachers traveling to the United States for summer camp were among the Chinese passengers .",
+          "Seventy students and teachers going to the United States for summer camp were among the Chinese passengers .",
+          "In most cases , control engineers make use of feedback when designing control systems .",
+          "The movie received negative review from critics .",
+          "Some research shows a connection between personality and job satisfaction .",
+          "The film earned mainly negative reviews from critics ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B1 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The current trophy is made from silver and gilt , and features a golden globe held up by three silver columns .",
+          "A consultant is usually an expert or a professional , in a specific field , who also has a wide knowledge of the subject matter .",
+          "In appearance , it is light yellow and opaque , smooth and creamy .",
+          "Throughout the campus , many fountains provide white noise as a background .",
+          "The song was given mixed reviews from music critics .",
+          "The song received mixed reviews from music critics .",
+          "Since the end of the series rumors have circulated that a feature length movie was in the works .",
+          "The long pit straight has also been used for drag racing ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B2",
+    "title": "CEFR-SP B2 — SCoRE · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP B2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: SCoRE; CC BY-NC-SA 4.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / SCoRE, Arase, Uchida & Kajiwara (2022). CC BY-NC-SA 4.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "There is probably titanium in your eyeglass frames .",
+          "The sound of the rushing water in the river was soothing .",
+          "They were complaining about what they see as a lax attitude by the Japanese government over the issue of abductions .",
+          "What she finds most amazing is how some foreigners can live here for decades and still not be fluent in the language .",
+          "The moment when the earthquake hit , the tsunami sirens began to shriek .",
+          "The students celebrating the Japanese Women's Team win stayed up late into the night but cleaned up their mess before they left .",
+          "Nothing you do or say will ever stop Sally from chasing her dream of becoming a veterinarian .",
+          "The wizard whom he lost was his godfather .",
+          "He puts Jamaican jerk on his meat .",
+          "Sally likes to wiggle her loose tooth to make the younger children laugh ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "B2",
+    "title": "CEFR-SP B2 — Wiki-Auto · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP B2, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc B2 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Most victims of the genocide were killed in their own villages .",
+          "The skull protects the brain and the ribs protect the heart and lungs .",
+          "A moment of silence is a common way to remember tragedies .",
+          "Ice sheets are larger than ice shelves or alpine glaciers .",
+          "Pi bonds result from overlap of atomic orbitals that are in contact through two areas of overlap .",
+          "The authors ' claim that nuclear power and clean coal are not clean technologies .",
+          "With such a large impact , debris was most likely scattered globally , but has since been worn away .",
+          "Perspective drawings have a horizon line , which is often implied .",
+          "Bird eggs are a common food and one of the most versatile ingredients used in cooking .",
+          "The animated series takes place chronologically between the and films ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Canada is also home to many indigenous languages .",
+          "The fur coloring of the lar gibbon varies from black and dark - brown to light - brown , sandy colors .",
+          "It is possible to walk upon the walls for roughly half the circumference .",
+          "The chassis are made of chrome moly tubing .",
+          "Although the sweet potato is not closely related botanically to the common potato , they have a shared etymology .",
+          "The guaracha is a genre of rapid tempo and with lyrics .",
+          "The cause of the vibrations during the first stage of the flight was well known .",
+          "However , because conventions are not textually based , their existence and practice are open to debate .",
+          "Chameleons have the most distinctive eyes of any reptile .",
+          "The lack of hair can cause health issues with kittens in the first weeks of life because they can get sick with respiratory infections ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The meaning and intent are sometimes mirrored in different terms .",
+          "The nouns and adjectives are created by removing the ending and thus obtaining the root .",
+          "The amount of propellant can be measured either in units of mass or weight .",
+          "The term gets its name from its use in the parliamentary system of government .",
+          "There is discussion whether the hotspot is caused by a deep mantle plume or at a shallower depth .",
+          "Most of these positions can be used for either vaginal or anal sex .",
+          "To pursue a cause of action , a plaintiff pleads or alleges facts in a complaint , the pleading that starts a lawsuit .",
+          "They typically enter the nests of pollen- collecting species , and lay their eggs in cells provisioned by the host bee .",
+          "Like many other plants , some palms are in danger of dying out because of human activity .",
+          "It has also been used to make lightweight blocks for building , and as a powdered ingredient in polishing ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 04",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The mast cell is very similar in both appearance and function to the basophil , a type of white blood cell .",
+          "Many tree frogs can change their color for better camouflage .",
+          "The beetle is an invasive species , and a serious pest which destroys ash trees .",
+          "This lets the photographer control the amount of light reaching the film or image sensor .",
+          "The yellow flowers of the plant produce hairy seed pods , with each pod containing roughly a half dozen seeds .",
+          "Since the germ theory of disease , it has also come to mean an absence of germs and other waste .",
+          "The frog has a few native predators , among them snakes and birds .",
+          "The practice is generally considered safe sex as long as the hands are protected with a latex gloves .",
+          "The lesser black - backed gull is smaller than the European herring gull .",
+          "Net - casting spiders weave only small webs , but then manipulate them to trap prey ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 05",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Zinc sulfate can be used to add zinc to the soil .",
+          "The golden everlasting has proven very adaptable to cultivation .",
+          "An elbow smash is where a wrestler makes a punching motion , tucks their hand towards their chest so the elbow and forearm make contact .",
+          "Black powder rocket propellant is a lot like old fashioned gunpowder .",
+          "Canada provided a thermal plasma analyzer .",
+          "Some people who do this started using pictures of text to make it harder for anti-phishing filters to see it .",
+          "No certain dates can be assigned to this empress 's life or reign .",
+          "The mouse - like hamsters are not true hamsters , but represent an early split from the rest of the mouse -like rodents .",
+          "The convention sets out the definition , rights and duties of statehood .",
+          "Symbolically , spires have two functions ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 06",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The size of Irish elk antlers is distinctive .",
+          "Not only did nimravids have varied tooth styles , but they also showed the same range of size size and shape as felids .",
+          "Though often used interchangeably , these words have different meanings .",
+          "Though often used interchangeably , in biology these words have different meanings .",
+          "Soaps and detergents help to spread the oils and dirt particles through the water , so they can be washed away .",
+          "The best -known method of prey capture is by means of sticky webs .",
+          "These frogs do not have the adhesive toe disc cups found in the tree frogs .",
+          "One way to think about mental health is by looking at how effectively and successfully a person functions .",
+          "The length of the slide rule is quoted in terms of the nominal length of the scales .",
+          "The friction between the ropes and the pulley furnishes the traction which gives this type of elevator its name ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 07",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The friction between the ropes and the pulley furnishes the traction which gives this type of lift its name .",
+          "The glaciers crush minerals in the rock as they pass over them .",
+          "Other types of keels are swing keels and canting keels .",
+          "In terms of school casualties , thousands of school children died due to shoddy construction .",
+          "The least skipper can be found in damp or wet habitats with tall grasses .",
+          "The long-tailed sylph is similar in appearance but does not overlap in range .",
+          "Each episode of Season One attracted more than a million viewers on its first airing .",
+          "Europe lies mainly in the temperate climate zones , being subjected to prevailing westerlies .",
+          "Those who advocate it are concerned with the later phases of product lifecycle and the comprehensive outcome of the whole production process .",
+          "The lower part of the trap contains glands which take nutrients from captured insects ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 08",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Another risk is that most BASE jumping venues have very small areas in which to land .",
+          "First , Euler pointed out that the choice of route inside each land mass is irrelevant .",
+          "Self resonant loop antennas are relatively large , governed by the intended wavelength of operation .",
+          "Most dolmen constructions were built using stone slabs of big dimensions .",
+          "The islets are volcanic rocks , with only a thin layer of soil and moss .",
+          "Paper clips can be bent into a crude but sometimes effective lock picking device .",
+          "Smoked and salted cod roe paste is very popular in Sweden .",
+          "In humans and animals , fear is adjusted by cognition and learning .",
+          "The park is frequently closed because of sulphur gas .",
+          "Their common name comes from the parrots ' strong , monogamous pair bonding and the long time the pairs spend sitting together ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 09",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "As artillery developed technically , almost all guns of any size could be moved at some speed .",
+          "These dates are allegedly the king 's birthday and coronation day , respectively .",
+          "After the rinse cycle , the machine begins the extraction process , which recovers dry-cleaning solvent for reuse .",
+          "After the rinse cycle , the machine begins the extraction process , which recovers the solvent for reuse .",
+          "The tombstones use to have some inscriptions .",
+          "In some cases of multiple bonds between two atoms , there is no net sigma-bonding at all , only pi bonds .",
+          "The Japanese government continues to search for and retrieve the remains of Japanese military personnel who were killed during the battle .",
+          "While a computer program is a passive collection of instructions , a process is the actual execution of those instructions .",
+          "The only time a female flying lizard ventures to the ground is when she is ready to lay her eggs .",
+          "Historians have noted that Washington 's death helped alter the way lynching was viewed ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 10",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The vehicle that was used as an atmospheric drop test glider had no propulsion system .",
+          "Many forms of amnesia fix themselves without being treated .",
+          "To hunt fish , the eagle swoops down over the water and snatches the fish out of the water with its talons .",
+          "When depicted he was usually drawn with a black and a yellow stripe painted across his face .",
+          "Metics shared the burdens of citizenship without any of its privileges .",
+          "This digital data is gathered and stored so that the physicist can later analyze the data and reconstruct the physics that occurred .",
+          "This digital data must be gathered and stored so that the physicist can later analyze the data and reconstruct the physics that occurred .",
+          "Typically , battle royale contestants are only given one life to play ; any players who die are not allowed to respawn .",
+          "Camel case is used in some wiki markup languages for terms that should be automatically linked to other wiki pages .",
+          "Rat snakes are commonly kept as pets by reptile enthusiasts ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 11",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "The Founding Fathers wanted republicanism because its ideas guaranteed liberty , with limited powers checking and balancing each other .",
+          "Louvers are used as semi-passive means of thermal control on spacecraft as well .",
+          "These birds feed on nectar from flowers using a long tongue .",
+          "A claw is made of hard protein called keratin .",
+          "Measurements made in the laboratory are essential to our understanding of the sources and sinks of pollutants and compounds found in nature .",
+          "Most tin whistles are in D , because they are often used in music with fiddles .",
+          "Notable features of the design include key-dependent S-boxes and a highly complex key schedule .",
+          "Common ostriches normally spend the winter months in pairs or alone .",
+          "Balls of solid glass occasionally were used in a method thought to prevent lightning strikes to ships .",
+          "Boyce is best known for his eight symphonies , his anthems and his odes ."
+        ]
+      },
+      {
+        "title": "Luyện đọc B2 — Bộ câu 12",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp B2 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Fashion designers attempt to design clothes which are functional as well as aesthetically pleasing .",
+          "The seven pitches of any diatonic scale can also be obtained by using a chain of six perfect fifths .",
+          "Demi-pointe shoes are often used to train dancers who are new to pointe technique .",
+          "Most of the coins of later series have specific commemorative topics and are usually made of precious metal .",
+          "As a result , the two worlds collide and it seems they are doomed by circumstance .",
+          "The city is home to a shipbuilding industry , brewing industry and sawmills .",
+          "The following is a list of some notable nonfiction works discussing anarcho-capitalism .",
+          "There is no connection between the shape of a bacterium and its color in the Gram staining .",
+          "In the center of a village the ground begins to open up and a strange green light emanates from within ."
+        ]
+      }
+    ]
+  },
+  {
+    "level": "C1",
+    "title": "CEFR-SP C1 — Wiki-Auto · Phần 01",
+    "description": "Bài đọc thử nghiệm CEFR-SP C1, nhãn đồng thuận của hai người đánh giá. Các câu đã qua kiểm tra mapping ít nhất 80% âm và audio giọng tổng hợp chậm không quá 10 giây; chưa xác nhận thời gian người học đọc hoặc độ chính xác điểm AI. Nguồn: Wiki-Auto; CC BY-SA 3.0. Arase, Uchida & Kajiwara, EMNLP 2022. https://github.com/yukiar/CEFR-SP",
+    "lessons": [
+      {
+        "title": "Luyện đọc C1 — Bộ câu 01",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp C1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Carbon monoxide can also be used in the water - gas shift reaction to produce hydrogen .",
+          "Under standard conditions , potassium bromide is a white crystalline powder .",
+          "Sleep disturbances such as insomnia and sleep apnea are risk factors for depression and suicide .",
+          "Because the brain can shift slightly during surgery , the electrodes can become displaced or dislodged from the specific location .",
+          "In males , relaxin enhances motility of sperm in semen .",
+          "The rock python 's color pattern is whitish or yellowish with the blotched patterns varying from tan to dark brown shades .",
+          "The symptoms of pernicious anemia come on slowly .",
+          "Calcium nitrate is used in fertilizers to add nitrogen to the soil .",
+          "The pelvic region of the trunk is the lower part of the trunk , between the abdomen and the thighs .",
+          "Pelvis can mean the lower part of the trunk of the human body , between the abdomen and the thighs ."
+        ]
+      },
+      {
+        "title": "Luyện đọc C1 — Bộ câu 02",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp C1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "NaBr is produced by treating sodium hydroxide with hydrogen bromide .",
+          "Zinc sulfide can be made by igniting a mixture of powdered zinc and sulfur .",
+          "The precise mechanisms underlying gestational diabetes remain unknown .",
+          "Another recently described rare , but serious , side effect is propofol infusion syndrome .",
+          "The cluster contains a dozen of O-type main sequence stars , of which at least three are eclipsing binaries .",
+          "In the razor shell sexual development is highly synchronous .",
+          "The garrison consisted of infantry or cavalry auxilia , not components of Roman legions .",
+          "Lactose intolerance is distinct from milk allergy , an immune response to cow 's milk proteins .",
+          "The test vehicle , which was used as an atmospheric drop test glider , had no propulsion system .",
+          "It has often been noted for its complex lightcurves , which made finding its shape and rotation somewhat hard ."
+        ]
+      },
+      {
+        "title": "Luyện đọc C1 — Bộ câu 03",
+        "goals": "Đọc từng câu, nghe lại rồi ghi âm tối đa 12 giây. Cấp C1 là độ khó câu do hai người đánh giá CEFR-SP cùng gán, không phải kết quả đánh giá trình độ của bạn. Bài luyện thử nghiệm: có thể có từ chưa được đánh giá; xem tỷ lệ âm đã chấm trong kết quả. Thời lượng đã kiểm tra bằng giọng tổng hợp, chưa xác nhận với người đọc thật.\nNguồn: CEFR-SP / Wiki-Auto, Arase, Uchida & Kajiwara (2022). CC BY-SA 3.0. https://github.com/yukiar/CEFR-SP",
+        "sentences": [
+          "Mast cells are a type of innate immune cell that reside in connective tissue and in the mucous membranes .",
+          "Like most other male mammals , a man inherits an X chromosome from his mother and a Y chromosome from his father .",
+          "Other physical properties are also linked to crystallography .",
+          "The type A viruses are the most virulent human pathogens among the three influenza types and cause the most severe disease ."
+        ]
+      }
+    ]
+  }
+]

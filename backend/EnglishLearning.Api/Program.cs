@@ -36,6 +36,15 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddScoped<SpeakingLessonService>();
+builder.Services.AddSingleton<SpeakingStorage>();
+builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services, client) =>
+{
+    var configuration = services.GetRequiredService<IConfiguration>();
+    client.BaseAddress = new Uri((configuration["SpeakingAi:BaseUrl"] ?? "http://127.0.0.1:8001").TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(55);
+    client.MaxResponseContentBufferSize = 2 * 1024 * 1024;
+});
 builder.Services.AddSingleton<IpaTranscriber>();
 builder.Services.AddSingleton<MediaStorage>();
 builder.Services.AddScoped<AdminBootstrapService>();

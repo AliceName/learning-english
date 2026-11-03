@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "scorer_sha256": "68505cc756b1fbf8b475ae799f394bc635b6abade4a63fb6f047159ff3a484ff",
+  "mapping_sha256": "9c83c28585ba0d4eb90966073576278b58ee69beb3219ed7edc7bd43a1443dcc",
+  "feature_signature": "d0be78d5e500164ff2db362a0ea237b6f73e9e6d363515d7559d57128aedfbd5",
+  "reference_mapping_sha256": "470077d127dbf4b4f2ff83a89f614f49afe47e304f8873aa872ced6ad5230a4e",
+  "transform": {
+    "kind": "identity"
+  },
+  "practice_threshold": 1.1,
+  "threshold_fitted": true,
+  "minimum_coverage": 0.8,
+  "evidence_scope": "speechocean762-supported-subset",
+  "validation_rows": 5891,
+  "validation_speakers": 25,
+  "label_definition": "mean expert phoneme score < 1.5/2: practice suggestion, not substitution diagnosis",
+  "limitations": "Same validation split previously used for MLP model selection. Cached reference-v1 supported phonemes. Ref2-only phones and Vietnamese speakers are not independently calibrated.",
+  "calibration_id": "cal1-f38fe9a705ac1e16"
+}

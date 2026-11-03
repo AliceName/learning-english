@@ -1,0 +1,24 @@
+{
+  "oldModelVersion": "gop-ctc-mlp-68505cc756b1fbf8",
+  "newModelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db",
+  "syntheticCasesBefore": [
+    422,
+    422,
+    422,
+    422,
+    422,
+    422
+  ],
+  "syntheticCasesAfter": [
+    200,
+    200,
+    200,
+    200,
+    200,
+    200
+  ],
+  "realDatasetBeforeCoverage": 0.777778,
+  "realDatasetAfterCoverage": 0.888889,
+  "mergedRhoticScored": false,
+  "humanAccuracyValidated": false
+}

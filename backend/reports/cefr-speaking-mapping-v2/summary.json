@@ -1,0 +1,79 @@
+{
+  "createdAtUtc": "2026-10-27T14:14:38.752672+00:00",
+  "sourceRows": 10004,
+  "agreementFormatCandidates": 3313,
+  "synthesizedSentenceCount": 3313,
+  "synthesizedAudioCount": 6626,
+  "voice": "Microsoft Zira Desktop",
+  "rates": [
+    0,
+    -2
+  ],
+  "audioSampleRate": 16000,
+  "humanReadingMeasured": false,
+  "acousticAlignmentValidated": false,
+  "levels": {
+    "A1": {
+      "mapped_partial": 41,
+      "mapped_full": 34,
+      "rejected_phone_mapping": 1,
+      "checked": 76,
+      "fits12sNormal": 76,
+      "fits12sSlow": 76,
+      "pilotCandidates": 64
+    },
+    "A2": {
+      "mapped_full": 157,
+      "mapped_partial": 388,
+      "rejected_phone_mapping": 28,
+      "checked": 573,
+      "fits12sNormal": 573,
+      "fits12sSlow": 573,
+      "pilotCandidates": 400
+    },
+    "B1": {
+      "mapped_full": 118,
+      "mapped_partial": 1013,
+      "rejected_phone_mapping": 106,
+      "checked": 1237,
+      "fits12sNormal": 1237,
+      "fits12sSlow": 1235,
+      "pilotCandidates": 679
+    },
+    "B2": {
+      "mapped_partial": 855,
+      "mapped_full": 17,
+      "rejected_phone_mapping": 136,
+      "checked": 1008,
+      "fits12sNormal": 1008,
+      "fits12sSlow": 980,
+      "pilotCandidates": 270
+    },
+    "C1": {
+      "mapped_partial": 352,
+      "rejected_phone_mapping": 41,
+      "checked": 393,
+      "fits12sNormal": 391,
+      "fits12sSlow": 366,
+      "pilotCandidates": 40
+    },
+    "C2": {
+      "mapped_partial": 22,
+      "rejected_phone_mapping": 4,
+      "checked": 26,
+      "fits12sNormal": 26,
+      "fits12sSlow": 20,
+      "pilotCandidates": 1
+    }
+  },
+  "mappingRejectReasons": {
+    "Chưa tách được ranh giới từ của câu mẫu này.": 313,
+    "Câu mẫu có âm chưa được bộ chấm hỗ trợ. Vui lòng chọn câu khác.": 3
+  },
+  "pilotRule": "Annotators agree, serving reference mapping coverage >= 0.8, slower synthesized audio duration 0.3–10 seconds. Not validated for human readers.",
+  "pilotCandidates": 1454,
+  "normalDurationMedian": 4.995,
+  "normalDurationMax": 12.475,
+  "slowDurationMedian": 6.055,
+  "slowDurationMax": 15.05
+}

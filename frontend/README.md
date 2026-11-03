@@ -70,3 +70,13 @@ Trình soạn hỗ trợ Markdown giới hạn: H2/H3, đậm/nghiêng/gạch ch
 Các nút AI của mẫu hiển thị chưa tích hợp và bị vô hiệu hóa: chưa chấm Writing/kiểm tra ngữ pháp AI, chưa dịch/sinh câu hỏi/trích xuất từ vựng tự động. Bộ đếm và Review chỉ phản ánh thao tác trong mô phỏng, không giả điểm IELTS.
 
 Trắc nghiệm Reading/Listening/Grammar khởi tạo với 2 lựa chọn. Component dùng chung cho phép thêm/xóa trong khoảng 2–4; khi xóa lựa chọn phía trước đáp án đúng thì tự cập nhật chỉ số, khi xóa chính đáp án đúng thì yêu cầu chọn lại. Grammar chọn phần sai cũng dùng cùng cơ chế. Các câu cũ có 4 lựa chọn được giữ nguyên.
+
+## Luyện Speaking với mô hình đã train
+
+`npm run dev` và `npm start` tự chạy `scripts/ensure-speaking.mjs` qua predev/prestart. Script kiểm tra health ở 127.0.0.1:8001, dùng lại dịch vụ sẵn có hoặc khởi động Python nền (ẩn cửa sổ trên Windows), rồi đợi ready tối đa 180 giây. Không khởi động API .NET; vẫn chạy API bằng Visual Studio như trước. Mô hình có thể mất một lúc để nạp trước khi frontend bắt đầu.
+
+Python lấy từ biến `SPEAKING_TRAINING_ROOT` hoặc thư mục train bên cạnh repository theo bố cục máy hiện tại. Log ở `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Dịch vụ Python tiếp tục chạy khi dừng frontend, lần chạy frontend sau sẽ dùng lại. Nếu không cần Speaking khi phát triển, đặt `$env:SPEAKING_AUTO_START='0'` trước khi chạy npm để bỏ qua bước này. Chạy trực tiếp `next dev` không đi qua bước khởi động tự động.
+
+Bài Speaking trong khóa học đã xuất bản có nút **Luyện nói** dẫn tới `/courses/[courseId]/speaking/[lessonId]`. Giao diện ghi âm PCM16 16 kHz, nghe lại, gửi chấm, xem điểm âm/từ, coverage và 20 lần luyện gần nhất. Có thể chọn WAV thay microphone. Proxy `/api/speaking` giữ JWT ở server; audio đã lưu chỉ chủ sở hữu đọc được.
+
+Xem `../SPEAKING.md` để khởi động dịch vụ mô hình Python, API .NET và frontend. Kết quả là điểm thử nghiệm trên các âm được hỗ trợ; chưa chấm trọng âm/độ trôi chảy hoặc xác định âm thay thế.

@@ -1,0 +1,187 @@
+{
+  "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+  "identityScoresUnchanged": true,
+  "normalAndLimitedCoverageChecks": [
+    {
+      "case": "A1",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 0.954545,
+      "feedbackMode": "normal"
+    },
+    {
+      "case": "A2",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 1.0,
+      "feedbackMode": "normal"
+    },
+    {
+      "case": "B1",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 1.0,
+      "feedbackMode": "normal"
+    },
+    {
+      "case": "B2",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 1.0,
+      "feedbackMode": "normal"
+    },
+    {
+      "case": "C1",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 0.85,
+      "feedbackMode": "normal"
+    },
+    {
+      "case": "C2",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 0.619048,
+      "feedbackMode": "limited_coverage"
+    },
+    {
+      "case": "public human sample",
+      "status": 200,
+      "scoreUnchanged": true,
+      "coverage": 0.888889,
+      "feedbackMode": "normal"
+    }
+  ],
+  "clippedPublicSample": {
+    "artificiallyModified": true,
+    "statusCode": 200,
+    "clippingFraction": 0.043628875968992245,
+    "result": {
+      "status": "partial",
+      "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16",
+      "durationSeconds": 2.58,
+      "overallScore": 97.24,
+      "coverage": 0.888889,
+      "referenceTokenCount": 9,
+      "words": [
+        {
+          "index": 0,
+          "text": "We",
+          "status": "scored",
+          "score": 1.9498,
+          "phones": [
+            {
+              "sourcePhone": "W",
+              "symbol": "w",
+              "score": 1.9902,
+              "rawScore": 1.9902,
+              "startSeconds": 0.66,
+              "endSeconds": 0.685
+            },
+            {
+              "sourcePhone": "IY1",
+              "symbol": "iː",
+              "score": 1.9094,
+              "rawScore": 1.9094,
+              "startSeconds": 0.72,
+              "endSeconds": 0.745
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 1,
+          "text": "call",
+          "status": "scored",
+          "score": 1.9277,
+          "phones": [
+            {
+              "sourcePhone": "K",
+              "symbol": "k",
+              "score": 1.9816,
+              "rawScore": 1.9816,
+              "startSeconds": 1.02,
+              "endSeconds": 1.045
+            },
+            {
+              "sourcePhone": "AO1",
+              "symbol": "ɔː",
+              "score": 1.9315,
+              "rawScore": 1.9315,
+              "startSeconds": 1.14,
+              "endSeconds": 1.165
+            },
+            {
+              "sourcePhone": "L",
+              "symbol": "l",
+              "score": 1.8699,
+              "rawScore": 1.8699,
+              "startSeconds": 1.22,
+              "endSeconds": 1.245
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 2,
+          "text": "it",
+          "status": "scored",
+          "score": 1.9473,
+          "phones": [
+            {
+              "sourcePhone": "IH1",
+              "symbol": "ɪ",
+              "score": 1.9615,
+              "rawScore": 1.9615,
+              "startSeconds": 1.34,
+              "endSeconds": 1.365
+            },
+            {
+              "sourcePhone": "T",
+              "symbol": "t",
+              "score": 1.9331,
+              "rawScore": 1.9331,
+              "startSeconds": 1.44,
+              "endSeconds": 1.465
+            }
+          ],
+          "reason": null
+        },
+        {
+          "index": 3,
+          "text": "bear",
+          "status": "scored",
+          "score": 1.981,
+          "phones": [
+            {
+              "sourcePhone": "B",
+              "symbol": "b",
+              "score": 1.981,
+              "rawScore": 1.981,
+              "startSeconds": 1.66,
+              "endSeconds": 1.685
+            }
+          ],
+          "reason": "Từ này chỉ được chấm một phần; các âm gộp hoặc chưa đủ chắc chắn chưa được đánh giá."
+        }
+      ],
+      "warnings": [
+        "Âm thanh có dấu hiệu quá lớn; nên đặt microphone xa hơn.",
+        "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+      ],
+      "feedback": "Bản ghi có dấu hiệu chưa khớp rõ câu mẫu hoặc âm thanh bị quá lớn. Hãy nghe lại và ghi âm lại trước khi kết luận về phát âm.",
+      "interpretation": {
+        "calibrationVersion": "cal1-f38fe9a705ac1e16",
+        "calibrationMethod": "identity",
+        "practiceThreshold": 1.1,
+        "reviewThreshold": 1.5,
+        "thresholdFitted": true,
+        "minimumCoverage": 0.8,
+        "feedbackMode": "record_again",
+        "evidenceScope": "speechocean762-supported-subset"
+      }
+    }
+  },
+  "sqlWrites": false,
+  "vietnameseAccuracyMeasured": false
+}

@@ -1,0 +1,8 @@
+export type SpeakingPhone = { sourcePhone: string; symbol: string; score: number; startSeconds: number; endSeconds: number; rawScore?: number | null };
+export type SpeakingWord = { index: number; text: string; status: "scored" | "unsupported"; score: number | null; phones: SpeakingPhone[]; reason: string | null };
+export type SpeakingInterpretation = { calibrationVersion: string; calibrationMethod: "identity" | "affine" | "isotonic"; practiceThreshold: number; reviewThreshold: number; thresholdFitted: boolean; minimumCoverage: number; feedbackMode: "normal" | "limited_coverage" | "record_again"; evidenceScope: string };
+export type SpeakingAssessment = { status: "scored" | "partial"; modelVersion: string; durationSeconds: number; overallScore: number; coverage: number; referenceTokenCount: number; words: SpeakingWord[]; warnings: string[]; feedback: string; interpretation?: SpeakingInterpretation | null };
+export type SpeakingSegment = { index: number; text: string; startWordIndex: number; wordCount: number };
+export type SpeakingAttemptScope = { kind: "segment"; segmentIndex: number; startWordIndex: number; wordCount: number; sentenceText: string; segmentationVersion: string };
+export type SpeakingAttempt = { attemptId: number; lessonId: number; sentenceIndex: number; referenceText: string; createdAt: string; audioUrl: string; assessment: SpeakingAssessment; scope?: SpeakingAttemptScope | null };
+export type SpeakingLesson = { lessonId: number; courseId: number; title: string; courseTitle: string; goals: string; sentences: { text: string; ipa: string | null; audioUrl: string | null }[]; maxRecordingSeconds: number; maxAudioBytes: number; segments?: SpeakingSegment[][] | null; segmentationVersion?: string | null };
