@@ -2,11 +2,11 @@
 
 ## Luyện cụm ngắn và tự dừng — 2026-10-31
 
-Các bài mới tải từ API mặc định mở **Luyện từng cụm**. Máy chủ chia câu dài thành cụm 3–6 từ, ưu tiên dấu câu và ranh giới giới từ/liên từ; câu không quá 6 từ giữ một cụm. Đây là quy tắc hỗ trợ luyện tập, chưa phải phân tích cú pháp ngữ nghĩa hoàn chỉnh. Không sửa câu gốc hay nội dung khóa học. Ví dụ: “There is probably titanium” / “in your eyeglass frames .”.
+Các bài mặc định mở **Đọc cả câu** để học viên đọc từ đầu đến cuối trong một bản ghi. Khi chọn **Luyện từng cụm**, giao diện dùng các cụm 3–6 từ do máy chủ tạo theo dấu câu và ranh giới giới từ hoặc liên từ. Câu không quá 6 từ giữ một cụm.
 
 Chọn trực tiếp cụm trong câu, nghe giọng mẫu chậm/bình thường, ghi âm cụm rồi gửi chấm để xem màu và điểm riêng. Có cụm trước/tiếp, giữ bản nháp riêng cho từng cụm và cả câu, lịch sử ghi rõ Câu N · cụm M hoặc cả câu. Sau khi luyện các cụm có thể chọn **Đọc cả câu** để ôn lại; điểm cụm không được cộng/gộp thành điểm cả câu. Tiến độ và so sánh các lần luyện cũng tách theo phạm vi cụm/cả câu và phiên bản chia cụm.
 
-Tùy chọn **Tự dừng sau khoảng 1,5 giây im lặng** mặc định bật trong giao diện. Chỉ kích hoạt sau khi nhận đủ âm thanh; im lặng ban đầu hoặc tiếng click ngắn không được xem là đã trả lời xong. Khi tự dừng, microphone được đóng và WAV giữ lại để nghe/gửi chấm, không tự nộp bài. Có thể tắt nếu người học thường ngập ngừng. Đây là phép đo năng lượng đơn giản, không xác định chính xác đã đọc đủ ý; giới hạn mỗi lần ghi vẫn là 12 giây. Hủy lúc đang xin quyền/nạp worklet cũng dừng stream nhận được muộn và giải phóng tài nguyên.
+Tùy chọn **Tự dừng sau khoảng 1,5 giây im lặng** mặc định tắt khi đọc cả câu và bật khi luyện từng cụm. Học viên có thể đổi tùy chọn này trong lượt luyện. Khi bật, tự dừng chỉ kích hoạt sau khi nhận đủ âm thanh. Microphone được đóng và WAV sẵn sàng để nghe lại trước khi gửi chấm. Mỗi lần ghi có giới hạn 12 giây.
 
 API bài học trả `segments` theo từng câu và `segmentationVersion=phrase-v1`. POST bài nói có `segmentIndex` tùy chọn; bỏ trường này vẫn chấm cả câu như trước. Backend tự lấy cụm từ câu được phép học, không dùng văn bản do client gửi. Kết quả cụm có `scope` chứa chỉ số, vị trí từ, số từ, câu gốc snapshot và phiên bản; lưu trong JSON `PhonemeScores` version 1 hiện có. Không thay đổi schema hay dữ liệu bài học. Lịch sử cũ vẫn đọc được với scope null.
 

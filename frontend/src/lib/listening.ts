@@ -24,6 +24,9 @@ export class ListeningRequestError extends Error {
 }
 export function listeningPath(courseId: number, lessonId: number) { return `courses/${courseId}/lessons/${lessonId}/listening`; }
 export function listeningHref(courseId: number, lessonId: number) { return `/courses/${courseId}/lessons/${lessonId}/listening`; }
+export function listeningLoginHref(courseId: number, lessonId: number) {
+  return `/login?next=${encodeURIComponent(listeningHref(courseId, lessonId))}`;
+}
 export async function listeningRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const response = await fetch(`/api/learning/${path}`, { ...init, cache: "no-store", headers: { "Content-Type": "application/json", ...init.headers } });
   const body = await response.json().catch(() => ({}));

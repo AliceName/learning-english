@@ -21,6 +21,7 @@ public sealed class AuthController(
     RegistrationService registrationService,
     LoginService loginService,
     JwtTokenService tokenService,
+    RefreshSessions refreshSessions,
     LoginAttemptLimiter loginAttemptLimiter,
     EnglishLearningDbContext dbContext,
     ILogger<AuthController> logger) : ControllerBase
@@ -94,7 +95,12 @@ public sealed class AuthController(
             if (user is null)
                 return Problem(statusCode: StatusCodes.Status401Unauthorized,
                     title: "Đăng nhập không thành công.", detail: "Email hoặc mật khẩu không chính xác.");
-            return Ok(tokenService.CreateToken(user));
+            if (!request.UseRefreshSession) return Ok(tokenService.CreateToken(user));
+
+            var session = refreshSessions.Create(user.UserId);
+            if (session is null) return Problem(statusCode: 503, title: "Chưa thể mở phiên đăng nhập. Vui lòng thử lại sau.");
+            if (request.PreviousRefreshToken is not null) refreshSessions.Revoke(request.PreviousRefreshToken);
+            return Ok(tokenService.CreateToken(user, session));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -106,6 +112,52 @@ public sealed class AuthController(
             return Problem(statusCode: StatusCodes.Status503ServiceUnavailable,
                 title: "Chưa thể đăng nhập.", detail: "Hệ thống đang bận. Vui lòng thử lại sau.");
         }
+    }
+
+    [AllowAnonymous]
+    [HttpPost("refresh")]
+    [RequestSizeLimit(1024)]
+    [ProducesResponseType<LoginResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<LoginResponse>> Refresh(RefreshRequest request, CancellationToken cancellationToken)
+    {
+        Response.Headers.CacheControl = "no-store";
+        var userId = refreshSessions.FindUser(request.RefreshToken);
+        if (userId is null) return Unauthorized();
+
+        try
+        {
+            var user = await dbContext.Users.AsNoTracking().SingleOrDefaultAsync(
+                item => item.UserId == userId.Value && item.IsActive, cancellationToken);
+            if (user is null)
+            {
+                refreshSessions.Revoke(request.RefreshToken);
+                return Unauthorized();
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            var session = refreshSessions.Rotate(request.RefreshToken, user.UserId);
+            if (session is null) return Unauthorized();
+            return Ok(tokenService.CreateToken(user, session));
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (Exception error) when (error is SqlException or OperationCanceledException)
+        {
+            logger.LogError(error, "Database request failed during session refresh.");
+            return Problem(statusCode: 503, title: "Chưa thể gia hạn phiên. Vui lòng thử lại.");
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPost("logout")]
+    [RequestSizeLimit(1024)]
+    public IActionResult Logout(RefreshRequest request)
+    {
+        Response.Headers.CacheControl = "no-store";
+        refreshSessions.Revoke(request.RefreshToken);
+        return NoContent();
     }
 
     [Authorize]

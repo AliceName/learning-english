@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 348 170" fill="none">
+  <defs>
+    <linearGradient id="book" x2="0" y2="1">
+      <stop stop-color="#70c7fb"/><stop offset="1" stop-color="#1277e2"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="180" cy="156" rx="154" ry="9" fill="#bfdcff" opacity=".55"/>
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <path d="M123 153c-4-23 13-44 36-48 28-5 46 14 50 49z" fill="#545661" stroke="#14203c" stroke-width="3.5"/>
+    <path d="M151 117c-12 7-15 23-12 37h29c5-20-3-31-17-37z" fill="#fffdfd"/>
+    <path d="M107 73c-2-19 4-55 17-58 8-2 23 13 31 23 8-2 18-2 26 0 14-11 33-22 42-17 10 5 10 33 6 53 3 28-19 45-53 49-38 4-70-15-69-50z" fill="#55565e" stroke="#14203c" stroke-width="4"/>
+    <path d="M113 56c2-15 6-31 11-34 5-1 13 7 20 16-12 5-20 11-31 18zm81-16c10-8 21-16 27-13 5 2 5 19 2 31-6-7-17-13-29-18z" fill="#f7a6b6"/>
+    <path d="M109 84c12-15 26-17 40-25 9-5 14-12 17-20 4 18 17 25 33 32 11 5 22 10 27 16-8 20-26 33-51 35-31 3-56-11-66-38z" fill="#fffdfc"/>
+    <path d="M131 74c5-6 12-6 16 1m39-2c4-6 11-6 16 0" stroke="#1a2136" stroke-width="3.7"/>
+    <ellipse cx="133" cy="84" rx="8" ry="4" fill="#f5a6b7"/>
+    <ellipse cx="204" cy="83" rx="8" ry="4" fill="#f5a6b7"/>
+    <path d="M161 77c3-2 7-2 10 0-2 3-4 4-5 4s-3-1-5-4z" fill="#e17a91" stroke="#342640" stroke-width="1.5"/>
+    <path d="M156 87c4 3 7 1 10-5 4 6 6 7 11 4-2 10-7 12-11 12-5 0-9-3-10-11z" fill="#f694a6" stroke="#172138" stroke-width="2.2"/>
+    <path d="m110 73-11-4m11 13-10 2m125-12 11-4m-11 12 11 3" stroke="#172138" stroke-width="2.2"/>
+    <g transform="rotate(-8 108 104)">
+      <rect x="55" y="69" width="90" height="66" rx="9" fill="#fff" stroke="#1044ad" stroke-width="4"/>
+      <path d="M66 75h67" stroke="#dceaff" stroke-width="3"/>
+      <text x="100" y="111" fill="#0754bd" font-size="29" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700">Aa</text>
+    </g>
+    <path d="M141 125c-9-6-5-15 2-17 8-2 14 6 21 10 8 4 10 13 5 18-4 4-12 0-18-4z" fill="#fffdfc" stroke="#14203c" stroke-width="3"/>
+    <path d="M41 63 24 58m23-8L34 37m27 7-5-17" stroke="#ffbc4d" stroke-width="4.5"/>
+    <path d="M225 134h78a10 10 0 0 1 0 20h-78c5-6 5-14 0-20z" fill="url(#book)" stroke="#134681" stroke-width="2.5"/>
+    <path d="M230 139h70a5 5 0 0 1 0 10h-70" fill="#f8fdff" stroke="#bce0fa" stroke-width="2"/>
+    <path d="M234 117h64a9 9 0 0 1 0 18h-64c4-6 4-12 0-18z" fill="#eff7ff" stroke="#134681" stroke-width="2.5"/>
+    <path d="M239 123h57m-56 6h55" stroke="#b6daf7" stroke-width="2"/>
+    <path d="M229 101h61a8 8 0 0 1 0 16h-61c4-5 4-11 0-16z" fill="#66bef5" stroke="#134681" stroke-width="2.5"/>
+    <path d="M234 105h55a4 4 0 0 1 0 8h-55" fill="#f8fdff" stroke="#bce0fa" stroke-width="1.5"/>
+  </g>
+</svg>

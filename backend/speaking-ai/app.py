@@ -54,12 +54,14 @@ def create_app(engine=None):
         return {'status': 'ready', 'modelVersion': scorer.model_version, 'maxRecordingSeconds': 12}
 
     @application.post('/score')
-    async def score(request: Request, file: UploadFile = File(), text: str = Form(min_length=1, max_length=300)):
+    async def score(request: Request, file: UploadFile = File(), text: str = Form(min_length=1, max_length=300),
+                    sentence_text: str | None = Form(None, max_length=1000, alias='sentenceText'),
+                    start_word_index: int = Form(0, ge=0, le=1000, alias='startWordIndex')):
         try:
             data = await file.read(MAX_BYTES + 1)
             if len(data) > MAX_BYTES:
                 return JSONResponse({'title': 'Audio tối đa 2 MB.'}, status_code=413)
-            result = await run_in_threadpool(request.app.state.engine.score, data, text)
+            result = await run_in_threadpool(request.app.state.engine.score, data, text, sentence_text, start_word_index)
             return JSONResponse(result, headers={'Cache-Control': 'no-store'})
         except RecordingError as exc:
             return JSONResponse({'title': str(exc)}, status_code=422)

@@ -17,4 +17,7 @@ public sealed class JwtOptions
 
     [Range(1, 60)]
     public int AccessTokenMinutes { get; init; } = 30;
+
+    [Range(1, 24)]
+    public int SessionHours { get; init; } = 8;
 }

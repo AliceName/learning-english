@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace EnglishLearning.Api.Contracts;
 
 public sealed record LoginResponse(
@@ -5,4 +7,5 @@ public sealed record LoginResponse(
     string TokenType,
     int ExpiresIn,
     DateTimeOffset ExpiresAt,
-    RegisteredUser User);
+    RegisteredUser User,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? RefreshToken = null);

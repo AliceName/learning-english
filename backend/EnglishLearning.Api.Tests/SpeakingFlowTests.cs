@@ -51,8 +51,20 @@ public sealed class SpeakingFlowTests
                 db.Lessons.AddRange(published, draft, personal); await db.SaveChangesAsync();
             }
             Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync($"/api/v1/speaking/lessons/{published.LessonId}")).StatusCode);
+            using (var anonymousFree = FreeForm("We."))
+                Assert.Equal(HttpStatusCode.Unauthorized, (await client.PostAsync("/api/v1/speaking/free/score", anonymousFree)).StatusCode);
             void SignIn(User user) => client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", factory.Services.GetRequiredService<JwtTokenService>().CreateToken(user).AccessToken);
             SignIn(owner);
+            using (var invalidFree = FreeForm("We have 2 books."))
+                Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/v1/speaking/free/score", invalidFree)).StatusCode);
+            using (var free = FreeForm("  We.  "))
+            {
+                var scored = await client.PostAsync("/api/v1/speaking/free/score", free);
+                Assert.Equal(HttpStatusCode.OK, scored.StatusCode);
+                Assert.Equal(75, (await scored.Content.ReadFromJsonAsync<SpeakingAssessment>())!.OverallScore);
+                Assert.Equal("We.", scorer.LastText);
+                Assert.False(Directory.Exists(root));
+            }
             Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/speaking/lessons/{draft.LessonId}")).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/speaking/lessons/{personal.LessonId}")).StatusCode);
             using (var wrong = Form(published.LessonId, 99))
@@ -88,9 +100,14 @@ public sealed class SpeakingFlowTests
     }
     private static MultipartFormDataContent Form(int lesson, int sentence)
     {
-        var form = new MultipartFormDataContent();
+        var form = FreeForm("Injected reference must be ignored");
         form.Add(new StringContent(lesson.ToString()), "lessonId"); form.Add(new StringContent(sentence.ToString()), "sentenceIndex");
-        form.Add(new StringContent("Injected reference must be ignored"), "text");
+        return form;
+    }
+    private static MultipartFormDataContent FreeForm(string text)
+    {
+        var form = new MultipartFormDataContent();
+        form.Add(new StringContent(text), "text");
         using var memory = new MemoryStream(); using var writer = new BinaryWriter(memory);
         writer.Write("RIFF"u8); writer.Write(36 + 32000); writer.Write("WAVEfmt "u8); writer.Write(16); writer.Write((short)1); writer.Write((short)1);
         writer.Write(16000); writer.Write(32000); writer.Write((short)2); writer.Write((short)16); writer.Write("data"u8); writer.Write(32000);
@@ -100,7 +117,7 @@ public sealed class SpeakingFlowTests
     private sealed class FakeScorer : ISpeakingScorer
     {
         public bool Fail; public string? LastText;
-        public Task<SpeakingAssessment> ScoreAsync(byte[] wav, string text, CancellationToken ct)
+        public Task<SpeakingAssessment> ScoreAsync(byte[] wav, string text, CancellationToken ct, SpeakingAttemptScope? scope = null)
         {
             LastText = text;
             if (Fail) throw new SpeakingException(503, "Test service unavailable");

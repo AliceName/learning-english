@@ -15,6 +15,8 @@ import numpy as np
 import soundfile as sf
 from scipy.signal import resample_poly
 
+from read_pronunciation import WORD_PATTERN, phonetic_spellings
+
 MAX_BYTES = 2 * 1024 * 1024
 MAX_SECONDS = 12
 
@@ -58,7 +60,7 @@ def decode_audio(data):
 def reference_words(text):
     if not text or len(text) > 300 or re.search(r"[^A-Za-z\s'’.,!?;:\-\"()]", text):
         raise RecordingError('Câu mẫu cần là tiếng Anh, tối đa 300 ký tự; hãy viết số thành chữ.')
-    words = re.findall(r"[A-Za-z]+(?:['’][A-Za-z]+)*", text)
+    words = WORD_PATTERN.findall(text)
     if not 1 <= len(words) <= 35:
         raise RecordingError('Hãy chọn câu mẫu từ 1 đến 35 từ.')
     return [w.replace('’', "'") for w in words]
@@ -117,16 +119,21 @@ class SpeakingEngine:
             mapping_sha256=self.package['mapping_sha256'], feature_signature=self.package['feature_signature'],
             reference_mapping_sha256=file_digest(Path(__file__).with_name('reference_mapping.py')))
         self.model_version += '-' + self.calibration.document['calibration_id']
+        self.model_version += '-readctx1-' + file_digest(Path(__file__).with_name('read_pronunciation.py'))[:12]
         self.lock = threading.Lock()
         self.stride, self.receptive = 1, 1
         for kernel, stride in zip(self.model.config.conv_kernel, self.model.config.conv_stride):
             self.receptive += (kernel - 1) * self.stride; self.stride *= stride
 
-    def build_reference(self, text):
+    def build_reference(self, text, sentence_text=None, start_word_index=0):
         from reference_mapping import restore_boundaries, map_word_consensus
         from phonemizer.separator import Separator
         words = reference_words(text)
-        source = ' '.join(words).lower()
+        try:
+            spellings = phonetic_spellings(words, text if sentence_text is None else sentence_text, start_word_index)
+        except ValueError as exc:
+            raise RecordingError('Cụm luyện nói không khớp với câu mẫu. Hãy tải lại bài học.') from exc
+        source = ' '.join(spellings)
         tokenizer = self.processor.tokenizer
         raw = tokenizer.phonemize(source).split()
         output = tokenizer.backend.phonemize([source], separator=Separator(phone=' ', word=' | ', syllable=''))[0]
@@ -139,7 +146,7 @@ class SpeakingEngine:
         candidates = [self.lexicon.get(word.lower(), []) for word in words]
         if len(chunks) != len(words):
             isolated = [p.split() for p in tokenizer.backend.phonemize(
-                [word.lower() for word in words], separator=Separator(phone=' ', word='', syllable=''))]
+                spellings, separator=Separator(phone=' ', word='', syllable=''))]
             try:
                 chunks = restore_boundaries(candidates, chunks, isolated, self.mapping)
             except ValueError:
@@ -163,20 +170,20 @@ class SpeakingEngine:
             raise RecordingError('Câu này chưa có âm đối chiếu đủ chắc chắn để chấm điểm.')
         return raw, [vocab[t] for t in raw], supervised, results
 
-    def score(self, data, text):
+    def score(self, data, text, sentence_text=None, start_word_index=0):
         if not self.lock.acquire(blocking=False):
             raise EngineBusyError('Bộ chấm đang xử lý một bản ghi khác. Vui lòng thử lại sau.')
         try:
-            return self._score(data, text)
+            return self._score(data, text, sentence_text, start_word_index)
         finally:
             self.lock.release()
 
-    def _score(self, data, text):
+    def _score(self, data, text, sentence_text=None, start_word_index=0):
         from gop_ctc import viterbi_align, phoneme_features
         from scorer_model import predict_package
         audio, duration, warnings = decode_audio(data)
         recording_issue = bool(warnings)
-        tokens, targets, labelled, words = self.build_reference(text)
+        tokens, targets, labelled, words = self.build_reference(text, sentence_text, start_word_index)
         inputs = self.processor(audio, sampling_rate=16000, return_tensors='pt')
         with self.torch.inference_mode():
             logits = self.model(inputs.input_values.to(self.device)).logits[0]

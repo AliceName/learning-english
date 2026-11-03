@@ -119,7 +119,7 @@ public sealed class SpeakingPhraseFlowTests
     private sealed class FakeScorer : ISpeakingScorer
     {
         public string? LastText; public int Calls;
-        public Task<SpeakingAssessment> ScoreAsync(byte[] wav, string text, CancellationToken ct)
+        public Task<SpeakingAssessment> ScoreAsync(byte[] wav, string text, CancellationToken ct, SpeakingAttemptScope? scope = null)
         {
             Calls++; LastText = text;
             var words = Regex.Matches(text.Replace('’', '\''), @"[A-Za-z]+(?:'[A-Za-z]+)*").Select((match, index) =>

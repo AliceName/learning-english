@@ -23,7 +23,7 @@ export async function buildListeningHarness() {
   await fs.writeFile(path.join(temporary, "entry.tsx"), `import React from 'react'; import {createRoot} from 'react-dom/client';
     import MemberShell from ${js(path.join(root, "src/components/navigation/member-shell.tsx"))};
     import ListeningPractice from ${js(path.join(root, "src/components/listening/listening-practice.tsx"))};
-    createRoot(document.getElementById('app')).render(<MemberShell user={{userId:42,email:'listening-test@example.com',fullName:'Học viên kiểm thử',role:'user',targetLevel:'B1',currentStreak:2}}><ListeningPractice lesson={window.__LISTENING_FIXTURE__}/></MemberShell>);`);
+    createRoot(document.getElementById('app')).render(<MemberShell user={{userId:42,email:'listening-test@example.com',fullName:'Học viên kiểm thử',role:'user',targetLevel:'B1',currentStreak:2}}><ListeningPractice userId={42} lesson={window.__LISTENING_FIXTURE__}/></MemberShell>);`);
   const compiler = webpack({
     mode: "development", devtool: false, context: root, entry: path.join(temporary, "entry.tsx"),
     output: { path: temporary, filename: "app.js" },

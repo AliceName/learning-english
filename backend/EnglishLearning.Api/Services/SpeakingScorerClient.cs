@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using EnglishLearning.Api.Contracts;
@@ -10,16 +11,21 @@ public sealed class SpeakingException(int status, string message) : Exception(me
 }
 public interface ISpeakingScorer
 {
-    Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct);
+    Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct, SpeakingAttemptScope? scope = null);
 }
 public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
 {
-    public async Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct)
+    public async Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct, SpeakingAttemptScope? scope = null)
     {
         using var form = new MultipartFormDataContent();
         using var audio = new ByteArrayContent(wav);
         audio.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
         form.Add(audio, "file", "recording.wav"); form.Add(new StringContent(referenceText), "text");
+        if (scope is not null)
+        {
+            form.Add(new StringContent(scope.SentenceText), "sentenceText");
+            form.Add(new StringContent(scope.StartWordIndex.ToString(CultureInfo.InvariantCulture)), "startWordIndex");
+        }
         try
         {
             using var response = await client.PostAsync("score", form, ct);

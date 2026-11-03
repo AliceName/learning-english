@@ -39,11 +39,7 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
             scope = new("segment", segment.Index, segment.StartWordIndex, segment.WordCount, text, SpeakingPhraseSegmenter.Version);
             text = segment.Text;
         }
-        if (SpeakingReferenceText.GetError(text) is { } error)
-            return Problem(statusCode: 400, title: error);
-        var wav = await SpeakingStorage.ReadWavAsync(request.File, ct);
-        var assessment = await scorer.ScoreAsync(wav, text, ct);
-        if (!SpeakingScorerClient.IsValid(assessment, text)) throw new SpeakingException(502, "Kết quả chấm không hợp lệ.");
+        var (wav, assessment) = await AssessAsync(request.File, text, ct, scope);
         var url = await storage.SaveAsync(wav, ct);
         var attempt = new SpeakingAttempt { UserId = uid, LessonId = lesson.LessonId, AudioUrl = url,
             OverallScore = (decimal)assessment.OverallScore, DurationSeconds = (int)Math.Ceiling(assessment.DurationSeconds),
@@ -53,6 +49,23 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
         catch { storage.Delete(url); throw; }
         return Created($"/api/v1/speaking/attempts/{attempt.AttemptId}", ToResponse(attempt));
     }, ct);
+
+    [HttpPost("free/score"), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
+    public Task<IActionResult> ScoreFree([FromForm] ScoreFreeSpeakingRequest request, CancellationToken ct) => Execute(async _ =>
+    {
+        var (_, assessment) = await AssessAsync(request.File, request.Text.Trim(), ct);
+        return Ok(assessment);
+    }, ct);
+
+    private async Task<(byte[] Wav, SpeakingAssessment Assessment)> AssessAsync(
+        IFormFile file, string text, CancellationToken ct, SpeakingAttemptScope? scope = null)
+    {
+        if (SpeakingReferenceText.GetError(text) is { } error) throw new SpeakingException(400, error);
+        var wav = await SpeakingStorage.ReadWavAsync(file, ct);
+        var assessment = await scorer.ScoreAsync(wav, text, ct, scope);
+        if (!SpeakingScorerClient.IsValid(assessment, text)) throw new SpeakingException(502, "Kết quả chấm không hợp lệ.");
+        return (wav, assessment);
+    }
 
     [HttpGet("lessons/{lessonId:int:min(1)}/attempts")]
     public Task<IActionResult> History(int lessonId, CancellationToken ct) => Execute(async uid =>

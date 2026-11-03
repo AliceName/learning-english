@@ -10,6 +10,11 @@ public sealed class SubmitSpeakingRequest
     [StringLength(1000)] public string? SentenceText { get; init; }
     [Required] public IFormFile File { get; init; } = null!;
 }
+public sealed class ScoreFreeSpeakingRequest
+{
+    [Required, StringLength(300)] public string Text { get; init; } = null!;
+    [Required] public IFormFile File { get; init; } = null!;
+}
 public sealed record SpeakingPhoneResult(string SourcePhone, string Symbol, double Score, double StartSeconds, double EndSeconds, double? RawScore = null);
 public sealed record SpeakingWordResult(int Index, string Text, string Status, double? Score, SpeakingPhoneResult[] Phones, string? Reason);
 public sealed record SpeakingAssessment(string Status, string ModelVersion, double DurationSeconds, double OverallScore,

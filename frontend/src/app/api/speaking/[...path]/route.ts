@@ -22,7 +22,7 @@ async function readLimited(request: Request): Promise<ArrayBuffer> {
 async function proxy(request: Request, context: { params: Promise<{ path: string[] }> }) {
   const path = (await context.params).path.join("/");
   const recording = /^recordings\/[a-f0-9]{32}\.wav$/.test(path);
-  const allowed = request.method === "POST" && path === "attempts" || request.method === "GET" &&
+  const allowed = request.method === "POST" && (path === "attempts" || path === "free/score") || request.method === "GET" &&
     (/^lessons\/[1-9]\d*(\/attempts)?$/.test(path) || /^attempts\/[1-9]\d*$/.test(path) || recording);
   if (!allowed) return Response.json({ title: "Không tìm thấy API." }, { status: 404 });
   if (request.method === "POST" && !isSameOrigin(request)) return Response.json({ title: "Nguồn yêu cầu không hợp lệ." }, { status: 403 });

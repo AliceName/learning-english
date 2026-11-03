@@ -17,6 +17,7 @@ export default function CourseFilters({ query }: { query: CourseQuery }) {
         <button type="button" className={styles.filterToggle} aria-expanded={filtersOpen} aria-controls={filtersId} onClick={() => setFiltersOpen(open => !open)}><Icon name="filter" />{filtersOpen ? "Ẩn bộ lọc" : "Hiện bộ lọc"}<Icon name="chevron" className={styles.filterToggleChevron} /></button>
       </div>
       <input type="hidden" name="level" value={query.level} /><input type="hidden" name="skill" value={query.skill} />
+      {query.skill === "speaking" && <input type="hidden" name="view" value="catalog" />}
       <div id={filtersId} className={styles.advancedFilters} hidden={!filtersOpen}>
       <div className={`${styles.filterRow} ${styles.levelRow}`}><span className={styles.filterLabel}>CẤP ĐỘ CEFR</span><div className={styles.chips}><Link href={catalogHref(query, { level: "" })} aria-current={!query.level ? "true" : undefined}>Tất cả</Link>{levels.map((level, index) => <Link key={level} href={catalogHref(query, { level })} aria-current={query.level === level ? "true" : undefined}><strong>{level}</strong> {levelNames[index]}</Link>)}</div></div>
       <div className={styles.filterRow}><span className={styles.filterLabel}>KỸ NĂNG</span><div className={styles.chips}><Link href={catalogHref(query, { skill: "" })} aria-current={!query.skill ? "true" : undefined}>Tất cả kỹ năng</Link>{Object.entries(skills).map(([skill, label]) => <Link key={skill} href={catalogHref(query, { skill })} aria-current={query.skill === skill ? "true" : undefined}>{label}</Link>)}</div></div>

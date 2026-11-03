@@ -140,6 +140,7 @@ builder.Services.AddScoped<AdminBootstrapService>();
 builder.Services.Configure<BootstrapAdminOptions>(builder.Configuration.GetSection(BootstrapAdminOptions.SectionName));
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<JwtTokenService>();
+builder.Services.AddSingleton<RefreshSessions>();
 builder.Services.AddSingleton<LoginAttemptLimiter>();
 builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
@@ -154,6 +155,17 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         var jwt = configured.Value;
         bearer.MapInboundClaims = false;
         bearer.IncludeErrorDetails = false;
+        bearer.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var session = context.Principal?.FindFirst(RefreshSessions.SessionClaim);
+                if (session is not null && (!Guid.TryParseExact(session.Value, "N", out var id) ||
+                    !context.HttpContext.RequestServices.GetRequiredService<RefreshSessions>().Touch(id)))
+                    context.Fail("Session expired or revoked.");
+                return Task.CompletedTask;
+            }
+        };
         bearer.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,

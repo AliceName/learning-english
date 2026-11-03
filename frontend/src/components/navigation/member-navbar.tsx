@@ -16,7 +16,7 @@ import styles from "./member-navbar.module.css";
 const links: { label: string; icon: SiteIconName; href?: string }[] = [
   { label: "Tổng quan", icon: "dashboard", href: "/account" },
   { label: "Khóa học", icon: "book", href: "/courses" },
-  { label: "Luyện nói", icon: "mic", href: "/courses?skill=speaking" },
+  { label: "Luyện nói", icon: "mic", href: "/speaking" },
   { label: "Tạo khóa học AI", icon: "sparkles" },
   { label: "Flashcards", icon: "cards", href: "/flashcards" },
   { label: "Ôn tập lỗi sai", icon: "replay" },
