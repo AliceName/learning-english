@@ -14,12 +14,13 @@ import styles from "@/components/courses/courses.module.css";
 
 export const metadata: Metadata = { title: "Chi tiết khóa học | LEWA" };
 async function Detail({ params }: PageProps<"/courses/[courseId]">) {
-  const session = await getCurrentUser();
-  if (session.status === "anonymous") redirect("/login");
   const { courseId } = await params;
   if (!/^[1-9]\d*$/.test(courseId) || Number(courseId) > 2147483647) notFound();
+  const loginHref = `/login?next=${encodeURIComponent(`/courses/${courseId}`)}`;
+  const session = await getCurrentUser();
+  if (session.status === "anonymous") redirect(loginHref);
   const result = session.status === "authenticated" ? await getCourse(Number(courseId)) : null;
-  if (result?.status === "anonymous") redirect("/login");
+  if (result?.status === "anonymous") redirect(loginHref);
   if (result?.status === "not_found") notFound();
   const data = result?.status === "ok" ? result.data : null;
   return <MemberShell user={session.status === "authenticated" ? session.user : undefined}><main id="main-content" tabIndex={-1} className={styles.catalog}>

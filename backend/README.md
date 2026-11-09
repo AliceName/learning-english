@@ -486,3 +486,14 @@ Khóa ẩn vắng khỏi catalog/summary, chi tiết và luồng luyện nghe tr
 Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
 
 Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.
+# Từ điển song ngữ và đọc nghĩa tiếng Việt
+
+Endpoint `GET /api/v1/vocabulary?word=book&direction=en-vi` hỗ trợ ba giá trị direction `en-en`, `en-vi`, `vi-en`. Khi thiếu direction, mặc định `en-en`. Request cần tài khoản đang hoạt động. Dữ liệu cache song ngữ được lưu vào hai collection riêng, nguồn từ `https://dict.minhqnd.com/` và giữ metadata nguồn ở từng nghĩa.
+
+Chuẩn bị hai collection bằng `dotnet run --project backend/EnglishLearning.Api -- --initialize-bilingual-vocabulary=true` từ repository root. Cấu hình tên nằm trong `MongoDbSettings:EnglishVietnameseCollectionName` và `MongoDbSettings:VietnameseEnglishCollectionName`.
+
+Audio phát âm Anh–Anh dùng endpoint hiện tại. Audio nghĩa Việt dùng `POST /api/v1/vocabulary/definition-audio/prepare` với body `{ "word": "book", "direction": "en-vi", "definitionId": "<id nhận từ lookup>" }`. Backend đối chiếu ID với nghĩa, tạo TTS theo yêu cầu rồi lưu Cloudinary. Response cung cấp playbackUrl qua proxy frontend. GET `/api/v1/vocabulary/definition-audio?key=<audioKey>` chỉ đọc asset đã chuẩn bị và hỗ trợ Range.
+
+TTS mặc định tắt để nghiệm thu chất lượng giọng. Sau khi nghe đánh giá mẫu và đối chiếu điều kiện lưu media, bật bằng biến môi trường `DefinitionAudioSettings__Enabled=true` cùng cấu hình Cloudinary hợp lệ, rồi khởi động lại backend. `MaxTextLength`, `VoiceProfile`, giới hạn byte, thời lượng, deadline, số tác vụ và hạn mức tài khoản cấu hình trong `DefinitionAudioSettings`. Kiểm tra server xác nhận MIME, kích thước, chuỗi khung MPEG Layer III và thời lượng. Trình duyệt xử lý giải mã và phản hồi lỗi phát. Đánh giá nghe xác nhận độ chính xác đọc nội dung.
+
+Kiểm thử liên quan nằm trong `BilingualVocabularyTests`, `BilingualHttpTests`, `DefinitionAudioTests`, `DefinitionAudioCloudTests` và `BilingualLiveTests`. Test nguồn thật bật bằng `ENGLISHLEARNING_RUN_LIVE_BILINGUAL_TEST=1`. Test MongoDB bật bằng `ENGLISHLEARNING_TEST_MONGODB_CONNECTION_STRING`, dùng database kết thúc bằng `Tests` và collection có prefix test. Test giao diện `frontend/tests/bilingual-dictionary.mjs` dùng Playwright, hỗ trợ `PLAYWRIGHT_MODULE_PATH` và `VOCABULARY_TEST_BASE_URL`.

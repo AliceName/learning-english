@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using EnglishLearning.Api.Configuration;
 
 namespace EnglishLearning.Api.Controllers;
 
 [ApiController, Authorize, Route("api/v1/vocabulary"), Tags("Vocabulary")]
 [EnableRateLimiting("Vocabulary")]
-public sealed class VocabularyController(VocabularyLookupService lookup, EnglishLearningDbContext db,
+public sealed class VocabularyController(VocabularyLookupService lookup, IBilingualVocabularyService bilingual, IOptions<DefinitionAudioSettings> audioOptions, EnglishLearningDbContext db,
     ILogger<VocabularyController> logger) : ControllerBase
 {
     [HttpGet]
@@ -25,19 +27,22 @@ public sealed class VocabularyController(VocabularyLookupService lookup, English
     [ProducesResponseType<ProblemDetails>(502)]
     [ProducesResponseType<ProblemDetails>(503)]
     [ProducesResponseType<ProblemDetails>(504)]
-    public async Task<ActionResult<VocabularyResponse>> Get([FromQuery] string? word, CancellationToken cancellationToken)
+    public async Task<ActionResult<VocabularyResponse>> Get([FromQuery] string? word, CancellationToken cancellationToken, [FromQuery] string direction = "en-en")
     {
         Response.Headers.CacheControl = "no-store";
-        if (!VocabularyWord.TryNormalize(word, out var normalized))
+        if (!VocabularyWord.IsDirection(direction)) return Problem(statusCode: 400, title: "Hướng tra chưa hợp lệ.", extensions: new Dictionary<string, object?> { ["code"] = "invalid_direction" });
+        if (!VocabularyWord.TryNormalize(word, direction, out var normalized))
         {
-            ModelState.AddModelError("word", "Nhập một từ tiếng Anh từ 1–100 ký tự; có thể có dấu nháy hoặc gạch nối bên trong từ.");
+            ModelState.AddModelError("word", direction == "en-en" ? "Nhập một từ tiếng Anh từ 1–100 ký tự; có thể có dấu nháy hoặc gạch nối bên trong từ." : "Nhập từ hoặc cụm từ từ 1–100 ký tự, đúng ngôn ngữ đã chọn.");
             return ValidationProblem(ModelState);
         }
         if (!int.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId) || userId <= 0) return Unauthorized();
         try
         {
             if (!await db.Users.AnyAsync(user => user.UserId == userId && user.IsActive, cancellationToken)) return Unauthorized();
-            return Ok(await lookup.LookupAsync(normalized, cancellationToken));
+            var result = direction == "en-en" ? await lookup.LookupAsync(normalized, cancellationToken)
+                : await bilingual.LookupAsync(normalized, direction, cancellationToken);
+            return Ok(VocabularyPresentation.Apply(result, audioOptions.Value));
         }
         catch (VocabularyException error)
         {

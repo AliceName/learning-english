@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="web_dashboard" name="shell-type">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet">
+    <style>
+        @layer base {
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                overscroll-behavior: none;
+            }
+
+            main>:first-child {
+                margin-top: 0 !important;
+            }
+
+            main>:last-child {
+                margin-bottom: 0 !important;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+        id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-secondary-container": "#004d6a", "on-secondary-fixed": "#001e2c", "primary-fixed-dim": "#b4c5ff", "secondary-fixed": "#c4e7ff", "inverse-on-surface": "#eef0ff", "outline": "#737686", "on-secondary-fixed-variant": "#004c69", "surface-variant": "#dae2fd", "primary-fixed": "#dbe1ff", "on-primary-container": "#eeefff", "on-primary-fixed": "#00174b", "secondary": "#00668a", "on-tertiary-container": "#ffecec", "on-surface": "#131b2e", "surface-container-high": "#e2e7ff", "on-error-container": "#93000a", "background": "#faf8ff", "surface-container-highest": "#dae2fd", "on-surface-variant": "#434655", "surface-tint": "#0053db", "surface-container": "#eaedff", "primary-container": "#2563eb", "inverse-primary": "#b4c5ff", "tertiary": "#ad0033", "error-container": "#ffdad6", "error": "#ba1a1a", "tertiary-fixed": "#ffdadb", "on-tertiary": "#ffffff", "on-background": "#131b2e", "surface-bright": "#faf8ff", "inverse-surface": "#283044", "surface": "#faf8ff", "surface-container-low": "#f2f3ff", "secondary-fixed-dim": "#7bd0ff", "secondary-container": "#40c2fd", "surface-dim": "#d2d9f4", "on-error": "#ffffff", "primary": "#004ac6", "surface-container-lowest": "#ffffff", "on-tertiary-fixed": "#40000d", "on-tertiary-fixed-variant": "#92002a", "on-primary": "#ffffff", "tertiary-container": "#d22348", "on-secondary": "#ffffff", "on-primary-fixed-variant": "#003ea8", "outline-variant": "#c3c6d7", "tertiary-fixed-dim": "#ffb2b7" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-xl": "2.5rem", "margin": "2rem", "margin-mobile": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "gutter": "1.5rem", "gutter-mobile": "1rem", "space-lg": "1.5rem" }, "fontFamily": { "headline-lg": ["Plus Jakarta Sans"], "headline-lg-mobile": ["Plus Jakarta Sans"], "headline-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "label-badge": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "label-phonetic": ["JetBrains Mono"], "display-hero": ["Plus Jakarta Sans"] }, "fontSize": { "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "headline-lg-mobile": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "headline-sm": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "22px", "fontWeight": "400" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-badge": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "body-lg": ["16px", { "lineHeight": "26px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "label-phonetic": ["13px", { "lineHeight": "18px", "letterSpacing": "0.02em", "fontWeight": "500" }], "display-hero": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "800" }] } } } }</script>
+</head>
+
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+    <aside
+        class="fixed left-0 top-0 h-screen w-72 bg-surface-container-low z-50 flex flex-col justify-between py-6 px-4 shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+        <div class="flex flex-col gap-6">
+            <div class="px-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-on-primary shadow-sm">
+                        <span class="material-symbols-outlined text-[24px]">neurology</span></div>
+                    <div class="flex flex-col"><span
+                            class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">LinguaAI</span><span
+                            class="font-body-sm text-body-sm text-on-surface-variant">Adaptive Learning</span></div>
+                </div>
+            </div>
+            <nav class="flex flex-col gap-1 px-1"
+                data-active-classes="bg-primary-container text-on-primary-container font-bold rounded-xl shadow-sm"><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="dashboard" href="#"><span
+                        class="material-symbols-outlined text-[20px]">space_dashboard</span><span
+                        class="font-body-md text-body-md">Tổng quan</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="courses" href="#"><span
+                        class="material-symbols-outlined text-[20px]">menu_book</span><span
+                        class="font-body-md text-body-md">Khóa học</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="practice" href="#"><span
+                        class="material-symbols-outlined text-[20px]">record_voice_over</span><span
+                        class="font-body-md text-body-md">Luyện tập kỹ năng</span></a><a
+                    class="flex items-center justify-between px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="ai-course-creator" href="#">
+                    <div class="flex items-center gap-3"><span
+                            class="material-symbols-outlined text-[20px]">auto_awesome</span><span
+                            class="font-body-md text-body-md">Tạo khóa học AI</span></div><span
+                        class="font-label-badge text-label-badge uppercase px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-bold">Mới</span>
+                </a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="flashcards" href="#"><span
+                        class="material-symbols-outlined text-[20px]">style</span><span
+                        class="font-body-md text-body-md">Flashcards</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="mistakes-review" href="#"><span
+                        class="material-symbols-outlined text-[20px]">replay</span><span
+                        class="font-body-md text-body-md">Ôn tập lỗi sai</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="bookmarks" href="#"><span
+                        class="material-symbols-outlined text-[20px]">bookmark</span><span
+                        class="font-body-md text-body-md">Bookmark</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="analytics" href="#"><span
+                        class="material-symbols-outlined text-[20px]">monitoring</span><span
+                        class="font-body-md text-body-md">Tiến độ</span></a><a
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all"
+                    data-path="profile" href="#"><span
+                        class="material-symbols-outlined text-[20px]">account_circle</span><span
+                        class="font-body-md text-body-md">Hồ sơ</span></a></nav>
+        </div>
+    </aside>
+    <div class="pl-72">
+        <header
+            class="fixed top-0 left-72 right-0 h-20 bg-surface/80 backdrop-blur-xl z-40 px-8 flex items-center justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)]">
+            <div class="flex items-center w-80">
+                <div
+                    class="w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant focus-within:bg-surface-container-lowest transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">search</span><input
+                        class="w-full bg-transparent border-none outline-none font-body-sm text-body-sm text-on-surface placeholder:text-outline"
+                        placeholder="Tìm bài học, chủ đề..." type="text"><span
+                        class="font-label-phonetic text-label-phonetic px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant">⌘K</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
+                    <span class="material-symbols-outlined text-tertiary text-[20px]">local_fire_department</span><span
+                        class="font-headline-sm text-headline-sm font-bold text-tertiary">14 Ngày</span></div><button
+                    class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"><span
+                        class="material-symbols-outlined text-[22px]">notifications</span><span
+                        class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-tertiary"></span></button>
+                <div class="flex items-center gap-3 pl-2">
+                    <div class="flex flex-col text-right hidden sm:flex">
+                        <div class="flex items-center justify-end gap-1.5"><span
+                                class="font-headline-sm text-headline-sm text-on-surface font-semibold">Minh
+                                Hoàng</span></div><span
+                            class="font-body-sm text-body-sm text-on-surface-variant">hoang.m@lingua.ai</span>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span
+                            class="material-symbols-outlined text-on-primary text-[18px]">person</span></div>
+                </div>
+            </div>
+        </header>
+        <main class="w-full pt-20 px-8 pb-12 bg-surface min-h-screen">
+            <div class="flex flex-col w-full">
+                <!-- Lesson Header & Progress Bar Strip -->
+                <div class="w-full flex flex-col gap-4 mb-6">
+                    <!-- Breadcrumb & Level Metadata -->
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 text-on-surface-variant text-body-sm font-medium">
+                            <span class="hover:text-primary cursor-pointer transition-colors">Khóa học</span>
+                            <span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+                            <span class="hover:text-primary cursor-pointer transition-colors">Tiếng Anh Giao Tiếp Thực
+                                Tế</span>
+                            <span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+                            <span class="text-on-surface font-semibold">Bài 03: Daily Conversation &amp; Ordering
+                                Coffee</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+
+
+                        </div>
+                    </div>
+                    <!-- Title and Progress Indicator Bar -->
+                    <div
+                        class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-xl bg-surface-container-lowest shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-[22px]">record_voice_over</span>
+                            </div>
+                            <div>
+                                <h1 class="font-headline-sm text-headline-sm text-on-surface font-bold">
+                                    Luyện phát âm &amp; Ngữ điệu câu giao tiếp
+                                </h1>
+
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 min-w-[240px]">
+                            <div class="flex-1 flex flex-col gap-1.5">
+                                <div class="flex justify-between items-center text-body-sm">
+                                    <span class="font-semibold text-on-surface">Tiến độ bài</span>
+                                    <span class="font-bold text-primary font-label">Câu 3/5 • 60%</span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                                    <div class="h-full bg-primary rounded-full transition-all duration-500 ease-out"
+                                        style="width: 60%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Main Dual-Column Interactive Arena -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full">
+                    <!-- LEFT PANEL: Core Speaking Interactive Practice Card (Cols 7) -->
+                    <div class="lg:col-span-7 flex flex-col gap-5">
+                        <!-- Target Sentence Core Surface -->
+                        <div
+                            class="p-6 md:p-8 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col justify-between relative overflow-hidden">
+                            <!-- Ambient decorative badge & Mode Switcher -->
+                            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+
+
+                                <!-- Practice Mode Switcher -->
+                                <div class="flex items-center p-1 bg-surface-container-low rounded-xl gap-1">
+                                    <button id="mode-full" onclick="switchPracticeMode('full')"
+                                        class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-body-sm font-semibold transition-all bg-surface-container-lowest text-primary shadow-xs">
+                                        <span class="material-symbols-outlined text-[16px]">record_voice_over</span>
+                                        <span class="">Nói nguyên câu</span>
+                                    </button>
+                                    <button id="mode-chunk" onclick="switchPracticeMode('chunk')"
+                                        class="flex items-center gap-1.5 px-3 py-1 rounded-lg text-body-sm font-semibold transition-all text-on-surface-variant hover:text-on-surface">
+                                        <span class="material-symbols-outlined text-[16px]">splitscreen</span>
+                                        <span class="">Chia thành cụm</span>
+
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Chunk Navigation Strip (Visible in Chunk Mode) -->
+
+
+                            <!-- The Target Phrase Display (Full Sentence vs Active Chunk Highlight) -->
+                            <div class="flex flex-col gap-3 my-2">
+                                <div id="full-sentence-view" class="flex flex-col gap-2">
+                                    <h2
+                                        class="text-[24px] md:text-[30px] leading-tight font-headline font-bold text-on-surface tracking-tight">
+                                        <span class="text-on-surface-variant font-medium">“Could I get </span>
+                                        <span
+                                            class="text-primary bg-primary-fixed/40 px-1.5 py-0.5 rounded-lg font-bold">a
+                                            flat white</span>
+                                        <span class="text-on-surface-variant font-medium"> with oat milk,
+                                            please?”</span>
+                                    </h2>
+                                    <!-- IPA Transcription -->
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span id="active-ipa-label"
+                                            class="px-3 py-1 rounded-lg bg-surface-container font-label text-[13px] md:text-[14px] text-primary font-medium tracking-wide">/kʊd
+                                            aɪ ɡet ə flæt waɪt wɪð oʊt mɪlk pliːz/</span>
+                                    </div>
+                                    <!-- Translation -->
+
+                                </div>
+                            </div>
+
+                            <!-- Audio Player Native Speaker Controller -->
+                            <div
+                                class="mt-4 pt-4 bg-surface-container-low/60 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        class="w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-container transition-all active:scale-95 shadow-sm"
+                                        id="btn-play-native">
+                                        <span class="material-symbols-outlined text-[24px]"
+                                            id="play-icon">volume_up</span>
+                                    </button>
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                class="font-headline-sm text-[14px] font-semibold text-on-surface">Nghe
+                                                giọng bản xứ</span>
+
+                                        </div>
+                                        <span class="font-body-sm text-[12px] text-on-surface-variant">Ngữ điệu nối âm
+                                            liền mạch chuẩn US Native</span>
+                                    </div>
+                                </div>
+                                <!-- Speed Toggles -->
+                                <div class="flex items-center p-1 bg-surface-container-highest rounded-lg gap-1">
+                                    <button
+                                        class="px-2.5 py-1 text-label text-[12px] rounded font-semibold text-on-surface-variant hover:text-on-surface transition-colors"
+                                        id="speed-08">
+                                        0.8x
+                                    </button>
+                                    <button
+                                        class="px-2.5 py-1 text-label text-[12px] rounded font-bold bg-surface-container-lowest text-primary shadow-xs"
+                                        id="speed-10">
+                                        1.0x
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Recording Deck & Waveform Console -->
+                        <div
+                            class="p-6 md:p-8 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col items-center justify-center text-center relative">
+                            <div class="w-full flex items-center justify-between mb-4 text-body-sm">
+                                <span class="flex items-center gap-2 font-medium text-on-surface">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-tertiary animate-pulse"></span>
+                                    Microphone Studio
+                                </span>
+                                <span class="font-label text-on-surface-variant font-semibold" id="rec-duration">00:03 /
+                                    00:06</span>
+                            </div>
+                            <!-- Live Waveform Segment Bars -->
+                            <div
+                                class="w-full h-20 bg-surface-container-low rounded-xl px-4 py-3 flex items-center justify-center gap-1.5 overflow-hidden my-3">
+                                <div class="w-1.5 bg-primary-fixed-dim rounded-full h-3"></div>
+                                <div class="w-1.5 bg-primary-fixed-dim rounded-full h-5"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-8 animate-pulse"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-12"></div>
+                                <div class="w-1.5 bg-primary-container rounded-full h-16 animate-pulse"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-10"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-14"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-11"></div>
+                                <div class="w-1.5 bg-tertiary rounded-full h-15" title="Điểm hạ ngữ điệu"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-12"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-9"></div>
+                                <div class="w-1.5 bg-primary-fixed-dim rounded-full h-6"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-13 animate-pulse"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-15"></div>
+                                <div class="w-1.5 bg-primary rounded-full h-10"></div>
+                                <div class="w-1.5 bg-primary-fixed-dim rounded-full h-4"></div>
+                                <div class="w-1.5 bg-primary-fixed-dim rounded-full h-2"></div>
+                            </div>
+                            <!-- Interactive Central Big Mic Button Area -->
+                            <div class="my-4 flex flex-col items-center">
+                                <div class="relative flex items-center justify-center">
+                                    <!-- Pulsing soft ambient halos for recording state -->
+                                    <div class="absolute w-24 h-24 rounded-full bg-primary/10 animate-ping opacity-75 pointer-events-none"
+                                        id="mic-halo"></div>
+                                    <button
+                                        class="relative z-10 w-20 h-20 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-lg hover:bg-primary-container active:scale-95 transition-all"
+                                        id="mic-button">
+                                        <span class="material-symbols-outlined text-[36px]" id="mic-icon">mic</span>
+                                    </button>
+                                </div>
+                                <span class="mt-3 text-body-sm font-semibold text-on-surface" id="mic-status-label">
+                                    Đang ghi âm giọng đọc của bạn...
+                                </span>
+                                <span class="text-body-sm text-outline mt-0.5">Nhấn lại để hoàn tất bản thu</span>
+                            </div>
+                            <!-- Secondary Sub-Actions (Re-record + Primary AI Assessment Action) -->
+                            <div class="w-full flex flex-col sm:flex-row items-center gap-3 mt-4 pt-4"><button
+                                    class="w-full sm:w-auto px-4 py-3 rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors flex items-center justify-center gap-2 text-body-md font-semibold"
+                                    id="btn-rerecord">
+                                    <span class="material-symbols-outlined text-[18px]">replay</span>
+                                    Thu âm lại
+                                </button>
+                                <button
+                                    class="w-full sm:w-auto px-4 py-3 rounded-lg bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-fixed-dim transition-all flex items-center justify-center gap-2 text-body-md font-bold shadow-xs active:scale-95"
+                                    id="btn-listen-studio" title="Nghe lại giọng của bạn vừa thu">
+                                    <span
+                                        class="material-symbols-outlined text-[20px] text-secondary">play_circle</span>
+                                    <span class="">Nghe lại bản thu</span>
+
+                                </button>
+                                <button
+                                    class="flex-1 w-full py-3 px-6 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all flex items-center justify-center gap-2 text-body-md font-bold shadow-md active:translate-y-0.5"
+                                    id="btn-grade-ai">
+
+                                    Chấm điểm phát âm bằng AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- RIGHT PANEL: AI Feedback & Phonetic Diagnostic Result Card (Cols 5) -->
+                    <div class="lg:col-span-5 flex flex-col gap-5">
+                        <!-- AI Overall Score Card -->
+                        <div class="p-6 md:p-7 rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-6">
+                            <!-- Top Score Ring & Evaluation Badge -->
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <!-- Circular Progress Ring SVG -->
+                                    <div class="relative w-20 h-20 flex-shrink-0 flex items-center justify-center">
+                                        <svg class="w-full h-full -rotate-90" viewBox="0 0 76 76">
+                                            <circle class="text-surface-container" cx="38" cy="38" fill="transparent"
+                                                r="32" stroke="currentColor" stroke-width="7"></circle>
+                                            <circle class="text-primary transition-all duration-1000 ease-out" cx="38"
+                                                cy="38" fill="transparent" r="32" stroke="currentColor"
+                                                stroke-dasharray="201.06" stroke-dashoffset="28.14"
+                                                stroke-linecap="round" stroke-width="7"></circle>
+                                        </svg>
+                                        <div class="absolute flex flex-col items-center justify-center">
+                                            <span class="text-[20px] font-headline font-bold text-on-surface">86</span>
+                                            <span
+                                                class="text-[10px] font-bold text-outline -mt-1 font-label">/100</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-label-badge uppercase font-bold text-outline tracking-wider">AI
+                                            OVERALL SCORE</span>
+                                        <div class="flex items-center gap-1.5 mt-0.5">
+                                            <h3 class="text-headline-sm font-bold text-on-surface">Tốt • Đạt chuẩn</h3>
+                                            <span class="material-symbols-outlined text-[20px] text-primary"
+                                                style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                        </div>
+                                        <span class="text-body-sm text-on-surface-variant">Phát âm tự nhiên, ngữ điệu rõ
+                                            ràng.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 3 Core Sub-Metrics Progress Row -->
+                            <div class="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-surface-container-low">
+                                <!-- Metric 1: Phoneme -->
+                                <div class="flex flex-col gap-1 p-2 rounded-lg bg-surface-container-lowest">
+                                    <span class="text-[11px] font-medium text-on-surface-variant truncate">Độ chính
+                                        xác</span>
+                                    <span
+                                        class="font-headline-sm text-[16px] font-bold text-primary font-label">88%</span>
+                                    <div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+                                        <div class="h-full bg-primary rounded-full" style="width: 88%;"></div>
+                                    </div>
+                                </div>
+                                <!-- Metric 2: Fluency -->
+                                <div class="flex flex-col gap-1 p-2 rounded-lg bg-surface-container-lowest">
+                                    <span class="text-[11px] font-medium text-on-surface-variant truncate">Độ lưu
+                                        loát</span>
+                                    <span
+                                        class="font-headline-sm text-[16px] font-bold text-secondary font-label">84%</span>
+                                    <div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+                                        <div class="h-full bg-secondary-container rounded-full" style="width: 84%;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Metric 3: Intonation -->
+                                <div class="flex flex-col gap-1 p-2 rounded-lg bg-surface-container-lowest">
+                                    <span class="text-[11px] font-medium text-on-surface-variant truncate">Ngữ
+                                        điệu</span>
+                                    <span
+                                        class="font-headline-sm text-[16px] font-bold text-tertiary font-label">86%</span>
+                                    <div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden">
+                                        <div class="h-full bg-tertiary-container rounded-full" style="width: 86%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Word-by-word Breakdown with color-coded phonetic pills -->
+                            <div class="flex flex-col gap-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-headline-sm text-[14px] font-bold text-on-surface">
+                                        Chi tiết từng từ (Word-by-word)
+                                    </span>
+                                    <div class="flex items-center gap-3 text-[11px] font-medium">
+                                        <div class="flex items-center gap-1.5"><span
+                                                class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#e8f5e9] text-[#1b5e20]">Xanh</span><span
+                                                class="text-[11px] text-on-surface-variant font-medium">Điểm tốt</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5"><span
+                                                class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#fff8e1] text-[#b78103]">Vàng</span><span
+                                                class="text-[11px] text-on-surface-variant font-medium">Nên nghe
+                                                lại</span></div>
+                                        <div class="flex items-center gap-1.5"><span
+                                                class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#ffebee] text-[#c62828] border-b-2 border-[#c62828]">Đỏ</span><span
+                                                class="text-[11px] text-on-surface-variant font-medium">Ưu tiên
+                                                luyện</span></div>
+                                        <div class="flex items-center gap-1.5"><span
+                                                class="px-2 py-0.5 rounded text-[11px] font-bold bg-[#eceff1] text-[#546e7a]">Xám</span><span
+                                                class="text-[11px] text-on-surface-variant font-medium">Chưa đủ dữ
+                                                liệu</span></div>
+                                    </div>
+                                </div>
+                                <!-- Color coded word chips -->
+                                <div class="flex flex-wrap gap-2 p-3.5 rounded-xl bg-surface-container-low/70"><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">Could</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">94%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">I</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">96%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">get</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">90%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">a</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">92%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] text-[#92400e] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">flat</span><span
+                                            class="text-[10px] font-label text-[#d97706] font-bold">72%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">white</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">89%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">with</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">85%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#fff1f2] hover:bg-[#ffe4e6] border-2 border-[#f43f5e] text-[#9f1239] transition-all flex flex-col items-center shadow-xs"><span
+                                            class="text-[14px] font-bold text-[#be123c] border-b-2 border-[#be123c]">oat</span><span
+                                            class="text-[10px] font-label text-[#e11d48] font-extrabold">58%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">milk,</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">91%</span></button><button
+                                        class="px-2.5 py-1.5 rounded-lg bg-[#f0fdf4] hover:bg-[#dcfce7] border border-[#bbf7d0] text-[#14532d] transition-all flex flex-col items-center"><span
+                                            class="text-[14px] font-bold">please?</span><span
+                                            class="text-[10px] font-label text-[#16a34a] font-bold">95%</span></button>
+                                </div>
+                            </div>
+                            <!-- AI Phonics Tip Callout Card -->
+                            <div class="p-4 rounded-xl bg-surface-container flex gap-3.5 items-start">
+                                <div
+                                    class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
+                                    <span class="material-symbols-outlined text-[20px]">psychology</span>
+                                </div>
+                                <div class="flex flex-col gap-1 text-body-sm">
+                                    <span class="font-bold text-on-surface">Mẹo cải thiện âm vị từ Lingua AI:</span>
+                                    <p class="text-on-surface-variant leading-relaxed">
+                                        Chú ý âm bẹt <span class="font-label font-bold text-primary">/æ/</span> trong từ
+                                        <strong class="text-on-surface">“flat”</strong> mở rộng hàm dưới hơn một chút.
+                                        Với từ <strong class="text-on-surface">“oat”</strong>, bật dứt khoát âm chặn
+                                        cuối <span class="font-label font-bold text-tertiary">/t/</span> để tránh nhầm
+                                        với “oak”.
+                                    </p>
+                                </div>
+                            </div>
+                            <!-- Action Control Cluster (Replay your audio, re-try, and next step) -->
+                            <div class="flex flex-col gap-2.5 pt-2">
+                                <!-- Listen back user audio -->
+                                <button
+                                    class="w-full py-3 px-4 rounded-xl bg-surface-container-high hover:bg-surface-variant text-on-surface transition-all flex items-center justify-between gap-3 text-body-md font-semibold shadow-xs active:scale-95 group"
+                                    id="btn-replay-user">
+                                    <div class="flex items-center gap-2.5">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                            <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                        </div>
+                                        <div class="flex flex-col text-left">
+                                            <span class="font-bold text-[13px] text-on-surface">Nghe lại bản thu của
+                                                bạn</span>
+                                            <span class="text-[11px] text-on-surface-variant font-normal">Kiểm tra ngữ
+                                                điệu &amp; nối âm trước khi tiếp tục</span>
+                                        </div>
+                                    </div>
+                                    <span
+                                        class="px-2 py-0.5 rounded-md font-label text-[11px] font-bold bg-surface-container-lowest text-secondary">3.4s</span>
+                                </button>
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <button
+                                        class="py-2.5 px-4 rounded-lg bg-surface-container text-primary hover:bg-surface-variant transition-colors flex items-center justify-center gap-1.5 text-body-md font-bold"
+                                        id="btn-retry-sentence">
+                                        <span class="material-symbols-outlined text-[18px]">replay</span>
+                                        Luyện lại câu này
+                                    </button>
+                                    <button
+                                        class="py-2.5 px-4 rounded-lg bg-primary text-on-primary hover:bg-primary-container transition-all flex items-center justify-center gap-1.5 text-body-md font-bold shadow-sm"
+                                        id="btn-next-sentence">
+                                        <span class="">Câu tiếp theo</span>
+                                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                    // Interactive UI State Handlers for LinguaAI Speaking Practice
+                    (function initSpeakingStudio() {
+                        let isRecording = false;
+                        let isPlayingNative = false;
+
+                        const micBtn = document.getElementById('mic-button');
+                        const micIcon = document.getElementById('mic-icon');
+                        const micStatus = document.getElementById('mic-status-label');
+                        const micHalo = document.getElementById('mic-halo');
+                        const btnPlayNative = document.getElementById('btn-play-native');
+                        const playIcon = document.getElementById('play-icon');
+                        const speed08 = document.getElementById('speed-08');
+                        const speed10 = document.getElementById('speed-10');
+                        const btnReplayUser = document.getElementById('btn-replay-user');
+                        const btnGradeAI = document.getElementById('btn-grade-ai');
+                        const btnNext = document.getElementById('btn-next-sentence');
+                        const btnRetry = document.getElementById('btn-retry-sentence');
+                        const btnReRecord = document.getElementById('btn-rerecord');
+
+                        // Toggle Mic Recording State
+                        function toggleRecording() {
+                            isRecording = !isRecording;
+                            if (isRecording) {
+                                micBtn.classList.replace('bg-primary', 'bg-tertiary');
+                                micIcon.innerText = 'stop';
+                                micStatus.innerText = 'Đang ghi âm giọng đọc... (Nói rõ ràng)';
+                                micHalo.classList.remove('hidden');
+                            } else {
+                                micBtn.classList.replace('bg-tertiary', 'bg-primary');
+                                micIcon.innerText = 'mic';
+                                micStatus.innerText = 'Bản thu đã sẵn sàng. Bạn có thể chấm điểm ngay!';
+                                micHalo.classList.add('hidden');
+                            }
+                        }
+
+                        if (micBtn) {
+                            micBtn.addEventListener('click', toggleRecording);
+                        }
+
+                        if (btnReRecord) {
+                            btnReRecord.addEventListener('click', () => {
+                                isRecording = true;
+                                micBtn.classList.replace('bg-primary', 'bg-tertiary');
+                                micIcon.innerText = 'stop';
+                                micStatus.innerText = 'Đang thu âm lại... Xin bắt đầu nói!';
+                                micHalo.classList.remove('hidden');
+                            });
+                        }
+
+                        // Toggle Native Audio Playback
+                        if (btnPlayNative) {
+                            btnPlayNative.addEventListener('click', () => {
+                                isPlayingNative = !isPlayingNative;
+                                if (isPlayingNative) {
+                                    playIcon.innerText = 'pause';
+                                    setTimeout(() => {
+                                        playIcon.innerText = 'volume_up';
+                                        isPlayingNative = false;
+                                    }, 2400);
+                                } else {
+                                    playIcon.innerText = 'volume_up';
+                                }
+                            });
+                        }
+
+                        // Speed Selector Toggles
+                        if (speed08 && speed10) {
+                            speed08.addEventListener('click', () => {
+                                speed08.className = 'px-2.5 py-1 text-label text-[12px] rounded font-bold bg-surface-container-lowest text-primary shadow-xs';
+                                speed10.className = 'px-2.5 py-1 text-label text-[12px] rounded font-semibold text-on-surface-variant hover:text-on-surface transition-colors';
+                            });
+
+                            speed10.addEventListener('click', () => {
+                                speed10.className = 'px-2.5 py-1 text-label text-[12px] rounded font-bold bg-surface-container-lowest text-primary shadow-xs';
+                                speed08.className = 'px-2.5 py-1 text-label text-[12px] rounded font-semibold text-on-surface-variant hover:text-on-surface transition-colors';
+                            });
+                        }
+
+                        // Replay User Audio Micro-interaction
+                        if (btnReplayUser) {
+                            btnReplayUser.addEventListener('click', () => {
+                                const originalContent = btnReplayUser.innerHTML;
+                                btnReplayUser.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin text-secondary">sync</span> Đang phát lại bản thu của bạn...';
+                                btnReplayUser.classList.add('bg-surface-variant');
+                                setTimeout(() => {
+                                    btnReplayUser.innerHTML = originalContent;
+                                    btnReplayUser.classList.remove('bg-surface-variant');
+                                }, 3400);
+                            });
+                        }
+
+                        // Grade AI Button Feedback
+                        if (btnGradeAI) {
+                            btnGradeAI.addEventListener('click', () => {
+                                const originalText = btnGradeAI.innerHTML;
+                                btnGradeAI.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span> AI đang phân tích âm vị...';
+                                btnGradeAI.classList.add('opacity-90');
+                                setTimeout(() => {
+                                    btnGradeAI.innerHTML = '<span class="material-symbols-outlined text-[20px]">check_circle</span> Đã hoàn tất chấm điểm!';
+                                    setTimeout(() => {
+                                        btnGradeAI.innerHTML = originalText;
+                                        btnGradeAI.classList.remove('opacity-90');
+                                    }, 1800);
+                                }, 1200);
+                            });
+                        }
+
+                        // Navigation triggers
+                        if (btnRetry) {
+                            btnRetry.addEventListener('click', () => {
+                                if (!isRecording) toggleRecording();
+                            });
+                        }
+
+                        if (btnNext) {
+                            btnNext.addEventListener('click', () => {
+                                btnNext.innerHTML = '<span>Đang chuyển câu...</span><span class="material-symbols-outlined text-[18px] animate-pulse">arrow_forward</span>';
+                                setTimeout(() => {
+                                    btnNext.innerHTML = '<span>Câu tiếp theo</span><span class="material-symbols-outlined text-[18px]">arrow_forward</span>';
+                                }, 1000);
+                            });
+                        }
+                    })();
+            </script>
+        </main>
+    </div>
+
+
+</body>
+
+</html>

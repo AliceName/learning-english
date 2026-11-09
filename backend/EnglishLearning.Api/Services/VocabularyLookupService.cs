@@ -11,10 +11,10 @@ namespace EnglishLearning.Api.Services;
 
 public sealed class VocabularyLookupService(IVocabularyRepository repository, IDictionaryApiClient source,
     IOptions<DictionaryApiSettings> options, TimeProvider clock, IHostApplicationLifetime lifetime,
-    ILogger<VocabularyLookupService> logger)
+    ILogger<VocabularyLookupService> logger, string direction = "en-en", string sourceProvider = "dictionaryApi", SemaphoreSlim? sourceSlots = null)
 {
     private readonly ConcurrentDictionary<string, Lazy<Task<VocabularyResponse>>> flights = new();
-    private readonly SemaphoreSlim slots = new(options.Value.MaxConcurrentLookups);
+    private readonly SemaphoreSlim slots = sourceSlots ?? new(options.Value.MaxConcurrentLookups);
 
     public async Task<VocabularyResponse> LookupAsync(string word, CancellationToken cancellationToken)
     {
@@ -23,7 +23,7 @@ public sealed class VocabularyLookupService(IVocabularyRepository repository, ID
         deadline.CancelAfter(TimeSpan.FromSeconds(10));
         try
         {
-            var key = VocabularyWord.Key(word);
+            var key = VocabularyWord.Key(word, direction);
             var cached = await ReadAsync(key, deadline.Token);
             if (cached is not null) return cached.Response("mongodb", true);
             Lazy<Task<VocabularyResponse>>? candidate = null;
@@ -51,18 +51,18 @@ public sealed class VocabularyLookupService(IVocabularyRepository repository, ID
             logger.LogDebug("Vocabulary source completed in {ElapsedMs} ms.", timer.Elapsed.TotalMilliseconds);
             // BSON dates have millisecond precision; return the same timestamp before and after persistence.
             var fetchedAt = DateTimeOffset.FromUnixTimeMilliseconds(clock.GetUtcNow().ToUnixTimeMilliseconds()).UtcDateTime;
-            var entry = new VocabularyEntryDocument(word, payload, fetchedAt);
+            var entry = new VocabularyEntryDocument(word, payload, fetchedAt, direction);
             try
             {
                 timer.Restart();
                 var stored = await repository.SaveAsync(entry, deadline.Token);
                 logger.LogDebug("Vocabulary persistence completed in {ElapsedMs} ms.", timer.Elapsed.TotalMilliseconds);
-                return stored.Response("dictionaryApi", true);
+                return stored.Response(sourceProvider, true);
             }
             catch (Exception error) when (StorageFailure(error))
             {
                 logger.LogWarning("Vocabulary write failed ({ErrorType}); returning source data without persistence confirmation.", error.GetType().Name);
-                return entry.Response("dictionaryApi", false);
+                return entry.Response(sourceProvider, false);
             }
         }
         catch (OperationCanceledException) when (!lifetime.ApplicationStopping.IsCancellationRequested)

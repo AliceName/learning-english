@@ -215,7 +215,24 @@ builder.Services.AddOpenApi(options =>
 builder.Services.AddProblemDetails();
 
 builder.Services.AddOptions<MongoDbSettings>().Bind(builder.Configuration.GetSection(MongoDbSettings.SectionName))
+    .ValidateDataAnnotations().Validate(options => new[] { options.VocabularyCollectionName, options.EnglishVietnameseCollectionName,
+        options.VietnameseEnglishCollectionName }.Distinct().Count() == 3, "Vocabulary collections must have distinct names.").ValidateOnStart();
+builder.Services.AddOptions<MinhqndDictionarySettings>().Bind(builder.Configuration.GetSection("MinhqndDictionarySettings"))
     .ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddOptions<DefinitionAudioSettings>().Bind(builder.Configuration.GetSection("DefinitionAudioSettings"))
+    .ValidateDataAnnotations().Validate(options => options.MaxPendingPreparations >= options.MaxConcurrentPreparations,
+        "Definition audio preparation limits are invalid.").ValidateOnStart();
+builder.Services.AddHttpClient("MinhqndDictionary", client =>
+{
+    client.BaseAddress = new Uri("https://dict.minhqnd.com/");
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+builder.Services.AddHttpClient("DefinitionAudio", client => client.Timeout = Timeout.InfiniteTimeSpan)
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+builder.Services.AddSingleton<BilingualVocabularyService>();
+builder.Services.AddSingleton<IBilingualVocabularyService>(services => services.GetRequiredService<BilingualVocabularyService>());
+builder.Services.AddSingleton<DefinitionAudioService>();
 builder.Services.AddOptions<DictionaryApiSettings>().Bind(builder.Configuration.GetSection(DictionaryApiSettings.SectionName))
     .ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddSingleton<IMongoClient>(services =>
@@ -237,6 +254,7 @@ builder.Services.AddHttpClient("DictionaryApi", client =>
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 });
 builder.Services.AddSingleton<IDictionaryApiClient, DictionaryApiClient>();
+builder.Services.AddSingleton<SemaphoreSlim>(services => new(services.GetRequiredService<IOptions<DictionaryApiSettings>>().Value.MaxConcurrentLookups));
 builder.Services.AddSingleton<VocabularyLookupService>();
 builder.Services.AddOptions<DictionaryAudioSettings>()
     .Bind(builder.Configuration.GetSection(DictionaryAudioSettings.SectionName)).ValidateDataAnnotations()
@@ -256,6 +274,13 @@ builder.Services.AddSingleton<IDictionaryAudioStorage>(services => new Cloudinar
 builder.Services.AddSingleton<DictionaryAudioService>();
 builder.Services.AddRateLimiter(options =>
 {
+    options.AddPolicy("DefinitionAudio", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "anonymous",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = builder.Configuration.GetValue<int?>("DefinitionAudioSettings:RequestsPerMinute") ?? 30,
+            Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true
+        }));
     options.AddPolicy("VocabularyAudio", context => RateLimitPartition.GetFixedWindowLimiter(
         context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "anonymous",
         _ => new FixedWindowRateLimiterOptions
@@ -291,6 +316,17 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+if (builder.Configuration.GetValue<bool>("initialize-bilingual-vocabulary"))
+{
+    using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+    var options = app.Services.GetRequiredService<IOptions<MongoDbSettings>>().Value;
+    var database = app.Services.GetRequiredService<IMongoDatabase>();
+    await MongoVocabularySchema.InitializeAsync(database, options.EnglishVietnameseCollectionName, deadline.Token, "en-vi");
+    await MongoVocabularySchema.InitializeAsync(database, options.VietnameseEnglishCollectionName, deadline.Token, "vi-en");
+    app.Logger.LogInformation("Bilingual vocabulary collections and validators initialized.");
+    return;
+}
 
 if (builder.Configuration.GetValue<bool>("initialize-vocabulary"))
 {

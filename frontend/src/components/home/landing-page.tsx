@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import Icon, { type SiteIconName } from "@/components/site-icon";
 import BearMascot from "./bear-mascot";
+import { HeroBackdrop, HeroCrown, HeroStickers } from "./hero-artwork";
 import SkillPreview, { type SkillId } from "./skill-previews";
 import SkillArtwork, { PeekingCat } from "./skill-artwork";
 import useSkillCarousel from "./use-skill-carousel";
@@ -17,15 +18,10 @@ const skills: { id: SkillId; title: string; icon: SiteIconName; description: str
   { id: "grammar", title: "Grammar", icon: "brain", description: "Hiểu cấu trúc qua ví dụ thực tế", metric: "Cấu trúc", value: "Inversion", hint: "Hiểu cấu trúc qua các ví dụ thực tế", action: "Luyện bài tập ngữ pháp" },
 ];
 
-const courses: { title: string; level: string; rating: string; icon: SiteIconName; description: string; days: number; lessons: number }[] = [
-  { title: "Tiếng Anh Giao Tiếp Phản Xạ Cấp Tốc", level: "A1 – B1", rating: "4.95", icon: "users", description: "Xây dựng phản xạ trả lời không cần dịch nhẩm tiếng Việt. Thực hành 50 tình huống thực tế thường ngày.", days: 30, lessons: 45 },
-  { title: "Luyện Phát Âm Chuẩn Bản Xứ IPA & Ngữ Điệu", level: "All Levels", rating: "4.98", icon: "wave", description: "Chinh phục 44 âm quốc tế IPA, quy tắc nối âm Flap-T, nuốt âm mượt mà cùng bài luyện khẩu hình trực quan.", days: 21, lessons: 36 },
-  { title: "Chinh Phục Ngữ Pháp & Viết Học Thuật AI", level: "B2 – C1", rating: "4.93", icon: "writing", description: "Nâng cấp cấu trúc câu phức, đảo ngữ và từ vựng C1 học thuật cho bài luận IELTS Task 2 và email kinh doanh chuyên nghiệp.", days: 40, lessons: 50 },
-];
 const sectionNames = ["Giới thiệu", "5 kỹ năng AI", "Khóa học"];
 const scrollBehavior = (): ScrollBehavior => window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
 
-export default function LandingPage() {
+export default function LandingPage({ courseCards }: { courseCards: ReactNode }) {
   const main = useRef<HTMLElement>(null);
   const sections = useRef<(HTMLElement | null)[]>([]);
   const [activeSection, setActiveSection] = useState(0);
@@ -65,15 +61,22 @@ export default function LandingPage() {
     <nav className={styles.sectionNav} aria-label="Các phần trang chủ">{sectionNames.map((name, index) => <button key={name} type="button" aria-label={`Cuộn tới ${name}`} aria-current={activeSection === index ? "step" : undefined} onClick={() => goToSection(index)}><span className={styles.sectionTooltip}>{name}</span><i /></button>)}</nav>
     <main id="main-content" ref={main} className={styles.scrollContainer} tabIndex={-1} onScroll={trackSections} onKeyDown={handleKeys}>
       <section id="introduction" ref={node => { sections.current[0] = node; }} className={`${styles.slide} ${styles.introduction}`} tabIndex={-1} aria-labelledby="hero-heading">
+        <HeroBackdrop />
         <div className={styles.heroGrid}>
-          <div className={styles.heroMascot}><BearMascot /></div>
-          <div className={styles.heroCopy}>
-            <div className={styles.speechBubble}>
-              <span className={styles.greeting}><Icon name="sparkles" />Lời chào từ Gia sư AI</span>
-              <h1 id="hero-heading">Giới thiệu về website{" "}<span>LEWA</span></h1>
-              <p>Chào bạn! Mình là trợ lý LEWA — người bạn đồng hành cùng lộ trình học tiếng Anh thông minh, cá nhân hóa. Cùng mình luyện giao tiếp, chỉnh sửa phát âm từng âm vị và bứt phá phản xạ tự nhiên nhé!</p>
+          <div className={styles.heroMascot}>
+            <BearMascot />
+            <HeroCrown />
+            <span className={styles.heroCloud} aria-hidden="true" />
+          </div>
+          <div className={styles.speechBubble}>
+            <HeroStickers />
+            <span className={styles.greeting}>Chào mừng đến với LEWA</span>
+            <h1 id="hero-heading">Giới thiệu về website{" "}<span>LEWA</span></h1>
+            <p>LEWA là trợ lý học tiếng Anh thông minh, giúp bạn học từ vựng, luyện nghe nói và phát âm một cách cá nhân hóa, thú vị và hiệu quả.</p>
+            <div className={styles.heroActions}>
+              <button type="button" className={styles.primaryButton} onClick={() => goToSection(1)}>Bắt đầu học <Icon name="play" /></button>
+              <button type="button" className={styles.secondaryButton} onClick={() => goToSection(2)}><Icon name="plus" />Khám phá thêm</button>
             </div>
-            <div className={styles.heroActions}><button type="button" className={styles.primaryButton} onClick={() => goToSection(1)}>Start <Icon name="play" /></button><button type="button" className={styles.secondaryButton} onClick={() => goToSection(2)}><Icon name="plus" />Thêm</button></div>
           </div>
         </div>
         {nextCue(1)}
@@ -101,15 +104,10 @@ export default function LandingPage() {
       </section>
 
       <section id="courses" ref={node => { sections.current[2] = node; }} className={`${styles.slide} ${styles.coursesSlide}`} tabIndex={-1} aria-labelledby="courses-heading">
-        <div className={styles.coursesContent}><h2 id="courses-heading">Khóa học</h2>
-          <div className={styles.courseGrid}>{courses.map((course, index) => <article key={course.title} className={styles.courseCard} data-tone={index}>
-            <div className={styles.courseTop}><span>Cấp độ {course.level}</span><strong><Icon name="star" />{course.rating}</strong></div>
-            <span className={styles.courseIcon}><Icon name={course.icon} /></span>
-            <h3>{course.title}</h3><p>{course.description}</p>
-            <div className={styles.courseMeta}><span><Icon name="clock" />{course.days} Ngày</span><span><Icon name="book" />{course.lessons} Bài học</span></div>
-            <Link href="/register">Học ngay (Miễn phí)<Icon name="arrow" /></Link>
-          </article>)}</div>
-          <p className={styles.demoNote}>Lộ trình và điểm đánh giá minh họa. <Link href="/courses">Khám phá tất cả khóa học <span aria-hidden="true">→</span></Link></p>
+        <HeroBackdrop />
+        <div className={styles.coursesContent}>
+          <h2 id="courses-heading"><span>Khóa học</span></h2>
+          {courseCards}
         </div>
         <footer className={styles.footer}><span><strong>LEWA © 2026</strong> — Nền tảng học tiếng Anh trực quan AI</span><div><button type="button" onClick={() => goToSection(0)}>↑ Về đầu trang</button><button type="button" onClick={() => goToSection(1)}>5 Kỹ Năng AI</button><Link href="/courses">Khóa học</Link></div></footer>
       </section>

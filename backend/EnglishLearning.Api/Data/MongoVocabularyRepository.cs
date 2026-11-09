@@ -7,15 +7,20 @@ using MongoDB.Driver;
 namespace EnglishLearning.Api.Data;
 
 public sealed class MongoVocabularyRepository(IMongoDatabase database, IOptions<MongoDbSettings> options,
-    ILogger<MongoVocabularyRepository> logger) : IVocabularyRepository
+    ILogger<MongoVocabularyRepository> logger, string direction = "en-en") : IVocabularyRepository
 {
-    private readonly IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(options.Value.VocabularyCollectionName);
+    private readonly IMongoCollection<BsonDocument> collection = database.GetCollection<BsonDocument>(direction switch
+    {
+        "en-vi" => options.Value.EnglishVietnameseCollectionName,
+        "vi-en" => options.Value.VietnameseEnglishCollectionName,
+        _ => options.Value.VocabularyCollectionName
+    });
 
     public async Task<VocabularyEntryDocument?> FindAsync(string key, CancellationToken cancellationToken)
     {
         using var deadline = Deadline(cancellationToken);
         var doc = await collection.Find(new BsonDocument("_id", key)).Limit(1).FirstOrDefaultAsync(deadline.Token);
-        var entry = doc is null ? null : VocabularyEntryDocument.Read(doc, key);
+        var entry = doc is null ? null : VocabularyEntryDocument.Read(doc, key, direction);
         if (doc is not null && entry is null) logger.LogWarning("Invalid vocabulary document found; attempting source recovery.");
         return entry;
     }
@@ -40,7 +45,7 @@ public sealed class MongoVocabularyRepository(IMongoDatabase database, IOptions<
         {
             var existing = await collection.Find(filter).Limit(1).FirstOrDefaultAsync(deadline.Token);
             if (existing is null) throw new InvalidOperationException("Concurrent vocabulary entry disappeared.");
-            var valid = VocabularyEntryDocument.Read(existing, entry.Id);
+            var valid = VocabularyEntryDocument.Read(existing, entry.Id, direction);
             if (valid is not null) return valid;
             // Compare the complete observed document; never replace a concurrent repair.
             var repaired = await collection.ReplaceOneAsync(existing, entry.ToBson(), cancellationToken: deadline.Token);

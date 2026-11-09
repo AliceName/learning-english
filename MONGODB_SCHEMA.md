@@ -1,5 +1,33 @@
 # MongoDB — thiết kế dữ liệu từ điển
 
+## Mở rộng song ngữ ngày 07/11/2026
+
+Người dùng đã yêu cầu thực hiện chức năng theo `reports/Thiet_ke_du_lieu_API_tu_dien_song_ngu_2026-11-07.md`. Collection Anh–Anh tiếp tục dùng hợp đồng hiện có ở các mục bên dưới.
+
+| Hướng | Collection mặc định | Cấu hình | Prefix khóa | language | Ngôn ngữ nghĩa |
+|---|---|---|---|---|---|
+| Anh–Anh | `VocabularyEntries` | `VocabularyCollectionName` | `en:` | `en` | `en` |
+| Anh–Việt | `VocabularyEntriesEnVi` | `EnglishVietnameseCollectionName` | `en:` | `en` | `vi` |
+| Việt–Anh | `VocabularyEntriesViEn` | `VietnameseEnglishCollectionName` | `vi:` | `vi` | `en` |
+
+Hai collection mới dùng năm field root `_id`, `language`, `normalizedWord`, `entries`, `fetchedAtUtc`. Tên ba collection được kiểm tra khác nhau. Validator riêng nằm trong `Resources/Vocabulary/schema-en-vi.json` và `schema-vi-en.json`. Các nghĩa song ngữ bắt buộc có `definitionLanguage` phù hợp và `sourceMetadata.provider=minhqnd`.
+
+Entry dùng lại cấu trúc word/phonetics/meanings/definitions. Phần mở rộng song ngữ gồm `phonetics[].region`, `definitions[].definitionLanguage`, `definitions[].sourceMetadata` và `entry.providerMetadata`. Metadata nghĩa giữ tên nguồn, giấy phép đã xác nhận nếu có, loại từ gốc, loại từ phụ và links. Provider metadata giữ ngôn ngữ result, đường dẫn TTS nguồn, translations đã lọc ngôn ngữ đích và relations. Nguồn mới được ánh xạ BSON có cấu trúc. Định danh nghĩa, khả năng đọc TTS và hướng tra ở response được tính khi đọc.
+
+Chuẩn hóa song ngữ dùng Unicode Form C, chữ thường invariant, dấu cách đơn giữa từ, hỗ trợ đầy đủ chữ tiếng Việt và dấu kết hợp. Giới hạn 300 đơn vị UTF-16 trước chuẩn hóa, 100 sau chuẩn hóa. Truy vấn khác dấu hoặc khác cách đặt dấu vẫn có khóa riêng. Cách chuẩn hóa và khóa Anh–Anh hiện tại tiếp tục được dùng cho dữ liệu cũ.
+
+Cache và gộp request phân biệt hướng tra. Ba hướng chia sẻ hạn mức tài khoản và semaphore gọi nguồn. Đọc equality theo `_id`, ghi `$setOnInsert`, sửa document hỏng bằng compare-and-swap và xử lý `isPersisted=false` dùng cùng logic repository hiện có. Mỗi instance có single-flight, unique `_id` xử lý cạnh tranh ghi nhiều instance.
+
+Cấp phát hai collection mới bằng lệnh tường minh từ repository root
+
+```powershell
+dotnet run --project backend/EnglishLearning.Api -- --initialize-bilingual-vocabulary=true
+```
+
+Audio nghĩa chỉ tạo khi bấm nghe và lưu qua kho Cloudinary hiện tại, với provider attribution `minhqnd-tts`, `synthetic=true`, locale `vi` và phiên bản cấu hình giọng. Khóa là SHA-256 của phiên bản request, provider, ngôn ngữ, voice profile và chính nội dung gửi đọc. Manifest và binary thuộc hợp đồng media hiện có. `DefinitionAudioSettings.Enabled` mặc định false trong thời gian nghiệm thu giọng đọc.
+
+## Hợp đồng Anh–Anh hiện có
+
 Phạm vi được người dùng cho phép triển khai ngày **26/10/2026** qua yêu cầu thực hiện theo `reports/Ke_hoach_tra_cuu_tu_vung_MongoDB.md`. MongoDB lưu kết quả từ điển dùng chung; SQL Server giữ nguyên schema hiện có. Không thêm dữ liệu tài khoản, lịch sử tìm kiếm, bookmark hoặc flashcard vào collection này.
 
 ## Database và collection

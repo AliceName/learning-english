@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { backendRequestSignal } from "./backend-request";
@@ -36,7 +37,7 @@ type Session =
   | { status: "anonymous" }
   | { status: "unavailable" };
 
-export async function getCurrentUser(): Promise<Session> {
+export const getCurrentUser = cache(async function getCurrentUser(): Promise<Session> {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return { status: "anonymous" };
   await connection();
@@ -52,4 +53,4 @@ export async function getCurrentUser(): Promise<Session> {
   } catch {
     return { status: "unavailable" };
   }
-}
+});

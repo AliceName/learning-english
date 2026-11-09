@@ -5,26 +5,30 @@ using MongoDB.Bson;
 namespace EnglishLearning.Api.Documents;
 
 // Only ToBson() determines the five persisted fields; DTOs are not database fields.
-public sealed record VocabularyEntryDocument(string NormalizedWord, VocabularyPayload Payload, DateTime FetchedAtUtc)
+public sealed record VocabularyEntryDocument(string NormalizedWord, VocabularyPayload Payload, DateTime FetchedAtUtc, string Direction = "en-en")
 {
-    public string Id => VocabularyWord.Key(NormalizedWord);
+    public string Id => VocabularyWord.Key(NormalizedWord, Direction);
     public BsonDocument ToBson() => new()
     {
-        { "_id", Id }, { "language", "en" }, { "normalizedWord", NormalizedWord },
+        { "_id", Id }, { "language", VocabularyWord.Language(Direction) }, { "normalizedWord", NormalizedWord },
         { "entries", Payload.RawEntries }, { "fetchedAtUtc", new BsonDateTime(FetchedAtUtc) }
     };
 
     public VocabularyResponse Response(string source, bool persisted) =>
-        new(NormalizedWord, "en", source, persisted, FetchedAtUtc, Payload.Entries);
+        new(NormalizedWord, VocabularyWord.Language(Direction), source, persisted, FetchedAtUtc, Payload.Entries,
+            Direction, VocabularyWord.DefinitionLanguage(Direction), Direction == "en-en" ? "dictionaryApi" : "minhqnd");
 
-    public static VocabularyEntryDocument? Read(BsonDocument doc, string key)
+    public static VocabularyEntryDocument? Read(BsonDocument doc, string key, string direction = "en-en")
     {
         try
         {
             var word = doc["normalizedWord"].AsString;
-            if (!VocabularyWord.TryNormalize(word, out var normalized) || normalized != word ||
-                key != VocabularyWord.Key(word) || doc["_id"].AsString != key || doc["language"].AsString != "en") return null;
-            return new(word, VocabularyPayload.FromBson(doc["entries"].AsBsonArray), doc["fetchedAtUtc"].AsBsonDateTime.ToUniversalTime());
+            if (!VocabularyWord.TryNormalize(word, direction, out var normalized) || normalized != word ||
+                key != VocabularyWord.Key(word, direction) || doc["_id"].AsString != key || doc["language"].AsString != VocabularyWord.Language(direction)) return null;
+            var payload = VocabularyPayload.FromBson(doc["entries"].AsBsonArray);
+            if (direction != "en-en" && payload.Entries.SelectMany(entry => entry.Meanings).SelectMany(meaning => meaning.Definitions)
+                .Any(definition => definition.DefinitionLanguage != VocabularyWord.DefinitionLanguage(direction) || definition.SourceMetadata?.Provider != "minhqnd")) return null;
+            return new(word, payload, doc["fetchedAtUtc"].AsBsonDateTime.ToUniversalTime(), direction);
         }
         catch (Exception error) when (error is FormatException or InvalidCastException or KeyNotFoundException or ArgumentException)
         { return null; }
@@ -47,7 +51,7 @@ public sealed record VocabularyPayload(BsonArray RawEntries, DictionaryEntryResp
             Array(entry, "phonetics").Select(value =>
             {
                 var phonetic = value.AsBsonDocument;
-                return new DictionaryPhonetic(Text(phonetic, "text"), Text(phonetic, "audio"), Text(phonetic, "sourceUrl"), License(phonetic));
+                return new DictionaryPhonetic(Text(phonetic, "text"), Text(phonetic, "audio"), Text(phonetic, "sourceUrl"), License(phonetic), Text(phonetic, "region"));
             }).ToArray(), meanings.Select(value =>
             {
                 var meaning = value.AsBsonDocument;
@@ -57,7 +61,7 @@ public sealed record VocabularyPayload(BsonArray RawEntries, DictionaryEntryResp
                 {
                     var definition = item.AsBsonDocument;
                     return new DictionaryDefinition(Text(definition, "definition", true)!, Text(definition, "example"),
-                        Strings(definition, "synonyms"), Strings(definition, "antonyms"));
+                        Strings(definition, "synonyms"), Strings(definition, "antonyms"), Text(definition, "definitionLanguage"), Source(definition));
                 }).ToArray(), Strings(meaning, "synonyms"), Strings(meaning, "antonyms"));
             }).ToArray(), License(entry), Strings(entry, "sourceUrls"));
     }
@@ -70,6 +74,13 @@ public sealed record VocabularyPayload(BsonArray RawEntries, DictionaryEntryResp
         var text = !doc.TryGetValue(name, out var value) || value.IsBsonNull ? null : value.AsString;
         if (required && string.IsNullOrWhiteSpace(text)) throw new FormatException($"Missing {name}.");
         return text;
+    }
+    private static DefinitionSourceMetadata? Source(BsonDocument definition)
+    {
+        if (!definition.TryGetValue("sourceMetadata", out var value) || value.IsBsonNull) return null;
+        var source = value.AsBsonDocument;
+        return new(Text(source, "provider", true)!, Text(source, "sourceName"), Text(source, "sourceUrl"), License(source),
+            Text(source, "originalPartOfSpeech"), Text(source, "subPartOfSpeech"), Strings(source, "links"));
     }
     private static DictionaryLicense? License(BsonDocument doc)
     {

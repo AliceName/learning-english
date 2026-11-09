@@ -11,6 +11,31 @@ public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
     private IQueryable<Course> VisibleCourses(int userId) => dbContext.Courses.AsNoTracking()
         .Where(course => course.IsPublished && (course.SourceType == "system" || course.CreatedBy == userId));
 
+    public async Task<IReadOnlyList<FeaturedCourse>> FeaturedAsync(CancellationToken cancellationToken)
+    {
+        var courses = await dbContext.Courses.AsNoTracking()
+            .Where(course => course.IsPublished && course.SourceType == "system")
+            .OrderByDescending(course => course.UpdatedAt)
+            .ThenByDescending(course => course.CourseId)
+            .Take(3)
+            .Select(course => new
+            {
+                course.CourseId,
+                course.Title,
+                course.Description,
+                Lessons = dbContext.Lessons.Where(lesson => lesson.CourseId == course.CourseId && lesson.IsActive)
+                    .Select(lesson => new { lesson.DifficultyLevel, lesson.EstimatedMinutes }).ToList()
+            })
+            .ToListAsync(cancellationToken);
+
+        return courses.Select(course => new FeaturedCourse(
+            course.CourseId, course.Title, course.Description,
+            course.Lessons.Count, course.Lessons.Sum(lesson => lesson.EstimatedMinutes ?? 0),
+            course.Lessons.Count(lesson => lesson.EstimatedMinutes.HasValue),
+            course.Lessons.Select(lesson => lesson.DifficultyLevel).OfType<string>().Distinct().Order().ToArray()
+        )).ToArray();
+    }
+
     public async Task<CourseListResponse> ListAsync(int userId, CourseListQuery query, CancellationToken cancellationToken)
     {
         var visible = VisibleCourses(userId);

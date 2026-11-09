@@ -6,17 +6,18 @@ namespace EnglishLearning.Api.Data;
 
 public static class MongoVocabularySchema
 {
-    public static BsonDocument Validator()
+    public static BsonDocument Validator(string direction = "en-en")
     {
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("EnglishLearning.Api.Resources.Vocabulary.schema.json")!;
+        var suffix = direction == "en-en" ? "" : "-" + direction;
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"EnglishLearning.Api.Resources.Vocabulary.schema{suffix}.json")!;
         using var reader = new StreamReader(stream);
         return new("$jsonSchema", BsonDocument.Parse(reader.ReadToEnd()));
     }
 
     // Explicit provisioning only. Startup never creates collections or changes validators.
-    public static async Task InitializeAsync(IMongoDatabase database, string collectionName, CancellationToken token)
+    public static async Task InitializeAsync(IMongoDatabase database, string collectionName, CancellationToken token, string direction = "en-en")
     {
-        var validator = Validator();
+        var validator = Validator(direction);
         using var names = await database.ListCollectionNamesAsync(new ListCollectionNamesOptions
             { Filter = new BsonDocument("name", collectionName) }, token);
         if (!(await names.ToListAsync(token)).Contains(collectionName))

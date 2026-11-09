@@ -10,6 +10,6 @@ public sealed class DictionaryAudioRequest
 }
 
 public sealed record AudioAttribution(string Provider, string? SourceUrl, string FileUrl, string? Author,
-    string? LicenseName, string? LicenseUrl, string? Locale);
+    string? LicenseName, string? LicenseUrl, string? Locale, bool Synthetic = false, string? VoiceProfile = null);
 public sealed record DictionaryAudioReadyResponse(string Status, string PlaybackUrl, string ContentType,
     long SizeBytes, AudioAttribution Attribution);

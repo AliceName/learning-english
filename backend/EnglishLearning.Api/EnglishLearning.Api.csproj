@@ -27,6 +27,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Pronunciation\en_US.txt.gz" />
     <EmbeddedResource Include="Resources\Vocabulary\schema.json" />
+    <EmbeddedResource Include="Resources\Vocabulary\schema-en-vi.json" />
+    <EmbeddedResource Include="Resources\Vocabulary\schema-vi-en.json" />
     <EmbeddedResource Include="Resources\Cloudinary\smoke-match.ogg" />
     <Content Include="Resources\Pronunciation\*.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
