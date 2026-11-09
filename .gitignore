@@ -37,6 +37,7 @@ out/
 *.tsbuildinfo
 coverage/
 .vercel/
+/frontend_demo/
 
 # Environment variables, local secrets, and private certificates
 .env
