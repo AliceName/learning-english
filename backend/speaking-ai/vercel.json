@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "fastapi",
+  "functions": {
+    "vercel_app.py": {
+      "includeFiles": "vercel_assets/**",
+      "excludeFiles": "{vercel_assets/model/.cache/**,cefr-practice/**,speechocean-catalog/**,practice-courses.json,training-practice-courses.json,test_*.py}"
+    }
+  }
+}

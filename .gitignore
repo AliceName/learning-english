@@ -37,6 +37,7 @@ out/
 *.tsbuildinfo
 coverage/
 .vercel/
+/backend/speaking-ai/vercel_assets/
 /frontend_demo/
 
 # Environment variables, local secrets, and private certificates
