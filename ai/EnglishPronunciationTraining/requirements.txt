@@ -1,0 +1,19 @@
+# Install requirements-torch-cu126.txt first. The complete resolved environment
+# is captured separately in requirements-lock-win-py313-cu126.txt.
+transformers==4.57.1
+accelerate==1.10.1
+datasets==4.1.1
+numpy==2.2.6
+scipy==1.16.3
+pandas==2.3.3
+scikit-learn==1.7.2
+soundfile==0.13.1
+phonemizer==3.3.0
+cmudict==1.1.1
+sentencepiece==0.2.1
+PyYAML==6.0.3
+matplotlib==3.10.7
+tqdm==4.67.1
+tensorboard==2.20.0
+ipykernel==6.30.1
+

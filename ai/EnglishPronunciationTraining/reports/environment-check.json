@@ -1,0 +1,77 @@
+{
+  "checked_at_utc": "2026-10-24T03:27:06.856389+00:00",
+  "python": "3.13.2 (tags/v3.13.2:4f8bb39, Feb  4 2025, 15:23:48) [MSC v.1942 64 bit (AMD64)]",
+  "executable": "D:\\EnglishPronunciationTraining\\EnglishPronunciationTraining\\.venv\\Scripts\\python.exe",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "packages": {
+    "torch": "2.8.0+cu126",
+    "torchaudio": "2.8.0+cu126",
+    "transformers": "4.57.1",
+    "accelerate": "1.10.1",
+    "datasets": "4.1.1",
+    "numpy": "2.2.6",
+    "scipy": "1.16.3",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.7.2",
+    "soundfile": "0.13.1",
+    "phonemizer": "3.3.0",
+    "cmudict": "1.1.1",
+    "sentencepiece": "0.2.1",
+    "PyYAML": "6.0.3",
+    "matplotlib": "3.10.7",
+    "tqdm": "4.67.1",
+    "tensorboard": "2.20.0",
+    "ipykernel": "6.30.1"
+  },
+  "errors": [],
+  "wav2vec2_import": true,
+  "tensorboard_writer_import": true,
+  "cuda_available": true,
+  "cuda_runtime": "12.6",
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "vram_gib": 4.0,
+    "compute_capability": [
+      8,
+      6
+    ],
+    "compiled_architectures": [
+      "sm_61",
+      "sm_70",
+      "sm_75",
+      "sm_80",
+      "sm_86",
+      "sm_90"
+    ]
+  },
+  "optimizer_check": {
+    "device": "cuda",
+    "loss": 0.1751384735107422
+  },
+  "g2p_example": "θ ɪ ŋ k | ɐ b aʊ t | ɪ t",
+  "cmudict_example": [
+    [
+      "TH",
+      "IH1",
+      "NG",
+      "K"
+    ]
+  ],
+  "dataset_train": {
+    "utterances": 2500,
+    "speakers": 125
+  },
+  "dataset_test": {
+    "utterances": 2500,
+    "speakers": 125
+  },
+  "audio_check": {
+    "utterance_id": "000010011",
+    "sample_rate": 16000,
+    "shape": [
+      41280
+    ],
+    "duration_seconds": 2.58
+  },
+  "status": "passed"
+}

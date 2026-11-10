@@ -1,0 +1,45 @@
+# Baseline configuration for frozen acoustic inference and phoneme scorer training.
+seed: 42
+dataset:
+  root: speechocean762-main
+  scores: resource/scores.json
+  train_split: train
+  test_split: test
+  validation_speaker_fraction: 0.2
+  split_by: speaker_id
+audio:
+  sample_rate: 16000
+  channels: 1
+acoustic_model:
+  id: facebook/wav2vec2-lv-60-espeak-cv-ft
+  revision: ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4
+  frozen: true
+  device: cuda
+  # This checkpoint produced non-finite logits in float16 on the local GPU.
+  dtype: float32
+  inference_batch_size: 1
+  attention_implementation: eager
+  # Do not truncate longer recordings. Route them for separate handling.
+  max_audio_seconds: 12
+features:
+  output_dir: features
+  phone_mapping: configs/phone_mapping.json
+  # Symbolic/token checks passed. Acoustic alignment/GOP accuracy is not verified.
+  phone_mapping_validation: symbolic_only
+scorer:
+  hidden_sizes: [128, 64]
+  dropout: 0.2
+  score_range: [0.0, 2.0]
+  loss: huber
+  optimizer: adamw
+  learning_rate: 0.001
+  batch_size: 128
+  max_epochs: 50
+  early_stopping_patience: 8
+  num_workers: 0
+paths:
+  manifests: data/manifests
+  checkpoints: checkpoints
+  reports: reports
+  logs: logs
+

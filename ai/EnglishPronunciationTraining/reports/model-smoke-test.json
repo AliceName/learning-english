@@ -1,0 +1,23 @@
+{
+  "checked_at_utc": "2026-10-24T03:27:24.359481+00:00",
+  "status": "passed",
+  "purpose": "acoustic inference only, not pronunciation assessment",
+  "model_id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+  "revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4",
+  "device": "cuda",
+  "dtype": "torch.float32",
+  "frozen": true,
+  "utterance_id": "000010011",
+  "reference_text": "WE CALL IT BEAR",
+  "audio_seconds": 2.58,
+  "logits_shape": [
+    1,
+    128,
+    392
+  ],
+  "decoded_phones": "w iː k oː ɪ t b eː",
+  "g2p_input_text": "we call it bear",
+  "reference_g2p": "w iː k ɔː l ɪ t b ɛɹ",
+  "inference_seconds": 0.23,
+  "peak_cuda_allocated_mib": 1273.8
+}

@@ -1,0 +1,466 @@
+{
+  "schema_version": 1,
+  "mapping_version": "arpabet-espeak-en-us-v1",
+  "status": "symbolic_mapping_acoustic_validation_pending",
+  "model_id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+  "model_revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4",
+  "vocab_sha256": "400648fa107de6a1ab8e4d943b112e44b2a2149fb9160db5d7ca208ef28e4cdc",
+  "vocab_size": 392,
+  "ctc_blank_id": 0,
+  "special_tokens": {
+    "<pad>": 0,
+    "<s>": 1,
+    "</s>": 2,
+    "<unk>": 3
+  },
+  "sources": [
+    "https://github.com/cmusphinx/cmudict",
+    "https://github.com/jimbozhang/speechocean762",
+    "https://huggingface.co/facebook/wav2vec2-lv-60-espeak-cv-ft",
+    "https://huggingface.co/docs/transformers/model_doc/wav2vec2_phoneme"
+  ],
+  "policy": {
+    "stress": "Preserve original suffix; do not infer reduced vowel from 0 alone.",
+    "reference": "Use frozen en-us text G2P to select permitted 1:1 variants.",
+    "scores": "Keep source score ownership and order; never use scores to select tokens.",
+    "merges": "Flag and block; do not split a joint token across teacher labels.",
+    "unknown": "Fail closed, never substitute <unk>, blank or a nearest phone.",
+    "interpretation": "Mapped means symbolic compatibility, not validated GOP accuracy."
+  },
+  "phones": {
+    "AA": {
+      "canonical_token": "ɑː",
+      "canonical_id": 41,
+      "reference_variants": [
+        {
+          "token": "ɑː",
+          "id": 41
+        },
+        {
+          "token": "ɑ",
+          "id": 59
+        }
+      ]
+    },
+    "AE": {
+      "canonical_token": "æ",
+      "canonical_id": 36,
+      "reference_variants": [
+        {
+          "token": "æ",
+          "id": 36
+        }
+      ]
+    },
+    "AH": {
+      "canonical_token": "ʌ",
+      "canonical_id": 33,
+      "reference_variants": [
+        {
+          "token": "ʌ",
+          "id": 33
+        },
+        {
+          "token": "ə",
+          "id": 7
+        },
+        {
+          "token": "ɐ",
+          "id": 20
+        }
+      ]
+    },
+    "AO": {
+      "canonical_token": "ɔː",
+      "canonical_id": 67,
+      "reference_variants": [
+        {
+          "token": "ɔː",
+          "id": 67
+        },
+        {
+          "token": "ɔ",
+          "id": 40
+        }
+      ]
+    },
+    "AW": {
+      "canonical_token": "aʊ",
+      "canonical_id": 53,
+      "reference_variants": [
+        {
+          "token": "aʊ",
+          "id": 53
+        }
+      ]
+    },
+    "AY": {
+      "canonical_token": "aɪ",
+      "canonical_id": 37,
+      "reference_variants": [
+        {
+          "token": "aɪ",
+          "id": 37
+        }
+      ]
+    },
+    "B": {
+      "canonical_token": "b",
+      "canonical_id": 26,
+      "reference_variants": [
+        {
+          "token": "b",
+          "id": 26
+        }
+      ]
+    },
+    "CH": {
+      "canonical_token": "tʃ",
+      "canonical_id": 66,
+      "reference_variants": [
+        {
+          "token": "tʃ",
+          "id": 66
+        }
+      ]
+    },
+    "D": {
+      "canonical_token": "d",
+      "canonical_id": 12,
+      "reference_variants": [
+        {
+          "token": "d",
+          "id": 12
+        },
+        {
+          "token": "ɾ",
+          "id": 15
+        }
+      ]
+    },
+    "DH": {
+      "canonical_token": "ð",
+      "canonical_id": 22,
+      "reference_variants": [
+        {
+          "token": "ð",
+          "id": 22
+        }
+      ]
+    },
+    "EH": {
+      "canonical_token": "ɛ",
+      "canonical_id": 14,
+      "reference_variants": [
+        {
+          "token": "ɛ",
+          "id": 14
+        }
+      ]
+    },
+    "ER": {
+      "canonical_token": "ɚ",
+      "canonical_id": 43,
+      "reference_variants": [
+        {
+          "token": "ɚ",
+          "id": 43
+        },
+        {
+          "token": "ɜː",
+          "id": 63
+        }
+      ]
+    },
+    "EY": {
+      "canonical_token": "eɪ",
+      "canonical_id": 44,
+      "reference_variants": [
+        {
+          "token": "eɪ",
+          "id": 44
+        }
+      ]
+    },
+    "F": {
+      "canonical_token": "f",
+      "canonical_id": 23,
+      "reference_variants": [
+        {
+          "token": "f",
+          "id": 23
+        }
+      ]
+    },
+    "G": {
+      "canonical_token": "ɡ",
+      "canonical_id": 35,
+      "reference_variants": [
+        {
+          "token": "ɡ",
+          "id": 35
+        }
+      ]
+    },
+    "HH": {
+      "canonical_token": "h",
+      "canonical_id": 39,
+      "reference_variants": [
+        {
+          "token": "h",
+          "id": 39
+        }
+      ]
+    },
+    "IH": {
+      "canonical_token": "ɪ",
+      "canonical_id": 17,
+      "reference_variants": [
+        {
+          "token": "ɪ",
+          "id": 17
+        },
+        {
+          "token": "ᵻ",
+          "id": 50
+        }
+      ]
+    },
+    "IY": {
+      "canonical_token": "iː",
+      "canonical_id": 30,
+      "reference_variants": [
+        {
+          "token": "iː",
+          "id": 30
+        },
+        {
+          "token": "i",
+          "id": 10
+        }
+      ]
+    },
+    "JH": {
+      "canonical_token": "dʒ",
+      "canonical_id": 60,
+      "reference_variants": [
+        {
+          "token": "dʒ",
+          "id": 60
+        }
+      ]
+    },
+    "K": {
+      "canonical_token": "k",
+      "canonical_id": 11,
+      "reference_variants": [
+        {
+          "token": "k",
+          "id": 11
+        }
+      ]
+    },
+    "L": {
+      "canonical_token": "l",
+      "canonical_id": 8,
+      "reference_variants": [
+        {
+          "token": "l",
+          "id": 8
+        },
+        {
+          "token": "ɫ",
+          "id": 175
+        }
+      ]
+    },
+    "M": {
+      "canonical_token": "m",
+      "canonical_id": 13,
+      "reference_variants": [
+        {
+          "token": "m",
+          "id": 13
+        }
+      ]
+    },
+    "N": {
+      "canonical_token": "n",
+      "canonical_id": 4,
+      "reference_variants": [
+        {
+          "token": "n",
+          "id": 4
+        }
+      ]
+    },
+    "NG": {
+      "canonical_token": "ŋ",
+      "canonical_id": 42,
+      "reference_variants": [
+        {
+          "token": "ŋ",
+          "id": 42
+        }
+      ]
+    },
+    "OW": {
+      "canonical_token": "oʊ",
+      "canonical_id": 49,
+      "reference_variants": [
+        {
+          "token": "oʊ",
+          "id": 49
+        }
+      ]
+    },
+    "OY": {
+      "canonical_token": "ɔɪ",
+      "canonical_id": 100,
+      "reference_variants": [
+        {
+          "token": "ɔɪ",
+          "id": 100
+        }
+      ]
+    },
+    "P": {
+      "canonical_token": "p",
+      "canonical_id": 18,
+      "reference_variants": [
+        {
+          "token": "p",
+          "id": 18
+        }
+      ]
+    },
+    "R": {
+      "canonical_token": "ɹ",
+      "canonical_id": 27,
+      "reference_variants": [
+        {
+          "token": "ɹ",
+          "id": 27
+        }
+      ]
+    },
+    "S": {
+      "canonical_token": "s",
+      "canonical_id": 5,
+      "reference_variants": [
+        {
+          "token": "s",
+          "id": 5
+        }
+      ]
+    },
+    "SH": {
+      "canonical_token": "ʃ",
+      "canonical_id": 38,
+      "reference_variants": [
+        {
+          "token": "ʃ",
+          "id": 38
+        }
+      ]
+    },
+    "T": {
+      "canonical_token": "t",
+      "canonical_id": 6,
+      "reference_variants": [
+        {
+          "token": "t",
+          "id": 6
+        },
+        {
+          "token": "ɾ",
+          "id": 15
+        }
+      ]
+    },
+    "TH": {
+      "canonical_token": "θ",
+      "canonical_id": 52,
+      "reference_variants": [
+        {
+          "token": "θ",
+          "id": 52
+        }
+      ]
+    },
+    "UH": {
+      "canonical_token": "ʊ",
+      "canonical_id": 29,
+      "reference_variants": [
+        {
+          "token": "ʊ",
+          "id": 29
+        }
+      ]
+    },
+    "UW": {
+      "canonical_token": "uː",
+      "canonical_id": 46,
+      "reference_variants": [
+        {
+          "token": "uː",
+          "id": 46
+        },
+        {
+          "token": "u",
+          "id": 34
+        }
+      ]
+    },
+    "V": {
+      "canonical_token": "v",
+      "canonical_id": 25,
+      "reference_variants": [
+        {
+          "token": "v",
+          "id": 25
+        }
+      ]
+    },
+    "W": {
+      "canonical_token": "w",
+      "canonical_id": 32,
+      "reference_variants": [
+        {
+          "token": "w",
+          "id": 32
+        }
+      ]
+    },
+    "Y": {
+      "canonical_token": "j",
+      "canonical_id": 24,
+      "reference_variants": [
+        {
+          "token": "j",
+          "id": 24
+        }
+      ]
+    },
+    "Z": {
+      "canonical_token": "z",
+      "canonical_id": 21,
+      "reference_variants": [
+        {
+          "token": "z",
+          "id": 21
+        }
+      ]
+    },
+    "ZH": {
+      "canonical_token": "ʒ",
+      "canonical_id": 65,
+      "reference_variants": [
+        {
+          "token": "ʒ",
+          "id": 65
+        }
+      ]
+    }
+  }
+}
