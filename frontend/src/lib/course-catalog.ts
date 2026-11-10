@@ -33,8 +33,10 @@ export function courseQueryString(query: CourseQuery) {
 }
 
 export function catalogHref(query: CourseQuery, changes: Partial<CourseQuery> = {}) {
-  const params = courseQueryString({ ...query, page: 1, ...changes });
-  return params ? `/courses?${params}` : "/courses";
+  const next = { ...query, page: 1, ...changes };
+  const params = new URLSearchParams(courseQueryString(next));
+  if (next.skill === "speaking") params.set("view", "catalog");
+  return params.size ? `/courses?${params}` : "/courses";
 }
 
 export function skillLabel(skill: string) { return skills[skill as keyof typeof skills] ?? skill; }

@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:speaking": "node --test tests/speaking-wav.test.mjs tests/speaking-feedback.test.mjs tests/speaking-practice.test.mjs tests/recording-silence.test.mjs",
-    "test:courses": "node --test tests/course-learning-integration.test.mjs"
+    "test:courses": "node --test tests/course-learning-integration.test.mjs",
+    "test:updates": "node --test tests/session-renewal.test.mjs tests/listening-draft.test.mjs"
   },
   "dependencies": {
     "next": "16.4.2",

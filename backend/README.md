@@ -501,3 +501,11 @@ POST `/api/v1/admin/courses/{id}/hide` đặt Courses.IsPublished=false; POST `.
 Khóa ẩn vắng khỏi catalog/summary, chi tiết và luồng luyện nghe trả 404; media được quản lý cũng bị chặn với học viên. Admin vẫn xem trước/chỉnh sửa được. Ẩn/hiện không xóa Lessons, UserCourses, LearningProgress hoặc ExerciseResults. Bài nghe sửa nội dung dùng contentVersion hiện có để từ chối bài nộp cũ 409. URL ngoài hệ thống không chịu quyền truy cập của media proxy.
 
 `PublishedCourseManagementTests.cs` kiểm tra sửa đủ năm loại bài, cập nhật ứng viên bị từ chối không ghi dở, thêm bài, tắt bài cuối cùng, ẩn/hiện, quyền admin/user và phạm vi system, catalog/practice/media, giữ bài nộp/đăng ký học và phiên bản bài nghe. Các dữ liệu SQL trong kiểm thử được rollback.
+
+## Phiên đăng nhập tự gia hạn
+
+Frontend sử dụng refresh cookie HttpOnly để gia hạn access token trong phiên làm việc. Backend cung cấp POST `/api/v1/auth/refresh` và `/api/v1/auth/logout`; logout thu hồi cả access token gắn cùng session. Phiên có hạn tuyệt đối theo `Jwt:SessionHours` (mặc định 8 giờ) và hết hạn khi không có hoạt động quá 3 giờ. Refresh có cửa sổ ngắn để các tab đồng thời nhận cùng token thay thế.
+
+Session hiện được giữ trong bộ nhớ của tiến trình API, không tạo bảng hoặc collection mới. Khởi động lại API sẽ yêu cầu các phiên refresh cũ đăng nhập lại. Các test HTTP in-memory và test proxy kiểm tra gia hạn, cookie HttpOnly, từ chối token không hợp lệ, thu hồi khi logout và xử lý mất kết nối.
+
+Luyện nói tự do có endpoint POST `/api/v1/speaking/free/score`; không tạo SpeakingAttempts cho các câu tự tạo. Chấm theo bài học vẫn giữ lịch sử SQL và quyền sở hữu bản ghi như trước. Model Python nhận thêm ngữ cảnh câu để chọn cách đọc của từ read, có hậu tố modelVersion readctx1 riêng.

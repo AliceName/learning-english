@@ -7,6 +7,12 @@ public sealed class SubmitSpeakingRequest
     [Range(1, int.MaxValue)] public int LessonId { get; init; }
     [Range(0, 29)] public int SentenceIndex { get; init; }
     [Range(0, 29)] public int? SegmentIndex { get; init; }
+    [StringLength(1000)] public string? SentenceText { get; init; }
+    [Required] public IFormFile File { get; init; } = null!;
+}
+public sealed class ScoreFreeSpeakingRequest
+{
+    [Required, StringLength(300)] public string Text { get; init; } = null!;
     [Required] public IFormFile File { get; init; } = null!;
 }
 public sealed record SpeakingPhoneResult(string SourcePhone, string Symbol, double Score, double StartSeconds, double EndSeconds, double? RawScore = null);

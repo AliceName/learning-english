@@ -97,6 +97,38 @@ public sealed partial class RegistrationSqlServerTests
     }
 
     [SqlServerFact]
+    public async Task Speaking_reference_must_be_scorable_to_publish_or_update_a_visible_lesson()
+    {
+        await AuthoringAdmin();
+        var course = await NewAuthoringCourse();
+        var coursePath = $"/api/v1/admin/courses/{course.CourseId}";
+        var speakingPath = $"{coursePath}/lessons/{course.Lessons.Single(lesson => lesson.SkillType == "speaking").LessonId}";
+        var listeningPath = $"{coursePath}/lessons/{course.Lessons.Single(lesson => lesson.SkillType == "listening").LessonId}";
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync(listeningPath, ListeningLesson())).StatusCode);
+
+        static SaveLessonRequest WithText(string text) => new()
+        {
+            Title = "Speaking", SkillType = "speaking", DifficultyLevel = "B2", EstimatedMinutes = 25,
+            Speaking = new SpeakingContent { Sentences = [new SpeakingSentence { Text = text }] }
+        };
+
+        foreach (var text in new[] { "I have 21 books.", new string('a', 301), string.Join(' ', Enumerable.Repeat("go", 36)), "..." })
+        {
+            Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync(speakingPath, WithText(text))).StatusCode);
+            var rejected = await client.PostAsync($"{coursePath}/publish", null);
+            Assert.Equal(HttpStatusCode.BadRequest, rejected.StatusCode);
+            Assert.Contains("câu 1", (await rejected.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>())!.Title);
+        }
+
+        const string valid = "I have twenty-one books, and I’m ready.";
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync(speakingPath, WithText(valid))).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await client.PostAsync($"{coursePath}/publish", null)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PutAsJsonAsync(speakingPath, WithText("I have 21 books."))).StatusCode);
+        var saved = (await client.GetFromJsonAsync<AdminCourseResponse>(coursePath))!;
+        Assert.Equal(valid, saved.Lessons.Single(lesson => lesson.SkillType == "speaking").Speaking!.Sentences[0].Text);
+    }
+
+    [SqlServerFact]
     public async Task Invalid_payloads_cross_course_writes_and_incomplete_publishing_are_rejected()
     {
         await AuthoringAdmin(); var course = await NewAuthoringCourse(); var other = await NewAuthoringCourse();

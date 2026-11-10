@@ -17,9 +17,11 @@ import styles from "@/components/courses/courses.module.css";
 export const metadata: Metadata = { title: "Khám phá khóa học | LEWA", description: "Khám phá khóa học tiếng Anh theo trình độ CEFR và kỹ năng của bạn." };
 
 async function Catalog({ searchParams }: PageProps<"/courses">) {
+  const params = await searchParams;
+  if (params.skill === "speaking" && Object.keys(params).length === 1) redirect("/speaking");
   const session = await getCurrentUser();
   if (session.status === "anonymous") redirect("/login");
-  const query = parseCourseQuery(await searchParams);
+  const query = parseCourseQuery(params);
   const result = session.status === "authenticated" ? await getCourses(query) : null;
   if (result?.status === "anonymous") redirect("/login");
   const data = result?.status === "ok" ? result.data : null;
@@ -50,7 +52,6 @@ async function Catalog({ searchParams }: PageProps<"/courses">) {
           {data.page < data.totalPages && <Link href={catalogHref(query, { page: data.page + 1 })} aria-label="Trang sau">→</Link>}
         </nav></div>
       </>}
-      <div className={styles.catalogNote}><Icon name="shield" /><p>Chọn cấp độ phù hợp, học theo nhịp độ của bạn.<br /><span>Thông tin khóa học và tiến độ luôn được cập nhật từ tài khoản của bạn.</span></p><Icon name="sparkles" /></div>
     </main>
   </MemberShell>;
 }

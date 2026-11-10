@@ -1,7 +1,8 @@
-.panel { padding: 18px; border: 1px solid #f2c78e; background: #fffcf7; border-radius: 12px; margin: 20px 0; line-height: 1.8; color: #252b39; overflow-wrap: anywhere; }
-.panel h3 { margin: 0 0 10px; color: #606a7c; font-size: 14px; }
-.sentence { margin: 0 0 12px; font-size: 19px; font-weight: 650; line-height: 2.2; }
-.sentenceWord { border-radius: 5px; padding: 3px 5px; box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: help; }
+.panel { padding-top: 14px; border-top: 1px solid #dce7fa; margin: 16px 0; line-height: 1.6; color: #17284c; overflow-wrap: anywhere; }
+.panel h3 { margin: 0 0 10px; font-size: 15px; }
+.sentence { display: grid; grid-template-columns: repeat(auto-fill, minmax(67px, 1fr)); gap: 7px; margin: 0 0 12px; padding: 0; list-style: none; }
+.sentenceWord { display: grid; align-content: center; gap: 2px; min-height: 51px; padding: 5px; border: 1px solid color-mix(in srgb, currentColor 20%, transparent); border-radius: 10px; text-align: center; font-size: 13px; line-height: 1.35; cursor: help; }
+.sentenceWord > span { font-size: 11px; }
 .goodWord { color: #166534; background: #e4f5e9; }
 .listenWord { color: #854d0e; background: #fff1bd; }
 .practiceWord { color: #b42318; background: #fee4e2; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
@@ -15,10 +16,8 @@
 .tag { display: inline-block; padding: 2px 9px; background: #ffead6; color: #a64600; border-radius: 18px; font-size: 12px; }
 .listenTag { display: inline-block; padding: 2px 9px; background: #f4efdb; color: #796732; border-radius: 18px; font-size: 12px; }
 .qualityNote { padding: 12px; border-radius: 9px; background: #f4f0e6; color: #6e6246; font-size: 13px; }
-.target + .target { border-top: 1px solid #f2dfc8; padding-top: 16px; margin-top: 16px; }
+.target { margin-block: 10px; padding: 12px; border: 1px solid #dce7fa; border-radius: 12px; background: #f1f6ff; }
 .target ul { margin: 10px 0; padding-left: 23px; font-size: 14px; }
 .target li { margin: 6px 0; }
-.panel button { cursor: pointer; font: inherit; font-size: 13px; background: #fff; color: #89420a; border: 1px solid #e1bc96; border-radius: 8px; padding: 7px 12px; margin: 6px 8px 6px 0; }
-.panel .note { margin: 12px 0 0; font-size: 12px; color: #776c60; }
+.panel button { cursor: pointer; font: inherit; font-size: 12px; background: #fff; color: #164784; border: 1px solid #cbdaf1; border-radius: 8px; padding: 7px 10px; margin: 6px 8px 6px 0; }
 .summary { font-size: 14px; }
-@media(max-width:600px) { .panel { padding: 14px; } .sentence { font-size: 17px; } }

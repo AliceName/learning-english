@@ -1,6 +1,6 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using EnglishLearning.Api.Contracts;
 
 namespace EnglishLearning.Api.Services;
@@ -11,16 +11,21 @@ public sealed class SpeakingException(int status, string message) : Exception(me
 }
 public interface ISpeakingScorer
 {
-    Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct);
+    Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct, SpeakingAttemptScope? scope = null);
 }
 public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
 {
-    public async Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct)
+    public async Task<SpeakingAssessment> ScoreAsync(byte[] wav, string referenceText, CancellationToken ct, SpeakingAttemptScope? scope = null)
     {
         using var form = new MultipartFormDataContent();
         using var audio = new ByteArrayContent(wav);
         audio.Headers.ContentType = new MediaTypeHeaderValue("audio/wav");
         form.Add(audio, "file", "recording.wav"); form.Add(new StringContent(referenceText), "text");
+        if (scope is not null)
+        {
+            form.Add(new StringContent(scope.SentenceText), "sentenceText");
+            form.Add(new StringContent(scope.StartWordIndex.ToString(CultureInfo.InvariantCulture)), "startWordIndex");
+        }
         try
         {
             using var response = await client.PostAsync("score", form, ct);
@@ -49,7 +54,7 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
 
     public static bool IsValid(SpeakingAssessment result, string text)
     {
-        var words = Regex.Matches(text.Replace('’', '\''), @"[A-Za-z]+(?:'[A-Za-z]+)*").Select(m => m.Value).ToArray();
+        var words = SpeakingReferenceText.Words.Matches(text.Replace('’', '\'')).Select(m => m.Value).ToArray();
         if (result.Status is not ("scored" or "partial") || string.IsNullOrWhiteSpace(result.ModelVersion) || result.ModelVersion.Length > 200
             || !double.IsFinite(result.DurationSeconds) || result.DurationSeconds is < .3 or > 12.03
             || !double.IsFinite(result.OverallScore) || result.OverallScore is < 0 or > 100

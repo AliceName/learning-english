@@ -5,16 +5,20 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import { SESSION_CHANGED } from "@/lib/session-events";
-import { audioTime, isAnswered, listeningHref, listeningPath, listeningRequest, ListeningRequestError,
+import { audioTime, isAnswered, listeningHref, listeningLoginHref, listeningPath, listeningRequest, ListeningRequestError,
   type ListeningAnswer, type ListeningHistory, type ListeningLesson, type ListeningResult, type ListeningReview } from "@/lib/listening";
+import { clearListeningDraft, listeningDraftKey, readListeningDraft, writeListeningDraft } from "@/lib/listening-draft";
 import ListeningPlayer from "./listening-player";
 import styles from "./listening.module.css";
 
 const questionNames = { multiple_choice: "Kiểm tra mức độ hiểu", fill_blank: "Nghe & điền từ còn thiếu", matching: "Nghe & nối ý chính" };
 
-export default function ListeningPractice({ lesson }: { lesson: ListeningLesson }) {
+export default function ListeningPractice({ lesson, userId }: { lesson: ListeningLesson; userId: number }) {
   const router = useRouter(), path = listeningPath(lesson.courseId, lesson.lessonId);
+  const draftKey = listeningDraftKey(userId, lesson);
   const [answers, setAnswers] = useState<Record<number, ListeningAnswer>>({});
+  const currentAnswers = useRef<Record<number, ListeningAnswer>>({});
+  const [draftStatus, setDraftStatus] = useState<"saved" | "restored" | "unavailable" | null>(null);
   const [started, setStarted] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [sessionInvalid, setSessionInvalid] = useState(false), [result, setResult] = useState<ListeningResult | null>(null);
   const [progress, setProgress] = useState(lesson.progress), [elapsed, setElapsed] = useState(0), [run, setRun] = useState(0);
@@ -28,12 +32,13 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
   const submitDialog = useRef<HTMLDialogElement>(null), leaveDialog = useRef<HTMLDialogElement>(null), leaveTarget = useRef("");
   const resultHeading = useRef<HTMLHeadingElement>(null), busyRef = useRef(false);
   const answered = lesson.questions.filter(question => isAnswered(question, answers[question.questionId])).length;
-  const dirty = started && !result && answered > 0 && !sessionInvalid;
+  const dirty = started && !result && Object.keys(answers).length > 0 && !sessionInvalid;
   const canShowTranscript = !lesson.hideTranscriptFirstListen || listened || !!result;
   const next = lesson.lessons[lesson.lessons.findIndex(item => item.lessonId === lesson.lessonId) + 1];
 
   const invalidate = useCallback(() => {
     controller.current?.abort();
+    currentAnswers.current = {};
     setSessionInvalid(true); setAnswers({}); setResult(null); setTranscript(null); setTranscriptOpen(false);
     setHistory(null); setStarted(false); setBusy(false); setError("Phiên đăng nhập đã thay đổi. Vui lòng đăng nhập lại để tiếp tục.");
   }, []);
@@ -76,12 +81,17 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
     try {
       const response = await listeningRequest<{ positionSeconds: number }>(`${path}/start`, { method: "POST", signal: controller.current?.signal });
       controller.current?.signal.throwIfAborted();
+      const draft = again ? null : readListeningDraft(draftKey, lesson);
+      if (again) clearListeningDraft(draftKey);
+      currentAnswers.current = draft?.answers ?? {};
       setPosition(again ? 0 : response.positionSeconds); setRun(value => value + 1);
-      setAnswers({}); setResult(null); setListened(false); setTranscript(null); setTranscriptOpen(false); setSeek(null);
-      setElapsed(0); startTime.current = performance.now(); setStarted(true);
+      setAnswers(currentAnswers.current); setResult(null); setListened(false); setTranscript(null); setTranscriptOpen(false); setSeek(null);
+      setDraftStatus(draft ? "restored" : null);
+      const savedSeconds = draft?.timeSpentSeconds ?? 0;
+      setElapsed(savedSeconds); startTime.current = performance.now() - savedSeconds * 1000; setStarted(true);
     } catch (reason) { showError(reason); }
     finally { busyRef.current = false; setBusy(false); }
-  }, [path, sessionInvalid, showError]);
+  }, [draftKey, lesson, path, sessionInvalid, showError]);
   const savePosition = (seconds: number) => {
     if (!started || result || sessionInvalid || savingPosition.current || !Number.isFinite(seconds)) return;
     savingPosition.current = true;
@@ -93,7 +103,13 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
       }).finally(() => { savingPosition.current = false; });
   };
   function update(questionId: number, change: Partial<ListeningAnswer>) {
-    setAnswers(previous => ({ ...previous, [questionId]: { ...(previous[questionId] ?? { questionId, matches: [] }), ...change } }));
+    if (controller.current?.signal.aborted) return;
+    const previous = currentAnswers.current;
+    const updated = { ...previous, [questionId]: { ...(previous[questionId] ?? { questionId, matches: [] }), ...change } };
+    currentAnswers.current = updated;
+    setAnswers(updated);
+    const saved = writeListeningDraft(draftKey, { contentVersion: lesson.contentVersion, answers: updated, timeSpentSeconds: elapsed });
+    setDraftStatus(saved ? "saved" : "unavailable");
   }
   const replay = useCallback((seconds: number | null) => { if (seconds !== null) setSeek(previous => ({ seconds, nonce: (previous?.nonce ?? 0) + 1 })); }, []);
   async function toggleTranscript() {
@@ -126,11 +142,13 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
       const response = await listeningRequest<ListeningResult>(`${path}/submissions`, { method: "POST", signal: controller.current?.signal,
         body: JSON.stringify({ contentVersion: lesson.contentVersion, answers: Object.values(answers), timeSpentSeconds: Math.min(86400, Math.floor((performance.now() - startTime.current) / 1000)) }) });
       controller.current?.signal.throwIfAborted();
+      clearListeningDraft(draftKey);
+      setDraftStatus(null);
       setResult(response); setProgress(response.progress); setHistory(null);
       requestAnimationFrame(() => { resultHeading.current?.focus(); resultHeading.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     } catch (reason) { showError(reason); }
     finally { busyRef.current = false; setBusy(false); }
-  }, [answers, lesson.contentVersion, path, result, sessionInvalid, showError, started]);
+  }, [answers, draftKey, lesson.contentVersion, path, result, sessionInvalid, showError, started]);
 
   return <main id="main-content" tabIndex={-1} className={styles.page}>
     <div className={styles.breadcrumb}><nav aria-label="Đường dẫn"><Link href="/courses"><Icon name="book" />Khóa học</Link><span>/</span><Link href={`/courses/${lesson.courseId}`}>{lesson.courseTitle}</Link><span>/</span><span>{lesson.title}</span></nav>
@@ -139,7 +157,9 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
       <div><h1>{lesson.title}</h1><p><Icon name="shield" />Nghe kỹ audio và hoàn thành {lesson.questions.length} câu hỏi{lesson.estimatedMinutes ? ` · Khoảng ${lesson.estimatedMinutes} phút` : ""}.</p></div>
       <div className={styles.answerProgress}><div><span>Đã trả lời</span><strong>{answered}/{lesson.questions.length}</strong></div><progress value={answered} max={lesson.questions.length} aria-label="Tiến độ trả lời" /></div>
     </section>
-    {error && <div className={styles.error} role="alert">{error}{sessionInvalid ? <Link href="/login">Đăng nhập</Link> : <button type="button" onClick={() => setError("")}>Đóng thông báo</button>}</div>}
+    {error && <div className={styles.error} role="alert">{error}{sessionInvalid ? <Link href={listeningLoginHref(lesson.courseId, lesson.lessonId)}>Đăng nhập</Link> : <button type="button" onClick={() => setError("")}>Đóng thông báo</button>}</div>}
+    {draftStatus && <p className={styles.hint} role="status">{draftStatus === "restored" ? "Đã khôi phục câu trả lời từ bản nháp." :
+      draftStatus === "saved" ? "Đã lưu bản nháp trong tab này." : "Trình duyệt chưa lưu được bản nháp."}</p>}
     {!started && !sessionInvalid && <section className={styles.intro}>
       <div><strong>Sẵn sàng luyện nghe?</strong><p>Bạn có thể nghe lại, thay đổi tốc độ và làm lại bài. Điểm được tính sau khi nộp.</p>{lesson.latestResult && <p>Đã làm {lesson.attemptCount} lần · Điểm gần nhất: <strong>{lesson.latestResult.score}/100</strong></p>}</div>
       <button type="button" className={styles.primary} disabled={busy} onClick={() => void start()}><Icon name="play" />{busy ? "Đang mở bài…" : lesson.positionSeconds > 0 ? "Tiếp tục làm bài" : "Bắt đầu làm bài"}</button>
@@ -186,7 +206,7 @@ export default function ListeningPractice({ lesson }: { lesson: ListeningLesson 
     </section>}
     {!sessionInvalid && <footer className={styles.footer}><div><strong>Tiến độ luyện nghe: {progress.completedLessons}/{progress.totalLessons} bài</strong><progress value={progress.completedLessons} max={progress.totalLessons || 1} aria-label="Tiến độ luyện nghe trong khóa" /></div><div><Link href={`/courses/${lesson.courseId}`}>← Về khóa học</Link>{next && <Link href={listeningHref(lesson.courseId, next.lessonId)} className={styles.softButton}>Bài nghe tiếp theo<Icon name="arrow" /></Link>}</div></footer>}
     <dialog ref={submitDialog} className={styles.dialog}><h2>Bạn còn {lesson.questions.length - answered} câu chưa hoàn thành</h2><p>Các câu bỏ trống được tính là sai. Bạn có thể tiếp tục làm hoặc nộp ngay.</p><div><button type="button" onClick={() => submitDialog.current?.close()}>Tiếp tục làm</button><button type="button" className={styles.primary} onClick={() => void submit()}>Nộp bài</button></div></dialog>
-    <dialog ref={leaveDialog} className={styles.dialog}><h2>Rời bài đang làm?</h2><p>Câu trả lời chưa nộp sẽ bị mất khi rời trang.</p><div><button type="button" onClick={() => leaveDialog.current?.close()}>Ở lại làm bài</button><button type="button" className={styles.primary} onClick={() => { setStarted(false); leaveDialog.current?.close(); router.push(leaveTarget.current); }}>Rời bài</button></div></dialog>
+    <dialog ref={leaveDialog} className={styles.dialog}><h2>Rời bài đang làm?</h2><p>{draftStatus === "unavailable" ? "Trình duyệt chưa lưu được bản nháp. Hãy ở lại để nộp bài." : "Bạn có thể quay lại bài nghe trong tab này để tiếp tục từ bản nháp."}</p><div><button type="button" onClick={() => leaveDialog.current?.close()}>Ở lại làm bài</button><button type="button" className={styles.primary} onClick={() => { setStarted(false); leaveDialog.current?.close(); router.push(leaveTarget.current); }}>Rời bài</button></div></dialog>
   </main>;
 }
 

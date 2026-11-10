@@ -21,6 +21,10 @@ async function Content() {
       if (response.ok) decks = await response.json();
     } catch { /* Show a retry control if the API is temporarily unavailable. */ }
   }
-  return <MemberShell user={session.status === "authenticated" ? session.user : undefined}><FlashcardsWorkspace initialDecks={decks} isAdmin={session.status === "authenticated" && session.user.role === "admin"} /></MemberShell>;
+  const user = session.status === "authenticated" ? session.user : undefined;
+  const account = user ? `${user.userId}:${user.createdAt}` : undefined;
+  return <MemberShell user={user}>
+    <FlashcardsWorkspace key={account} initialDecks={decks} account={account} isAdmin={user?.role === "admin"} />
+  </MemberShell>;
 }
 export default function FlashcardsPage() { return <Suspense fallback={<p className={styles.page}>Đang tải bộ thẻ…</p>}><Content /></Suspense>; }

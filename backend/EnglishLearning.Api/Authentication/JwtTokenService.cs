@@ -11,12 +11,12 @@ namespace EnglishLearning.Api.Authentication;
 
 public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProvider)
 {
-    public LoginResponse CreateToken(User user)
+    public LoginResponse CreateToken(User user, RefreshGrant? session = null)
     {
         var settings = options.Value;
-        var now = timeProvider.GetUtcNow();
+        var now = session?.IssuedAt ?? timeProvider.GetUtcNow();
         var expiresAt = now.AddMinutes(settings.AccessTokenMinutes);
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString(CultureInfo.InvariantCulture)),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
@@ -25,12 +25,18 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider t
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
             new Claim(JwtRegisteredClaimNames.Iat, now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };
+        if (session is not null)
+        {
+            if (session.ExpiresAt < expiresAt) expiresAt = session.ExpiresAt;
+            claims.Add(new Claim(RefreshSessions.SessionClaim, session.SessionId.ToString("N")));
+            claims.Add(new Claim(RefreshSessions.DeadlineClaim, session.ExpiresAt.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64));
+        }
         var credentials = new SigningCredentials(
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(settings.SigningKey)), SecurityAlgorithms.HmacSha256);
         var token = new JwtSecurityToken(settings.Issuer, settings.Audience, claims,
             now.UtcDateTime, expiresAt.UtcDateTime, credentials);
         return new LoginResponse(new JwtSecurityTokenHandler().WriteToken(token), "Bearer",
-            settings.AccessTokenMinutes * 60, expiresAt,
-            new RegisteredUser(user.UserId, user.Email, user.FullName, user.TargetLevel, user.CreatedAt, user.Role));
+            Math.Max(1, (int)Math.Ceiling((expiresAt - now).TotalSeconds)), expiresAt,
+            new RegisteredUser(user.UserId, user.Email, user.FullName, user.TargetLevel, user.CreatedAt, user.Role), session?.Token);
     }
 }

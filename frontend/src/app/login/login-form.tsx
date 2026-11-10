@@ -50,7 +50,9 @@ export default function LoginForm({ onReaction, onBusyChange }: { onReaction: (r
       }
       form.reset();
       notifySessionChanged();
-      router.replace(result.user?.role === "admin" ? "/admin/courses" : "/account");
+      const next = new URLSearchParams(window.location.search).get("next") ?? "";
+      const returnToListening = /^\/courses\/[1-9]\d{0,9}\/lessons\/[1-9]\d{0,9}\/listening$/.test(next);
+      router.replace(returnToListening ? next : result.user?.role === "admin" ? "/admin/courses" : "/account");
       router.refresh();
     } catch {
       setNotice("Kết nối bị gián đoạn. Vui lòng thử lại sau ít phút.");

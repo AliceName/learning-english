@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from app import create_app
 from engine import MAX_BYTES, RecordingError, decode_audio, edit_ratio, reference_words
+from read_pronunciation import phonetic_spellings
 
 
 def wav(seconds=1, rate=16000, silent=False, stereo=False):
@@ -23,9 +24,10 @@ class FakeEngine:
     def __init__(self):
         self.calls = 0
 
-    def score(self, data, text):
+    def score(self, data, text, sentence_text=None, start_word_index=0):
         self.calls += 1
         decode_audio(data); reference_words(text)
+        self.context = (sentence_text, start_word_index)
         return {'status': 'scored', 'testOnly': True}
 
 
@@ -66,6 +68,41 @@ class ServingTests(unittest.TestCase):
             response = client.post('/score', data={'text': 'We'}, files={'file': ('x.wav', b'x' * (MAX_BYTES + 1), 'audio/wav')})
             self.assertIn(response.status_code, (400, 413))
             self.assertEqual(engine.calls, before)
+
+    def test_read_uses_tense_cues_without_changing_the_written_word(self):
+        cases = [
+            ('I read a book yesterday.', 'red'),
+            ('Yesterday, I read a book.', 'red'),
+            ('I read a book last week.', 'red'),
+            ('I have already read it.', 'red'),
+            ('I’ve read it.', 'red'),
+            ('I did read a book yesterday.', 'reed'),
+            ('What did you read yesterday?', 'reed'),
+            ('Have you already read it?', 'red'),
+            ('Will you have read it by then?', 'red'),
+            ('I read every day.', 'read'),
+            ('I read every day, but she left yesterday.', 'read'),
+        ]
+        for text, expected in cases:
+            with self.subTest(text=text):
+                words = reference_words(text)
+                index = words.index('read')
+                self.assertEqual(phonetic_spellings(words, text)[index], expected)
+                self.assertEqual(words[index], 'read')
+
+    def test_phrase_uses_original_sentence_cue_and_matching_word_offset(self):
+        sentence = 'Yesterday, I read a book.'
+        words = reference_words('read a book')
+        self.assertEqual(phonetic_spellings(words, sentence, 2), ['red', 'a', 'book'])
+        with self.assertRaises(ValueError):
+            phonetic_spellings(words, sentence, 0)
+
+        engine = FakeEngine()
+        with TestClient(create_app(engine)) as client:
+            response = client.post('/score', data={'text': 'read a book', 'sentenceText': sentence, 'startWordIndex': '2'},
+                                   files={'file': ('x.wav', wav(), 'audio/wav')})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(engine.context, (sentence, 2))
 
 
 if __name__ == '__main__':

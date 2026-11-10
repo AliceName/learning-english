@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
-import { backendUrl, isSameOrigin, SESSION_COOKIE, sessionCookieOptions } from "@/lib/server-auth";
+import { NextResponse, type NextRequest } from "next/server";
+import { backendUrl, isSameOrigin } from "@/lib/server-auth";
+import { isRefreshToken, readIssuedSession, REFRESH_COOKIE, setBrowserSession } from "@/lib/server-session";
 import { backendRequestSignal, isBackendTimeout } from "@/lib/backend-request";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   if (!isSameOrigin(request)) return NextResponse.json({ title: "Yêu cầu không hợp lệ." }, { status: 403 });
   let body: { email?: unknown; password?: unknown };
   try {
@@ -13,10 +14,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    const previousRefreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
     const upstream = await fetch(backendUrl("/api/v1/auth/login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: body.email, password: body.password }),
+      body: JSON.stringify({ email: body.email, password: body.password, useRefreshSession: true,
+        previousRefreshToken: isRefreshToken(previousRefreshToken) ? previousRefreshToken : undefined }),
       cache: "no-store",
       signal: backendRequestSignal(request.signal),
     });
@@ -30,14 +33,12 @@ export async function POST(request: Request) {
       return response;
     }
 
-    const result = await upstream.json();
-    if (typeof result.accessToken !== "string" || !Number.isInteger(result.expiresIn) || result.expiresIn < 1 || result.expiresIn > 3600 || !result.user)
-      throw new Error("Invalid authentication response");
+    const result = await readIssuedSession(upstream);
 
     const response = NextResponse.json({ user: result.user, expiresAt: result.expiresAt }, {
       headers: { "Cache-Control": "no-store" },
     });
-    response.cookies.set(SESSION_COOKIE, result.accessToken, { ...sessionCookieOptions, maxAge: result.expiresIn });
+    setBrowserSession(response, result);
     return response;
   } catch (error) {
     if (request.signal.aborted) return new NextResponse(null, { status: 499 });

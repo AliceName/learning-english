@@ -119,6 +119,8 @@ Trắc nghiệm Reading/Listening/Grammar khởi tạo với 2 lựa chọn. Com
 
 Python lấy từ biến `SPEAKING_TRAINING_ROOT` hoặc thư mục train bên cạnh repository theo bố cục máy hiện tại. Log ở `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Dịch vụ Python tiếp tục chạy khi dừng frontend, lần chạy frontend sau sẽ dùng lại. Nếu không cần Speaking khi phát triển, đặt `$env:SPEAKING_AUTO_START='0'` trước khi chạy npm để bỏ qua bước này. Chạy trực tiếp `next dev` không đi qua bước khởi động tự động.
 
+Nếu thiếu Python ở đường dẫn này, frontend vẫn khởi động và in cảnh báo. Gửi bản ghi để chấm cần dịch vụ Speaking đang chạy.
+
 Bài Speaking trong khóa học đã xuất bản có nút **Luyện nói** dẫn tới `/courses/[courseId]/speaking/[lessonId]`. Giao diện ghi âm PCM16 16 kHz, nghe lại, gửi chấm, xem điểm âm/từ, coverage và 20 lần luyện gần nhất. Có thể chọn WAV thay microphone. Proxy `/api/speaking` giữ JWT ở server; audio đã lưu chỉ chủ sở hữu đọc được.
 
 Xem `../SPEAKING.md` để khởi động dịch vụ mô hình Python, API .NET và frontend. Kết quả là điểm thử nghiệm trên các âm được hỗ trợ; chưa chấm trọng âm/độ trôi chảy hoặc xác định âm thay thế.
@@ -132,3 +134,11 @@ Xem `../SPEAKING.md` để khởi động dịch vụ mô hình Python, API .NET
 Danh sách `/admin/courses` có Chỉnh sửa và Ẩn khóa học/Hiện khóa học cho từng dòng. Cả thông tin chung và năm loại bài được biên soạn dù khóa đã xuất bản. Bước 4 **Hiển thị** có nút ẩn/hiện, xem trước và quay lại chỉnh sửa. Nút bật hiển thị bị khóa khi còn thay đổi chưa lưu hoặc checklist chưa đủ; máy chủ kiểm tra media/nội dung đầy đủ. Khóa hiển thị cập nhật cho học viên ngay khi lưu; muốn soạn dở, ẩn trước. Trạng thái false hiển thị “Đang ẩn / Bản nháp”.
 
 Ẩn/hiện dùng BFF POST `courses/{id}/hide` và `courses/{id}/publish`, giữ cookie HttpOnly, kiểm tra cùng nguồn và cache no-store. Các thao tác lưu có thể kiểm tra media nên proxy chờ tối đa 120 giây. Ẩn khóa không xóa bài học, bài nộp hoặc tiến độ.
+
+## Luyện nói tự do, draft và phiên học
+
+`/speaking` là trang luyện nói tự do mới; lịch sử câu và audio được lưu trong IndexedDB trên trình duyệt, theo tài khoản. Các bài luyện Speaking của khóa học vẫn truy cập theo URL bài học. Liên kết lọc khóa Speaking có `view=catalog` để giữ đủ cấp A1–C2; lối tắt `/courses?skill=speaking` mở trang luyện tự do.
+
+Nháp Listening lưu trong sessionStorage theo user, khóa và bài học. Khi nội dung bài đổi, phiên bản nháp không khớp sẽ không được khôi phục. Cơ chế refresh phiên hỗ trợ các bài học dài, vẫn giữ cookie xác thực ở server; API restart sẽ cần đăng nhập lại.
+
+Kiểm thử bổ sung: `npm run test:updates` cho proxy gia hạn phiên và draft Listening; `npm run test:courses` kiểm tra cả liên kết bài học và điều hướng catalog/luyện tự do.

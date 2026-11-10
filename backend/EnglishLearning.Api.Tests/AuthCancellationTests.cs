@@ -42,6 +42,7 @@ public sealed class AuthCancellationTests
             {
                 Issuer = "EnglishLearning.Api", Audience = "EnglishLearning.Web", SigningKey = TestJwt.SigningKey
             }), TimeProvider.System),
+            new RefreshSessions(TimeProvider.System, Options.Create(new JwtOptions())),
             limiter, dbContext, NullLogger<AuthController>.Instance)
         {
             ControllerContext = new ControllerContext

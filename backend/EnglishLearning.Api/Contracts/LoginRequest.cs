@@ -18,4 +18,9 @@ public sealed class LoginRequest
     [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
     [StringLength(128, ErrorMessage = "Mật khẩu không được vượt quá 128 ký tự.")]
     public string Password { get; init; } = string.Empty;
+
+    public bool UseRefreshSession { get; init; }
+
+    [StringLength(97, MinimumLength = 97)]
+    public string? PreviousRefreshToken { get; init; }
 }

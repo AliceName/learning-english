@@ -103,7 +103,21 @@ test("the new catalog hero retains all six Speaking CEFR level links", async () 
   assert.match(html, /id="catalog-title"/);
   assert.match(html, /course-discovery-cat\.png/);
   assert.match(html, /Cấp độ bài luyện nói/);
+  const links = [...html.matchAll(/href="([^"]+)"/g)].map(match => new URL(match[1].replaceAll("&amp;", "&"), "http://course.test"));
   for (const level of ["A1", "A2", "B1", "B2", "C1", "C2"]) {
-    assert.ok(html.includes(`href="/courses?level=${level}&amp;skill=speaking"`), `Missing ${level} link`);
+    assert.ok(links.some(link => link.pathname === "/courses" && link.searchParams.get("level") === level &&
+      link.searchParams.get("skill") === "speaking" && link.searchParams.get("view") === "catalog"), `Missing ${level} catalog link`);
   }
+});
+
+test("the Speaking shortcut opens free practice while explicit catalog links keep course browsing", async () => {
+  const data = { items: [], totalCount: 0, page: 1, pageSize: 12, totalPages: 0,
+    summary: { totalCourses: 0, inProgress: 0, completed: 0 } };
+  await assert.rejects(renderPage("src/app/courses/page.tsx", {
+    searchParams: Promise.resolve({ skill: "speaking" }),
+  }, data), /Unexpected redirect: \/speaking/);
+  const html = await renderPage("src/app/courses/page.tsx", {
+    searchParams: Promise.resolve({ skill: "speaking", view: "catalog" }),
+  }, data);
+  assert.match(html, /Cấp độ bài luyện nói/);
 });

@@ -54,6 +54,16 @@ public sealed class SpeakingLiveModelTests
             }
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", factory.Services.GetRequiredService<JwtTokenService>().CreateToken(user).AccessToken);
             var audio = await File.ReadAllBytesAsync(Environment.GetEnvironmentVariable("SPEAKING_LIVE_TEST_AUDIO")!);
+            using (var free = new MultipartFormDataContent())
+            {
+                free.Add(new ByteArrayContent(audio), "file", "recording.wav");
+                free.Add(new StringContent("We call it bear"), "text");
+                var freeResponse = await client.PostAsync("/api/v1/speaking/free/score", free);
+                Assert.Equal(HttpStatusCode.OK, freeResponse.StatusCode);
+                var freeResult = (await freeResponse.Content.ReadFromJsonAsync<SpeakingAssessment>())!;
+                Assert.StartsWith("gop-ctc-mlp-", freeResult.ModelVersion);
+                Assert.NotEmpty(freeResult.Words.SelectMany(word => word.Phones));
+            }
             using var form = new MultipartFormDataContent();
             form.Add(new ByteArrayContent(audio), "file", "recording.wav"); form.Add(new StringContent(lesson.LessonId.ToString()), "lessonId"); form.Add(new StringContent("0"), "sentenceIndex");
             var response = await client.PostAsync("/api/v1/speaking/attempts", form);
