@@ -1,5 +1,6 @@
-"""Local-only model service. Public authentication/persistence belong to .NET."""
+"""Model service. Learner authentication and persistence belong to .NET."""
 from contextlib import asynccontextmanager
+from hmac import compare_digest
 import logging
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
@@ -9,13 +10,19 @@ from starlette.concurrency import run_in_threadpool
 from engine import MAX_BYTES, EngineBusyError, RecordingError, SpeakingEngine
 
 
-class BodyLimit:
-    def __init__(self, app):
+class RequestGuard:
+    def __init__(self, app, api_token=None):
         self.app = app
+        self.authorization = f'Bearer {api_token}'.encode() if api_token else None
 
     async def __call__(self, scope, receive, send):
         if scope['type'] != 'http':
             return await self.app(scope, receive, send)
+        if self.authorization is not None and scope['path'].rstrip('/') == '/score':
+            authorization = dict(scope['headers']).get(b'authorization', b'')
+            if not compare_digest(authorization, self.authorization):
+                await JSONResponse({'title': 'Unauthorized'}, status_code=401)(scope, receive, send)
+                return
         consumed, started = 0, False
 
         async def limited_receive():
@@ -39,14 +46,14 @@ class BodyLimit:
             await JSONResponse({'title': 'Yêu cầu vượt quá 2 MB.'}, status_code=413)(scope, receive, send)
 
 
-def create_app(engine=None):
+def create_app(engine=None, *, api_token=None, engine_factory=SpeakingEngine):
     @asynccontextmanager
     async def lifespan(app):
-        app.state.engine = engine if engine is not None else await run_in_threadpool(SpeakingEngine)
+        app.state.engine = engine if engine is not None else await run_in_threadpool(engine_factory)
         yield
 
     application = FastAPI(title='LinguaAI Speaking', lifespan=lifespan)
-    application.add_middleware(BodyLimit)
+    application.add_middleware(RequestGuard, api_token=api_token)
 
     @application.get('/health')
     def health(request: Request):

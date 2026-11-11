@@ -5,12 +5,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def configure_environment():
-    for name in (
-        '.cache/huggingface', '.cache/pip', 'data/raw', 'data/processed',
-        'data/manifests', 'features', 'checkpoints', 'reports', 'logs', 'notebooks',
-    ):
-        (ROOT / name).mkdir(parents=True, exist_ok=True)
+def configure_environment(*, create_directories=True):
+    if create_directories:
+        for name in (
+            '.cache/huggingface', '.cache/pip', 'data/raw', 'data/processed',
+            'data/manifests', 'features', 'checkpoints', 'reports', 'logs', 'notebooks',
+        ):
+            (ROOT / name).mkdir(parents=True, exist_ok=True)
     os.environ.setdefault('HF_HOME', str(ROOT / '.cache/huggingface'))
     os.environ.setdefault('HF_HUB_DISABLE_SYMLINKS_WARNING', '1')
     os.environ.setdefault('HF_HUB_DOWNLOAD_TIMEOUT', '120')
