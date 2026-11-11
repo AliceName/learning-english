@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import AuthScreen from "@/components/auth/auth-screen";
 import styles from "@/components/auth/auth-screen.module.css";
+import { safeWritingReturnTo } from "@/lib/writing-return";
 
 export const metadata: Metadata = {
   title: "Đăng ký tài khoản | LEWA",
@@ -9,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 async function RegistrationContent({ searchParams }: Pick<PageProps<"/register">, "searchParams">) {
-  const { email } = await searchParams;
-  return <AuthScreen initialMode="register" initialEmail={typeof email === "string" ? email.slice(0, 255) : ""} />;
+  const { email, returnTo } = await searchParams;
+  return <AuthScreen initialMode="register" initialEmail={typeof email === "string" ? email.slice(0, 255) : ""} returnTo={safeWritingReturnTo(returnTo)} />;
 }
 
 export default function RegisterPage({ searchParams }: PageProps<"/register">) {

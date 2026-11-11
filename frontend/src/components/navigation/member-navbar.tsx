@@ -18,6 +18,7 @@ const links: { label: string; icon: SiteIconName; href?: string }[] = [
   { label: "Khóa học", icon: "book", href: "/courses" },
   { label: "Luyện nói", icon: "mic", href: "/speaking" },
   { label: "Luyện phiên dịch", icon: "translate", href: "/translation-practice" },
+  { label: "Luyện viết", icon: "writing", href: "/writing" },
   { label: "Tạo khóa học AI", icon: "sparkles" },
   { label: "Flashcards", icon: "cards", href: "/flashcards" },
   { label: "Ôn tập lỗi sai", icon: "replay" },
