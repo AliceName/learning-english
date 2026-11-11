@@ -17,8 +17,8 @@ public sealed class SchemaModelTests
                 .UseSqlServer("Server=localhost;Database=ModelValidation;Integrated Security=True").Options);
         var schema = ApprovedSchema.Read();
         var entities = context.Model.GetEntityTypes().ToDictionary(entity => entity.GetTableName()!);
-        Assert.Equal(13, schema.Count);
-        Assert.Equal(122, schema.Values.Sum(columns => columns.Count));
+        Assert.Equal(16, schema.Count);
+        Assert.Equal(139, schema.Values.Sum(columns => columns.Count));
         Assert.Equal(schema.Keys.Order(), entities.Keys.Order());
 
         foreach (var (table, columns) in schema)
@@ -26,7 +26,14 @@ public sealed class SchemaModelTests
             var entity = entities[table];
             Assert.Equal("dbo", entity.GetSchema());
             Assert.Equal(columns.Select(column => column.Name).Order(), entity.GetProperties().Select(property => property.Name).Order());
-            Assert.Empty(entity.GetIndexes());
+            string[] expectedIndexes = table switch
+            {
+                "TranslationPrompts" => ["UX_TranslationPrompts_ActiveHash", "UX_TranslationPrompts_ActiveRotation"],
+                "TranslationAcceptedAnswers" => ["UX_TranslationAcceptedAnswers_Original", "UX_TranslationAcceptedAnswers_PromptHash"],
+                _ => []
+            };
+            Assert.Equal(expectedIndexes, entity.GetIndexes().Select(index => index.GetDatabaseName()).Order());
+            Assert.All(entity.GetIndexes(), index => Assert.True(index.IsUnique));
             foreach (var column in columns)
             {
                 var property = entity.FindProperty(column.Name)!;
@@ -42,11 +49,11 @@ public sealed class SchemaModelTests
             }
         }
 
-        Assert.Equal(20, entities.Values.Sum(entity => entity.GetForeignKeys().Count()));
+        Assert.Equal(22, entities.Values.Sum(entity => entity.GetForeignKeys().Count()));
         Assert.Equal(2, entities.Values.Sum(entity => entity.GetForeignKeys().Count(foreignKey => foreignKey.DeleteBehavior == DeleteBehavior.Cascade)));
         Assert.All(entities.Values.SelectMany(entity => entity.GetForeignKeys()), foreignKey =>
             Assert.Contains(foreignKey.DeleteBehavior, new[] { DeleteBehavior.NoAction, DeleteBehavior.Cascade }));
-        Assert.Equal(15, context.GetService<IDesignTimeModel>().Model.GetEntityTypes().Sum(entity => entity.GetCheckConstraints().Count()));
+        Assert.Equal(19, context.GetService<IDesignTimeModel>().Model.GetEntityTypes().Sum(entity => entity.GetCheckConstraints().Count()));
         Assert.Equal(4, entities.Values.Sum(entity => entity.GetKeys().Count(key => !key.IsPrimaryKey())));
     }
 }

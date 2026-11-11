@@ -1,0 +1,43 @@
+.dialog {
+  width: min(800px, calc(100vw - 28px));
+  max-height: min(88dvh, 850px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #ced9e5;
+  border-radius: 16px;
+  background: #fff;
+  color: #20324a;
+  box-shadow: 0 16px 56px #14243a38;
+  overflow: hidden;
+}
+.dialog[open] { display: flex; flex-direction: column; }
+.dialog::backdrop { background: #14243a87; }
+.header, .footer, .fileRow, .countRow, .candidateTitle, .candidateTitle label {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.header, .footer { justify-content: space-between; padding: 14px 20px; }
+.header { border-bottom: 1px solid #dce4ec; }
+.header h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.header p, .countRow p { margin: 0; }
+.body { min-height: 0; overflow-y: auto; padding: 16px 20px; }
+.fileRow { align-items: end; flex-wrap: wrap; margin-bottom: 12px; }
+.fileRow > label { flex: 1; min-width: 180px; }
+.fileRow input { width: 100%; }
+.countRow, .candidateTitle { justify-content: space-between; flex-wrap: wrap; }
+.candidate, .passage { margin-top: 10px; border: 1px solid #dce4ec; border-radius: 12px; padding: 12px; }
+.passage p { white-space: pre-wrap; max-height: 180px; overflow: auto; }
+.sourceLabel, .footer span { color: #526986; font-size: .875rem; }
+.status, .ready { border-radius: 12px; padding: 3px 9px; font-size: .8125rem; background: #fff0d7; color: #79441d; }
+.ready { background: #e0f2e7; color: #195837; }
+.prompt { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.warning, .issues { color: #79441d; overflow-wrap: anywhere; }
+.issues { margin: 6px 0; padding-left: 20px; list-style: disc; }
+.details { margin-top: 8px; }
+.details summary, .passage summary { cursor: pointer; color: #294b77; font-weight: 600; }
+.source { background: #f1f5fa; border-radius: 8px; padding: 10px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fields { display: grid; gap: 8px; }
+.fields button { justify-self: start; }
+.footer { border-top: 1px solid #dce4ec; flex-wrap: wrap; }
+.footer button { margin-left: auto; }

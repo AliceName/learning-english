@@ -4,9 +4,11 @@
 >
 > **BẮT BUỘC:** Đọc cùng `DATABASE_RULES.md`. Không tự thêm/xóa/đổi tên bảng hoặc cột. Khi tài liệu không nói rõ, báo `CHƯA XÁC ĐỊNH` và hỏi người dùng trước khi quyết định.
 
-## 1. Danh sách bảng được phép (13 bảng)
+## 1. Danh sách bảng được phép (16 bảng)
 
 `Users`, `Courses`, `UserCourses`, `Lessons`, `SpeakingAttempts`, `WritingSubmissions`, `ExerciseResults`, `ErrorLogs`, `FlashcardDecks`, `Flashcards`, `Bookmarks`, `LearningProgress`, `UploadedDocuments`.
+
+Phản xạ dịch bổ sung `TranslationPrompts`, `TranslationAcceptedAnswers` và `UserTranslationPromptExposures` theo yêu cầu triển khai kế hoạch ngày 10/11/2026.
 
 **Cấm tự tạo thêm bảng**, kể cả `Roles`, `Permissions`, `Questions`, `Answers`, `Notifications`, `RefreshTokens`, `AuditLogs`, `Categories` hoặc bảng AI phụ trợ, nếu chưa được duyệt. Không suy luận từ chức năng, giao diện hay API rằng phải có bảng mới.
 
@@ -211,6 +213,44 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | CreatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |
 | ProcessedAt | DATETIME2 | NULL |
 
+### 2.14. TranslationPrompts
+
+| Cột | SQL Server type | Ràng buộc |
+|---|---|---|
+| PromptId | INT | PK, IDENTITY(1,1), NN |
+| RotationKey | UNIQUEIDENTIFIER | NN, dùng chung giữa các bản của một đề |
+| VietnameseText | NVARCHAR(500) | NN |
+| CefrLevel | NVARCHAR(10) | NN, CHECK A1/A2/B1 |
+| Topic | NVARCHAR(80) | NN |
+| MeaningNotesJson | NVARCHAR(MAX) | NN, danh sách ý cần giữ khi dịch |
+| NormalizedVietnameseHash | BINARY(32) | NN |
+| Availability | NVARCHAR(16) | NN, CHECK active/retired/blocked |
+
+`UX_TranslationPrompts_ActiveHash` và `UX_TranslationPrompts_ActiveRotation` là unique index có lọc `Availability = 'active'` trên `NormalizedVietnameseHash` và `RotationKey`. `active` được phát và chấm. `retired` chỉ chấm lượt đã cấp. `blocked` dừng cả hai.
+
+### 2.15. TranslationAcceptedAnswers
+
+| Cột | SQL Server type | Ràng buộc |
+|---|---|---|
+| AnswerId | INT | PK, IDENTITY(1,1), NN |
+| PromptId | INT | NN, FK → TranslationPrompts.PromptId |
+| EnglishText | NVARCHAR(500) | NN |
+| NormalizedEnglishHash | BINARY(32) | NN |
+| Source | NVARCHAR(16) | NN, CHECK original/student |
+| ReviewStatus | NVARCHAR(16) | NN, CHECK pending/approved/rejected |
+
+`UX_TranslationAcceptedAnswers_PromptHash` bảo đảm duy nhất trên `(PromptId, NormalizedEnglishHash)`. `UX_TranslationAcceptedAnswers_Original` bảo đảm tối đa một câu gốc trên `PromptId` với `Source = 'original'`. Lệnh phát hành lưu đề và câu gốc đã duyệt cùng giao dịch. Kho đáp án dùng chung lưu câu tiếng Anh, tách khỏi tài khoản người nộp.
+
+### 2.16. UserTranslationPromptExposures
+
+| Cột | SQL Server type | Ràng buộc |
+|---|---|---|
+| UserId | INT | PK ghép, NN, FK → Users.UserId |
+| RotationKey | UNIQUEIDENTIFIER | PK ghép, NN |
+| LastShownAtUtc | DATETIME2 | NN, ứng dụng ghi thời điểm UTC |
+
+`RotationKey` là mã chung của các bản đề. Một dòng lưu lần phát gần nhất của cặp tài khoản và mã đề. Các FK ở mục 2.14–2.16 dùng `NO ACTION`. Áp dụng [script 004](backend/database/004_add_translation_practice.sql) tường minh sau các script hiện có.
+
 ## 3. Các ràng buộc Code First không được vi phạm
 
 1. **Giữ nguyên tên bảng số nhiều và tên PK theo tài liệu**, ví dụ `Users.UserId`, `Courses.CourseId`. Không tự đổi thành `User.Id` hoặc `Course.Id` theo quy ước chung.
@@ -227,7 +267,7 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 
 - **Phân quyền Admin:** đã được người dùng duyệt ngày 2026-10-21 bằng cột `Users.Role` (mục 2.1); không cần bảng Roles.
 - **Nội dung câu hỏi Listening/Reading:** tài liệu có `Lessons.Content` và `ExerciseResults`, nhưng không định nghĩa cấu trúc câu hỏi/đáp án dưới dạng bảng riêng. **Không tự tạo bảng.**
-- **Bookmark `TargetType=vocabulary`:** không có bảng `Vocabulary` trong 13 bảng. Cần xác nhận cách tham chiếu trước khi triển khai chức năng đó.
+- **Bookmark `TargetType=vocabulary`:** không có bảng SQL Server `Vocabulary`. Cần xác nhận cách tham chiếu trước khi triển khai chức năng đó.
 - **`UpdatedAt`:** tài liệu nêu default khi tạo bản ghi, không quy định trigger hoặc tự cập nhật mỗi lần sửa. **Không tự thêm trigger hoặc `onupdate` nếu chưa được duyệt.**
 - **Tên cụ thể của các constraint và index không được tài liệu nêu:** không tự đặt thêm index ngoài PK, FK và UNIQUE đã mô tả; tên constraint do framework/SQL Server tạo có thể khác nhưng nội dung phải đúng.
 

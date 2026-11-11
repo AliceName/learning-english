@@ -417,6 +417,41 @@ Kiểm thử `CourseAuthoringTests.cs` bao gồm quyền Admin, role bị thu h�
 
 Áp dụng `database/003_add_grammar_lesson_type.sql` sau hai script trước khi triển khai phiên bản hỗ trợ Grammar. Script chỉ mở rộng `CK_Lessons_SkillType` thêm `grammar`, có transaction và kiểm tra định nghĩa trước khi sửa; chạy lại được. Không thêm bảng/cột, không sửa dữ liệu bài học, không tự chạy lúc API khởi động. Database local `EnglishLearningDB` đã được cập nhật ngày 2026-10-22.
 
+## Luyện phiên dịch
+
+Sau khi áp dụng `004_add_translation_practice.sql`, rà soát rồi nhập [bộ 90 câu khởi đầu](course-data/translation-practice-starter.json). Lệnh nhập dùng connection string của môi trường đang chạy. Chạy từ gốc kho mã.
+
+```powershell
+$starterPath = (Resolve-Path 'backend/course-data/translation-practice-starter.json').Path
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=import "--translation-file=$starterPath"
+```
+
+Mở **Luyện phiên dịch** trong menu sau khi đăng nhập. Kho SQL phục vụ đề và xác nhận câu khớp đáp án đã duyệt. Để chấm cách dịch mới hoặc yêu cầu chấm chi tiết trên máy local, chạy lệnh sau từ gốc kho mã.
+
+```powershell
+.\backend\scripts\Set-TranslationAiSecrets.ps1
+```
+
+Dán key từ Google AI Studio tại lời nhắc ẩn. Script lưu provider `Gemini`, key và model `gemini-3.5-flash-lite` trong User Secrets của backend. Để chọn model khác, truyền `-Model` với ID của model Gemini. Sau đó khởi động lại backend ở chế độ Development. [Tài liệu Gemini](https://ai.google.dev/gemini-api/docs/models?hl=en)
+
+Khi triển khai với Gemini, đặt `TranslationAi__Provider=Gemini` và `TranslationAi__ApiKey` trong môi trường backend. Backend cũng đọc `GEMINI_API_KEY` hoặc `GOOGLE_API_KEY` nếu chưa đặt `TranslationAi__ApiKey`. Có thể ghi đè model bằng `TranslationAi__Model`. Backend gọi Gemini `generateContent` tại Google, không cần đặt endpoint thủ công. [Tài liệu Gemini Generate Content](https://ai.google.dev/gemini-api/docs/generate-content/text-generation?hl=en)
+
+Để dùng nhà cung cấp tương thích Chat Completions, truyền `-Provider ChatCompletions -Model <model-id>` và thêm `-Endpoint <url>` nếu dùng endpoint khác OpenAI. Khi triển khai, đặt `TranslationAi__Provider=ChatCompletions` cùng các thông số tương ứng. Model và endpoint Chat Completions đã lưu trước đây vẫn dùng được nếu chưa chỉ định provider và model không phải Gemini.
+
+`TranslationPractice:CooldownDays` mặc định 7 ngày. `TranslationAi:GradeCallsPerDay` mặc định 300 lượt mỗi ngày UTC cho từng tiến trình API. Mỗi lần gọi lệnh `generate` sinh tối đa 10 đề và dùng một lượt riêng. Có thể đặt `TranslationAi:GenerationApiKey` và `TranslationAi:GenerationModel` cho công việc sinh đề. Với nhiều instance API, cấu hình chung kho khóa ASP.NET Data Protection để các instance đọc được mã lượt. Cache chống gửi trùng hoạt động trong từng tiến trình trong 5 phút.
+
+```powershell
+$draftPath = Join-Path (Resolve-Path 'reports').Path 'translation-a2-draft.json'
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=generate --translation-level=A2 '--translation-topic=Giao thông' --translation-count=5 "--translation-file=$draftPath"
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=import "--translation-file=$draftPath"
+
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=list-pending
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=approve --translation-answer-id=123
+dotnet run --project backend/EnglishLearning.Api -- --translation-command=reject --translation-answer-id=124
+```
+
+Rà soát JSON giữa bước `generate` và `import`. `list-pending` trả tối đa 50 bản dịch chưa duyệt. Truyền `--translation-after` bằng ID cuối của trang trước để đọc tiếp. `replace` dùng file chứa một đề và `--translation-prompt-id` để tạo bản mới giữ nguyên mã chống lặp. `block` dùng `--translation-prompt-id` để dừng phát và chấm một bản đề.
+
 Các API tạo/sửa bài hiện có nhận `skillType: "grammar"` và `grammar: { topic, rules, commonMistakes, questions }`; các nội dung của loại khác và `audioUrl` phải là null. API tạo khóa học nhận Skills gồm Speaking, Listening, Reading, Writing, Grammar (1–5 loại, không trùng). Nội dung Grammar nằm trong Lessons.Content JSON version 1; các bài Speaking/Listening cũ vẫn đọc được.
 
 Grammar có tối đa 30 câu hỏi với `type` là `multiple_choice`, `fill_blank`, `error_correction`. Mỗi câu có prompt, explanation và tag. Trắc nghiệm/sửa lỗi có 2–4 options và correctOptionIndex; sửa lỗi cần correction. Điền từ cần `[blank]`, answer, acceptedAnswers (tối đa 10 đáp án thay thế) và caseSensitive. Backend kiểm tra null, độ dài, số lựa chọn và chỉ số đáp án. Có thể lưu lý thuyết trống khi còn nháp; xuất bản cần topic, rules và ít nhất một câu hỏi hợp lệ. Chỉ Admin còn hoạt động được ghi; bài thuộc khóa đang hiển thị được chỉnh sửa nếu nội dung sau sửa vẫn đáp ứng điều kiện xuất bản.

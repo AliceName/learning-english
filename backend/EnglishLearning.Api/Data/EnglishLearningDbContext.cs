@@ -20,6 +20,9 @@ public sealed class EnglishLearningDbContext(
     public DbSet<Bookmark> Bookmarks => Set<Bookmark>();
     public DbSet<Entities.LearningProgress> LearningProgress => Set<Entities.LearningProgress>();
     public DbSet<UploadedDocument> UploadedDocuments => Set<UploadedDocument>();
+    public DbSet<TranslationPrompt> TranslationPrompts => Set<TranslationPrompt>();
+    public DbSet<TranslationAcceptedAnswer> TranslationAcceptedAnswers => Set<TranslationAcceptedAnswer>();
+    public DbSet<UserTranslationPromptExposure> UserTranslationPromptExposures => Set<UserTranslationPromptExposure>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -27,6 +30,9 @@ public sealed class EnglishLearningDbContext(
         configurationBuilder.Conventions.Remove(typeof(ForeignKeyIndexConvention));
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder) =>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
         EnglishLearningModel.Configure(modelBuilder);
+        TranslationPracticeModel.Configure(modelBuilder);
+    }
 }

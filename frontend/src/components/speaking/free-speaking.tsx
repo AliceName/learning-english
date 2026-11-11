@@ -191,9 +191,9 @@ export default function FreeSpeaking({ account }: { account: string }) {
 
   return <main id="main-content" tabIndex={-1} className={styles.dashboard}>
     <header className={styles.hero}>
-      <p className={styles.breadcrumb}><Icon name="headphones" /> Luyện tập kỹ năng <Icon name="chevron" /> <strong>Luyện nói</strong></p>
+      <p className={styles.breadcrumb}><Icon name="mic" /> Luyện tập kỹ năng <Icon name="chevron" /> <strong>Luyện nói</strong></p>
       <div className={styles.intro}>
-        <span className={styles.heroIcon}><Icon name="headphones" /></span>
+        <span className={styles.heroIcon}><Icon name="mic" /></span>
         <div><h1>Luyện nói</h1><p>Tự tạo câu tiếng Anh, luyện đọc và theo dõi tiến bộ phát âm cùng AI.</p></div>
       </div>
       <Image className={styles.mascot} src="/illustrations/speaking-cat.svg" alt="" width={320} height={224} priority />

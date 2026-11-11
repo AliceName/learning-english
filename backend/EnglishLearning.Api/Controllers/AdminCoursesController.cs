@@ -36,6 +36,30 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
     [HttpPut("{id:int:min(1)}/lessons/{lessonId:int:min(1)}"), RequestSizeLimit(256 * 1024)]
     public Task<ActionResult<AdminCourseResponse>> SaveLesson(int id, int lessonId, SaveLessonRequest request, CancellationToken ct) =>
         ExecuteAsync(_ => authoring.SaveLessonAsync(id, lessonId, request, ct), true, ct);
+    [HttpPost("{id:int:min(1)}/question-import/preview"), Consumes("multipart/form-data")]
+    [RequestSizeLimit(QuestionDocxImport.MaxRequestBytes), RequestFormLimits(MultipartBodyLengthLimit = QuestionDocxImport.MaxRequestBytes)]
+    public Task<ActionResult<QuestionImportPreview>> PreviewQuestionImport(int id, [FromForm] IFormFile? file,
+        [FromForm] string skillType, [FromForm] int? lessonId, CancellationToken ct) =>
+        ExecuteAsync(async _ =>
+        {
+            if (skillType is not ("reading" or "grammar"))
+                throw new AuthoringException(400, "Chọn bài Reading hoặc Grammar để nhập câu hỏi.");
+            if (file is null || file.Length == 0)
+                throw new AuthoringException(400, "Chọn tệp Word có nội dung.");
+            if (file.Length > QuestionDocxImport.MaxFileBytes)
+                throw new AuthoringException(413, "Tệp Word tối đa 2 MB.");
+            if (!Path.GetExtension(file.FileName).Equals(".docx", StringComparison.OrdinalIgnoreCase))
+                throw new AuthoringException(415, "Chỉ hỗ trợ tệp Word .docx.");
+            if (!await db.Courses.AnyAsync(course => course.CourseId == id && course.SourceType == "system", ct))
+                throw new AuthoringException(404, "Không tìm thấy khóa học.");
+            if (lessonId is int target && !await db.Lessons.AnyAsync(lesson =>
+                lesson.LessonId == target && lesson.CourseId == id && lesson.SkillType == skillType, ct))
+                throw new AuthoringException(404, "Không tìm thấy bài học phù hợp trong khóa này.");
+
+            using var stream = file.OpenReadStream();
+            return QuestionDocxImport.Read(stream, ct);
+        }, false, ct);
+
     [HttpPost("{id:int:min(1)}/publish")]
     public Task<ActionResult<AdminCourseResponse>> Publish(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.PublishAsync(id, ct), true, ct);
     [HttpPost("{id:int:min(1)}/hide")]

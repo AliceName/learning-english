@@ -3,13 +3,14 @@
 import {newGrammarQuestion, type Grammar, type GrammarQuestion} from "@/lib/admin-courses";
 import Icon from "@/components/site-icon";
 import ChoiceOptionsEditor from "./choice-options-editor";
+import QuestionImport, {type QuestionImportContext} from "./question-import";
 import styles from "./admin.module.css";
 
 type Update = Grammar | ((previous: Grammar) => Grammar);
 const questionTypes = {multiple_choice:"Trắc nghiệm",fill_blank:"Điền từ",error_correction:"Tìm và sửa lỗi"} as const;
 
-export default function GrammarEditor({value, onChange, disabled}: {
-  value: Grammar; onChange:(value:Update)=>void; disabled:boolean;
+export default function GrammarEditor({value, onChange, disabled, importContext}: {
+  value: Grammar; onChange:(value:Update)=>void; disabled:boolean; importContext:QuestionImportContext;
 }) {
   function update(index:number, change:Partial<GrammarQuestion>) {
     onChange(previous=>({...previous,questions:previous.questions.map((item,itemIndex)=>itemIndex===index?{...item,...change}:item)}));
@@ -37,6 +38,12 @@ export default function GrammarEditor({value, onChange, disabled}: {
     </section>
     <section className={styles.panel}>
       <div className={styles.sectionHeader}><span className={styles.sectionIcon}><Icon name="clipboard"/></span><div><h2>Bài tập ngữ pháp</h2><p>{value.questions.length}/30 câu · Trắc nghiệm, điền từ, tìm và sửa lỗi.</p></div></div>
+      <div className={styles.questionAddBar}>
+        <QuestionImport context={importContext} skill="grammar" disabled={disabled} existing={value.questions}
+          onImport={questions => onChange(previous => ({...previous, questions: [
+            ...previous.questions, ...questions.map(question => ({...newGrammarQuestion(question.type), ...question})),
+          ]}))}/>
+      </div>
       {value.questions.length===0&&<p className={styles.hint}>Thêm câu hỏi để học viên luyện tập ngay sau phần lý thuyết.</p>}
       {value.questions.map((question,index)=><div key={index} className={styles.exerciseCard}>
         <div className={styles.exerciseHeading}><span className={styles.exerciseNumber}>{index+1}</span><strong>{questionTypes[question.type]}</strong>

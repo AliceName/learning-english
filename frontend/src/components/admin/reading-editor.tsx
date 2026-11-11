@@ -6,9 +6,10 @@ import Icon from "@/components/site-icon";
 import FormattedTextEditor from "./formatted-text-editor";
 import ChoiceOptionsEditor from "./choice-options-editor";
 import MediaField from "./media-field";
+import QuestionImport, {type QuestionImportContext} from "./question-import";
 import styles from "./admin.module.css";
 
-export default function ReadingEditor({value,onChange,disabled,onBusy}:{value:Reading;onChange:(update:Reading|((previous:Reading)=>Reading))=>void;disabled:boolean;onBusy?:(busy:boolean)=>void}) {
+export default function ReadingEditor({value,onChange,disabled,onBusy,importContext}:{value:Reading;onChange:(update:Reading|((previous:Reading)=>Reading))=>void;disabled:boolean;onBusy?:(busy:boolean)=>void;importContext:QuestionImportContext}) {
   const [newType,setNewType]=useState<ReadingQuestion["type"]>("multiple_choice");
   const [glossaryNotice,setGlossaryNotice]=useState("");
   function update(index:number,change:Partial<ReadingQuestion>) {
@@ -54,7 +55,12 @@ export default function ReadingEditor({value,onChange,disabled,onBusy}:{value:Re
     </section>
     <section className={styles.panel}>
       <div className={styles.studioHeading}><span>02</span><div><h2>Danh sách câu hỏi kiểm tra ({value.questions.length})</h2><p>Skimming, Scanning, suy luận và từ vựng · Tối đa 30 câu hỏi.</p></div></div>
-      <div className={styles.questionAddBar}><label className={styles.field}>Loại câu hỏi mới<select value={newType} disabled={disabled} onChange={event=>setNewType(event.target.value as ReadingQuestion["type"])}>{Object.entries(readingQuestionTypes).map(([type,label])=><option key={type} value={type}>{label}</option>)}</select></label><button type="button" className={styles.primaryButton} disabled={disabled||value.questions.length>=30} onClick={()=>onChange(previous=>({...previous,questions:[...previous.questions,newReadingQuestion(newType)]}))}><Icon name="plus"/>Thêm câu hỏi</button></div>
+      <div className={styles.questionAddBar}><label className={styles.field}>Loại câu hỏi mới<select value={newType} disabled={disabled} onChange={event=>setNewType(event.target.value as ReadingQuestion["type"])}>{Object.entries(readingQuestionTypes).map(([type,label])=><option key={type} value={type}>{label}</option>)}</select></label><button type="button" className={styles.primaryButton} disabled={disabled||value.questions.length>=30} onClick={()=>onChange(previous=>({...previous,questions:[...previous.questions,newReadingQuestion(newType)]}))}><Icon name="plus"/>Thêm câu hỏi</button>
+        <QuestionImport context={importContext} skill="reading" disabled={disabled} existing={value.questions} passage={lessonPlainText(value.passage)}
+          onImport={questions => onChange(previous => ({...previous, questions: [
+            ...previous.questions, ...questions.map(question => ({...newReadingQuestion(question.type), ...question})),
+          ]}))}/>
+      </div>
       {value.questions.map((question,index)=><div key={index} className={styles.exerciseCard}>
         <div className={styles.exerciseHeading}><span className={styles.exerciseNumber}>{index+1}</span><strong>{readingQuestionTypes[question.type]}</strong><div className={styles.questionActions}>
           <button type="button" className={styles.iconButton} aria-label={`Đưa câu ${index+1} lên`} disabled={disabled||index===0} onClick={()=>move(index,-1)}>↑</button>

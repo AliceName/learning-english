@@ -62,7 +62,7 @@ User Secrets nằm ngoài repository, dùng cho cấu hình local. Không lưu m
 
 ## 4. Tạo database và áp dụng schema SQL
 
-Chạy **đủ 3 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
+Chạy **4 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
 
 ```powershell
 $sqlServerInstance = '.\SQLEXPRESS'
@@ -70,6 +70,7 @@ $sqlServerInstance = '.\SQLEXPRESS'
 sqlcmd -S $sqlServerInstance -d master -E -C -b -f 65001 -i backend/database/001_initial_schema.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/002_add_user_role.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/003_add_grammar_lesson_type.sql
+sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/004_add_translation_practice.sql
 ```
 
 | Script | Mục đích |
@@ -77,8 +78,9 @@ sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/d
 | `001_initial_schema.sql` | Tạo `EnglishLearningDB` và các bảng còn thiếu |
 | `002_add_user_role.sql` | Bổ sung role `admin` / `user` |
 | `003_add_grammar_lesson_type.sql` | Cho phép bài học Grammar |
+| `004_add_translation_practice.sql` | Tạo kho câu, kho đáp án và lịch sử phát đề cho Luyện phiên dịch |
 
-Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database); chọn database `EnglishLearningDB` khi chạy script 002 và 003.
+Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database). Chọn database `EnglishLearningDB` cho script 002 đến 004.
 
 Backend **không tự tạo hoặc cập nhật schema khi khởi động**. Không dùng `dotnet ef database update` hoặc `EnsureCreated` thay cho các script này. Với database đã có cấu trúc khác, cần đối chiếu [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) trước khi áp dụng.
 
@@ -173,6 +175,7 @@ Mở [http://localhost:3000](http://localhost:3000). Frontend cũng cho phép đ
 | `/login` | Đăng nhập |
 | `/account` | Tài khoản học viên, cần đăng nhập |
 | `/courses` | Danh sách khóa học, cần đăng nhập |
+| `/translation-practice` | Luyện phiên dịch Việt → Anh, cần đăng nhập và [nạp kho đề](backend/README.md#luyện-phiên-dịch) |
 | `/admin/courses` | Quản trị khóa học, cần role `admin` |
 
 Database mới chưa có tài khoản hoặc khóa học mẫu. Tạo học viên tại `/register`; để biên soạn nội dung, tạo admin ở bước tiếp theo rồi tạo/xuất bản khóa học. Trang chủ vẫn xem được khi backend chưa chạy, nhưng đăng ký/đăng nhập và dữ liệu học tập cần API/SQL Server hoạt động.

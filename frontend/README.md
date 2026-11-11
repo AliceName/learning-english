@@ -69,6 +69,12 @@ Thông tin phiên `PublicUser` có `role: "admin" | "user"` từ backend. Không
 - Server Components gọi `/api/v1/courses` và `/api/v1/courses/{id}` bằng JWT trong cookie HttpOnly, `cache: no-store`. `server-courses.ts` gọi `connection()` trước fetch/timeout để tương thích Cache Components; không truyền JWT cho client và không cache chung tiến độ cá nhân.
 - Nội dung trang khóa học lấy từ database, không dùng danh sách minh họa của landing page. Khi database chưa có Courses, giao diện hiển thị trạng thái chưa có khóa học. Bài Listening đã có luồng vào học, làm bài và xem kết quả như phần dưới; các kỹ năng khác và AI/bookmark được phát triển riêng.
 
+### Nhập câu hỏi từ Word
+
+Trong bài Reading hoặc Grammar, mở **Nhập câu hỏi từ tệp**, tải mẫu DOCX và thay nội dung mẫu bằng đề của bạn. Hệ thống đọc trắc nghiệm một đáp án và điền từ có `[blank]`. Dùng dòng `Đáp án:` dưới câu hoặc bảng trắc nghiệm hai hàng `Câu` và `Chọn` ở cuối đề.
+
+Đối chiếu trích đoạn, sửa câu thiếu đáp án và chọn **Thêm câu đã chọn**. Tổng số câu trong bài tối đa 30. Thao tác thêm đưa câu vào bản đang soạn. Bấm **Lưu bài học** để ghi nội dung. File DOCX tối đa 2 MB.
+
 ## Học viên làm bài Listening
 
 Từ `/courses/[courseId]`, chọn **Làm bài nghe / Làm lại** để mở `/courses/[courseId]/lessons/[lessonId]/listening`. Giao diện dựa trên `frontend_demo/UserListening.html`, dùng navbar thành viên chung, nội dung bài đã xuất bản và audio thật. Bấm **Bắt đầu** mới ghi nhận vào học; GET trang không tạo đăng ký hoặc kết quả.
