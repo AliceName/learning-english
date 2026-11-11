@@ -5,8 +5,11 @@ import Icon from "@/components/auth-icon";
 import type { AuthReaction } from "@/components/auth/auth-mascot";
 import styles from "@/components/auth/auth-screen.module.css";
 import { notifySessionChanged } from "@/lib/session-events";
+import { adoptAnonymousWritingDraft, writingDraftStorage } from "@/lib/writing-draft";
+import { safeWritingReturnTo, writingReturnSubmissionId, writingReturnTaskId } from "@/lib/writing-return";
 
-export default function LoginForm({ onReaction, onBusyChange }: { onReaction: (reaction: AuthReaction) => void; onBusyChange: (busy: boolean) => void }) {
+export default function LoginForm({ returnTo = "/account", onReaction, onBusyChange }: { returnTo?: string; onReaction: (reaction: AuthReaction) => void; onBusyChange: (busy: boolean) => void }) {
+  const writingDestination = safeWritingReturnTo(returnTo);
   const inFlight = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -45,7 +48,11 @@ export default function LoginForm({ onReaction, onBusyChange }: { onReaction: (r
       if (response.ok) {
         const next = new URLSearchParams(window.location.search).get("next") ?? "";
         const returnToCourse = /^\/courses\/[1-9]\d{0,9}(?:\/lessons\/[1-9]\d{0,9}\/listening)?$/.test(next);
-        const destination = returnToCourse ? next : result.user?.role === "admin" ? "/admin/courses" : "/account";
+        const destination = writingDestination.startsWith("/writing") ? writingDestination
+          : returnToCourse ? next : result.user?.role === "admin" ? "/admin/courses" : "/account";
+        if (writingDestination.startsWith("/writing") && Number.isInteger(result.user?.userId)) {
+          adoptAnonymousWritingDraft(writingDraftStorage(), result.user.userId, writingReturnSubmissionId(writingDestination), Date.now(), writingReturnTaskId(writingDestination));
+        }
         notifySessionChanged();
         // Load the protected page with the new cookie, bypassing any cached guest redirect.
         window.location.replace(destination);

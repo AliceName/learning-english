@@ -57,6 +57,21 @@ secrets.json
 .idea/
 
 # AI model weights and download caches
+# Private Writing data, prepared sets, weights, caches and local Python environment
+ai/writing/data/
+ai/writing/artifacts/
+ai/writing/.cache/
+ai/writing/.venv/
+# Historical CEFR utilities are bound to private developer audit artifacts.
+/ai/writing/evaluate_cefr_suite.py
+/ai/writing/tests/test_cefr_evaluation_suite.py
+/ai/writing/standardize_cefr_comparison.py
+/ai/writing/tests/test_cefr_comparison_protocol.py
+# The eleven-label predictor is an evidence-bound pilot; production uses six bands.
+/ai/writing/cefr_sublevel_loss.py
+/ai/writing/predict_cefr_sublevels.py
+/ai/writing/tests/test_cefr_sublevel_loss.py
+/ai/writing/tests/test_cefr_sublevel_prediction.py
 *.pt
 *.pth
 *.ckpt

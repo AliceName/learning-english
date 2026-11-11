@@ -13,7 +13,7 @@ import styles from "./landing.module.css";
 const skills: { id: SkillId; title: string; icon: SiteIconName; description: string; metric: string; value: string; hint: string; action: string }[] = [
   { id: "speaking", title: "Speaking", icon: "mic", description: "Luyện nói và phát âm IPA cùng AI", metric: "Native Match", value: "98%", hint: "Luyện phát âm theo từng âm vị", action: "Luyện Speaking" },
   { id: "reading", title: "Reading", icon: "book", description: "Đọc hiểu và tra từ theo ngữ cảnh", metric: "Tốc độ đọc", value: "245 wpm", hint: "Khám phá từ vựng trong ngữ cảnh", action: "Bắt đầu đọc tương tác" },
-  { id: "writing", title: "Writing", icon: "writing", description: "Sửa ngữ pháp, nâng cấp cách diễn đạt", metric: "Mạch lạc (CC)", value: "Band 8.0", hint: "Phát triển kỹ năng viết học thuật", action: "Mở trình sửa bài AI" },
+  { id: "writing", title: "Writing", icon: "writing", description: "Thử nghiệm sửa lỗi ngữ pháp trên câu văn", metric: "Bản xem trước", value: "Bản demo", hint: "Kiểm tra và tự chọn gợi ý sửa", action: "Mở trình sửa bài" },
   { id: "listening", title: "Listening", icon: "headphones", description: "Luyện nghe và nhận diện từ khóa", metric: "Giọng đọc", value: "US / UK", hint: "Lắng nghe và luyện theo nhịp của bạn", action: "Bắt đầu luyện nghe" },
   { id: "grammar", title: "Grammar", icon: "brain", description: "Hiểu cấu trúc qua ví dụ thực tế", metric: "Cấu trúc", value: "Inversion", hint: "Hiểu cấu trúc qua các ví dụ thực tế", action: "Luyện bài tập ngữ pháp" },
 ];
@@ -92,7 +92,7 @@ export default function LandingPage({ courseCards }: { courseCards: ReactNode })
               {skills.map((skill, index) => <article id={`skill-${skill.id}`} key={skill.id} className={`${styles.skillCard} ${styles[skill.id] ?? ""}`} role="group" aria-roledescription="slide" aria-label={`${index + 1} / 5: ${skill.title}`} data-active={activeSkill === index} aria-hidden={activeSkill !== index} inert={activeSkill !== index} style={{ "--panel-distance": Math.min(1, Math.abs(index - position)) } as CSSProperties}>
                 <div className={styles.skillHeader}><div className={styles.skillIdentity}><span className={styles.skillIcon}><SkillArtwork skill={skill.id} /></span><div className={styles.skillTitle}><h3>{skill.title}<small>Kỹ năng 0{index + 1}</small></h3><p>{skill.description}</p></div></div><div className={styles.skillMetric}><span>{skill.metric}</span><strong>{skill.value}</strong></div></div>
                 <div className={styles.skillBody}><SkillPreview skill={skill.id} active={activeSkill === index} /></div>
-                <div className={styles.skillFooter}><span><Icon name={skill.icon} />{skill.hint}</span><Link href="/register"><Icon name={skill.icon} />{skill.action}</Link></div>
+                <div className={styles.skillFooter}><span><Icon name={skill.icon} />{skill.hint}</span><Link href={skill.id === "writing" ? "/writing" : "/register"}><Icon name={skill.icon} />{skill.action}</Link></div>
               </article>)}
             </div>
           </div>

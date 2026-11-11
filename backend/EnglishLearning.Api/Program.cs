@@ -119,6 +119,12 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddSingleton<WritingTaskLibrary>();
+builder.Services.AddHttpClient<WritingAiClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["WritingAi:BaseUrl"] ?? "http://127.0.0.1:8000/");
+    client.Timeout = TimeSpan.FromSeconds(90);
+});
 builder.Services.AddDataProtection();
 builder.Services.AddSingleton<ListeningGradingService>();
 builder.Services.AddScoped<ListeningPracticeService>();

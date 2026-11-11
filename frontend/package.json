@@ -9,7 +9,8 @@
     "prestart": "node scripts/ensure-speaking.mjs",
     "start": "next start",
     "lint": "eslint",
-    "test:speaking": "node --test tests/speaking-wav.test.mjs tests/speaking-feedback.test.mjs tests/speaking-practice.test.mjs tests/recording-silence.test.mjs"
+    "test:speaking": "node --test tests/speaking-wav.test.mjs tests/speaking-feedback.test.mjs tests/speaking-practice.test.mjs tests/recording-silence.test.mjs",
+    "test:writing": "node --test tests/writing-capabilities.test.cjs tests/writing-diff.test.cjs tests/writing-draft.test.cjs tests/writing-feedback.test.cjs tests/writing-flow.test.cjs tests/writing-revision.test.cjs tests/writing-tasks.test.cjs"
   },
   "dependencies": {
     "next": "16.4.2",

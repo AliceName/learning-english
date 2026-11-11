@@ -91,12 +91,11 @@ export default function SkillPreview({ skill, active }: { skill: SkillId; active
 
   if (skill === "writing") return <>
     <div className={styles.previewBox}>
-      <div className={styles.boxHeading}><strong><Icon name="writing" />AI Editor</strong><span>{applied ? "Đã nâng cấp cách diễn đạt" : "Sửa lỗi và gợi ý C1"}</span></div>
+      <div className={styles.boxHeading}><strong><Icon name="writing" />Bản xem trước minh họa</strong><span>{applied ? "Đã chọn gợi ý minh họa" : "Gợi ý không phải điểm CEFR/IELTS"}</span></div>
       <p className={styles.editor} lang="en">Technology <del>bring</del> <ins>brings</ins> benefits. We can {applied ? <ins>acquire in-depth knowledge</ins> : <mark>get more knowledge</mark>} online.</p>
-      <div className={styles.suggestion}><Icon name="sparkles" /><p><strong lang="en">acquire in-depth knowledge</strong></p><button type="button" disabled={applied} onClick={() => setApplied(true)}>{applied ? "Đã áp dụng" : "Áp dụng"}</button></div>
+      <div className={styles.suggestion}><Icon name="sparkles" /><p><strong lang="en">acquire in-depth knowledge</strong></p><button type="button" disabled={applied} onClick={() => setApplied(true)}>{applied ? "Đã chọn" : "Thử chọn gợi ý"}</button></div>
     </div>
-    <dl className={styles.writingScores}><div><dt>Ngữ pháp</dt><dd>9.2 / 10</dd></div><div><dt>Từ vựng (LR)</dt><dd>C1 Advanced</dd></div><div><dt>Mạch lạc (CC)</dt><dd>Xuất sắc</dd></div></dl>
-    <p className={styles.feedback} role="status">{applied ? "Đã nâng cấp cách diễn đạt." : ""}</p>
+    <p className={styles.feedback} role="status">{applied ? "Đây là thao tác trên câu mẫu, không phải đánh giá năng lực viết." : "Câu và gợi ý trên trang chủ là nội dung minh họa."}</p>
   </>;
 
   if (skill === "listening") return <>
