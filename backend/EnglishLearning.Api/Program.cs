@@ -125,6 +125,12 @@ builder.Services.AddHttpClient<WritingAiClient>(client =>
     client.BaseAddress = new Uri(builder.Configuration["WritingAi:BaseUrl"] ?? "http://127.0.0.1:8000/");
     client.Timeout = TimeSpan.FromSeconds(90);
 });
+if (builder.Environment.IsDevelopment() && Assembly.GetEntryAssembly() == typeof(Program).Assembly &&
+    string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")) &&
+    builder.Configuration.GetValue("WritingAi:AutoStart", true))
+{
+    builder.Services.AddHostedService<WritingAiStartup>();
+}
 builder.Services.AddDataProtection();
 builder.Services.AddSingleton<ListeningGradingService>();
 builder.Services.AddScoped<ListeningPracticeService>();

@@ -28,6 +28,29 @@ test('UTF16 offsets select the later repeated sentence after emoji and CRLF',()=
   assert.equal(applyWritingEdits(original,edits,[edits[0].id]),r.correctedText);
   assert.equal(currentEditPosition(edits[0],edits,[]).start,start+2);
 });
+test('accepting edits in sequence leaves a skipped edit and untouched text intact',()=>{
+  const first = 'It were Friends.';
+  const second = 'She go home.';
+  const originalText = first + '\n\n' + second;
+  const result = {
+    originalText,
+    correctedText: 'It was friends.\n\nShe goes home.',
+    errors: [
+      { original: first, suggestion: 'It was friends.', sourceStart: 0, sourceEnd: first.length },
+      { original: second, suggestion: 'She goes home.', sourceStart: first.length + 2, sourceEnd: originalText.length },
+    ],
+  };
+  const { edits, unmapped } = writingEdits(result);
+  assert.equal(unmapped, 0);
+  assert.equal(edits.length, 3);
+  const accepted = [edits.find(edit => edit.before === 'were').id];
+  const draft = applyWritingEdits(originalText, edits, accepted);
+  assert.equal(draft, 'It was Friends.\n\nShe go home.');
+  const next = edits.find(edit => edit.before === 'go');
+  const span = currentEditPosition(next, edits, accepted);
+  assert.equal(draft.slice(span.start, span.end), 'go');
+  assert.equal(applyWritingEdits(originalText, edits, [...accepted, next.id]), 'It was Friends.\n\nShe goes home.');
+});
 test('ambiguous legacy repeated source offers no write action',()=>{
   const result=writingEdits({originalText:'I work. I work.',correctedText:'I work. I worked.',errors:[{original:'I work.',suggestion:'I worked.'}]});
   assert.equal(result.edits.length,0);assert.equal(result.unmapped,1);

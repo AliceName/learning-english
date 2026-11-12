@@ -62,6 +62,27 @@ def encode_split(rows, task, tokenizer, max_length, target_length, limit, seed, 
                                "over_length_skipped": skipped, "labels": dict(counts)}
 
 
+def build_training_arguments(args, cuda, bf16, seq2seq_factory, standard_factory):
+    kwargs = dict(
+        output_dir=str(args.output), num_train_epochs=args.epochs, max_steps=args.max_steps,
+        learning_rate=args.learning_rate, per_device_train_batch_size=args.batch_size,
+        per_device_eval_batch_size=1, gradient_accumulation_steps=args.gradient_accumulation,
+        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
+        bf16=bf16, fp16=False, use_cpu=not cuda, optim="adamw_torch", weight_decay=0.01,
+        lr_scheduler_type="linear", warmup_steps=0,
+        eval_strategy="epoch", save_strategy="epoch", save_total_limit=2,
+        logging_steps=10, logging_nan_inf_filter=False, report_to=[], push_to_hub=False,
+        dataloader_num_workers=0, disable_tqdm=not args.progress,
+        dataloader_pin_memory=cuda, seed=args.seed, data_seed=args.seed,
+        load_best_model_at_end=True, label_names=["labels"], remove_unused_columns=False,
+        metric_for_best_model=args.metric_for_best_model,
+        greater_is_better=args.greater_is_better,
+        eval_accumulation_steps=1, group_by_length=True, restore_callback_states_from_checkpoint=True,
+    )
+    return (seq2seq_factory(**kwargs, predict_with_generate=False) if args.task == "gec"
+            else standard_factory(**kwargs))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task", choices=list(DEFAULT_MODELS))
@@ -351,23 +372,15 @@ def main():
         raise ValueError("Initial adapter tensor hash differs before the first optimizer update")
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     model.print_trainable_parameters()
-    kwargs = dict(
-        output_dir=str(args.output), num_train_epochs=args.epochs, max_steps=args.max_steps,
-        learning_rate=args.learning_rate, per_device_train_batch_size=args.batch_size,
-        per_device_eval_batch_size=1, gradient_accumulation_steps=args.gradient_accumulation,
-        gradient_checkpointing=True, gradient_checkpointing_kwargs={"use_reentrant": False},
-        bf16=bf16, fp16=False, use_cpu=not cuda, optim="adamw_torch", weight_decay=0.01,
-        lr_scheduler_type="linear", warmup_steps=0,
-        eval_strategy="epoch", save_strategy="epoch", save_total_limit=2,
-        logging_steps=10, logging_nan_inf_filter=False, report_to=[], push_to_hub=False, dataloader_num_workers=0, disable_tqdm=not args.progress,
-        dataloader_pin_memory=cuda, seed=args.seed, data_seed=args.seed,
-        load_best_model_at_end=True, label_names=["labels"], remove_unused_columns=False,
+    argument_options = argparse.Namespace(
+        output=args.output, epochs=args.epochs, max_steps=args.max_steps, learning_rate=args.learning_rate,
+        batch_size=args.batch_size, gradient_accumulation=args.gradient_accumulation,
+        progress=args.progress, seed=args.seed, task=args.task,
         metric_for_best_model=manifest["selection_metric"],
-        greater_is_better=args.task == "cefr" or bool(args.gec_eval_per_group),
-        eval_accumulation_steps=1, group_by_length=True, restore_callback_states_from_checkpoint=True,
-    )
+        greater_is_better=args.task == "cefr" or bool(args.gec_eval_per_group))
+    training_args = build_training_arguments(argument_options, cuda, bf16,
+                                             Seq2SeqTrainingArguments, TrainingArguments)
     if args.task == "gec":
-        training_args = Seq2SeqTrainingArguments(**kwargs, predict_with_generate=False)
         trainer_class = Seq2SeqTrainer
         collator = DataCollatorForSeq2Seq(tokenizer, model=model, label_pad_token_id=-100)
         if args.gec_edit_weight != 1:
@@ -375,7 +388,6 @@ def main():
             collator = EditCollator(collator)
             trainer_class = edit_trainer_class()
     else:
-        training_args = TrainingArguments(**kwargs)
         trainer_class = Trainer
         if args.task == "cefr" and args.cefr_class_weighting != "none":
             from cefr_loss import weighted_trainer_class

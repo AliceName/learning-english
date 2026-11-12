@@ -3,6 +3,7 @@ import importlib.util
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from inference import InputBudgetError, IncompleteGenerationError, EngineBusyError
@@ -14,6 +15,20 @@ if SERVICE_AVAILABLE:
 
 @unittest.skipUnless(SERVICE_AVAILABLE, "Install requirements-service.txt for API tests")
 class ServiceTests(unittest.TestCase):
+    def test_service_default_and_explicit_gec_override(self):
+        from serve import ROOT
+        baseline = ROOT / "artifacts/gec-expanded-v1"
+        for env, expected in (
+            ({}, ROOT / "artifacts/gec-viet-full-18ep-bs2-ga8-20261111"),
+            ({"WRITING_GEC_RUN": str(baseline)}, baseline),
+            ({"WRITING_GEC_RUN": " "}, None),
+        ):
+            with self.subTest(env=env), patch.dict("os.environ", env, clear=True), \
+                    patch("serve.WritingEngine", return_value=SimpleNamespace(gec=None)) as engine:
+                with TestClient(create_app()) as client:
+                    self.assertEqual(client.get("/health").status_code, 200)
+                engine.assert_called_once_with(ROOT / "artifacts/cefr-my-first-run", expected, "auto")
+
     def test_scoring_contract_does_not_accept_or_silently_ignore_topic(self):
         with TestClient(create_app(lambda: SimpleNamespace(gec=None))) as client:
             response = client.post("/internal/writing/analyze", json={
@@ -185,7 +200,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(result["errors"]), 1)
         self.assertEqual(result["errors"][0]["suggestion"], "She goes home.")
         self.assertEqual(result["correctedText"], original.replace("She go home.", "She goes home.", 1))
-        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v1")
+        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v2")
 
     def test_coverage_for_twenty_twenty_one_and_twenty_two_repeated_sentences(self):
         for count in (20, 21, 22):
@@ -257,6 +272,14 @@ class EngineTests(unittest.TestCase):
         result = engine.analyze(original, True)
         self.assertEqual(result["correctedText"], "I bought 12 books.\n\nShe goes to school.")
         self.assertEqual(len(result["errors"]), 1)
+
+    def test_dropped_segment_does_not_emit_a_suggestion(self):
+        engine, _ = self.engine(lambda text: "We tested it yesterday, and we filed a report.")
+        source = "We tested it yesterday, the battery lost half its charge, and we filed a report."
+        result = engine.analyze(source, True)
+        self.assertEqual(result["correctedText"], source)
+        self.assertEqual(result["errors"], [])
+        self.assertEqual(result["gecCoverage"]["rejected"], 1)
 
     def test_new_model_line_breaks_are_blocked_instead_of_changing_layout(self):
         engine, _ = self.engine(lambda text: "I like\nbooks.")

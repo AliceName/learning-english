@@ -7,6 +7,21 @@ from gec_safety import correction_rejection_reason
 
 
 class CorrectionSafetyTests(unittest.TestCase):
+    def test_dropped_middle_and_initial_segments_are_blocked(self):
+        for source, proposed in (
+            ("We tested it yesterday, the battery lost half its charge, and we filed a report.",
+             "We tested it yesterday, and we filed a report."),
+            ("The first train left before dawn, the second train was full and we waited outside.",
+             "The second train was full and we waited outside."),
+        ):
+            with self.subTest(source=source):
+                self.assertEqual(correction_rejection_reason(source, proposed), "segment_deletion")
+
+    def test_grammar_changes_across_clause_boundaries_are_allowed(self):
+        self.assertIsNone(correction_rejection_reason(
+            "She go to school, and she study English there every day.",
+            "She goes to school, and she studies English there every day."))
+
     def test_valid_grammar_and_contractions_are_not_blocked(self):
         for original, proposed in (
             ("She go to school.", "She goes to school."),

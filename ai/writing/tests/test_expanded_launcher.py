@@ -167,6 +167,25 @@ function Start-Process {
         self.assertNotIn('--preparation-report', args)
         self.assertNotIn('verified-data', self.events.read_text().splitlines())
 
+    def test_gradient_accumulation_defaults_to_one_and_forwards_full_training_value(self):
+        default = self.run_launcher('-RunName', 'gradient-default')
+        self.assertEqual(default.returncode, 0, default.stderr)
+        args = self.captured()
+        self.assertEqual(args[args.index('--gradient-accumulation') + 1], '1')
+
+        configured = self.run_launcher('-RunName', 'gradient-eight', '-GradientAccumulation', '8')
+        self.assertEqual(configured.returncode, 0, configured.stderr)
+        args = self.captured()
+        self.assertEqual(args[args.index('--gradient-accumulation') + 1], '8')
+
+    def test_smoke_keeps_fixed_gradient_accumulation(self):
+        result = self.run_launcher('-RunName', 'gradient-smoke', '-Smoke', '-GradientAccumulation', '8')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        args = self.captured()
+        self.assertEqual(args[args.index('--gradient-accumulation') + 1], '1')
+        self.assertEqual(args[args.index('--batch-size') + 1], '2')
+        self.assertEqual(args[args.index('--max-steps') + 1], '3')
+
     def test_verified_profile_bootstraps_legacy_then_checks_new_data_and_passes_report(self):
         source = str(self.root / 'corpus source with spaces')
         result = self.run_launcher('-DataProfile', 'verified-unicode-train', '-Source', source,

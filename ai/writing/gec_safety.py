@@ -6,9 +6,10 @@ suggestions must leave the learner's original text available and unchanged.
 from __future__ import annotations
 
 from collections import Counter
+from difflib import SequenceMatcher
 import re
 
-GUARD_VERSION = "gec-safety-v1"
+GUARD_VERSION = "gec-safety-v2"
 
 
 _WORDS = re.compile(r"[^\W_]+(?:['’][^\W_]+)*", re.UNICODE)
@@ -122,4 +123,14 @@ def correction_rejection_reason(source: str, proposed: str) -> str | None:
                if match.start() > 0 and match.group()[0].isupper() and match.group() != "I"]
     if Counter(anchors) - Counter(corrected):
         return "anchors"
+    # Catch a deleted segment even when the surviving text is still long.
+    segments = [words for part in re.split(r"[,;:!?]|(?<!\d)\.(?!\d)", source)
+                if (words := _words(part))]
+    if len(segments) > 1 and len(original) - len(corrected) >= 5:
+        boundaries = {0}
+        for segment in segments:
+            boundaries.add(max(boundaries) + len(segment))
+        for op, start, end, _, _ in SequenceMatcher(None, original, corrected, autojunk=False).get_opcodes():
+            if op == "delete" and end - start >= 5 and start in boundaries and end in boundaries:
+                return "segment_deletion"
     return None

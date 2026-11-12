@@ -123,7 +123,11 @@ Có thể kiểm tra kết nối bằng script riêng; lệnh này tạo rồi d
 
 Xem [hướng dẫn backend](backend/README.md) nếu cần cấu hình nâng cao hoặc chuyển dữ liệu media đã có từ một môi trường khác. Máy mới không cần chạy các lệnh migration/cleanup media để bắt đầu.
 
-## 7. Chạy backend
+## 7. Chạy ứng dụng local
+
+Chạy `.\Start-Dev.cmd` từ thư mục gốc để khởi động frontend, backend và AI Writing. Launcher đợi cả ba dịch vụ sẵn sàng. Nhấn Ctrl+C trong terminal của launcher để dừng các tiến trình do nó khởi tạo. Nếu muốn chạy frontend và backend ở hai terminal riêng, làm theo phần dưới.
+
+### Chạy backend riêng
 
 Mở **terminal thứ nhất** tại thư mục gốc repository:
 
@@ -138,6 +142,8 @@ dotnet run --project backend/EnglishLearning.Api --launch-profile http
 ```
 
 Giữ terminal đang chạy. API mặc định tại [http://localhost:5000](http://localhost:5000); Swagger tại [http://localhost:5000/swagger](http://localhost:5000/swagger).
+
+Trên Windows, backend Development tự khởi động AI Writing nếu cổng 8000 đang trống và model đã có sẵn local. Backend tái sử dụng AI đã healthy trên cổng 8000 và chỉ dừng AI do nó khởi tạo. Nếu AI không sẵn sàng, kiểm tra log backend. API vẫn chạy và Writing báo không khả dụng. Tắt auto-start bằng `$env:WritingAi__AutoStart = 'false'` trước khi chạy backend, hoặc đặt `WritingAi:AutoStart` thành `false` trong cấu hình Development. Khi chạy bằng `Start-Dev.cmd`, launcher quản lý AI trực tiếp.
 
 Từ terminal khác, kiểm tra các dịch vụ:
 
@@ -310,7 +316,9 @@ $source = Join-Path $env:USERPROFILE 'Downloads\write-and-improve-corpus-2024-v2
 
 ### Phục vụ local và đánh giá
 
-Cài dependency phục vụ riêng nếu cần bằng Python trong đúng environment: `ai/writing/.venv/Scripts/python.exe -m pip install -r ai/writing/requirements-service.txt`. Khởi chạy AI service bằng `ai/writing/Start-Writing.ps1`; mặc định feedback model tắt và GEC run không đặt. Cấu hình CEFR/GEC bằng tên thư mục run đã có trong `ai/writing/artifacts/`. Có thể chạy ba dịch vụ cùng lúc bằng `Start-Dev.cmd`, nhưng script cần checkpoint CEFR `cefr-my-first-run`, GEC `gec-expanded-v1`, Python environment và dependencies của backend/frontend. Nếu chưa có các run đó, dùng các lệnh khởi chạy riêng và chọn model có sẵn.
+Cài dependency phục vụ riêng nếu cần bằng Python trong đúng environment: `ai/writing/.venv/Scripts/python.exe -m pip install -r ai/writing/requirements-service.txt`. Cả hai cách khởi động đọc mặc định GEC `gec-viet-full-18ep-bs2-ga8-20261111` từ `ai/writing/model-defaults.json`. CEFR mặc định là `cefr-my-first-run`, feedback mặc định tắt. Cần có artifacts local và base models trong HF cache trước khi khởi động. Model weights không đi kèm Git.
+
+Với cả hai cách chạy, đặt `WRITING_CEFR_RUN` hoặc `WRITING_GEC_RUN` trước khi khởi động để trỏ đến run đã có. Dùng đường dẫn tuyệt đối nếu run nằm ngoài checkout và đặt `HF_HOME` nếu cache nằm ngoài `ai/writing/.cache/huggingface`. Để dùng lại baseline, đặt `$env:WRITING_GEC_RUN = 'artifacts/gec-expanded-v1'` hoặc truyền `-GecRun artifacts/gec-expanded-v1` khi chủ động chạy riêng `Start-Writing.ps1`. Bỏ override GEC để dùng lại mặc định mới. Kiểm tra `gecRun` ở `http://127.0.0.1:8000/health` và SHA adapter trong `provenance` của kết quả phân tích.
 
 Để cài dependency evaluator, chạy `ai/writing/.venv/Scripts/python.exe -m pip install -r ai/writing/requirements-evaluation.txt`. Đánh giá GEC offline:
 

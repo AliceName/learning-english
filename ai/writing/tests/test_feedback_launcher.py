@@ -59,6 +59,7 @@ class FakePython {
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         shutil.copyfile(ROOT / "Start-Writing.ps1", self.root / "Start-Writing.ps1")
+        shutil.copyfile(ROOT / "model-defaults.json", self.root / "model-defaults.json")
         for name in ("local_feedback.py", "benchmark_feedback.py"):
             target = self.root / name
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -129,6 +130,17 @@ class FakePython {
         self.assertTrue(lines[3].endswith("gec-original"))
         self.assertIn("--host|127.0.0.1", lines[4])
 
+    def test_gec_default_and_explicit_baseline_override(self):
+        for arguments, name in (
+            ((), "gec-viet-full-18ep-bs2-ga8-20261111"),
+            (("-GecRun", "artifacts/gec-expanded-v1"), "gec-expanded-v1"),
+        ):
+            with self.subTest(name=name):
+                result = self.run_launcher(*arguments)
+                self.assertEqual(0, result.returncode, result.stderr)
+                self.assertEqual(Path(self.capture.read_text(encoding="utf-8-sig").splitlines()[3]),
+                                 self.root / "artifacts" / name)
+
     def test_enable_requires_benchmark_before_python(self):
         result = self.run_launcher("-EnableFeedback")
         self.assertNotEqual(0, result.returncode)
@@ -137,6 +149,25 @@ class FakePython {
                                    "-FeedbackBenchmark", str(self.root / "missing benchmark.json"))
         self.assertNotEqual(0, result.returncode)
         self.assertFalse(self.capture.exists())
+
+    def test_live_service_lock_prevents_a_second_python_launch(self):
+        lock_path = self.root / ".cache/locks/writing-ai-start.lock"
+        lock_path.parent.mkdir(parents=True)
+        wrapper = self.root / "hold-startup-lock.ps1"
+        wrapper.write_text(
+            "$lock = [IO.File]::Open((Join-Path $PSScriptRoot '.cache/locks/writing-ai-start.lock'), 'OpenOrCreate', 'ReadWrite', 'None')\n"
+            "try { & (Join-Path $PSScriptRoot 'Start-Writing.ps1') } finally { $lock.Dispose() }\n",
+            encoding="utf-8",
+        )
+        result = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(wrapper)],
+            capture_output=True, text=True, errors="replace", timeout=20,
+            env=dict(os.environ, FEEDBACK_CAPTURE=str(self.capture)),
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("already starting or running", result.stderr)
+        self.assertFalse(self.capture.exists())
+        self.assertEqual(0, self.run_launcher().returncode)
 
     def test_redirected_native_info_stderr_does_not_stop_healthy_server(self):
         result = self.run_launcher(env_extra={"FEEDBACK_FAKE_STDERR": "1"}, redirect=True)

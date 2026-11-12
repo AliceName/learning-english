@@ -10,8 +10,13 @@ param(
 $ErrorActionPreference = 'Stop'
 $taskPython = Join-Path $PSScriptRoot '.venv/Scripts/python.exe'
 if (-not (Test-Path -LiteralPath $taskPython)) { throw 'Run Install-Training.ps1 and install requirements-service.txt first.' }
+if (-not $PSBoundParameters.ContainsKey('GecRun')) {
+    $GecRun = (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'model-defaults.json') -Raw | ConvertFrom-Json).gecRun
+    if (-not $GecRun) { throw 'Missing default GEC run in model-defaults.json.' }
+}
 $env:WRITING_CEFR_RUN = if ([IO.Path]::IsPathRooted($CefrRun)) { $CefrRun } else { Join-Path $PSScriptRoot $CefrRun }
-$env:WRITING_GEC_RUN = if ($GecRun) { if ([IO.Path]::IsPathRooted($GecRun)) { $GecRun } else { Join-Path $PSScriptRoot $GecRun } } else { '' }
+# Windows PowerShell removes empty env values. Preserve explicit GEC disable.
+$env:WRITING_GEC_RUN = if ($GecRun) { if ([IO.Path]::IsPathRooted($GecRun)) { $GecRun } else { Join-Path $PSScriptRoot $GecRun } } else { ' ' }
 $env:WRITING_DEVICE = $Device
 $env:WRITING_FEEDBACK_ENABLED = '0'
 $env:WRITING_FEEDBACK_MANIFEST = ''
@@ -82,15 +87,27 @@ if ($EnableFeedback) {
 }
 $env:OMP_NUM_THREADS = '2'
 $env:MKL_NUM_THREADS = '2'
+$env:HF_HUB_OFFLINE = '1'
 # Windows PowerShell 5 converts redirected native stderr into error records.
 # Uvicorn writes ordinary INFO messages there; fail on its exit code instead.
 # Keep Stop for every validation above and restore it before reporting failure.
 $taskPreviousErrorAction = $ErrorActionPreference
 $taskNativeExit = $null
+$taskLockDirectory = Join-Path $PSScriptRoot '.cache/locks'
+$null = New-Item -ItemType Directory -Path $taskLockDirectory -Force
+try {
+    $taskServiceLock = [IO.File]::Open((Join-Path $taskLockDirectory 'writing-ai-start.lock'),
+        [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::None)
+} catch [IO.IOException] {
+    throw 'Writing AI is already starting or running from this checkout. Check http://127.0.0.1:8000/health.'
+}
 try {
     $ErrorActionPreference = 'Continue'
     & $taskPython -m uvicorn serve:app --app-dir $PSScriptRoot --host 127.0.0.1 --port 8000 --workers 1
     $taskNativeExit = $LASTEXITCODE
 }
-finally { $ErrorActionPreference = $taskPreviousErrorAction }
+finally {
+    $taskServiceLock.Dispose()
+    $ErrorActionPreference = $taskPreviousErrorAction
+}
 if ($taskNativeExit -ne 0) { throw "Writing AI exited with code $taskNativeExit." }

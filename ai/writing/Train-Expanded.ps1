@@ -6,6 +6,7 @@ param(
     [ValidatePattern('^[A-Za-z0-9][A-Za-z0-9_-]*$')][string]$RunName = 'gec-expanded-v1',
     [ValidateRange(1,100)][double]$Epochs = 6,
     [ValidateRange(1,16)][int]$BatchSize = 16,
+    [ValidateRange(1,128)][int]$GradientAccumulation = 1,
     [ValidateScript({ -not [double]::IsNaN($_) -and -not [double]::IsInfinity($_) -and $_ -gt 0 })][double]$LearningRate = 0.0002,
     [ValidateSet('none','sqrt-inverse')][string]$CefrClassWeighting = 'none',
     [ValidateSet('qv','qvo')][string]$GecLoraProfile = 'qv',
@@ -167,7 +168,7 @@ try {
         '--train-file',(Join-Path $taskData ($ModelTask + '-train.jsonl')),'--dev-file',(Join-Path $taskData ($ModelTask + '-dev.jsonl')),
         '--output',$taskOutput,'--epochs',$Epochs.ToString([Globalization.CultureInfo]::InvariantCulture),
         '--learning-rate',$LearningRate.ToString('R',[Globalization.CultureInfo]::InvariantCulture),
-        '--gradient-accumulation','1','--early-stopping-patience','2','--progress')
+        '--gradient-accumulation',($(if ($Smoke) { '1' } else { [string]$GradientAccumulation })),'--early-stopping-patience','2','--progress')
     if ($Experiment) {
         $taskArguments += '--experiment'
         $taskArguments[$taskArguments.IndexOf('--early-stopping-patience') + 1] = '0'

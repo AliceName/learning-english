@@ -1,6 +1,7 @@
 """Run with uvicorn serve:app --app-dir ai/writing --host 127.0.0.1 --port 8000 --workers 1."""
 from contextlib import asynccontextmanager
 import asyncio
+import json
 import logging
 import os
 from pathlib import Path
@@ -65,7 +66,9 @@ def create_app(engine_factory=None, feedback_factory=None):
         else:
             cefr = Path(os.getenv("WRITING_CEFR_RUN", str(ROOT / "artifacts/cefr-my-first-run")))
             gec = os.getenv("WRITING_GEC_RUN")
-            app.state.engine = WritingEngine(cefr, Path(gec) if gec else None,
+            if gec is None:
+                gec = json.loads((ROOT / "model-defaults.json").read_text(encoding="utf-8"))["gecRun"]
+            app.state.engine = WritingEngine(cefr, ROOT / gec if gec.strip() else None,
                                              os.getenv("WRITING_DEVICE", "auto"))
         app.state.feedback_engine = feedback_factory() if feedback_factory else FeedbackEngine.from_env()
         try:

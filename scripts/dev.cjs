@@ -3,16 +3,20 @@ const path = require('node:path');
 const net = require('node:net');
 const readline = require('node:readline');
 const { spawn, spawnSync } = require('node:child_process');
+const defaults = require('../ai/writing/model-defaults.json');
 
 const root = path.resolve(__dirname, '..');
 
 function servicesFor(projectRoot) {
   const next = path.join(projectRoot, 'frontend/node_modules/next/dist/bin/next');
+  const writingRoot = path.join(projectRoot, 'ai/writing');
+  const cefrRun = process.env.WRITING_CEFR_RUN?.trim() || 'artifacts/cefr-my-first-run';
+  const gecRun = process.env.WRITING_GEC_RUN?.trim() || defaults.gecRun;
   for (const [file, hint] of [
     [next, 'Run npm ci in frontend first.'],
     [path.join(projectRoot, 'ai/writing/.venv/Scripts/python.exe'), 'Set up the Writing Python environment first.'],
-    [path.join(projectRoot, 'ai/writing/artifacts/cefr-my-first-run/run.json'), 'Missing trained CEFR model.'],
-    [path.join(projectRoot, 'ai/writing/artifacts/gec-expanded-v1/run.json'), 'Missing serving GEC model.'],
+    [path.resolve(writingRoot, cefrRun, 'run.json'), 'Missing trained CEFR model.'],
+    [path.resolve(writingRoot, gecRun, 'run.json'), 'Missing serving GEC model.'],
   ]) {
     if (!fs.existsSync(file)) throw new Error(hint);
   }
@@ -28,8 +32,9 @@ function servicesFor(projectRoot) {
   return [
     { name: 'AI', port: 8000, url: 'http://127.0.0.1:8000/health', status: 'ready', cwd: projectRoot,
       command: 'powershell.exe', args: [...powershell, path.join(projectRoot, 'ai/writing/Start-Writing.ps1'),
-        '-CefrRun', 'artifacts/cefr-my-first-run', '-GecRun', 'artifacts/gec-expanded-v1'] },
+        '-CefrRun', cefrRun, '-GecRun', gecRun] },
     { name: 'API', port: 5000, url: 'http://127.0.0.1:5000/api/v1/health', status: 'healthy', cwd: projectRoot,
+      env: { WritingAi__AutoStart: 'false' },
       command: 'powershell.exe', args: [...powershell, path.join(projectRoot, 'backend/scripts/Start-Development.ps1')] },
     { name: 'WEB', port: 3000, url: 'http://127.0.0.1:3000/', cwd: path.join(projectRoot, 'frontend'),
       command: process.execPath, args: [next, 'dev', '--hostname', '127.0.0.1', '--port', '3000'] },
@@ -91,7 +96,7 @@ async function startStack(services, { log = console.log, timeoutMs = 120000, sig
     for (const service of services) {
       log(`[${service.name}] Starting...`);
       const child = spawn(service.command, service.args, { cwd: service.cwd, windowsHide: true,
-        env: { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' }, stdio: ['ignore', 'pipe', 'pipe'] });
+        env: { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8', ...service.env }, stdio: ['ignore', 'pipe', 'pipe'] });
       const entry = { service, child, failure: null };
       owned.push(entry);
       child.once('error', error => { entry.failure = error; });

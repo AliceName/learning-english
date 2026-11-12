@@ -8,10 +8,32 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from gec_evaluation import sample_dev
-from train import main
+from train import build_training_arguments, main
 
 
 class TrainingArgumentTests(unittest.TestCase):
+    def test_trainer_receives_requested_gradient_accumulation(self):
+        captured = {}
+
+        def seq2seq_factory(**kwargs):
+            captured.update(kwargs)
+            return kwargs
+
+        args = type("Args", (), dict(
+            output=Path("run"), epochs=18, max_steps=-1, learning_rate=2e-4,
+            batch_size=2, gradient_accumulation=8, progress=True, seed=42, task="gec",
+            metric_for_best_model="gec_f05", greater_is_better=True))()
+        built = build_training_arguments(args, cuda=True, bf16=True,
+                                         seq2seq_factory=seq2seq_factory,
+                                         standard_factory=lambda **kwargs: kwargs)
+        self.assertEqual(built, captured)
+        self.assertEqual(captured["gradient_accumulation_steps"], 8)
+        self.assertEqual(captured["per_device_train_batch_size"], 2)
+        self.assertEqual(captured["seed"], 42)
+        self.assertEqual(captured["eval_strategy"], "epoch")
+        self.assertEqual(captured["save_strategy"], "epoch")
+        self.assertFalse(captured["predict_with_generate"])
+
     def test_gec_lora_profile_is_rejected_for_other_tasks_before_data_loading(self):
         with patch.object(sys, "argv", ["train.py", "cefr", "--output", "never-created",
                                        "--gec-lora-profile", "qvo"]), contextlib.redirect_stderr(io.StringIO()) as stderr:
