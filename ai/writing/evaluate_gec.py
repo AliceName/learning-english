@@ -4,7 +4,6 @@ This selected sample is not the full dev set and must not be reported as test ac
 All sentences, references and outputs stay inside the private output directory.
 """
 import argparse
-import hashlib
 import importlib.metadata
 import json
 import os
@@ -14,6 +13,7 @@ import sys
 from pathlib import Path
 
 from data import ROOT, read_jsonl, validate_splits
+from gec_data_paths import verified_data_paths
 from gec_evaluation import ERRANT_PROTOCOL, m2_block
 
 os.environ.setdefault("HF_HOME", str(ROOT / ".cache/huggingface"))
@@ -23,6 +23,7 @@ os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "true")
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, required=True)
+    parser.add_argument("--data-root", type=Path, help="Find the manifest's train and dev filenames under this directory")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--per-group", type=int, default=128)
     parser.add_argument("--seed", type=int, default=2026)
@@ -36,13 +37,11 @@ def main():
     manifest = json.loads((args.run / "run.json").read_text(encoding="utf-8"))
     if not manifest.get("completed") or manifest["kind"] != "training" or manifest["task"] != "gec":
         parser.error("A completed full GEC run is required")
-    parts = {}
-    for split in ("train", "dev"):
-        path = Path(manifest["data_files"][split])
-        with path.open("rb") as stream:
-            if hashlib.file_digest(stream, "sha256").hexdigest() != manifest["data_sha256"][split]:
-                raise ValueError("Training data changed after model fitting")
-        parts[split] = read_jsonl(path)
+    try:
+        paths = verified_data_paths(manifest, ("train", "dev"), args.data_root)
+    except (ValueError, OSError) as error:
+        parser.error(str(error))
+    parts = {split: read_jsonl(path) for split, path in paths.items()}
     validate_splits(parts, "gec")
     import torch
     import errant

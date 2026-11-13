@@ -326,6 +326,15 @@ Với cả hai cách chạy, đặt `WRITING_CEFR_RUN` hoặc `WRITING_GEC_RUN` 
 .\ai\writing\.venv\Scripts\python.exe .\ai\writing\evaluate_gec.py --run .\ai\writing\artifacts\gec-team-local-01 --output .\ai\writing\.cache\eval-gec-team-local-01 --device cuda
 ```
 
+Nếu đã chuyển dữ liệu của run huấn luyện sang checkout hiện tại, chạy từ thư mục gốc và chỉ định thư mục prepared tương ứng:
+
+```powershell
+.\ai\writing\.venv\Scripts\python.exe .\ai\writing\evaluate_gec.py --run .\ai\writing\artifacts\gec-viet-full-18ep-bs2-ga8-20261111 --data-root .\ai\writing\data\prepared-first-final --output .\ai\writing\.cache\eval-gec-local --device cpu
+.\ai\writing\.venv\Scripts\python.exe .\ai\writing\audit_gec.py --run .\ai\writing\artifacts\gec-viet-full-18ep-bs2-ga8-20261111 --data-root .\ai\writing\data\prepared-first-final --output .\ai\writing\.cache\audit-gec-local
+```
+
+Bỏ `--data-root` nếu các đường dẫn trong `run.json` vẫn dùng được. Khi có tham số, mỗi tên file train/dev ghi trong manifest phải xuất hiện đúng một lần dưới thư mục đã chọn và khớp SHA-256. Nếu thiếu file, kiểm tra đúng bộ prepared của run. Nếu trùng tên, chọn thư mục hẹp hơn. `--sample-file` vẫn yêu cầu xác minh dev gốc. Chế độ audit experiment dùng đường dẫn gốc để xác minh toàn bộ provenance. Khi dùng `--rescore`, điểm và M2 được ghi lại trong thư mục kết quả đã lưu.
+
 Script lấy mẫu dev cân bằng (mặc định 128 câu mỗi nhóm), chạy inference và chấm edit bằng ERRANT. Đây là diagnostic sample, không phải toàn bộ dev hay test accuracy. Dùng thư mục output mới; predictions và report chứa dữ liệu dẫn xuất riêng tư. Corpus GEC chính thức không có test correction references nên pipeline không thể đưa ra test F-score đáng tin cậy từ corpus này. Các sample dev được dùng nhiều lần để tuning không phải holdout độc lập. Exact/reference-match không chứng minh chất lượng ngữ pháp tổng quát.
 
 CEFR có hai cách kiểm tra tổng quát: single-input prediction bằng `predict.py --run ... --input <UTF-8-file> --output <new-private-json>`, hoặc final held-out evaluation chỉ sau khi đã khóa model/config bằng `--evaluate-test`. Ví dụ chỉ chạy một lần sau khi chọn model xong:

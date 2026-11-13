@@ -17,6 +17,7 @@ import sys
 import time
 
 from data import ROOT, read_jsonl
+from gec_data_paths import verified_data_paths
 from gec_evaluation import ERRANT_PROTOCOL as PROTOCOL, m2_block
 
 os.environ.setdefault("HF_HOME", str(ROOT / ".cache/huggingface"))
@@ -87,6 +88,7 @@ def rescore_existing(directory):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--run", type=Path, required=True)
+    p.add_argument("--data-root", type=Path, help="Find the manifest's train and dev filenames under this directory")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--sample-size", type=int, default=1024)
     p.add_argument("--batch-size", type=int, default=4)
@@ -97,18 +99,24 @@ def main():
     p.add_argument("--allow-experiment", action="store_true", help="Offline-only opt-in for completed integrity-checked experiments")
     args = p.parse_args()
     if args.rescore:
+        if args.data_root is not None:
+            p.error("--data-root applies to fresh evaluations, not --rescore")
         rescore_existing(args.output)
         return
     if args.sample_size < 1 or args.batch_size < 1 or args.output.exists():
         p.error("Use positive sizes and a fresh output directory")
     from training_state import validate_loadable_run
     try:
+        if args.data_root is not None and args.allow_experiment:
+            # Experiment loading validates all recorded paths again inside Adapter.
+            kind = json.loads((args.run / "run.json").read_text(encoding="utf-8")).get("kind")
+            if kind == "experiment":
+                p.error("--data-root supports completed training runs; experiment integrity checks use recorded paths")
         manifest = validate_loadable_run(args.run, "gec", allow_experiment=args.allow_experiment)
-    except ValueError as error:
+        splits = ("train", "dev") if args.data_root is not None else ("dev",)
+        dev_path = verified_data_paths(manifest, splits, args.data_root)["dev"]
+    except (ValueError, OSError) as error:
         p.error(str(error))
-    dev_path = Path(manifest["data_files"]["dev"])
-    if hashlib.sha256(dev_path.read_bytes()).hexdigest() != manifest["data_sha256"]["dev"]:
-        p.error("Dev data changed after training")
     import torch
     import errant
     import spacy
