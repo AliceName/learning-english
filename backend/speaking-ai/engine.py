@@ -77,7 +77,7 @@ def edit_ratio(expected, decoded):
 
 
 class SpeakingEngine:
-    def __init__(self, training_root=None):
+    def __init__(self, training_root=None, *, model_path=None):
         default = Path(__file__).resolve().parents[2].parent / 'EnglishPronunciationTraining' / 'EnglishPronunciationTraining'
         self.root = Path(training_root or os.environ.get('SPEAKING_TRAINING_ROOT', default)).resolve()
         scripts = self.root / 'scripts'
@@ -85,7 +85,10 @@ class SpeakingEngine:
             raise RuntimeError('Set SPEAKING_TRAINING_ROOT to the prepared training project.')
         sys.path.insert(0, str(scripts))
         from project_env import configure_environment
-        configure_environment()
+        if model_path is None:
+            configure_environment()
+        else:
+            configure_environment(create_directories=False)
         import cmudict
         import torch
         from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
@@ -93,7 +96,8 @@ class SpeakingEngine:
         from training_common import config, snapshot_path, FEATURE_NAMES, BASE_PHONES, file_digest
         from score_interpretation import ScoreCalibration
         self.torch = torch
-        cfg = config(); snapshot = snapshot_path(cfg)
+        cfg = config()
+        snapshot = Path(model_path) if model_path is not None else snapshot_path(cfg)
         self.processor = Wav2Vec2Processor.from_pretrained(str(snapshot), local_files_only=True)
         self.mapping = PhoneMapping.load(self.root / cfg['features']['phone_mapping'], self.processor.tokenizer.get_vocab())
         self.package = torch.load(self.root / 'checkpoints/pronunciation_scorer.pt', map_location='cpu', weights_only=True)

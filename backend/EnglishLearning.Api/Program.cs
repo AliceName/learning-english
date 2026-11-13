@@ -5,6 +5,7 @@ using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using EnglishLearning.Api.Services;
 using EnglishLearning.Api.Services.CloudinaryMedia;
@@ -142,6 +143,9 @@ builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services,
     client.BaseAddress = new Uri((configuration["SpeakingAi:BaseUrl"] ?? "http://127.0.0.1:8001").TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromSeconds(55);
     client.MaxResponseContentBufferSize = 2 * 1024 * 1024;
+    var apiToken = configuration["SpeakingAi:ApiToken"];
+    if (!string.IsNullOrWhiteSpace(apiToken))
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
 });
 builder.Services.AddSingleton<IpaTranscriber>();
 builder.Services.AddSingleton<MediaStorage>();

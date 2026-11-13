@@ -69,6 +69,19 @@ class ServingTests(unittest.TestCase):
             self.assertIn(response.status_code, (400, 413))
             self.assertEqual(engine.calls, before)
 
+    def test_protected_score_requires_token_before_parsing_audio(self):
+        engine = FakeEngine()
+        with TestClient(create_app(engine, api_token='test-token')) as client:
+            self.assertEqual(client.get('/health').status_code, 200)
+            self.assertEqual(client.post('/score').status_code, 401)
+            wrong_token = {'Authorization': 'Bearer wrong-token'}
+            self.assertEqual(client.post('/score', headers=wrong_token).status_code, 401)
+            self.assertEqual(engine.calls, 0)
+            response = client.post('/score', headers={'Authorization': 'Bearer test-token'},
+                                   data={'text': 'We call it bear'}, files={'file': ('x.wav', wav(), 'audio/wav')})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(engine.calls, 1)
+
     def test_read_uses_tense_cues_without_changing_the_written_word(self):
         cases = [
             ('I read a book yesterday.', 'red'),
