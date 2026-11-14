@@ -2,7 +2,7 @@
 
 - Nhánh `Viet`, upstream `origin/Viet`, remote `https://github.com/AliceName/learning-english.git`.
 - Trước bàn giao, HEAD local là `ac4cd717e50f746a693bebca1d9fca2a568e7fe1`, tip remote đã kiểm tra là `313572c21b1f6057b8f8abd5aff4bd8ba22e693a`. Năm commit đã có local gồm phần runtime GEC và phần Speaking đã hợp nhất.
-- Trạng thái push và mã commit bàn giao được ghi ở mục Biên nhận sau khi xác minh remote.
+- Mã nguồn và tài liệu bàn giao đã push tại commit ở mục Biên nhận. Commit ghi biên nhận tiếp theo chỉ cập nhật tài liệu này.
 
 ## Clone và đối chiếu
 
@@ -41,4 +41,4 @@ Test-Path docs/handoff-ai-writing/00_READ_ME_FIRST.md
 
 ## Biên nhận
 
-Chờ kết quả git và kiểm tra remote.
+Đã push fast-forward `313572c21b1f6057b8f8abd5aff4bd8ba22e693a` → `09d1d49161e572022a5c4a1614ea8977fff524fe` trên `origin/Viet`. `git ls-remote` đã trả đúng SHA của commit nội dung ngay sau push. Commit nội dung gồm 50 file, xem `git show --stat 09d1d49`.
