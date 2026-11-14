@@ -223,17 +223,64 @@
 .cardList p { margin: 4px 0; white-space: pre-wrap; }
 .cardList blockquote { margin: 6px 0; padding-left: 9px; border-left: 2px solid #d5e6ff; color: var(--muted); font-size: .8rem; white-space: pre-wrap; }
 .cardList .actions { flex-shrink: 0; }
-.progress { width: 100%; height: 8px; margin-bottom: 14px; accent-color: #0867e3; }
-/* Leave enough scroll room to center the card even in a short review. */
-.page:has(.flipCard) { padding-block-end: max(24px, calc(50dvh - 120px)); }
-.page .flipCard {
-  display: grid; align-content: center; justify-items: center; gap: 13px; width: 100%; min-height: 240px; padding: 20px;
-  border-color: #d0e1fc; background: linear-gradient(135deg, #f9fbff, #eaf2ff); border-radius: 17px;
-  text-align: center; white-space: pre-wrap; overflow-wrap: anywhere;
-}
-.flipCard > strong { max-width: 100%; font-size: clamp(1.35rem, 3vw, 2rem); line-height: 1.4; }
-.flipCard > span { max-width: 100%; color: var(--muted); }
-.flipCard small { color: var(--muted); font-size: .73rem; }
+.progress { display: block; width: 100%; height: 8px; margin-bottom: 14px; accent-color: #0867e3; border: 0; border-radius: 8px; overflow: hidden; }
+.progress::-webkit-progress-bar { border-radius: 8px; background: #b7bee9; }
+.progress::-webkit-progress-value { border-radius: 8px; background: #0867e3; }
+.progress::-moz-progress-bar { border-radius: 8px; background: #0867e3; }
+.studyPanel { position: relative; border: 0; background: transparent; box-shadow: none; }
+.studyPanel .top { align-items: center; margin-bottom: 14px; }
+.studyPanel .top h2 { font-size: 1.35rem; }
+.studyPanel .top > span { color: var(--ink); font-size: .85rem; font-weight: 750; }
+.studyScene { position: relative; isolation: isolate; display: grid; grid-template-columns: 42px minmax(0, 780px) 42px; align-items: center; justify-content: center; gap: clamp(12px, 3cqw, 38px); margin: 48px auto 26px; padding: 12px 0 8px; }
+.studyScene::before { position: absolute; z-index: -2; right: -22px; bottom: -20px; left: -22px; height: 175px; content: ""; background: radial-gradient(ellipse at 2% 95%, #dee3ff 0 17%, transparent 17.5%), radial-gradient(ellipse at 18% 110%, #e8ebff 0 27%, transparent 27.5%), radial-gradient(ellipse at 98% 90%, #e0e6ff 0 20%, transparent 20.5%); pointer-events: none; }
+.studyStack { position: relative; isolation: isolate; min-width: 0; }
+.studyStack::before, .studyStack::after { position: absolute; z-index: -1; inset: 0; border: 1px solid #a99aff; border-radius: 32px; background: #ddd8ff; content: ""; box-shadow: 0 5px 8px #8171dd25; }
+.studyStack::before { transform: rotate(3deg) translate(5px, 6px); }
+.studyStack::after { transform: rotate(-3deg) translate(-7px, 1px); background: #e7e3ff; }
+.studyPaper { position: relative; border: 1px solid #bebcfd; border-radius: 30px; background: linear-gradient(145deg, #fff 5%, #f7f6ff 55%, #eff3ff); box-shadow: 0 10px 20px #5b63ba2b, inset 0 1px 0 white; transform: rotate(-1.1deg); }
+.studyPaper[data-flipped=true] { transform: rotate(-.6deg); }
+.page .flipCard { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; }
+.page .flipCard:hover:not(:disabled) { background: #eaf0ff26; }
+.studyContent { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: stretch; gap: 13px; min-height: 345px; padding: 28px 32px 24px; pointer-events: none; }
+.studyContent button { pointer-events: auto; }
+.studyRibbon { align-self: flex-start; max-width: calc(100% - 35px); padding: 7px 22px; background: linear-gradient(#ffeddf, #ffe2cb); color: #824216; font-size: .85rem; font-weight: 800; clip-path: polygon(0 0, 100% 0, 96% 50%, 100% 100%, 0 100%, 4% 50%); }
+.studyPaper[data-flipped=true] .studyRibbon { background: linear-gradient(#eee6ff, #e5dbff); color: #36316f; }
+.studyStar { position: absolute; top: 28px; right: 26px; color: #0767f4; }
+.studyStar svg { width: 25px; height: 25px; }
+.studyWord { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0 0; text-align: center; }
+.studyWord > strong { min-width: 0; color: #14275b; font-size: clamp(1.55rem, 3.2cqw, 2.6rem); line-height: 1.28; font-weight: 850; overflow-wrap: anywhere; white-space: pre-wrap; }
+.studyContent .sound { flex-shrink: 0; width: 41px; min-height: 41px; }
+.studyPhonetic { text-align: center; color: #647aa3; font: 1rem/1.5 Arial, sans-serif; overflow-wrap: anywhere; }
+.studyCat { align-self: center; width: min(100%, 390px); height: auto; max-height: 185px; margin: -9px 0 -7px; object-fit: contain; }
+.studyCustomImage { align-self: center; width: min(100%, 330px); height: auto; max-height: 170px; border-radius: 12px; object-fit: contain; }
+.studyFlipHint { margin-top: auto; text-align: center; font-size: .83rem; color: #26366a; }
+.binderRings { position: absolute; z-index: 4; top: -22px; right: 23%; display: flex; gap: 39px; pointer-events: none; }
+.binderRings i { width: 18px; height: 42px; border: 5px solid #7bd9ff; border-radius: 15px; background: transparent; box-shadow: inset 2px 0 0 #e6fcff, 2px 2px 0 #4779d8, 0 2px 2px #3e52a352; }
+.binderRings i::after { position: absolute; z-index: -1; bottom: -5px; width: 14px; height: 14px; margin-left: -3px; border: 2px solid #a8b4f1; border-radius: 50%; background: #8493c1; content: ""; }
+.studyMeaning { display: flex; align-items: flex-start; gap: 13px; margin-top: 4px; padding: 18px; border-radius: 18px; background: linear-gradient(120deg, #eeeaff, #e6edff); }
+.studyMeaning > svg { width: 26px; height: 26px; margin-top: 3px; color: #5d60ed; }
+.studyMeaning > div { flex: 1; min-width: 0; color: #17285d; overflow-wrap: anywhere; white-space: pre-wrap; }
+.studyMeaning strong { font-size: clamp(1.15rem, 2.4cqw, 1.8rem); line-height: 1.55; }
+.studyMeaning p { margin: 7px 0 0; color: #34466b; font-size: .95rem; line-height: 1.65; }
+.studyMeaning > img { flex-shrink: 0; width: min(25%, 135px); height: auto; max-height: 100px; border-radius: 9px; object-fit: contain; }
+.studyExample { display: flex; align-items: flex-start; gap: 13px; padding: 15px 5px 6px; border-top: 1px solid #dce0fb; }
+.studyExample > span { color: #0873ff; font: 800 3rem/.85 Georgia, serif; }
+.studyExample > p { flex: 1; min-width: 0; margin: 0; color: #172c60; font-size: 1rem; line-height: 1.8; overflow-wrap: anywhere; white-space: pre-wrap; }
+.studyExample mark { padding: 3px 5px; border-radius: 9px; background: #ffe49b; color: inherit; font-weight: 800; }
+.studyMetadata { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 8px; }
+.studyMetadata > span { display: inline-flex; align-items: center; gap: 8px; padding: 7px 17px; border: 1px solid #d9d9ff; border-radius: 25px; background: #f0edff; color: #273b6f; font-size: .82rem; }
+.studyMetadata svg { width: 17px; height: 17px; }
+.panel .studyNoExample { margin: 5px; color: #7785a5; font-size: .85rem; }
+.studyBooks { position: absolute; z-index: -1; left: -16px; bottom: -25px; width: min(12%, 118px); height: auto; opacity: .8; }
+.studyBooksRight { right: -16px; left: auto; }
+.page .faceArrow { width: 42px; min-height: 42px; padding: 0; border: 1px solid #d8d5ff; border-radius: 50%; background: linear-gradient(#fff, #f3f2ff); color: #152d65; box-shadow: 0 4px 9px #8081b625; }
+.faceArrow:first-of-type svg { transform: rotate(180deg); }
+.page .faceArrow:disabled { opacity: .4; }
+.studyDots { display: flex; justify-content: center; gap: 10px; margin: 12px 0 25px; }
+.page .studyDots button { width: 12px; min-height: 12px; height: 12px; padding: 0; border: 0; border-radius: 50%; background: #c7d0ff; }
+.page .studyDots button[aria-pressed=true] { background: #0661ed; }
+.panel .studyHelp { display: flex; justify-content: center; align-items: center; gap: 10px; width: fit-content; max-width: 100%; margin: 24px auto 8px; padding: 12px 22px; border: 1px solid #d2d5ff; border-radius: 20px; background: #f9faffb3; color: #354477; font-size: .85rem; box-shadow: 0 3px 8px #8186c31a; }
+.studyHelp svg { width: 25px; height: 25px; color: #e8ac13; }
 .ratings { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
 .ratings button { display: grid; padding: 8px 5px; }
 .ratings button:first-child { color: #a22d49; background: #fff0f4; }
@@ -258,6 +305,25 @@
   .createTile button { min-height: 42px; padding-inline: 15px; }
 }
 @container (max-width: 680px) {
+  .studyScene { grid-template-columns: 30px minmax(0, 1fr) 30px; gap: 10px; margin-top: 35px; }
+  .page .faceArrow { width: 30px; min-height: 30px; }
+  .faceArrow svg { width: 17px; height: 17px; }
+  .studyContent { min-height: 325px; gap: 12px; padding: 24px 18px 20px; }
+  .studyRibbon { padding: 6px 14px; font-size: .72rem; }
+  .studyStar { top: 25px; right: 14px; }
+  .studyStar svg { width: 21px; height: 21px; }
+  .studyWord { gap: 8px; }
+  .studyWord > strong { font-size: clamp(1.3rem, 4cqw, 1.8rem); }
+  .studyMeaning { padding: 12px; gap: 8px; }
+  .studyMeaning strong { font-size: 1.05rem; }
+  .studyMeaning p { font-size: .85rem; }
+  .studyExample { gap: 9px; padding-top: 12px; }
+  .studyExample > p { font-size: .88rem; }
+  .studyContent .sound { width: 32px; min-height: 32px; }
+  .studyContent .sound svg { width: 17px; height: 17px; }
+  .studyBooks { display: none; }
+  .studyMetadata > span { padding: 6px 12px; font-size: .75rem; }
+  .binderRings { right: 25%; gap: 25px; }
   .editorLayout { grid-template-columns: minmax(0, 1fr); }
   .stats, .decks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat { min-height: 70px; }
@@ -267,6 +333,17 @@
   .heading p { font-size: .8rem; }
 }
 @container (max-width: 420px) {
+  .studyScene { gap: 6px; grid-template-columns: 24px minmax(0, 1fr) 24px; }
+  .page .faceArrow { width: 24px; min-height: 28px; }
+  .studyContent { padding: 24px 13px 18px; }
+  .studyMeaning > svg { display: none; }
+  .studyMeaning > img { max-width: 65px; }
+  .studyRibbon { font-size: .66rem; }
+  .studyContent .sound { width: 29px; min-height: 29px; }
+  .studyExample { flex-wrap: wrap; }
+  .studyExample > p { flex-basis: calc(100% - 35px); }
+  .studyExample .sound { margin-left: auto; }
+  .panel .studyHelp { align-items: flex-start; padding: 11px 13px; font-size: .76rem; }
   .heading { min-height: 125px; }
   .headingText, .editorLayout .headingText { max-width: 71%; }
   .heroArt, .editorLayout .heroArt { width: 28%; bottom: 6px; right: 0; }

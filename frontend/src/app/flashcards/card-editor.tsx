@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
 import { levels } from "@/lib/course-catalog";
-import type { Deck, DeckDetail, Flashcard } from "@/lib/flashcards";
+import { pronounceFlashcard, type Deck, type DeckDetail, type Flashcard } from "@/lib/flashcards";
 import { FlashcardHeading } from "./library";
 import { emptyPreferences, type CardPreferences } from "./preferences";
 import { useFlashcardPhonetic } from "./use-flashcard-phonetic";
@@ -55,17 +55,7 @@ export default function FlashcardEditor({ detail, decks, card, initialPreference
   }, []);
 
   function pronounce(text: string, language = "en-US") {
-    if (!text.trim()) return;
-    if (!("speechSynthesis" in window)) { setIssue("Trình duyệt chưa hỗ trợ đọc từ."); return; }
-    setIssue("");
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = language;
-    speech.rate = .9;
-    speech.onerror = event => {
-      if (event.error !== "canceled" && event.error !== "interrupted") setIssue("Chưa phát được giọng đọc trên trình duyệt.");
-    };
-    window.speechSynthesis.speak(speech);
+    pronounceFlashcard(text, language, setIssue);
   }
 
   async function chooseImage(file: File | undefined) {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import HomeNavbar, { NavbarFallback } from "@/components/navigation/home-navbar";
+import FeaturedCourses from "@/components/home/featured-courses";
 import LandingPage from "@/components/home/landing-page";
 import styles from "@/components/home/landing.module.css";
 
@@ -13,7 +14,11 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <Suspense fallback={<NavbarFallback />}><HomeNavbar /></Suspense>
-      <LandingPage />
+      <LandingPage courseCards={
+        <Suspense fallback={<p className={styles.courseNotice} role="status">Đang tải khóa học…</p>}>
+          <FeaturedCourses />
+        </Suspense>
+      } />
     </div>
   );
 }

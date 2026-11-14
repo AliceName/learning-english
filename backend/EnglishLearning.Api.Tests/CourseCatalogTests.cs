@@ -70,6 +70,29 @@ public sealed partial class RegistrationSqlServerTests
     }
 
     [SqlServerFact]
+    public async Task Featured_returns_public_course_metadata_to_guests_without_drafts_or_personal_courses()
+    {
+        var data = await CreateCatalog();
+        using var scope = factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
+        var ids = data.Courses.Select(course => course.CourseId).ToArray();
+        await context.Courses.Where(course => ids.Contains(course.CourseId))
+            .ExecuteUpdateAsync(update => update.SetProperty(course => course.UpdatedAt, new DateTime(2100, 1, 1)));
+        client.DefaultRequestHeaders.Authorization = null;
+
+        var featured = (await client.GetFromJsonAsync<FeaturedCourse[]>("/api/v1/courses/featured"))!;
+
+        Assert.InRange(featured.Length, 2, 3);
+        Assert.Equal(new[] { ids[1], ids[0] }, featured.Take(2).Select(course => course.CourseId));
+        Assert.DoesNotContain(featured, course => ids.Skip(2).Contains(course.CourseId));
+        Assert.Equal(new[] { "A2", "B1" }, featured[1].Levels);
+        Assert.Equal(2, featured[1].LessonCount);
+        Assert.Equal(25, featured[1].EstimatedMinutes);
+        Assert.Equal(1, featured[1].TimedLessonCount);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync($"/api/v1/courses/{ids[0]}")).StatusCode);
+    }
+
+    [SqlServerFact]
     public async Task Catalog_filters_search_level_skill_source_status_and_pages_in_a_stable_order()
     {
         var data = await CreateCatalog();

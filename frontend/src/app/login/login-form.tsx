@@ -1,14 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/auth-icon";
 import type { AuthReaction } from "@/components/auth/auth-mascot";
 import styles from "@/components/auth/auth-screen.module.css";
 import { notifySessionChanged } from "@/lib/session-events";
+import { adoptAnonymousWritingDraft, writingDraftStorage } from "@/lib/writing-draft";
+import { safeWritingReturnTo, writingReturnSubmissionId, writingReturnTaskId } from "@/lib/writing-return";
 
-export default function LoginForm({ onReaction, onBusyChange }: { onReaction: (reaction: AuthReaction) => void; onBusyChange: (busy: boolean) => void }) {
-  const router = useRouter();
+export default function LoginForm({ returnTo = "/account", onReaction, onBusyChange }: { returnTo?: string; onReaction: (reaction: AuthReaction) => void; onBusyChange: (busy: boolean) => void }) {
+  const writingDestination = safeWritingReturnTo(returnTo);
   const inFlight = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,23 +45,26 @@ export default function LoginForm({ onReaction, onBusyChange }: { onReaction: (r
         body: JSON.stringify({ email, password }),
       });
       const result = await response.json();
-      if (!response.ok) {
-        setNotice(result.detail ?? result.title ?? "Chưa thể đăng nhập. Vui lòng thử lại.");
+      if (response.ok) {
+        const next = new URLSearchParams(window.location.search).get("next") ?? "";
+        const returnToCourse = /^\/courses\/[1-9]\d{0,9}(?:\/lessons\/[1-9]\d{0,9}\/listening)?$/.test(next);
+        const destination = writingDestination.startsWith("/writing") ? writingDestination
+          : returnToCourse ? next : result.user?.role === "admin" ? "/admin/courses" : "/account";
+        if (writingDestination.startsWith("/writing") && Number.isInteger(result.user?.userId)) {
+          adoptAnonymousWritingDraft(writingDraftStorage(), result.user.userId, writingReturnSubmissionId(writingDestination), Date.now(), writingReturnTaskId(writingDestination));
+        }
+        notifySessionChanged();
+        // Load the protected page with the new cookie, bypassing any cached guest redirect.
+        window.location.replace(destination);
         return;
       }
-      form.reset();
-      notifySessionChanged();
-      const next = new URLSearchParams(window.location.search).get("next") ?? "";
-      const returnToListening = /^\/courses\/[1-9]\d{0,9}\/lessons\/[1-9]\d{0,9}\/listening$/.test(next);
-      router.replace(returnToListening ? next : result.user?.role === "admin" ? "/admin/courses" : "/account");
-      router.refresh();
+      setNotice(result.detail ?? result.title ?? "Chưa thể đăng nhập. Vui lòng thử lại.");
     } catch {
       setNotice("Kết nối bị gián đoạn. Vui lòng thử lại sau ít phút.");
-    } finally {
-      inFlight.current = false;
-      setSubmitting(false);
-      onBusyChange(false);
     }
+    inFlight.current = false;
+    setSubmitting(false);
+    onBusyChange(false);
   }
 
   return (

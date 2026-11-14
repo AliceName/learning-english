@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
 import type { Deck, DeckDetail, Flashcard } from "@/lib/flashcards";
 import FlashcardEditor, { type CardFields } from "./card-editor";
 import FlashcardLibrary, { FlashcardHeading } from "./library";
 import { deckPreferencePrefix, emptyPreferences, favoritePrefix, readFavorites, readPreference, removePreferences, writePreference, type CardPreferences } from "./preferences";
-import { useFlashcardPhonetic } from "./use-flashcard-phonetic";
+import StudyCard from "./study-card";
 import styles from "./flashcards.module.css";
 
 async function api<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
@@ -28,24 +27,6 @@ const dateFormat = new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeSt
 const dateLabel = (date: string | null) => date ? dateFormat.format(new Date(date)) : "Thẻ mới";
 type DeckForm = { original?: Deck; title: string; description: string };
 type Editor = { card?: Flashcard; preferences: CardPreferences };
-
-function StudyMedia({ account, card, flipped }: { account?: string; card: Flashcard; flipped: boolean }) {
-  const [preferences, setPreferences] = useState<CardPreferences | null>(null);
-  const phonetic = useFlashcardPhonetic(!account || preferences ? card.frontText : "", preferences?.phonetic);
-  useEffect(() => {
-    if (!account) return;
-    let active = true;
-    const key = deckPreferencePrefix(account, card.deckId) + card.cardId;
-    void readPreference<CardPreferences>(key).catch(() => undefined).then(value => {
-      if (active) setPreferences(value ?? emptyPreferences);
-    });
-    return () => { active = false; };
-  }, [account, card.deckId, card.cardId]);
-  return <>
-    {!flipped && phonetic && <span className={styles.phonetic} lang="en-fonipa">{phonetic}</span>}
-    {preferences?.image && <Image className={styles.studyImage} src={preferences.image} width={280} height={140} alt="Ảnh minh họa từ vựng" unoptimized />}
-  </>;
-}
 
 export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: {
   initialDecks: Deck[] | null; account?: string; isAdmin: boolean;
@@ -356,23 +337,17 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
           {study !== null && <button type="button" disabled={busy} onClick={() => setStudy(null)}>Quản lý thẻ</button>}
         </div>
       </section>
-      {study !== null ? <section className={styles.panel} aria-label="Ôn tập thẻ">
+      {study !== null ? <section className={`${styles.panel} ${styles.studyPanel}`} aria-label="Ôn tập thẻ">
         <div className={styles.top}><h2 ref={studyHeading} tabIndex={-1}>Phiên ôn tập</h2><span>{reviewed} / {total} thẻ</span></div>
         <progress className={styles.progress} value={reviewed} max={Math.max(total, 1)} aria-label="Tiến độ phiên ôn" />
         {current ? <>
-          <button ref={studyCard} type="button" className={styles.flipCard} disabled={busy} onClick={() => setFlipped(old => !old)}
-            aria-label={flipped ? "Đang xem nghĩa. Bấm để xem từ." : "Bấm để lật thẻ và xem nghĩa."} aria-pressed={flipped}>
-            <small>{flipped ? "MẶT SAU · NGHĨA" : "MẶT TRƯỚC · TỪ VỰNG"}</small>
-            <strong lang={flipped ? "vi" : "en"}>{flipped ? current.backText : current.frontText}</strong>
-            {flipped && current.exampleSentence && <span><strong>Ví dụ:</strong> <span lang="en">{current.exampleSentence}</span></span>}
-            <StudyMedia key={current.cardId} account={account} card={current} flipped={flipped} />
-            <small>Bấm hoặc nhấn Enter để lật thẻ</small>
-          </button>
+          <StudyCard key={current.cardId} account={account} card={current} flipped={flipped} busy={busy} flipRef={studyCard} onFlip={setFlipped} />
           {flipped ? <div className={styles.ratings} aria-label="Tự đánh giá mức ghi nhớ">
             {["Quên", "Khó", "Nhớ", "Dễ"].map((label, rating) => <button type="button" key={label} disabled={busy} onClick={() => rate(rating)}>
               <strong>{label}</strong><small>{rating === 0 ? "Ôn lại sau 5 phút" : "Lên lịch lần tới"}</small>
             </button>)}
-          </div> : <p className={styles.help}>Hãy tự nhớ nghĩa trước khi lật. Lật thẻ để chọn mức độ ghi nhớ.</p>}
+          </div> : null}
+          <p className={styles.studyHelp}><Icon name="bulb" /> Hãy tự nhớ nghĩa trước khi lật. Lật thẻ để chọn mức độ ghi nhớ.</p>
         </> : <div className={styles.complete}>
           <h3>{total ? "Bạn đã hoàn thành phiên ôn!" : "Chưa có thẻ đến lịch"}</h3>
           <p>{total ? "Đã lưu đánh giá cho " + reviewed + " thẻ." : "Bạn có thể thêm thẻ mới hoặc quay lại khi đến lịch ôn."}</p>

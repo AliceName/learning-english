@@ -1,0 +1,3 @@
+# The checkpoint verifies the mapping by its exact SHA256 bytes.
+configs/phone_mapping.json -text whitespace=cr-at-eol
+checkpoints/*.pt binary

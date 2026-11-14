@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import Icon, { type SiteIconName } from "@/components/site-icon";
 import BearMascot from "./bear-mascot";
+import { HeroBackdrop, HeroCrown, HeroStickers } from "./hero-artwork";
 import SkillPreview, { type SkillId } from "./skill-previews";
 import SkillArtwork, { PeekingCat } from "./skill-artwork";
 import useSkillCarousel from "./use-skill-carousel";
@@ -12,20 +13,15 @@ import styles from "./landing.module.css";
 const skills: { id: SkillId; title: string; icon: SiteIconName; description: string; metric: string; value: string; hint: string; action: string }[] = [
   { id: "speaking", title: "Speaking", icon: "mic", description: "Luyện nói và phát âm IPA cùng AI", metric: "Native Match", value: "98%", hint: "Luyện phát âm theo từng âm vị", action: "Luyện Speaking" },
   { id: "reading", title: "Reading", icon: "book", description: "Đọc hiểu và tra từ theo ngữ cảnh", metric: "Tốc độ đọc", value: "245 wpm", hint: "Khám phá từ vựng trong ngữ cảnh", action: "Bắt đầu đọc tương tác" },
-  { id: "writing", title: "Writing", icon: "writing", description: "Sửa ngữ pháp, nâng cấp cách diễn đạt", metric: "Mạch lạc (CC)", value: "Band 8.0", hint: "Phát triển kỹ năng viết học thuật", action: "Mở trình sửa bài AI" },
+  { id: "writing", title: "Writing", icon: "writing", description: "Thử nghiệm sửa lỗi ngữ pháp trên câu văn", metric: "Bản xem trước", value: "Bản demo", hint: "Kiểm tra và tự chọn gợi ý sửa", action: "Mở trình sửa bài" },
   { id: "listening", title: "Listening", icon: "headphones", description: "Luyện nghe và nhận diện từ khóa", metric: "Giọng đọc", value: "US / UK", hint: "Lắng nghe và luyện theo nhịp của bạn", action: "Bắt đầu luyện nghe" },
   { id: "grammar", title: "Grammar", icon: "brain", description: "Hiểu cấu trúc qua ví dụ thực tế", metric: "Cấu trúc", value: "Inversion", hint: "Hiểu cấu trúc qua các ví dụ thực tế", action: "Luyện bài tập ngữ pháp" },
 ];
 
-const courses: { title: string; level: string; rating: string; icon: SiteIconName; description: string; days: number; lessons: number }[] = [
-  { title: "Tiếng Anh Giao Tiếp Phản Xạ Cấp Tốc", level: "A1 – B1", rating: "4.95", icon: "users", description: "Xây dựng phản xạ trả lời không cần dịch nhẩm tiếng Việt. Thực hành 50 tình huống thực tế thường ngày.", days: 30, lessons: 45 },
-  { title: "Luyện Phát Âm Chuẩn Bản Xứ IPA & Ngữ Điệu", level: "All Levels", rating: "4.98", icon: "wave", description: "Chinh phục 44 âm quốc tế IPA, quy tắc nối âm Flap-T, nuốt âm mượt mà cùng bài luyện khẩu hình trực quan.", days: 21, lessons: 36 },
-  { title: "Chinh Phục Ngữ Pháp & Viết Học Thuật AI", level: "B2 – C1", rating: "4.93", icon: "writing", description: "Nâng cấp cấu trúc câu phức, đảo ngữ và từ vựng C1 học thuật cho bài luận IELTS Task 2 và email kinh doanh chuyên nghiệp.", days: 40, lessons: 50 },
-];
 const sectionNames = ["Giới thiệu", "5 kỹ năng AI", "Khóa học"];
 const scrollBehavior = (): ScrollBehavior => window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
 
-export default function LandingPage() {
+export default function LandingPage({ courseCards }: { courseCards: ReactNode }) {
   const main = useRef<HTMLElement>(null);
   const sections = useRef<(HTMLElement | null)[]>([]);
   const [activeSection, setActiveSection] = useState(0);
@@ -65,15 +61,22 @@ export default function LandingPage() {
     <nav className={styles.sectionNav} aria-label="Các phần trang chủ">{sectionNames.map((name, index) => <button key={name} type="button" aria-label={`Cuộn tới ${name}`} aria-current={activeSection === index ? "step" : undefined} onClick={() => goToSection(index)}><span className={styles.sectionTooltip}>{name}</span><i /></button>)}</nav>
     <main id="main-content" ref={main} className={styles.scrollContainer} tabIndex={-1} onScroll={trackSections} onKeyDown={handleKeys}>
       <section id="introduction" ref={node => { sections.current[0] = node; }} className={`${styles.slide} ${styles.introduction}`} tabIndex={-1} aria-labelledby="hero-heading">
+        <HeroBackdrop />
         <div className={styles.heroGrid}>
-          <div className={styles.heroMascot}><BearMascot /></div>
-          <div className={styles.heroCopy}>
-            <div className={styles.speechBubble}>
-              <span className={styles.greeting}><Icon name="sparkles" />Lời chào từ Gia sư AI</span>
-              <h1 id="hero-heading">Giới thiệu về website{" "}<span>LEWA</span></h1>
-              <p>Chào bạn! Mình là trợ lý LEWA — người bạn đồng hành cùng lộ trình học tiếng Anh thông minh, cá nhân hóa. Cùng mình luyện giao tiếp, chỉnh sửa phát âm từng âm vị và bứt phá phản xạ tự nhiên nhé!</p>
+          <div className={styles.heroMascot}>
+            <BearMascot />
+            <HeroCrown />
+            <span className={styles.heroCloud} aria-hidden="true" />
+          </div>
+          <div className={styles.speechBubble}>
+            <HeroStickers />
+            <span className={styles.greeting}>Chào mừng đến với LEWA</span>
+            <h1 id="hero-heading">Giới thiệu về website{" "}<span>LEWA</span></h1>
+            <p>LEWA là trợ lý học tiếng Anh thông minh, giúp bạn học từ vựng, luyện nghe nói và phát âm một cách cá nhân hóa, thú vị và hiệu quả.</p>
+            <div className={styles.heroActions}>
+              <button type="button" className={styles.primaryButton} onClick={() => goToSection(1)}>Bắt đầu học <Icon name="play" /></button>
+              <button type="button" className={styles.secondaryButton} onClick={() => goToSection(2)}><Icon name="plus" />Khám phá thêm</button>
             </div>
-            <div className={styles.heroActions}><button type="button" className={styles.primaryButton} onClick={() => goToSection(1)}>Start <Icon name="play" /></button><button type="button" className={styles.secondaryButton} onClick={() => goToSection(2)}><Icon name="plus" />Thêm</button></div>
           </div>
         </div>
         {nextCue(1)}
@@ -89,7 +92,7 @@ export default function LandingPage() {
               {skills.map((skill, index) => <article id={`skill-${skill.id}`} key={skill.id} className={`${styles.skillCard} ${styles[skill.id] ?? ""}`} role="group" aria-roledescription="slide" aria-label={`${index + 1} / 5: ${skill.title}`} data-active={activeSkill === index} aria-hidden={activeSkill !== index} inert={activeSkill !== index} style={{ "--panel-distance": Math.min(1, Math.abs(index - position)) } as CSSProperties}>
                 <div className={styles.skillHeader}><div className={styles.skillIdentity}><span className={styles.skillIcon}><SkillArtwork skill={skill.id} /></span><div className={styles.skillTitle}><h3>{skill.title}<small>Kỹ năng 0{index + 1}</small></h3><p>{skill.description}</p></div></div><div className={styles.skillMetric}><span>{skill.metric}</span><strong>{skill.value}</strong></div></div>
                 <div className={styles.skillBody}><SkillPreview skill={skill.id} active={activeSkill === index} /></div>
-                <div className={styles.skillFooter}><span><Icon name={skill.icon} />{skill.hint}</span><Link href="/register"><Icon name={skill.icon} />{skill.action}</Link></div>
+                <div className={styles.skillFooter}><span><Icon name={skill.icon} />{skill.hint}</span><Link href={skill.id === "writing" ? "/writing" : "/register"}><Icon name={skill.icon} />{skill.action}</Link></div>
               </article>)}
             </div>
           </div>
@@ -101,15 +104,10 @@ export default function LandingPage() {
       </section>
 
       <section id="courses" ref={node => { sections.current[2] = node; }} className={`${styles.slide} ${styles.coursesSlide}`} tabIndex={-1} aria-labelledby="courses-heading">
-        <div className={styles.coursesContent}><h2 id="courses-heading">Khóa học</h2>
-          <div className={styles.courseGrid}>{courses.map((course, index) => <article key={course.title} className={styles.courseCard} data-tone={index}>
-            <div className={styles.courseTop}><span>Cấp độ {course.level}</span><strong><Icon name="star" />{course.rating}</strong></div>
-            <span className={styles.courseIcon}><Icon name={course.icon} /></span>
-            <h3>{course.title}</h3><p>{course.description}</p>
-            <div className={styles.courseMeta}><span><Icon name="clock" />{course.days} Ngày</span><span><Icon name="book" />{course.lessons} Bài học</span></div>
-            <Link href="/register">Học ngay (Miễn phí)<Icon name="arrow" /></Link>
-          </article>)}</div>
-          <p className={styles.demoNote}>Lộ trình và điểm đánh giá minh họa. <Link href="/courses">Khám phá tất cả khóa học <span aria-hidden="true">→</span></Link></p>
+        <HeroBackdrop />
+        <div className={styles.coursesContent}>
+          <h2 id="courses-heading"><span>Khóa học</span></h2>
+          {courseCards}
         </div>
         <footer className={styles.footer}><span><strong>LEWA © 2026</strong> — Nền tảng học tiếng Anh trực quan AI</span><div><button type="button" onClick={() => goToSection(0)}>↑ Về đầu trang</button><button type="button" onClick={() => goToSection(1)}>5 Kỹ Năng AI</button><Link href="/courses">Khóa học</Link></div></footer>
       </section>

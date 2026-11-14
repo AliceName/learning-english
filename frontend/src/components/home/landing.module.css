@@ -21,19 +21,84 @@
 .scrollContainer { position: relative; height: 100dvh; overflow-y: auto; overflow-x: hidden; scroll-snap-type: y mandatory; scroll-behavior: smooth; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: #c3c6d7 transparent; }
 .scrollContainer:focus, .slide:focus { outline: none; }
 .slide { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 100dvh; padding: 104px 80px 26px; scroll-snap-align: start; scroll-snap-stop: always; background: radial-gradient(ellipse at 8% 25%, #e0f2fe88, transparent 45%), radial-gradient(ellipse at 90% 55%, #ffe2eb55, transparent 48%), linear-gradient(#faf8ff, #f2f3ff55, #faf8ff); }
-.heroGrid { flex: 1; display: grid; grid-template-columns: 5fr 7fr; align-items: center; gap: 48px; width: 100%; max-width: 1152px; margin: auto; padding: 24px 0; }
-.heroMascot { display: flex; align-items: center; justify-content: center; padding: 28px 0; }
-.bearOrb { position: relative; display: flex; align-items: center; justify-content: center; width: 328px; height: 328px; max-width: 100%; border: 4px solid white; border-radius: 50%; background: linear-gradient(white, #f2f3ff); box-shadow: 0 22px 50px #28304420, 0 0 80px 14px #c4e7ff77; animation: float 3.6s ease-in-out infinite; }
+.introduction {
+  isolation: isolate;
+  overflow: clip;
+  padding-bottom: clamp(24px, 5dvh, 52px);
+  background: radial-gradient(ellipse at 49% 49%, #f1f7ff, transparent 63%), linear-gradient(135deg, #d9e7fb, #e7f1ff 52%, #d8e7fc);
+}
+.heroBackdrop { position: absolute; z-index: -1; inset: 80px 0 0; width: 100%; height: calc(100% - 80px); pointer-events: none; }
+.heroGrid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 9fr);
+  align-items: center;
+  gap: clamp(18px, 2.5vw, 44px);
+  width: 100%;
+  max-width: 1260px;
+  margin: auto;
+  padding: clamp(22px, 4dvh, 42px) 0 28px;
+}
+.heroMascot {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, clamp(188px, 24vw, 360px));
+  justify-self: center;
+}
+.heroMascot::before { content: ""; position: absolute; z-index: -1; inset: -4% 12% 6% -13%; border: 2px dashed #91bdf77a; border-radius: 50%; }
+.bearOrb {
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: clamp(5px, .7vw, 10px) solid #fcfdff;
+  border-radius: 50%;
+  background: radial-gradient(circle at 48% 33%, #fff, #eff3ff 65%, #d8e5fc);
+  box-shadow: 0 0 0 7px #a3c9fb, 0 8px 0 8px #80b6fc, 0 22px 45px 6px #82baff60;
+}
 .bear { max-width: 100%; max-height: 100%; filter: drop-shadow(0 10px 8px #28304418); border-radius: 50%; }
-.heroCopy { min-width: 0; }
-.speechBubble { position: relative; padding: 32px; border: 2px solid #dbe1ff; border-radius: 24px; background: #ffffffee; box-shadow: 0 15px 30px #2830440d; }
-.speechBubble::before { position: absolute; content: ""; width: 22px; height: 22px; left: -13px; top: 44px; transform: rotate(45deg); border-left: 2px solid #dbe1ff; border-bottom: 2px solid #dbe1ff; background: white; }
-.greeting { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px; margin-bottom: 14px; border-radius: 50px; background: #dbe1ff99; color: var(--primary); font-size: 11px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; }
-.greeting svg { width: 16px; height: 16px; }
-.speechBubble h1 { margin: 0 0 16px; font-size: clamp(28px, 2.8vw, 38px); line-height: 1.25; letter-spacing: -1.1px; font-weight: 800; text-wrap: balance; }
-.speechBubble h1 span, .sectionHeading h2 span { background: linear-gradient(100deg, #004ac6, #00668a); background-clip: text; -webkit-text-fill-color: transparent; }
-.speechBubble > p { margin: 0; font-size: 17px; font-weight: 500; line-height: 1.85; color: var(--muted); }
-.heroActions { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 28px; }
+.heroCrown { position: absolute; z-index: 1; top: -12%; right: 5%; width: 25%; height: auto; transform: rotate(29deg); pointer-events: none; }
+.heroCloud { position: absolute; z-index: 1; bottom: -4%; left: -4%; width: 43%; height: 14%; border-radius: 90px; background: linear-gradient(#fff, #e8f0ff); box-shadow: 0 3px 14px #8bbcff26; pointer-events: none; }
+.heroCloud::before, .heroCloud::after { content: ""; position: absolute; bottom: 42%; border-radius: 50%; background: linear-gradient(#fff, #f4f8ff); }
+.heroCloud::before { width: 55%; aspect-ratio: 1; left: 15%; }
+.heroCloud::after { width: 35%; aspect-ratio: 1; right: 10%; bottom: 21%; }
+.speechBubble {
+  position: relative;
+  min-width: 0;
+  padding: clamp(40px, 5vw, 76px) clamp(26px, 4vw, 68px) clamp(34px, 3.6vw, 60px);
+  border: 3px solid #fff;
+  border-radius: 13% 10% 13% 12% / 22% 24% 22% 24%;
+  background: linear-gradient(145deg, #fbfbff, #eff5ff);
+  box-shadow: 0 0 0 3px #c9dcfa, 6px 12px 0 3px #96bff875, 0 20px 34px #75a8ed43;
+}
+.speechBubble::before { content: ""; position: absolute; width: 32px; height: 32px; left: -17px; top: 54%; transform: skew(-15deg, -15deg) rotate(45deg); border-left: 3px solid white; border-bottom: 3px solid white; border-radius: 0 0 0 8px; background: #f8faff; box-shadow: -2px 2px 0 1px #c9dcfa; }
+.heroStickers { position: absolute; inset: 0; pointer-events: none; }
+.heroStickers svg { position: absolute; height: auto; }
+.heroPlane { width: min(34%, 250px); top: -92px; right: -1%; }
+.heroTape { width: clamp(56px, 7vw, 94px); top: -7px; right: 4%; transform: rotate(21deg); }
+.heroBooks { width: clamp(72px, 11vw, 144px); right: 1%; bottom: -2%; filter: drop-shadow(0 4px 3px #31589328); }
+.greeting {
+  position: absolute;
+  top: 0;
+  left: clamp(22px, 4vw, 68px);
+  transform: translateY(-54%) rotate(-1deg);
+  max-width: calc(100% - 44px);
+  padding: 6px clamp(14px, 2.5vw, 34px);
+  border: 3px solid #f8fbff;
+  border-radius: 50px;
+  background: linear-gradient(105deg, #518cda, #3d7ad6);
+  box-shadow: 0 4px 0 #a9cbfa, 0 7px 12px #3b76ce32;
+  color: white;
+  font-size: clamp(14px, 1.65vw, 24px);
+  font-weight: 800;
+  line-height: 1.4;
+}
+.speechBubble h1 { position: relative; margin: 0 0 18px; font-size: clamp(29px, 2.75vw, 46px); line-height: 1.25; letter-spacing: -.045em; font-weight: 800; text-wrap: balance; }
+.speechBubble h1 span { position: relative; display: inline-block; color: #075bd5; }
+.speechBubble h1 span::after { content: ""; position: absolute; inset: auto 0 -9px; height: 8px; border-top: 4px solid #afcef9; border-radius: 50%; transform: rotate(-4deg); }
+.speechBubble > p { position: relative; margin: 0; font-size: clamp(15px, 1.45vw, 21px); font-weight: 500; line-height: 1.75; color: #323c63; }
+.heroActions { position: relative; display: flex; flex-wrap: wrap; gap: clamp(10px, 1.6vw, 25px); margin-top: clamp(18px, 4dvh, 40px); padding-right: clamp(48px, 7vw, 96px); }
 .primaryButton, .secondaryButton { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 12px 30px; border-radius: 16px; font-size: 16px; font-weight: 800; text-decoration: none; transition: transform .2s, box-shadow .2s; }
 .primaryButton { color: white; border: 0; background: linear-gradient(110deg, #004ac6, #2563eb); box-shadow: 0 8px 20px #004ac62b; }
 .secondaryButton { color: var(--ink); border: 2px solid #c3c6d766; background: #ffffffdd; box-shadow: 0 2px 5px #131b2e08; }
@@ -42,6 +107,8 @@
 .scrollCue { display: grid; place-items: center; flex-shrink: 0; width: 42px; height: 42px; border: 2px solid #004ac64d; border-radius: 50%; background: white; color: var(--primary); box-shadow: 0 4px 9px #004ac615; animation: bounce 1.6s ease-in-out infinite; }
 .scrollCue svg { width: 23px; height: 23px; transform: rotate(90deg); }
 .scrollCue:hover { background: var(--primary); color: white; }
+.introduction .scrollCue { position: relative; background: #f8faff; box-shadow: 0 5px 14px #004ac628; }
+.introduction .scrollCue:hover { background: var(--primary); }
 .sectionNav { position: fixed; top: 50%; right: 22px; transform: translateY(-50%); z-index: 40; display: grid; gap: 10px; padding: 12px 7px; border: 1px solid #c3c6d766; border-radius: 50px; background: #ffffffd9; box-shadow: 0 8px 25px #28304416; backdrop-filter: blur(12px); }
 .sectionNav button { position: relative; display: grid; place-items: center; min-width: 24px; min-height: 26px; padding: 4px; border: 0; border-radius: 50px; background: none; }
 .sectionNav i { width: 9px; height: 9px; border-radius: 50px; background: #c3c6d7; transition: height .25s, background .25s; }
@@ -156,48 +223,85 @@
 .mindmap strong { display: block; font-size: 10px; color: var(--accent); text-transform: uppercase; }
 .mindmap p { margin: 6px 0 0; font-family: var(--font-geist-mono), monospace; font-size: 11px; line-height: 1.7; }
 .skillStatus { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.demoNote { margin: 12px 0 0; text-align: center; color: #737686; font-size: 10px; }
-.demoNote a { color: var(--primary); text-decoration: none; font-weight: 650; }
 .nextSection { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 10px; }
 .nextSection > span { color: var(--primary); font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-.coursesContent { display: flex; flex: 1; flex-direction: column; justify-content: center; width: 100%; max-width: 1152px; padding: 24px 0 32px; }
-.coursesContent > h2 { margin: 0 0 32px; text-align: center; font-size: 46px; font-weight: 800; line-height: 1.3; letter-spacing: -1.5px; }
-.courseGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
-.courseCard { --accent: #004ac6; --tint: #c4e7ff; display: flex; flex-direction: column; padding: 26px; border: 2px solid #004ac633; border-radius: 24px; background: #fffffff5; box-shadow: 0 8px 20px #28304412; transition: transform .2s, box-shadow .2s, border-color .2s; }
-.courseCard[data-tone="1"] { --accent: #00668a; --tint: #dbe1ff; border-color: #40c2fd4d; }
-.courseCard[data-tone="2"] { --accent: #ad0033; --tint: #ffdadb; border-color: #ad003333; }
-.courseCard:hover { transform: translateY(-6px); border-color: var(--accent); box-shadow: 0 18px 30px #2830441a; }
-.courseTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 18px; }
-.courseTop > span { padding: 4px 9px; border-radius: 10px; background: var(--tint); color: var(--ink); font-size: 11px; font-weight: 800; }
-.courseTop > strong { display: flex; align-items: center; gap: 3px; color: #bd840b; font-size: 11px; }
-.courseTop svg { width: 16px; height: 16px; fill: currentColor; }
-.courseIcon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px; background: var(--tint); color: var(--accent); margin-bottom: 18px; }
-.courseIcon svg { width: 31px; height: 31px; }
-.courseCard h3 { font-size: 18px; font-weight: 750; line-height: 1.5; margin: 0 0 12px; letter-spacing: -.3px; }
-.courseCard > p { color: var(--muted); font-size: 13px; line-height: 1.85; margin: 0 0 20px; }
-.courseMeta { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid #c3c6d733; margin-top: auto; margin-bottom: 20px; }
-.courseMeta > span { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 600; }
+.coursesSlide { isolation: isolate; background: radial-gradient(ellipse at 50% 48%, #f6f9ff, transparent 74%), linear-gradient(145deg, #d5e6fd, #ecf3ff 55%, #dce8fa); }
+.coursesContent { display: flex; flex: 1; flex-direction: column; justify-content: center; width: 100%; max-width: 1180px; padding: 12px 0 30px; }
+.coursesContent > h2 { margin: 0 0 clamp(22px, 4dvh, 40px); text-align: center; font-size: clamp(31px, 4.2vw, 52px); font-weight: 850; line-height: 1.15; letter-spacing: -.04em; color: #141d4c; }
+.coursesContent > h2 span { position: relative; display: inline-block; }
+.coursesContent > h2 span::after { content: ""; position: absolute; inset: auto 16% -12px; height: 9px; border-top: 4px solid #aebddd; border-radius: 50%; transform: rotate(-4deg); }
+.courseGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: clamp(14px, 2vw, 26px); width: 100%; margin-inline: auto; }
+.courseGrid:has(.courseCard:only-child) { max-width: 440px; }
+.courseGrid:has(.courseCard:nth-child(2):last-child) { max-width: 820px; }
+.courseCard {
+  --accent: #0757cb;
+  --tint: #d9ebff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-top: 5px solid var(--accent);
+  border-radius: 8px 8px 14px 14px;
+  background: #fcfdff;
+  box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 26%, transparent), 0 12px 24px #28304415;
+}
+.courseCard[data-tone="1"] { --accent: #087485; --tint: #d4eef1; }
+.courseCard[data-tone="2"] { --accent: #6934b9; --tint: #ebe1ff; }
+.courseLevel { align-self: flex-start; padding: 4px 9px; border-radius: 8px; background: var(--tint); color: #151f42; font-size: 12px; font-weight: 800; }
+.courseInfo { display: flex; flex: 1; flex-direction: column; gap: 14px; padding: clamp(18px, 2vw, 28px); overflow-wrap: anywhere; }
+.courseInfo h3 { margin: 0; font-size: clamp(18px, 1.9vw, 24px); font-weight: 800; line-height: 1.3; letter-spacing: -.03em; }
+.courseInfo > p { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+.courseMeta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding-top: 12px; border-top: 1px solid #dce3f3; margin-top: auto; }
+.courseMeta > span { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; font-weight: 650; }
 .courseMeta svg { width: 16px; height: 16px; color: var(--accent); }
-.courseCard > a { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px; border-radius: 14px; color: white; background: var(--accent); font-size: 12px; font-weight: 750; text-decoration: none; }
-.courseCard > a:hover { filter: brightness(1.1); }
-.courseCard > a svg { width: 17px; height: 17px; }
+.courseInfo > a { display: flex; align-items: center; justify-content: center; gap: 9px; padding: 10px; min-height: 44px; border-radius: 7px; color: white; background: var(--accent); font-size: 14px; font-weight: 800; text-decoration: none; }
+.courseInfo > a:hover { filter: brightness(1.12); }
+.courseInfo > a:focus-visible { outline-offset: 2px; }
+.courseInfo > a svg { width: 18px; height: 18px; }
+.courseNotice { max-width: 520px; margin: 0 auto; padding: 18px 24px; border: 1px solid #cbdaf3; border-radius: 14px; background: #fcfdff; color: var(--muted); text-align: center; }
 .footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; width: 100%; max-width: 1152px; padding-top: 20px; border-top: 1px solid #c3c6d740; color: var(--muted); font-size: 11px; }
 .footer > span strong { color: var(--ink); }
 .footer > div { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
 .footer button { border: 0; padding: 0; background: none; color: var(--muted); font-size: 11px; }
 .footer button:hover, .footer a { color: var(--primary); text-decoration: none; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes bounce { 0%, 100% { translate: 0 0; } 50% { translate: 0 7px; } }
 @keyframes soundwave { from { transform: scaleY(.65); } to { transform: scaleY(1.1); } }
 @media (max-width: 1150px) {
-  .slide { padding-left: 40px; padding-right: 64px; }.heroGrid { gap: 32px; grid-template-columns: 4fr 6fr; }.bearOrb { width: 288px; height: 288px; }.speechBubble { padding: 26px; }.speechBubble > p { font-size: 15px; }.sectionNav { right: 12px; }.courseGrid { gap: 18px; }.courseCard { padding: 22px; }
+  .slide { padding-left: 40px; padding-right: 64px; }.sectionNav { right: 12px; }
 }
 @media (max-width: 900px) {
-  .slide { padding: 104px 48px 28px 28px; }.heroGrid { grid-template-columns: 1fr; max-width: 650px; gap: 28px; padding: 12px 0 32px; }.heroMascot { padding: 10px 0 0; }.bearOrb { width: 232px; height: 232px; }.speechBubble::before { left: calc(50% - 12px); top: -13px; transform: rotate(135deg); }.heroActions { justify-content: center; margin-top: 22px; }.speechBubble h1 { font-size: 30px; }.sectionHeading { align-items: center; }.sectionHeading h2 { font-size: 28px; }.courseGrid { grid-template-columns: 1fr; max-width: 560px; width: 100%; margin: auto; }.courseCard { padding: 24px; }.courseCard h3 { font-size: 20px; }.coursesContent > h2 { font-size: 38px; }.footer { justify-content: center; text-align: center; }.footer > div { justify-content: center; }
+  .slide { padding: 104px 48px 28px 28px; }.footer { justify-content: center; text-align: center; }.footer > div { justify-content: center; }
 }
 @media (max-width: 600px) {
-  .slide { padding: 96px 34px 24px 16px; }.introduction { padding-right: 16px; }.heroGrid { gap: 23px; padding-top: 8px; }.bearOrb { width: 190px; height: 190px; }.speechBubble { padding: 23px; border-radius: 22px; }.greeting { font-size: 9px; padding: 4px 9px; }.speechBubble h1 { font-size: 27px; margin-bottom: 12px; }.speechBubble > p { font-size: 14px; line-height: 1.8; }.primaryButton, .secondaryButton { min-height: 48px; padding: 11px 26px; font-size: 14px; border-radius: 13px; }.heroActions { margin-top: 20px; }.sectionNav { right: 5px; padding: 9px 3px; gap: 6px; }.sectionNav button { min-width: 18px; min-height: 24px; padding: 3px; }.sectionNav i { width: 7px; height: 7px; }.sectionNav button[aria-current] i { height: 22px; }.sectionTooltip { display: none; }
-  .sectionHeading { align-items: flex-start; gap: 12px; }.sectionHeading h2 { font-size: 25px; letter-spacing: -.7px; }.carousel { gap: 16px; padding-bottom: 14px; }.skillCard { padding: 16px; border-radius: 20px; }.skillHeader { gap: 9px; flex-wrap: wrap; }.skillIcon { width: 40px; height: 40px; border-radius: 12px; }.skillIcon svg { width: 23px; height: 23px; }.skillTitle h3 { font-size: 20px; gap: 6px; }.skillTitle h3 small { font-size: 8px; padding: 2px 6px; }.skillTitle p { font-size: 10px; }.skillMetric { flex-direction: row; align-items: center; gap: 8px; padding: 4px 9px; margin-left: 49px; }.skillMetric strong { font-size: 11px; }.coachRow { grid-template-columns: 1fr; padding: 8px; gap: 4px; }.coachAvatar { width: 52px; height: 52px; }.coachIdentity { gap: 8px; }.coachIdentity small { font-size: 9px; }.phonetics { font-size: 9px; }.wave { height: 34px; gap: 4px; }.wave i { width: 4px; }.previewBox { padding: 11px; border-radius: 12px; }.boxHeading { font-size: 10px; }.boxHeading > span { font-size: 9px; }.previewBox blockquote, .readingText { font-size: 12px; }.wordTags { gap: 5px; }.wordTags span { font-size: 9px; padding: 3px 5px; }.skillFooter { flex-direction: column; align-items: stretch; gap: 10px; padding-top: 14px; }.skillFooter > span { font-size: 9px; }.skillFooter > a { width: 100%; font-size: 11px; }.demoNote { font-size: 9px; line-height: 1.8; }.nextSection > span { font-size: 9px; letter-spacing: .5px; }.nextSection { gap: 10px; padding-top: 6px; }.answers { grid-template-columns: 1fr; }.answers button { font-size: 10px; }.definition > div { font-size: 11px; }.definition > div span { font-size: 9px; }.editor { font-size: 10px; padding: 10px; }.suggestion { flex-wrap: wrap; gap: 6px; }.suggestion p { min-width: 130px; }.writingScores > div { padding: 8px 5px; }.writingScores dt { font-size: 8px; }.writingScores dd { font-size: 10px; }.mindmap { grid-template-columns: 1fr; }.mindmap > div { padding: 9px; }.mindmap p { font-size: 10px; }.playerRow { gap: 10px; }.rates button { padding: 5px 7px; font-size: 10px; }.listeningQuiz label { font-size: 12px; }.coursesContent { padding-top: 10px; }.coursesContent > h2 { font-size: 34px; margin-bottom: 24px; }.courseGrid { gap: 20px; }.courseCard { padding: 23px; }.courseCard h3 { font-size: 18px; }.courseCard > p { font-size: 12px; }.footer { font-size: 10px; gap: 12px; }.footer > div { gap: 16px; }.footer button { font-size: 10px; }
+  .slide { padding: 96px 34px 24px 16px; }.sectionNav { right: 5px; padding: 9px 3px; gap: 6px; }.sectionNav button { min-width: 18px; min-height: 24px; padding: 3px; }.sectionNav i { width: 7px; height: 7px; }.sectionNav button[aria-current] i { height: 22px; }.sectionTooltip { display: none; }
+  .sectionHeading { align-items: flex-start; gap: 12px; }.sectionHeading h2 { font-size: 25px; letter-spacing: -.7px; }.carousel { gap: 16px; padding-bottom: 14px; }.skillCard { padding: 16px; border-radius: 20px; }.skillHeader { gap: 9px; flex-wrap: wrap; }.skillIcon { width: 40px; height: 40px; border-radius: 12px; }.skillIcon svg { width: 23px; height: 23px; }.skillTitle h3 { font-size: 20px; gap: 6px; }.skillTitle h3 small { font-size: 8px; padding: 2px 6px; }.skillTitle p { font-size: 10px; }.skillMetric { flex-direction: row; align-items: center; gap: 8px; padding: 4px 9px; margin-left: 49px; }.skillMetric strong { font-size: 11px; }.coachRow { grid-template-columns: 1fr; padding: 8px; gap: 4px; }.coachAvatar { width: 52px; height: 52px; }.coachIdentity { gap: 8px; }.coachIdentity small { font-size: 9px; }.phonetics { font-size: 9px; }.wave { height: 34px; gap: 4px; }.wave i { width: 4px; }.previewBox { padding: 11px; border-radius: 12px; }.boxHeading { font-size: 10px; }.boxHeading > span { font-size: 9px; }.previewBox blockquote, .readingText { font-size: 12px; }.wordTags { gap: 5px; }.wordTags span { font-size: 9px; padding: 3px 5px; }.skillFooter { flex-direction: column; align-items: stretch; gap: 10px; padding-top: 14px; }.skillFooter > span { font-size: 9px; }.skillFooter > a { width: 100%; font-size: 11px; }.nextSection > span { font-size: 9px; letter-spacing: .5px; }.nextSection { gap: 10px; padding-top: 6px; }.answers { grid-template-columns: 1fr; }.answers button { font-size: 10px; }.definition > div { font-size: 11px; }.definition > div span { font-size: 9px; }.editor { font-size: 10px; padding: 10px; }.suggestion { flex-wrap: wrap; gap: 6px; }.suggestion p { min-width: 130px; }.writingScores > div { padding: 8px 5px; }.writingScores dt { font-size: 8px; }.writingScores dd { font-size: 10px; }.mindmap { grid-template-columns: 1fr; }.mindmap > div { padding: 9px; }.mindmap p { font-size: 10px; }.playerRow { gap: 10px; }.rates button { padding: 5px 7px; font-size: 10px; }.listeningQuiz label { font-size: 12px; }.footer { font-size: 10px; gap: 12px; }.footer > div { gap: 16px; }.footer button { font-size: 10px; }
+}
+@media (min-width: 761px) and (max-height: 650px) {
+  .heroMascot { width: min(100%, clamp(160px, 48dvh, 294px)); }
+  .speechBubble { padding-block: 40px 30px; }
+  .heroPlane { display: none; }
+}
+@media (max-width: 760px) {
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 36px;
+    max-width: 560px;
+    padding-block: 14px 24px;
+  }
+  .heroMascot { width: min(100%, clamp(132px, 24dvh, 205px)); }
+  .bearOrb { box-shadow: 0 0 0 5px #a3c9fb, 0 5px 0 6px #80b6fc, 0 14px 22px #82baff60; }
+  .speechBubble { padding: 32px clamp(16px, 4vw, 28px) 22px; border-radius: 24px; }
+  .speechBubble::before { display: none; }
+  .greeting { left: 50%; transform: translate(-50%, -54%) rotate(-1deg); width: max-content; max-width: calc(100% - 24px); text-align: center; }
+  .speechBubble h1 { margin-bottom: 12px; font-size: clamp(23px, 5vw, 30px); text-align: center; }
+  .speechBubble h1 span::after { bottom: -6px; height: 5px; border-width: 3px; }
+  .speechBubble > p { font-size: 14px; line-height: 1.65; text-align: center; }
+  .heroPlane { display: none; }
+  .heroTape { width: 42px; top: -4px; right: 0; }
+  .heroBooks { width: 52px; right: -2px; bottom: -12px; }
+  .heroActions { justify-content: center; gap: 8px; margin-top: 18px; padding-right: 0; }
+  .heroActions button { gap: 6px; min-height: 44px; padding: 8px 12px; border-radius: 12px; font-size: 13px; }
+  .heroActions svg { width: 16px; height: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .scrollContainer { scroll-behavior: auto; }.page *, .page *::before, .page *::after { animation: none; transition: none; scroll-behavior: auto; } }
 /* Keep the skill carousel inside the viewport, including its actions and navigation. */
@@ -208,7 +312,7 @@
   --muted: #5a5a51;
   --primary: var(--accent);
   height: 100dvh;
-  min-height: 0;
+  min-height: 425px;
   padding-top: 96px;
   padding-bottom: 80px;
   gap: 12px;
@@ -226,21 +330,37 @@
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   justify-content: normal;
-  gap: 10px;
+  gap: 6px;
   flex: 1 1 0;
   min-height: 0;
   padding: 0;
   max-width: 1180px;
+  max-height: 640px;
 }
-.skillsContent .sectionHeading { position: relative; min-height: 76px; align-items: center; padding: 0 210px 0 36px; margin: 0; }
-.skillsContent .sectionHeading h2 { position: relative; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.35; text-wrap: balance; }
+.skillsContent .sectionHeading {
+  position: relative;
+  z-index: 2;
+  min-height: clamp(50px, 9dvh, 78px);
+  align-items: center;
+  justify-content: flex-start;
+  gap: clamp(12px, 4vw, 64px);
+  padding-inline: clamp(8px, 4vw, 60px);
+  margin: 0;
+}
+.skillsContent .sectionHeading h2 { position: relative; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.25; text-wrap: balance; }
 .skillsContent .sectionHeading h2::after { content: ""; position: absolute; width: 45%; height: 7px; left: 4%; bottom: -10px; border-top: 3px solid #d9e5c4; border-radius: 50%; transform: rotate(-1deg); }
 .skillsContent .sectionHeading h2 span { background: none; color: #427135; -webkit-text-fill-color: currentColor; }
-.peekingCat { position: absolute; right: 13%; bottom: -14px; z-index: 2; width: 175px; pointer-events: none; }
+.peekingCat {
+  flex: 0 0 clamp(90px, 13vw, 178px);
+  align-self: end;
+  margin-top: -20px;
+  transform: translateY(16px);
+  pointer-events: none;
+}
 .skillsContent .carousel { height: 100%; min-height: 0; padding: 0; border-radius: 32px; }
 .skillsContent .skillCard { container: skill-card / size; height: 100%; min-height: 0; padding: 20px 28px; flex-basis: 100%; }
 .skillsContent .skillHeader { flex-shrink: 0; padding-bottom: 14px; margin-bottom: 12px; }
-.skillsContent .skillBody { width: 100%; max-width: 960px; margin-inline: auto; min-height: 0; gap: 12px; justify-content: center; }
+.skillsContent .skillBody { width: 100%; max-width: 960px; margin-inline: auto; min-height: 0; gap: 12px; overflow-y: auto; }
 .skillsContent .skillBody > * { flex-shrink: 0; }
 .skillsContent .skillFooter { flex-shrink: 0; padding-top: 16px; }
 .skillsContent .skillFooter > span { color: var(--ink); font-size: 12px; }
@@ -268,13 +388,28 @@
 .skillsContent .mindmap > div { flex: 1 1 140px; padding: 8px 10px; border-width: 1px; border-color: var(--tint); background: #fffdf7; }
 .skillsContent .mindmap p { margin-top: 4px; }
 
+@media (min-width: 900px) {
+  .skillsContent .skillHeader::before { justify-self: end; margin-right: clamp(12px, 3vw, 44px); }
+  .skillsContent .skillHeader::after {
+    content: "";
+    grid-area: 1 / 3;
+    width: min(28%, 90px);
+    height: 2px;
+    justify-self: start;
+    margin-left: clamp(12px, 3vw, 44px);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent) 55%, #fffdf7);
+  }
+  .skillsContent .skillMetric { grid-area: 1 / 3; z-index: 1; }
+}
+
 @media (max-width: 600px) {
   .skillsSlide { padding: 90px 36px 76px 18px; gap: 10px; }
   .skillsContent { gap: 8px; }
-  .skillsContent .sectionHeading { min-height: 74px; padding: 0 96px 0 0; }
+  .skillsContent .sectionHeading { min-height: 58px; padding-inline: 4px; }
   .skillsContent .sectionHeading h2 { font-size: 21px; line-height: 1.3; }
   .skillsContent .sectionHeading h2::after { bottom: -6px; }
-  .peekingCat { right: 0; bottom: -8px; width: 102px; }
+  .peekingCat { transform: translateY(14px); }
   .skillArrow { width: 30px; height: 34px; }
   .previousSkill { left: -14px; }
   .nextSkill { right: -14px; }
@@ -357,14 +492,18 @@
   .skillsContent .largeWave { height: 30px; margin: 5px 0; }
 }
 @container skill-card (max-height: 360px) {
-  .skillsContent .readingQuiz, .skillsContent .grammarOverview, .skillsContent .writingScores, .skillsContent .coachRow, .skillsContent .wordTags { display: none; }
-  .skillsContent .skillBody { justify-content: center; gap: 4px; }
+  .skillsContent .grammarOverview, .skillsContent .writingScores { display: none; }
+  .skillsContent .skillBody { gap: 4px; }
+  .skillsContent .coachRow { padding: 6px 8px; }
+  .skillsContent .coachAvatar { width: 36px; height: 36px; }
+  .skillsContent .wave { height: 28px; }
   .skillsContent .previewBox { padding: 8px; }
   .skillsContent .editor { padding: 7px; line-height: 1.5; }
   .skillsContent .suggestion { padding: 6px; margin-top: 6px; }
   .skillsContent .skillBody > .feedback { margin-top: 0; }
-  .skillsContent .boxHeading > span, .skillsContent .largeWave { display: none; }
-  .skillsContent .boxHeading { display: none; }
+  .skillsContent .largeWave { display: none; }
+  .skillsContent .boxHeading { margin-bottom: 4px; }
+  .skillsContent .boxHeading strong { font-size: 11px; }
   .skillsContent .question { margin-bottom: 6px; }
   .skillsContent .answers { grid-template-columns: 1fr 1fr; }
   .skillsContent .answers button { padding: 6px 8px; }
@@ -383,35 +522,27 @@
 @media (max-width: 600px) and (max-height: 650px) {
   .skillsSlide { padding-top: 88px; padding-bottom: 76px; gap: 8px; }
   .skillsContent .sectionHeading h2 { font-size: 20px; }
-  .skillsContent .sectionHeading h2 span { display: none; }
   .skillsContent .skillCard { padding: 10px; }
-  .skillsContent .sectionHeading { min-height: 64px; }
   .skillsContent .skillHeader { grid-template-columns: minmax(0, 1fr); }
   .skillsContent .skillIcon { width: 36px; height: 36px; }
   .skillsContent .skillTitle p, .skillsContent .skillMetric { display: none; }
 }
 
-@media (max-height: 650px) and (min-width: 600px) {
-  .skillsSlide { padding: 90px 48px 76px 24px; gap: 8px; }
-  .skillsContent { grid-template-columns: 156px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); column-gap: 20px; }
-  .skillsContent .sectionHeading { grid-column: 1; grid-row: 1; align-items: flex-start; padding: 8px 0 0; }
-  .skillsContent .sectionHeading h2 { font-size: 22px; }
-  .skillsContent .peekingCat { width: 145px; right: 0; top: 140px; bottom: auto; }
-  .skillsContent .skillStage { grid-column: 2; grid-row: 1; }
-  .skillsContent .skillCard { flex-basis: 100%; padding: 10px; }
-  .skillsContent .skillHeader { grid-template-columns: 1fr; gap: 8px; padding-bottom: 6px; margin-bottom: 6px; }
-  .skillsContent .skillHeader::before { display: none; }
-  .skillsContent .skillIdentity { grid-column: 1; justify-content: center; gap: 10px; }
-  .skillsContent .skillIcon { width: 32px; height: 32px; }
-  .skillsContent .skillIcon svg { width: 20px; height: 20px; }
-  .skillsContent .skillTitle h3 { font-size: 18px; margin: 0; }
-  .skillsContent .skillTitle h3 small, .skillsContent .skillMetric, .skillsContent .skillFooter > span { display: none; }
-  .skillsContent .skillTitle p { display: none; }
-  .skillsContent .skillFooter { padding-top: 6px; }
-  .skillsContent .skillFooter > a { width: 100%; padding: 6px 10px; min-height: 32px; border-radius: 12px; }
-  .skillsContent .listening .skillBody { display: grid; grid-template-columns: 150px minmax(0, 1fr); align-items: center; }
-  .skillsContent .writing .previewBox { padding: 6px; }
-  .skillsContent .writing .suggestion { padding: 4px; margin-top: 4px; }
+@media (max-height: 650px) and (min-width: 601px) {
+  .skillsSlide { padding-top: 86px; padding-bottom: 76px; }
+  .skillsContent .sectionHeading h2 { font-size: clamp(22px, 2.5vw, 30px); }
+  .peekingCat { flex-basis: clamp(90px, 11vw, 128px); }
+  .skillsContent .skillCard { padding: 10px 20px; }
+  .skillsContent .skillHeader { gap: 8px; padding-bottom: 6px; margin-bottom: 8px; }
+  .skillsContent .skillIdentity { gap: 10px; }
+  .skillsContent .skillIcon { width: 44px; height: 44px; }
+  .skillsContent .skillTitle h3 { font-size: 21px; margin: 0; }
+  .skillsContent .skillTitle h3 small { font-size: 10px; padding: 3px 8px; }
+  .skillsContent .skillTitle p { font-size: 11px; }
+  .skillsContent .skillMetric { gap: 0; padding: 4px 9px; border-radius: 12px; }
+  .skillsContent .skillMetric strong { font-size: 15px; }
+  .skillsContent .skillFooter { padding-top: 8px; }
+  .skillsContent .skillFooter > a { padding: 6px 12px; min-height: 34px; border-radius: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

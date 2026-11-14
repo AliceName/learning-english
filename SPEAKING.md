@@ -139,6 +139,17 @@ Nhập trên môi trường được phê duyệt bằng `./backend/scripts/Impo
 
 Kiểm tra dịch vụ: `GET http://127.0.0.1:8001/health`. Dịch vụ chỉ báo ready sau khi đã nạp model. Bản hiện tại chạy một worker và chấm tuần tự để phù hợp GPU 4 GB.
 
+### Deploy bộ chấm lên Vercel
+
+Tạo project FastAPI riêng với Root Directory `backend/speaking-ai`. Bật **Include source files outside of the Root Directory** và **Fluid Compute** để build đọc được `ai/EnglishPronunciationTraining` và đóng gói model bằng Large Functions. Với project cũ chưa bật Large Functions, đặt `VERCEL_SUPPORT_LARGE_FUNCTIONS=1` cho Preview.
+
+1. Đặt `SPEAKING_API_TOKEN` trong Environment Variables của project Speaking bằng một khóa ngẫu nhiên. Chọn Preview khi thử và Production khi đưa vào sử dụng.
+2. Deploy nhánh chứa cấu hình Vercel. Build dùng PyTorch CPU và eSpeak NG từ wheel Linux. `prepare_vercel.py` sao chép phần cần cho inference từ repo và tải snapshot Wav2Vec2 đúng revision vào gói Function.
+3. Kiểm tra `GET /health` trả `status: ready`. Gửi một WAV cùng câu tương ứng đến `POST /score` với header `Authorization: Bearer <token>`. Thử cả lượt đầu sau khi Function khởi động vì Somee chờ phản hồi tối đa 55 giây. Một yêu cầu thiếu hoặc sai token phải trả `401`.
+4. Khi kiểm tra đạt, publish lại API .NET có hỗ trợ token lên Somee. Trong `web.config`, đặt `SpeakingAi__BaseUrl` là URL HTTPS gốc của project Speaking và `SpeakingAi__ApiToken` là cùng khóa đã đặt trên Vercel. Sau đó thử ghi và chấm một bản thu qua trang LEWA.
+
+Preview có thể bật Vercel Authentication. Khi thử bằng HTTP client, dùng header `x-vercel-protection-bypass` với secret Automation Bypass của Vercel bên cạnh Bearer token của ứng dụng.
+
 ## API
 
 | Method | Backend | Mục đích |

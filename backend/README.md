@@ -381,14 +381,20 @@ Frontend chờ backend tối đa 120 giây trong Development để có thời gi
 
 ## Kiểm thử
 
-Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Để chạy thêm kiểm thử API và đối chiếu schema trên SQL Server, tạo CSDL ở trên trước rồi đặt biến môi trường:
+Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Các test SQL cần một catalog **riêng, dùng dữ liệu giả và đã được phê duyệt cho phép ghi**. Catalog ứng dụng `EnglishLearningDB` và các database hệ thống bị chặn ở test harness. Danh tính chạy test chỉ nên có quyền trong catalog kiểm thử. Tên catalog xác nhận và catalog trong chuỗi kết nối phải khớp.
+
+1. Nhờ người quản trị xác nhận instance, catalog, tài khoản và quyền ghi trước khi chuẩn bị. Dùng danh tính triển khai riêng để chuẩn bị schema từ các SQL script đã duyệt `001` đến `004`. `001` chứa `USE master`, `CREATE DATABASE` và `USE EnglishLearningDB`, nên `sqlcmd -d` một mình không đổi được đích của script. Với catalog riêng, dùng bản sao để review phần định tuyến sang catalog kiểm thử đã tạo, hoặc nhờ DBA áp dụng phần DDL vào đúng catalog. Không sửa script gốc, nạp dữ liệu thật hay chạy EF `database update` lên database đã khởi tạo bằng SQL scripts.
+2. Cấp danh tính test quyền kết nối, đọc metadata và `SELECT`, `INSERT`, `UPDATE`, `DELETE` trên các bảng mà suite dùng, cùng quyền lấy `sp_getapplock` trong catalog đó. Nhóm Writing/Flashcards không cần quyền tạo database hay DDL. Một số nhóm khác có bài test DDL, ví dụ Grammar, nên dùng riêng một database dùng một lần và duyệt quyền tương ứng nếu chạy toàn bộ suite SQL.
+3. Kiểm tra instance và `DB_NAME()` bằng đúng danh tính test rồi chạy trong một phiên PowerShell riêng. Ví dụ dưới đây dùng Windows Authentication, tên database minh họa và chỉ chạy nhóm trong phạm vi Writing/Flashcards.
 
 ```powershell
-$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=MSI\MSSQLSERVER01;Database=EnglishLearningDB;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=5'
-dotnet test EnglishLearningSystem.sln --configuration Release
+$env:ENGLISHLEARNING_TEST_DATABASE = 'LinguaAI_Writing_Scratch'
+$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=<approved-test-instance>;Database=LinguaAI_Writing_Scratch;Integrated Security=True;Encrypt=True;Connect Timeout=5'
+dotnet test backend/EnglishLearning.Api.Tests/EnglishLearning.Api.Tests.csproj --configuration Release --filter 'FullyQualifiedName~Writing|FullyQualifiedName~Flashcard'
+Remove-Item Env:ENGLISHLEARNING_TEST_CONNECTION_STRING, Env:ENGLISHLEARNING_TEST_DATABASE
 ```
 
-Các kiểm thử tích hợp chạy trong transaction riêng và rollback sau mỗi test. Nếu không đặt biến môi trường, chúng được báo skipped; các kiểm thử còn lại vẫn chạy bình thường.
+Nhóm SQL cũ dùng transaction ngoài và rollback khi kết thúc. `WritingStudioSqlTests` dùng connection riêng theo request để kiểm transaction, khóa, lưu metadata `practice`, tạo nhánh từ phiên bản cũ, retry, phân quyền và trùng thẻ. Nhóm này dùng kết quả AI synthetic, ghi thật vào database kiểm thử và dọn theo hai email ngẫu nhiên của lượt chạy sau khi các request kết thúc. Nếu tiến trình bị dừng giữa chừng, đối chiếu email fixture hoặc để DBA loại bỏ catalog dùng một lần đã xác nhận. Khi thiếu biến chuỗi kết nối, SQL tests báo skipped. Nếu đã đặt chuỗi kết nối nhưng thiếu xác nhận catalog hoặc catalog sai, fixture dừng trước khi kết nối.
 
 ## Admin tạo và biên soạn khóa học
 
@@ -508,4 +514,20 @@ Frontend sử dụng refresh cookie HttpOnly để gia hạn access token trong 
 
 Session hiện được giữ trong bộ nhớ của tiến trình API, không tạo bảng hoặc collection mới. Khởi động lại API sẽ yêu cầu các phiên refresh cũ đăng nhập lại. Các test HTTP in-memory và test proxy kiểm tra gia hạn, cookie HttpOnly, từ chối token không hợp lệ, thu hồi khi logout và xử lý mất kết nối.
 
+## Luyện nói tự do
+
 Luyện nói tự do có endpoint POST `/api/v1/speaking/free/score`; không tạo SpeakingAttempts cho các câu tự tạo. Chấm theo bài học vẫn giữ lịch sử SQL và quyền sở hữu bản ghi như trước. Model Python nhận thêm ngữ cảnh câu để chọn cách đọc của từ read, có hậu tố modelVersion readctx1 riêng.
+
+Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.
+
+## Từ điển song ngữ và đọc nghĩa tiếng Việt
+
+Endpoint `GET /api/v1/vocabulary?word=book&direction=en-vi` hỗ trợ ba giá trị direction `en-en`, `en-vi`, `vi-en`. Khi thiếu direction, mặc định `en-en`. Request cần tài khoản đang hoạt động. Dữ liệu cache song ngữ được lưu vào hai collection riêng, nguồn từ `https://dict.minhqnd.com/` và giữ metadata nguồn ở từng nghĩa.
+
+Chuẩn bị hai collection bằng `dotnet run --project backend/EnglishLearning.Api -- --initialize-bilingual-vocabulary=true` từ repository root. Cấu hình tên nằm trong `MongoDbSettings:EnglishVietnameseCollectionName` và `MongoDbSettings:VietnameseEnglishCollectionName`.
+
+Audio phát âm Anh–Anh dùng endpoint hiện tại. Audio nghĩa Việt dùng `POST /api/v1/vocabulary/definition-audio/prepare` với body `{ "word": "book", "direction": "en-vi", "definitionId": "<id nhận từ lookup>" }`. Backend đối chiếu ID với nghĩa, tạo TTS theo yêu cầu rồi lưu Cloudinary. Response cung cấp playbackUrl qua proxy frontend. GET `/api/v1/vocabulary/definition-audio?key=<audioKey>` chỉ đọc asset đã chuẩn bị và hỗ trợ Range.
+
+TTS mặc định tắt để nghiệm thu chất lượng giọng. Sau khi nghe đánh giá mẫu và đối chiếu điều kiện lưu media, bật bằng biến môi trường `DefinitionAudioSettings__Enabled=true` cùng cấu hình Cloudinary hợp lệ, rồi khởi động lại backend. `MaxTextLength`, `VoiceProfile`, giới hạn byte, thời lượng, deadline, số tác vụ và hạn mức tài khoản cấu hình trong `DefinitionAudioSettings`. Kiểm tra server xác nhận MIME, kích thước, chuỗi khung MPEG Layer III và thời lượng. Trình duyệt xử lý giải mã và phản hồi lỗi phát. Đánh giá nghe xác nhận độ chính xác đọc nội dung.
+
+Kiểm thử liên quan nằm trong `BilingualVocabularyTests`, `BilingualHttpTests`, `DefinitionAudioTests`, `DefinitionAudioCloudTests` và `BilingualLiveTests`. Test nguồn thật bật bằng `ENGLISHLEARNING_RUN_LIVE_BILINGUAL_TEST=1`. Test MongoDB bật bằng `ENGLISHLEARNING_TEST_MONGODB_CONNECTION_STRING`, dùng database kết thúc bằng `Tests` và collection có prefix test. Test giao diện `frontend/tests/bilingual-dictionary.mjs` dùng Playwright, hỗ trợ `PLAYWRIGHT_MODULE_PATH` và `VOCABULARY_TEST_BASE_URL`.

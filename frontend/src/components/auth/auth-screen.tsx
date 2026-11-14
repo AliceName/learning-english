@@ -6,12 +6,14 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import Brand from "@/components/navigation/brand";
 import LoginForm from "@/app/login/login-form";
 import RegistrationForm from "@/app/register/registration-form";
+import { safeWritingReturnTo, writingAuthHref } from "@/lib/writing-return";
 import AuthMascot, { type AuthReaction, type MascotReaction } from "./auth-mascot";
 import styles from "./auth-screen.module.css";
 
 type Mode = "login" | "register";
 
-export default function AuthScreen({ initialMode, initialEmail = "" }: { initialMode: Mode; initialEmail?: string }) {
+export default function AuthScreen({ initialMode, initialEmail = "", returnTo = "/account" }: { initialMode: Mode; initialEmail?: string; returnTo?: string }) {
+  const destination = safeWritingReturnTo(returnTo);
   const pathname = usePathname();
   const mode = pathname === "/register" ? "register" : pathname === "/login" ? "login" : initialMode;
   const [reaction, setReaction] = useState<MascotReaction | null>(null);
@@ -33,7 +35,7 @@ export default function AuthScreen({ initialMode, initialEmail = "" }: { initial
   function switchMode(next: Mode) {
     if (busy) return;
     react(next === "register" ? "sparkle" : "heart");
-    if (next !== mode) window.history.pushState(null, "", `/${next}`);
+    if (next !== mode) window.history.pushState(null, "", writingAuthHref(next, destination));
   }
 
   function navigateTabs(event: KeyboardEvent<HTMLDivElement>) {
@@ -66,7 +68,7 @@ export default function AuthScreen({ initialMode, initialEmail = "" }: { initial
               <span className={styles.language}>Tiếng Việt</span>
             </div>
             <div id="login-panel" role="tabpanel" aria-labelledby="tab-login" hidden={mode !== "login"}>
-              {mode === "login" && <LoginForm onReaction={react} onBusyChange={setBusy} />}
+              {mode === "login" && <LoginForm returnTo={destination} onReaction={react} onBusyChange={setBusy} />}
             </div>
             <div id="register-panel" role="tabpanel" aria-labelledby="tab-register" hidden={mode !== "register"}>
               {mode === "register" && <RegistrationForm initialEmail={initialEmail} onReaction={react} onBusyChange={setBusy} onLogin={() => switchMode("login")} />}

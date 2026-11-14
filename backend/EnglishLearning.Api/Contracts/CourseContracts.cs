@@ -39,6 +39,9 @@ public sealed record CourseListItem(
 public sealed record CourseListResponse(
     IReadOnlyList<CourseListItem> Items, int TotalCount, int Page, int PageSize,
     int TotalPages, CourseSummary Summary);
+public sealed record FeaturedCourse(
+    int CourseId, string Title, string? Description,
+    int LessonCount, int EstimatedMinutes, int TimedLessonCount, IReadOnlyList<string> Levels);
 public sealed record CourseLessonSummary(
     int LessonId, string Title, string SkillType, string? DifficultyLevel,
     int? EstimatedMinutes, int OrderIndex, ListeningLessonStatus? ListeningStatus = null);

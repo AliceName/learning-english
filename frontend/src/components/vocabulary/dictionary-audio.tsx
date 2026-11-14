@@ -32,7 +32,7 @@ async function problem(response: Response) {
   return new Error(typeof body?.title === "string" ? body.title : "Chưa chuẩn bị được âm thanh. Vui lòng thử lại.");
 }
 
-async function audioBlob(response: Response, expectedBytes: number, token: AbortSignal) {
+export async function audioBlob(response: Response, expectedBytes: number, token: AbortSignal) {
   const reader = response.body?.getReader();
   if (!reader) throw new Error("Chưa đọc được bản thu.");
   const chunks: ArrayBuffer[] = []; let total = 0;
@@ -56,6 +56,7 @@ export function usePreparedDictionaryAudio(result: VocabularyResponse, onUnautho
   const retryRef = useRef<(key: string) => void>(() => {});
 
   useEffect(() => {
+    if (result.direction && result.direction !== "en-en") return;
     const selections = new Map<string, Selection>();
     result.entries.forEach((entry, entryIndex) => entry.phonetics.forEach((phonetic, phoneticIndex) => {
       const key = dictionaryAudioKey(phonetic);

@@ -124,20 +124,40 @@
 .dialog::backdrop { background: #142b5475; backdrop-filter: blur(4px); }
 .dialogInner { display: grid; gap: 15px; padding: clamp(15px, 4vw, 26px); }
 .dialogHeader, .recorderHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-.dialogHeader span { color: #155bb5; font-size: .68rem; font-weight: 800; letter-spacing: .11em; }
-.dialogHeader h2 { margin: 3px 0 0; font-size: 1.45rem; font-weight: 800; }
+.dialogHeader h2 { margin: 0; font-size: 1.45rem; font-weight: 800; }
 .close { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 10px; background: #eaf1fe; color: var(--ink); }
 .close:hover { background: #dceaff; }
 .editor, .recorder { display: grid; gap: 12px; }
 .editor > label { font-weight: 750; }
+.practiceButton {
+  position: relative; isolation: isolate; display: inline-flex; align-items: center; justify-content: center;
+  width: min(100%, 420px); min-height: 116px; margin: 4px 0 2px; padding: 18px 24px 18px 152px;
+  overflow: hidden; border: 3px solid #fff; border-radius: 999px;
+  background: radial-gradient(ellipse at 4% 5%, #b5f2ff 0%, transparent 54%), linear-gradient(110deg, #4bb8ff, #1878f5 48%, #0051dc 85%, #167eff);
+  color: #fff; font: inherit; cursor: pointer;
+  box-shadow: 0 10px 23px #1879df35, inset 0 0 0 2px #b6f4ffb3;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.practiceButton::before, .practiceButton::after { content: ""; position: absolute; z-index: -1; pointer-events: none; border-radius: 50%; }
+.practiceButton::before { width: 106%; height: 110%; left: -36%; top: 58%; transform: rotate(14deg); background: #62c1ff55; }
+.practiceButton::after { width: 78%; height: 115%; right: -18%; bottom: -78%; transform: rotate(-10deg); background: #3dc9ff8c; }
+.practiceButton > span { position: relative; font-size: clamp(1.35rem, 3vw, 1.9rem); font-weight: 800; line-height: 1.15; letter-spacing: -.025em; text-shadow: 0 2px 3px #0048b833; }
+.practiceMascot { position: absolute; left: 8px; bottom: -18px; width: 142px; height: 142px; object-fit: contain; pointer-events: none; user-select: none; }
+.practiceButton:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.04); box-shadow: 0 13px 26px #1879df47, inset 0 0 0 2px #c4f7ff; }
+.practiceButton:active:not(:disabled) { transform: translateY(1px); }
+.practiceButton:focus-visible { outline: 3px solid #174eac; outline-offset: 4px; }
+.practiceButton:disabled { opacity: .65; cursor: wait; }
+@media (max-width: 440px) {
+  .practiceButton { width: 100%; min-height: 102px; padding: 15px 16px 15px 118px; }
+  .practiceMascot { left: 0; bottom: -18px; width: 126px; height: 126px; }
+  .practiceButton > span { font-size: 1.4rem; }
+}
 .editor textarea {
   width: 100%; resize: vertical; padding: 12px; border: 1px solid #c8dafa; border-radius: 12px;
   background: #fff; color: var(--ink); font: inherit;
 }
 .editor p { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px; margin: 0; color: var(--muted); font-size: .78rem; }
 .editor > button { justify-self: start; }
-.prompt { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #eaf2ff; }
-.prompt p { margin: 0; font-size: 1.06rem; font-weight: 750; overflow-wrap: anywhere; }
 .recorder { justify-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
 .recorderHeader { width: 100%; font-size: .8rem; }
 .recorderHeader span:first-child { display: flex; align-items: center; gap: 6px; font-weight: 750; }
@@ -162,6 +182,148 @@
 .dialogMessage { color: var(--muted); }
 .dialogError { color: #aa153a; }
 
+.noteDialog {
+  width: min(calc(100vw - 24px), 940px); max-width: calc(100vw - 12px); max-height: calc(100dvh - 20px);
+  padding: 31px 9px 12px; overflow: auto; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; scrollbar-width: none;
+}
+.noteDialog::-webkit-scrollbar { display: none; }
+.noteDialog .dialogInner { position: relative; isolation: isolate; gap: 20px; padding: 36px 44px 40px; }
+.noteDialog .noteFrame { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 12px 14px #0d347333); pointer-events: none; }
+.noteDialog .noteClip { position: absolute; z-index: 2; top: -31px; left: 53%; width: 88px; height: 81px; transform: translateX(-50%) rotate(3deg); filter: drop-shadow(0 3px 2px #2560b226); pointer-events: none; }
+.noteTape { position: absolute; top: 25px; left: 37%; width: 94px; height: 12px; transform: skewX(-36deg); background: repeating-linear-gradient(90deg, #a6cdff 0 14px, transparent 14px 24px); opacity: .8; pointer-events: none; }
+.noteMascot { position: absolute; top: 15px; right: 49px; width: 285px; height: 190px; object-fit: contain; pointer-events: none; user-select: none; }
+.noteDialog .notePlane { position: absolute; right: 47px; bottom: 37px; width: 150px; height: 85px; pointer-events: none; }
+.noteDialog .dialogHeader { position: relative; min-height: 140px; align-items: center; padding-right: 265px; }
+.noteDialog .dialogHeader h2 { position: relative; z-index: 1; margin: 5px 0 0; font-size: clamp(1.7rem, 3.2vw, 2.25rem); line-height: 1.25; letter-spacing: -.035em; outline: none; }
+.titleHighlight { position: relative; white-space: nowrap; }
+.titleHighlight::after { content: ""; position: absolute; z-index: -1; left: -3px; right: -4px; bottom: 1px; height: 8px; background: #ffe88c; transform: rotate(-1deg); }
+.noteDialog .close { position: absolute; z-index: 3; top: -9px; right: -12px; width: 40px; height: 40px; border: 2px solid #7daaff; border-radius: 6px; background: #f8fbff; color: #0865ee; box-shadow: 0 3px 0 #bdd7ff; }
+.noteDialog .close:hover { background: #e5efff; }
+.noteDialog .close:focus-visible { outline: 3px solid #174eac; outline-offset: 3px; }
+.noteDialog .close svg { width: 23px; height: 23px; stroke-width: 2.5; }
+.noteDialog .editor { position: relative; z-index: 1; gap: 17px; }
+.noteDialog .editor > label { display: flex; align-items: center; gap: 10px; font-size: 1.1rem; line-height: 1.4; }
+.noteDialog .editor > label svg { flex: none; width: 23px; height: 23px; color: #075dcc; }
+.sentenceInput { position: relative; padding: 2px; background: #73a4ff; clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px); }
+.sentenceInput:focus-within { background: #1266ef; }
+.sentenceInput textarea { display: block; min-height: 124px; margin: 0; padding: 16px 20px; border: 0; border-radius: 0; outline: none; background: linear-gradient(135deg, #fff, #f9fbff); font-size: 1.08rem; line-height: 1.5; clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 11px, 100% calc(100% - 11px), calc(100% - 11px) 100%, 11px 100%, 0 calc(100% - 11px), 0 11px); }
+.sentenceInput textarea::placeholder { color: #8799bc; opacity: 1; }
+.inputStripes { position: absolute; right: 20px; bottom: 10px; width: 39px; height: 6px; background: repeating-linear-gradient(125deg, #77abff 0 4px, transparent 4px 7px); pointer-events: none; }
+.noteDialog .editorHint { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px; color: #3764a6; font-size: .85rem; line-height: 1.45; }
+.inputHelp { display: flex; align-items: flex-start; gap: 8px; }
+.inputHelp svg { flex: none; width: 20px; height: 20px; color: #1676ef; }
+.characterCount { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.noteDialog .practiceButton { margin-top: 7px; }
+@media (max-width: 640px) {
+  .noteDialog { width: calc(100vw - 12px); padding: 26px 6px 10px; }
+  .noteDialog .dialogInner { gap: 16px; padding: 24px 20px 32px; }
+  .noteDialog .noteClip { top: -26px; left: 50%; width: 67px; height: 62px; }
+  .noteTape { top: 19px; left: 18%; width: 58px; height: 8px; background-size: 20px 100%; }
+  .noteMascot { top: 58px; right: 22px; width: 190px; height: 127px; }
+  .noteDialog .notePlane { display: none; }
+  .noteDialog .dialogHeader { min-height: 157px; align-items: flex-start; padding: 21px 0 0; }
+  .noteDialog .dialogHeader > div { width: 100%; min-width: 0; }
+  .noteDialog .dialogHeader h2 { max-width: none; margin-top: 0; font-size: clamp(1.45rem, 5.6vw, 1.9rem); }
+  .noteDialog .close { top: -8px; right: -8px; width: 32px; height: 32px; }
+  .noteDialog .close svg { width: 20px; height: 20px; }
+  .noteDialog .editor { gap: 13px; }
+  .noteDialog .editor > label { gap: 7px; font-size: .95rem; }
+  .sentenceInput textarea { min-height: 112px; padding: 14px; font-size: 1rem; }
+  .noteDialog .editorHint { gap: 7px; font-size: .72rem; }
+  .inputHelp { gap: 5px; }
+  .inputHelp svg { width: 17px; height: 17px; }
+}
+
+.readingDialog .dialogHeader { padding-right: 315px; }
+.readingDialog .dialogHeader > div { width: 100%; min-width: 0; }
+.readingDialog .dialogHeader h2 { margin-top: 13px; font-size: clamp(1.8rem, 3.2vw, 2.5rem); line-height: 1.28; overflow-wrap: anywhere; }
+.readingMascot { position: absolute; top: -28px; right: 7px; width: 300px; height: 200px; object-fit: contain; pointer-events: none; user-select: none; }
+.readingEyebrow { display: inline-flex; align-items: center; gap: 9px; max-width: 100%; padding: 6px 14px 6px 9px; border: 1px solid #c9e0ff; border-radius: 999px; background: linear-gradient(120deg, #e8f3ff, #cfe4ff); color: #075bd9; }
+.readingEyebrow > button { display: grid; flex: none; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; }
+.readingEyebrow > button:hover:not(:disabled) { background: #b7d8ff; }
+.readingEyebrow > button:disabled { opacity: .5; cursor: wait; }
+.noteDialog .readingEyebrow svg { width: 24px; height: 24px; stroke-width: 2; }
+.readingEyebrow > span { font-size: .78rem; font-weight: 800; line-height: 1.3; text-transform: uppercase; letter-spacing: .035em; }
+.readSentence { background: linear-gradient(transparent 80%, #ffe68d 80%, #ffe68d 95%, transparent 95%); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.readingDialog .recorder { position: relative; isolation: isolate; min-width: 0; gap: 18px; padding: 24px 26px 28px; border: 0; border-radius: 0; background: transparent; }
+.noteDialog .recordingFrame { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.readingDialog .recorderHeader { gap: 14px; align-items: center; color: #3165ad; font-size: 1rem; font-variant-numeric: tabular-nums; }
+.readingDialog .recorderHeader span:first-child { gap: 9px; color: #0d285a; font-size: 1.2rem; }
+.noteDialog .recorderHeader svg { width: 25px; height: 25px; color: #0873f8; }
+.readingDialog .waveform { height: 64px; gap: 5px; border-radius: 15px; background: linear-gradient(120deg, #e9f2ff, #dceaff); }
+.readingDialog .waveform i { width: 5px; background: linear-gradient(#94c3ff, #377efa); }
+.readingDialog .recorder[data-recording="true"] .waveform i { background: linear-gradient(#4ab4ff, #0063e9); }
+.micControls { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; margin: 3px 0; }
+.noteDialog .micWave { width: 70px; height: 52px; color: #a9cfff; stroke-width: 2.2; }
+.readingDialog .recordButton { width: 96px; height: 96px; margin: 7px; background: linear-gradient(145deg, #149cff, #0050d5); box-shadow: 0 0 0 7px #d9e8ff, inset 0 2px 0 #8cdcff; }
+.readingDialog .recordButton:hover:not(:disabled) { background: linear-gradient(145deg, #0a8df1, #0346bd); }
+.readingDialog .recordButton[data-recording="true"] { background: linear-gradient(145deg, #ef5278, #bd1c48); box-shadow: 0 0 0 7px #ffe0e9, inset 0 2px 0 #ffb8cb; }
+.readingDialog .recordButton:disabled { opacity: .55; cursor: wait; }
+.noteDialog .recordButton svg { width: 42px; height: 42px; stroke-width: 1.9; }
+.readingDialog .recorderHint { max-width: 95%; color: #3b68ad; font-size: .98rem; line-height: 1.5; }
+.recorderActions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; width: 100%; margin-top: 7px; }
+.readingDialog .upload { justify-content: center; min-width: 194px; min-height: 50px; padding: 2px; border-radius: 0; background: #a5c6ff; font-size: .95rem; clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px); }
+.readingDialog .upload > span { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 46px; padding: 10px 18px; color: #0757bb; background: #f8fbff; clip-path: inherit; }
+.noteDialog .upload svg { width: 22px; height: 22px; }
+.readingDialog .upload:has(input:focus-visible) { background: #095edc; }
+.readingDialog .scoreButton { justify-content: center; min-width: 194px; min-height: 50px; padding: 12px 22px; border: 0; border-radius: 0; background: linear-gradient(135deg, #158fff, #0649d1); color: #fff; font-size: .95rem; font-weight: 800; clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px); }
+.readingDialog .scoreButton:hover:not(:disabled) { background: linear-gradient(135deg, #087de8, #033db5); }
+.readingDialog .scoreButton:disabled { opacity: .52; cursor: not-allowed; }
+.readingDialog .scoreButton:focus-visible { outline: none; box-shadow: inset 0 0 0 4px #ffe188; }
+.recorderBooks { position: absolute; left: -14px; bottom: -12px; width: 122px; height: 122px; object-fit: contain; pointer-events: none; user-select: none; }
+.readingDialog .notePlane { z-index: 2; bottom: 43px; }
+.resultDialog .notePlane { display: none; }
+.resultContent { display: grid; gap: 17px; min-width: 0; }
+.resultDialog .resultSummary { gap: 12px; }
+.resultDialog .resultSummary > div { min-width: 0; padding: 16px; border: 1px solid #b5d1fa; border-radius: 13px; background: linear-gradient(140deg, #fff, #e8f2ff); text-align: center; }
+.resultDialog .resultSummary small { color: #45658f; font-size: .8rem; line-height: 1.4; }
+.resultDialog .resultSummary strong { font-size: 1.7rem; line-height: 1.3; overflow-wrap: anywhere; }
+.scoreScope { margin: -6px 0 0; color: #557096; font-size: .78rem; line-height: 1.5; }
+.resultDialog .modelFeedback { padding: 14px 16px; border: 1px solid #c8dcfb; border-radius: 12px; background: #e7f1ff; color: #284e81; line-height: 1.6; }
+.playbackCard { display: grid; gap: 10px; padding: 16px; border: 1px solid #b9d3fb; border-radius: 13px; background: #fbfdff; }
+.playbackCard h3 { display: flex; align-items: center; gap: 9px; margin: 0; color: #173e78; font-size: 1rem; }
+.noteDialog .playbackCard h3 svg { width: 23px; height: 23px; color: #1476ee; }
+.feedbackWrap { min-width: 0; }
+.feedbackWrap > section { margin: 0; padding: 20px; border: 1px solid #b9d3fb; border-radius: 13px; background: #fbfdff; }
+.feedbackWrap h3 { color: #173e78; font-size: 1.1rem; }
+.feedbackWrap button { border-color: #a8c9f7; border-radius: 9px; background: #edf5ff; color: #0a54b6; font-weight: 700; }
+.readingDialog .dialogError, .readingDialog .dialogMessage { position: relative; z-index: 1; padding: 11px 14px; border: 1px solid #c8dcfb; border-radius: 10px; background: #f9fcff; line-height: 1.5; }
+@media (max-width: 800px) {
+  .recorderBooks, .readingDialog .notePlane { display: none; }
+}
+@media (max-width: 640px) {
+  .readingDialog .dialogHeader { min-height: 0; padding: 22px 0 0; }
+  .readingDialog .dialogHeader > div { padding-bottom: 119px; }
+  .readingDialog .dialogHeader h2 { margin-top: 10px; font-size: clamp(1.5rem, 6.4vw, 1.95rem); }
+  .readingMascot { top: auto; right: 0; bottom: -4px; width: 190px; height: 127px; }
+  .readingEyebrow { gap: 6px; padding: 4px 10px 4px 6px; }
+  .readingEyebrow > span { font-size: .65rem; }
+  .readingEyebrow > button { width: 25px; height: 25px; }
+  .noteDialog .readingEyebrow svg { width: 22px; height: 22px; }
+  .readingDialog .recorder { gap: 16px; padding: 19px 14px 23px; }
+  .readingDialog .recorderHeader { font-size: .8rem; }
+  .readingDialog .recorderHeader span:first-child { gap: 5px; font-size: 1rem; }
+  .noteDialog .recorderHeader svg { width: 22px; height: 22px; }
+  .readingDialog .waveform { height: 53px; gap: 4px; }
+  .readingDialog .waveform i { width: 4px; }
+  .micControls { gap: 12px; }
+  .noteDialog .micWave { width: 42px; height: 42px; }
+  .readingDialog .recordButton { width: 78px; height: 78px; }
+  .noteDialog .recordButton svg { width: 35px; height: 35px; }
+  .readingDialog .recorderHint { max-width: 100%; font-size: .85rem; }
+  .recorderActions { gap: 10px; }
+  .readingDialog .upload, .readingDialog .scoreButton { width: 100%; min-width: 0; min-height: 46px; }
+  .readingDialog .upload > span { min-height: 42px; }
+  .resultDialog .resultSummary { gap: 7px; }
+  .resultDialog .resultSummary > div { padding: 11px 7px; }
+  .resultDialog .resultSummary small { font-size: .67rem; }
+  .resultDialog .resultSummary strong { font-size: 1.25rem; }
+  .scoreScope { font-size: .73rem; }
+  .playbackCard { padding: 13px; }
+  .feedbackWrap > section { padding: 13px; }
+}
+
 @container (max-width: 740px) {
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat { min-height: 91px; }
@@ -185,4 +347,4 @@
   .searchRow { grid-template-columns: minmax(0, 1fr); }
   .entryMeta { align-items: flex-start; flex-direction: column; }
 }
-@media (prefers-reduced-motion: reduce) { .waveform i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .waveform i, .practiceButton { transition: none; } }

@@ -1,0 +1,98 @@
+{
+  "status": "partial",
+  "modelVersion": "gop-ctc-mlp-68505cc756b1fbf8",
+  "durationSeconds": 2.58,
+  "overallScore": 96.82,
+  "coverage": 0.777778,
+  "referenceTokenCount": 9,
+  "words": [
+    {
+      "index": 0,
+      "text": "We",
+      "status": "scored",
+      "score": 1.9541,
+      "phones": [
+        {
+          "sourcePhone": "W",
+          "symbol": "w",
+          "score": 1.9889,
+          "startSeconds": 0.66,
+          "endSeconds": 0.685
+        },
+        {
+          "sourcePhone": "IY1",
+          "symbol": "iː",
+          "score": 1.9194,
+          "startSeconds": 0.72,
+          "endSeconds": 0.745
+        }
+      ],
+      "reason": null
+    },
+    {
+      "index": 1,
+      "text": "call",
+      "status": "scored",
+      "score": 1.9238,
+      "phones": [
+        {
+          "sourcePhone": "K",
+          "symbol": "k",
+          "score": 1.9786,
+          "startSeconds": 1.02,
+          "endSeconds": 1.045
+        },
+        {
+          "sourcePhone": "AO1",
+          "symbol": "ɔː",
+          "score": 1.8958,
+          "startSeconds": 1.12,
+          "endSeconds": 1.145
+        },
+        {
+          "sourcePhone": "L",
+          "symbol": "l",
+          "score": 1.897,
+          "startSeconds": 1.22,
+          "endSeconds": 1.245
+        }
+      ],
+      "reason": null
+    },
+    {
+      "index": 2,
+      "text": "it",
+      "status": "scored",
+      "score": 1.9379,
+      "phones": [
+        {
+          "sourcePhone": "IH1",
+          "symbol": "ɪ",
+          "score": 1.9517,
+          "startSeconds": 1.34,
+          "endSeconds": 1.365
+        },
+        {
+          "sourcePhone": "T",
+          "symbol": "t",
+          "score": 1.9241,
+          "startSeconds": 1.44,
+          "endSeconds": 1.465
+        }
+      ],
+      "reason": null
+    },
+    {
+      "index": 3,
+      "text": "bear",
+      "status": "unsupported",
+      "score": null,
+      "phones": [],
+      "reason": "Chưa đối chiếu được âm vị của từ này."
+    }
+  ],
+  "warnings": [
+    "Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá."
+  ],
+  "feedback": "Nghe lại bản ghi và luyện lại các âm có điểm thấp. Điểm chưa xác định lỗi thay âm cụ thể."
+}

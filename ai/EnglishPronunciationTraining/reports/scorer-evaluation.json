@@ -1,0 +1,435 @@
+{
+  "status": "completed",
+  "scope": "Phoneme scoring only on explicitly supported subset; not a full official benchmark.",
+  "method": "gop_ctc_align_v1",
+  "feature_signature": "d0be78d5e500164ff2db362a0ea237b6f73e9e6d363515d7559d57128aedfbd5",
+  "seed": 42,
+  "training_device": "cuda",
+  "elapsed_training_seconds": 26.29,
+  "best_mlp_epoch": 30,
+  "epochs_run": 38,
+  "selection_rule": "Lowest validation MAE among four fixed candidates; no test tuning.",
+  "selected_model": "mlp",
+  "validation": {
+    "global_mean": {
+      "count": 5891,
+      "mae": 0.1906644073736281,
+      "rmse": 0.2936632576639332,
+      "pearson": null,
+      "spearman": null
+    },
+    "phone_mean": {
+      "count": 5891,
+      "mae": 0.18454899154116555,
+      "rmse": 0.2922848238432929,
+      "pearson": 0.12472266658299531,
+      "spearman": 0.22018077106379041
+    },
+    "ridge": {
+      "count": 5891,
+      "mae": 0.13079608976840973,
+      "rmse": 0.24971845746040344,
+      "pearson": 0.537964403629303,
+      "spearman": 0.3006931804357643
+    },
+    "mlp": {
+      "count": 5891,
+      "mae": 0.07821139693260193,
+      "rmse": 0.199433833360672,
+      "pearson": 0.7210970520973206,
+      "spearman": 0.3784562163215046
+    }
+  },
+  "test": {
+    "global_mean": {
+      "count": 30865,
+      "mae": 0.21519667631500683,
+      "rmse": 0.35267555376754334,
+      "pearson": null,
+      "spearman": null
+    },
+    "phone_mean": {
+      "count": 30865,
+      "mae": 0.2083016965182813,
+      "rmse": 0.3493406142442273,
+      "pearson": 0.1419825244804178,
+      "spearman": 0.22127835979236077
+    },
+    "ridge": {
+      "count": 30865,
+      "mae": 0.16457219421863556,
+      "rmse": 0.301116943359375,
+      "pearson": 0.5437736511230469,
+      "spearman": 0.3436659233784934
+    },
+    "mlp": {
+      "count": 30865,
+      "mae": 0.10792367160320282,
+      "rmse": 0.26917874813079834,
+      "pearson": 0.6509456634521484,
+      "spearman": 0.4033855676064194
+    }
+  },
+  "coverage": {
+    "train": {
+      "official_utterances": 2000,
+      "supported_utterances": 1776,
+      "official_phonemes": 37750,
+      "supported_phonemes": 24923,
+      "supported_phoneme_percent": 66.02,
+      "acoustic_failures": 0,
+      "preprocessing_skips": {
+        "unresolved_word_boundaries": 214,
+        "no_supervised_phones": 215,
+        "audio_over_max_seconds_not_truncated": 12
+      }
+    },
+    "validation": {
+      "official_utterances": 500,
+      "supported_utterances": 434,
+      "official_phonemes": 9326,
+      "supported_phonemes": 5891,
+      "supported_phoneme_percent": 63.17,
+      "acoustic_failures": 0,
+      "preprocessing_skips": {
+        "unresolved_word_boundaries": 49,
+        "no_supervised_phones": 49,
+        "audio_over_max_seconds_not_truncated": 18
+      }
+    },
+    "test": {
+      "official_utterances": 2500,
+      "supported_utterances": 2207,
+      "official_phonemes": 47369,
+      "supported_phonemes": 30865,
+      "supported_phoneme_percent": 65.16,
+      "acoustic_failures": 0,
+      "preprocessing_skips": {
+        "unresolved_word_boundaries": 286,
+        "no_supervised_phones": 292,
+        "audio_over_max_seconds_not_truncated": 2
+      }
+    }
+  },
+  "selected_model_test_per_phone": {
+    "AA": {
+      "count": 27,
+      "mae": 0.36174720525741577,
+      "rmse": 0.5946075916290283,
+      "pearson": 0.3305065929889679,
+      "spearman": 0.31336159037101086,
+      "train_count": 24
+    },
+    "AE": {
+      "count": 1145,
+      "mae": 0.11331435292959213,
+      "rmse": 0.2724325656890869,
+      "pearson": 0.601123571395874,
+      "spearman": 0.42665573906668924,
+      "train_count": 897
+    },
+    "AH": {
+      "count": 2557,
+      "mae": 0.12458457052707672,
+      "rmse": 0.2924475073814392,
+      "pearson": 0.6046215295791626,
+      "spearman": 0.29206044696515965,
+      "train_count": 2053
+    },
+    "AO": {
+      "count": 293,
+      "mae": 0.210282564163208,
+      "rmse": 0.42354056239128113,
+      "pearson": 0.6872113347053528,
+      "spearman": 0.5562767357533533,
+      "train_count": 244
+    },
+    "AW": {
+      "count": 295,
+      "mae": 0.1260039061307907,
+      "rmse": 0.2872195243835449,
+      "pearson": 0.7134270668029785,
+      "spearman": 0.4519961462320687,
+      "train_count": 229
+    },
+    "AY": {
+      "count": 1054,
+      "mae": 0.08399578183889389,
+      "rmse": 0.2363661378622055,
+      "pearson": 0.8219859004020691,
+      "spearman": 0.4243270366277808,
+      "train_count": 840
+    },
+    "B": {
+      "count": 558,
+      "mae": 0.0369795598089695,
+      "rmse": 0.16002628207206726,
+      "pearson": 0.4569603502750397,
+      "spearman": 0.21423497249840878,
+      "train_count": 507
+    },
+    "CH": {
+      "count": 123,
+      "mae": 0.09837575256824493,
+      "rmse": 0.3156711459159851,
+      "pearson": 0.6992090940475464,
+      "spearman": 0.4863167595381064,
+      "train_count": 80
+    },
+    "D": {
+      "count": 1214,
+      "mae": 0.12089342623949051,
+      "rmse": 0.3120515048503876,
+      "pearson": 0.45379745960235596,
+      "spearman": 0.25658633704087513,
+      "train_count": 998
+    },
+    "DH": {
+      "count": 1093,
+      "mae": 0.13952448964118958,
+      "rmse": 0.30190229415893555,
+      "pearson": 0.5646445751190186,
+      "spearman": 0.33139630320480257,
+      "train_count": 922
+    },
+    "EH": {
+      "count": 791,
+      "mae": 0.19581544399261475,
+      "rmse": 0.36418667435646057,
+      "pearson": 0.6435350775718689,
+      "spearman": 0.474181567962207,
+      "train_count": 656
+    },
+    "ER": {
+      "count": 465,
+      "mae": 0.19076092541217804,
+      "rmse": 0.39096227288246155,
+      "pearson": 0.5321253538131714,
+      "spearman": 0.4238812028511628,
+      "train_count": 349
+    },
+    "EY": {
+      "count": 630,
+      "mae": 0.1616063416004181,
+      "rmse": 0.3186354637145996,
+      "pearson": 0.786939263343811,
+      "spearman": 0.5612016201964063,
+      "train_count": 515
+    },
+    "F": {
+      "count": 396,
+      "mae": 0.09122230112552643,
+      "rmse": 0.24192191660404205,
+      "pearson": 0.7057329416275024,
+      "spearman": 0.2045685503569797,
+      "train_count": 329
+    },
+    "G": {
+      "count": 371,
+      "mae": 0.02079271897673607,
+      "rmse": 0.12067742645740509,
+      "pearson": 0.8678268790245056,
+      "spearman": 0.23698405598848743,
+      "train_count": 332
+    },
+    "HH": {
+      "count": 791,
+      "mae": 0.03895196691155434,
+      "rmse": 0.19155672192573547,
+      "pearson": 0.6983662247657776,
+      "spearman": 0.27072927829726745,
+      "train_count": 672
+    },
+    "IH": {
+      "count": 2034,
+      "mae": 0.09040903300046921,
+      "rmse": 0.24459855258464813,
+      "pearson": 0.6653144955635071,
+      "spearman": 0.3368587408505871,
+      "train_count": 1720
+    },
+    "IY": {
+      "count": 1378,
+      "mae": 0.11382439732551575,
+      "rmse": 0.211325541138649,
+      "pearson": 0.7697791457176208,
+      "spearman": 0.29835451116057315,
+      "train_count": 1123
+    },
+    "JH": {
+      "count": 128,
+      "mae": 0.10429272055625916,
+      "rmse": 0.33443698287010193,
+      "pearson": 0.4881197214126587,
+      "spearman": 0.34142363430256367,
+      "train_count": 93
+    },
+    "K": {
+      "count": 1057,
+      "mae": 0.053893521428108215,
+      "rmse": 0.18846289813518524,
+      "pearson": 0.7347492575645447,
+      "spearman": 0.26604696060011546,
+      "train_count": 835
+    },
+    "L": {
+      "count": 1238,
+      "mae": 0.14238466322422028,
+      "rmse": 0.32185596227645874,
+      "pearson": 0.493904709815979,
+      "spearman": 0.4230347935706289,
+      "train_count": 901
+    },
+    "M": {
+      "count": 1059,
+      "mae": 0.08114198595285416,
+      "rmse": 0.24296723306179047,
+      "pearson": 0.61187344789505,
+      "spearman": 0.3878197341340317,
+      "train_count": 882
+    },
+    "N": {
+      "count": 1859,
+      "mae": 0.08509236574172974,
+      "rmse": 0.23469141125679016,
+      "pearson": 0.6700475811958313,
+      "spearman": 0.3365568300272993,
+      "train_count": 1510
+    },
+    "NG": {
+      "count": 390,
+      "mae": 0.12160272896289825,
+      "rmse": 0.33850041031837463,
+      "pearson": 0.5939460396766663,
+      "spearman": 0.4259635586880564,
+      "train_count": 319
+    },
+    "OW": {
+      "count": 577,
+      "mae": 0.12240134924650192,
+      "rmse": 0.2729356288909912,
+      "pearson": 0.6246619820594788,
+      "spearman": 0.4118285207493787,
+      "train_count": 483
+    },
+    "OY": {
+      "count": 19,
+      "mae": 0.2638184428215027,
+      "rmse": 0.5620421767234802,
+      "pearson": 0.5007777214050293,
+      "spearman": 0.5287533255028605,
+      "train_count": 19
+    },
+    "P": {
+      "count": 369,
+      "mae": 0.0859592854976654,
+      "rmse": 0.24904745817184448,
+      "pearson": 0.4576120972633362,
+      "spearman": 0.21047073703975286,
+      "train_count": 284
+    },
+    "R": {
+      "count": 586,
+      "mae": 0.17026200890541077,
+      "rmse": 0.3722584545612335,
+      "pearson": 0.4814024269580841,
+      "spearman": 0.41924164928300967,
+      "train_count": 477
+    },
+    "S": {
+      "count": 1505,
+      "mae": 0.0757971778512001,
+      "rmse": 0.22090809047222137,
+      "pearson": 0.6655367612838745,
+      "spearman": 0.31260369950169453,
+      "train_count": 1159
+    },
+    "SH": {
+      "count": 219,
+      "mae": 0.15007160604000092,
+      "rmse": 0.3422626256942749,
+      "pearson": 0.7388462424278259,
+      "spearman": 0.5970085183111556,
+      "train_count": 188
+    },
+    "T": {
+      "count": 2280,
+      "mae": 0.1093299612402916,
+      "rmse": 0.26847052574157715,
+      "pearson": 0.6181927919387817,
+      "spearman": 0.32108448842109827,
+      "train_count": 1866
+    },
+    "TH": {
+      "count": 260,
+      "mae": 0.21559078991413116,
+      "rmse": 0.3817536532878876,
+      "pearson": 0.6518736481666565,
+      "spearman": 0.542319561049297,
+      "train_count": 178
+    },
+    "UH": {
+      "count": 313,
+      "mae": 0.11604815721511841,
+      "rmse": 0.3514421582221985,
+      "pearson": 0.7039982080459595,
+      "spearman": 0.4240569653263712,
+      "train_count": 270
+    },
+    "UW": {
+      "count": 636,
+      "mae": 0.11323250830173492,
+      "rmse": 0.2388412058353424,
+      "pearson": 0.5698290467262268,
+      "spearman": 0.1606575963413543,
+      "train_count": 450
+    },
+    "V": {
+      "count": 595,
+      "mae": 0.1415359228849411,
+      "rmse": 0.25883156061172485,
+      "pearson": 0.5376886129379272,
+      "spearman": 0.44399864896582536,
+      "train_count": 489
+    },
+    "W": {
+      "count": 1185,
+      "mae": 0.03432922437787056,
+      "rmse": 0.14851871132850647,
+      "pearson": 0.8120394349098206,
+      "spearman": 0.293458236430362,
+      "train_count": 986
+    },
+    "Y": {
+      "count": 419,
+      "mae": 0.01425252016633749,
+      "rmse": 0.09025854617357254,
+      "pearson": 0.0054037501104176044,
+      "spearman": 0.11883229835840926,
+      "train_count": 301
+    },
+    "Z": {
+      "count": 953,
+      "mae": 0.16347984969615936,
+      "rmse": 0.2780173122882843,
+      "pearson": 0.691200315952301,
+      "spearman": 0.5112701258852353,
+      "train_count": 743
+    },
+    "ZH": {
+      "count": 3,
+      "mae": 0.11682343482971191,
+      "rmse": 0.18842151761054993,
+      "pearson": 0.9999890327453613,
+      "spearman": 0.8660254037844387,
+      "train_count": 0
+    }
+  },
+  "checkpoint": "checkpoints\\pronunciation_scorer.pt",
+  "limitations": [
+    "No manual verification of alignment timestamps.",
+    "Masking of unresolved mappings changes sample distribution.",
+    "No Vietnamese learner validation.",
+    "Scores do not identify a specific phoneme substitution or assess fluency/prosody."
+  ]
+}

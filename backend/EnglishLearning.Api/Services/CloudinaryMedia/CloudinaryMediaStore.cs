@@ -234,6 +234,13 @@ public sealed class CloudinaryMediaStore : ICloudMediaStore, IDisposable
     private static CloudMediaException Conflict() => new(409, "media_reference_conflict");
     private static void ValidateAttribution(CloudMediaKind kind, AudioAttribution? credit)
     {
+        if (kind == CloudMediaKind.DictionaryAudio && credit?.Provider == "minhqnd-tts")
+        {
+            if (!credit.Synthetic || credit.Locale != "vi" || string.IsNullOrWhiteSpace(credit.VoiceProfile) || credit.VoiceProfile.Length > 100 ||
+                !DefinitionAudioService.AllowedSource(credit.FileUrl) || credit.SourceUrl != "https://dict.minhqnd.com/" || credit.FileUrl.Length > 8192)
+                throw new CloudMediaException(400, "invalid_media_attribution");
+            return;
+        }
         if (kind != CloudMediaKind.DictionaryAudio && credit is null) return;
         if (credit is null || credit.Provider is not ("wikimedia" or "dictionaryApi") || credit.FileUrl is null ||
             WikimediaAudioResolver.Https(credit.FileUrl) is not { } url || !WikimediaAudioResolver.AllowedDownload(url) ||

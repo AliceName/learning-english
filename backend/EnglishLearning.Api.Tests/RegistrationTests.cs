@@ -36,11 +36,12 @@ public sealed class SqlServerFactAttribute : FactAttribute
 {
     public SqlServerFactAttribute()
     {
-        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ENGLISHLEARNING_TEST_CONNECTION_STRING")))
-            Skip = "Set ENGLISHLEARNING_TEST_CONNECTION_STRING to run SQL Server integration tests.";
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(SqlServerTestTarget.ConnectionVariable)))
+            Skip = $"Set {SqlServerTestTarget.ConnectionVariable} and {SqlServerTestTarget.CatalogVariable} for an approved disposable SQL Server database.";
     }
 }
 
+[Collection("SQL Server integration")]
 public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
 {
     private SqlConnection connection = null!;
@@ -51,7 +52,7 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        connection = new SqlConnection(Environment.GetEnvironmentVariable("ENGLISHLEARNING_TEST_CONNECTION_STRING"));
+        connection = new SqlConnection(SqlServerTestTarget.ConnectionString());
         await connection.OpenAsync();
         transaction = (SqlTransaction)await connection.BeginTransactionAsync();
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
@@ -184,6 +185,6 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
             Assert.Equal(ApprovedSchema.NormalizeDefault(column.Default), ApprovedSchema.NormalizeDefault(reader.IsDBNull(8) ? null : reader.GetString(8)));
             count++;
         }
-        Assert.Equal(122, count);
+        Assert.Equal(schema.Values.Sum(columns => columns.Count), count);
     }
 }

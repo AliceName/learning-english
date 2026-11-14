@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "seed": 42,
+  "config_sha256": "85f29bc36f4178202f1fd89e6a4fcaf6eaca87b0b3fc09a8ffc76b1b78b6ff84",
+  "mapping_sha256": "9c83c28585ba0d4eb90966073576278b58ee69beb3219ed7edc7bd43a1443dcc",
+  "scores_sha256": "31c847b8ee29d61d8fe338bcbb1d4c4721425f05481d2144ad57cd19ea1159f8",
+  "model_id": "facebook/wav2vec2-lv-60-espeak-cv-ft",
+  "model_revision": "ae45363bf3413b374fecd9dc8bc1df0e24c3b7f4",
+  "split_policy": "Validation speakers sampled only from official train. Official test untouched.",
+  "supervision_policy": "Align full G2P sequence; attach scores only to text-verified 1:1 source phones.",
+  "splits": {
+    "train": {
+      "utterances": 2000,
+      "speakers": 100,
+      "eligible_utterances": 1776,
+      "source_phones": 37750,
+      "eligible_supervised_phones": 24923,
+      "skip_reasons": {
+        "unresolved_word_boundaries": 214,
+        "no_supervised_phones": 215,
+        "audio_over_max_seconds_not_truncated": 12
+      },
+      "manifest_sha256": "c01e0ecb79c155478c3734cb92a0c2b83859aacbfa25082fe6563610a23f953c"
+    },
+    "validation": {
+      "utterances": 500,
+      "speakers": 25,
+      "eligible_utterances": 434,
+      "source_phones": 9326,
+      "eligible_supervised_phones": 5891,
+      "skip_reasons": {
+        "unresolved_word_boundaries": 49,
+        "no_supervised_phones": 49,
+        "audio_over_max_seconds_not_truncated": 18
+      },
+      "manifest_sha256": "b65d04298bd2e09160e34e71ce8b17ad5e71a8459437a74d2d1787e05560180a"
+    },
+    "test": {
+      "utterances": 2500,
+      "speakers": 125,
+      "eligible_utterances": 2207,
+      "source_phones": 47369,
+      "eligible_supervised_phones": 30865,
+      "skip_reasons": {
+        "unresolved_word_boundaries": 286,
+        "no_supervised_phones": 292,
+        "audio_over_max_seconds_not_truncated": 2
+      },
+      "manifest_sha256": "ddbd116a54b7ef60bb920017d647e54200be216c5d4748f34bd703a71ef22d68"
+    }
+  }
+}

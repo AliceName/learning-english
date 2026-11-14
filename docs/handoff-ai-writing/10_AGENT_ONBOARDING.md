@@ -1,0 +1,16 @@
+# Khởi động công việc cho agent tiếp nhận
+
+1. Đọc [00](00_READ_ME_FIRST.md), [01](01_PROJECT_STATUS.md), [setup](02_SETUP_WINDOWS.md) và hướng dẫn repo. Frontend Next.js có [AGENTS.md](../../frontend/AGENTS.md). Đọc các mục [GEC](04_GEC_MODEL_AND_FAILURES.md), [CEFR và bám đề](05_CEFR_AND_TOPIC_ADHERENCE.md), [protocol](06_AI_EVALUATION_PROTOCOL.md) và [backlog](07_AI_IMPROVEMENT_BACKLOG.md) trước khi đề xuất sửa model.
+2. Kiểm tra branch `Viet`, HEAD/upstream, status và thay đổi local. Dùng repo và runtime hiện tại làm căn cứ. [Bản ghi release](11_GIT_HANDOFF_AND_RELEASE.md) là mốc so sánh. Giữ các thay đổi, corpus, artifacts và checkpoints hiện hữu. Stage đường dẫn đã duyệt khi được yêu cầu xuất bản.
+3. Theo [luồng kiến trúc](03_ARCHITECTURE_AND_DATA_FLOW.md) từ Next/BFF đến ASP.NET và Python. CEFR dự đoán từ DeBERTa và mục tiêu hồ sơ là hai dữ liệu khác nhau. Mục tiêu được snapshot khi lưu phiên bản, giữ nguyên ở bản lịch sử. ByT5 tạo gợi ý cấp câu; UI kiểm diff và span khi sửa. Đề bài và Task Relevance là một nhánh chất lượng cần kiểm định riêng.
+4. Checkpoint bàn giao là `cefr-my-first-run` và `gec-viet-full-18ep-bs2-ga8-20261111`. Ghi lại kết quả health, manifest, SHA và dependency theo [danh mục artifact](09_ENV_MODELS_AND_ARTIFACTS.md). Nếu thiếu artifact hợp lệ, ghi blocker. Không thay bằng `gec-expanded-v1` hoặc tự tạo output tương đương.
+5. Ưu tiên GEC reliability và đánh giá bám đề. Mỗi lỗi nối được qua raw decode → safety guard → response → span/diff UI. Mỗi phép đo quality ghi split, provenance, seed, model SHA, config, ngày và số ca thiếu hoặc lỗi. Tách ghi nhận người dùng, lỗi replay, ca synthetic, chẩn đoán giả thuyết và bằng chứng từ test độc lập.
+6. Bảo vệ quyền dữ liệu và tính tái lập. Giữ cố định eval, tách tập development khỏi held-out; chọn candidate bằng development. Chấm thủ công bảo toàn nghĩa và rubric task theo protocol. Timeout hoặc lỗi không được loại lặng lẽ khỏi mẫu số. Không đính kèm bài learner, token, secrets, corpus, cache, checkpoint vào Git hoặc gửi ra dịch vụ ngoài khi chưa có quyền.
+7. Chạy Writing frontend, lint/build/TypeScript, Speaking regression nếu chạm code chung. Chạy backend Writing/Flashcards và Python contract, GEC guard, evaluation/replay tests liên quan theo [02](02_SETUP_WINDOWS.md). Chỉ chạy SQL integration với catalog được duyệt theo [08](08_DATABASE_AND_PENDING_WORK.md). Gemini thật và benchmark có trả phí cần phê duyệt model, ngân sách, corpus và xử lý dữ liệu.
+8. Đề xuất promotion sau khi đạt quality gate trên dữ liệu độc lập, chấm người, runtime regression/latency, khả năng rollback và phê duyệt đổi serving. Việc chạy thử kỹ thuật là một gate riêng. Tránh chạy training lớn, thay checkpoint, hoặc sửa SQL ngoài phạm vi đã duyệt.
+
+## Mẫu báo cáo
+
+Ghi mốc commit, môi trường và checkpoint/hash. Liệt kê datasets/splits, nguồn quyền sử dụng, protocol và ca tái hiện. Với mỗi nhánh, báo metric gồm mẫu số, uncertainty, số ca lỗi/timeout, giới hạn và kết quả đối chứng. Ghi rõ phiên bản giữ nguyên hoặc thay đổi đã duyệt khi có ảnh hưởng. Báo test theo **PASS / FAIL / NOT RUN / BLOCKED**, nêu khác biệt fixture, InMemory, SQL và model thật. Kết thúc bằng kết luận chất lượng, việc còn thiếu, bước tiếp theo và quyết định nào cần người quản lý.
+
+Có thể dùng [prompt độc lập cho công việc tiếp theo](12_NEXT_AGENT_TASK.md).

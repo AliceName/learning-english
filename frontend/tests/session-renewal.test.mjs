@@ -5,6 +5,7 @@ import test from "node:test";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { NextRequest, NextResponse } from "next/server.js";
+import { cache } from "react";
 import ts from "typescript";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -32,22 +33,37 @@ function setup(reply) {
   const fetch = async (url, init) => { calls.push({ url: String(url), init }); return reply(url, init); };
   const auth = load("src/lib/server-auth.ts", {
     "server-only": {}, "next/headers": {}, "next/server": {},
-    "./backend-request": {},
+    "./backend-request": {}, react: { cache },
   }, fetch);
   const session = load("src/lib/server-session.ts", { "server-only": {}, "./server-auth": auth }, fetch);
-  const proxy = load("src/proxy.ts", {
+  const { proxy, config } = load("src/proxy.ts", {
     "next/server": { NextResponse }, "@/lib/server-auth": auth, "@/lib/server-session": session,
-  }, fetch).proxy;
+  }, fetch);
   const request = (access = token(now() - 60), path = "/courses/23", init = {}) => {
     const headers = new Headers(init.headers);
     headers.set("cookie", `linguaai_session=${access}; linguaai_refresh=${refresh}`);
     return new NextRequest(`http://frontend.test${path}`, { ...init, headers });
   };
-  return { calls, proxy, request };
+  return { calls, proxy, config, request };
 }
 
 const issued = () => ({ accessToken: token(now() + 1800), refreshToken: replacement,
   expiresIn: 1800, expiresAt: new Date(Date.now() + 1800000).toISOString(), user: { userId: 42 } });
+
+test("Writing Studio and its API renew an expired access token", async () => {
+  const session = issued();
+  const routes = [
+    ["/writing?submission=42", "/writing/:path*"],
+    ["/api/writing/submissions/42/feedback", "/api/writing/:path*"],
+  ];
+  for (const [path, matcher] of routes) {
+    const { calls, proxy, config, request } = setup(() => Response.json(session));
+    assert.ok(config.matcher.includes(matcher));
+    const response = await proxy(request(undefined, path));
+    assert.equal(calls.length, 1);
+    assert.equal(response.cookies.get("linguaai_session").value, session.accessToken);
+  }
+});
 
 test("a valid access window does not contact the refresh endpoint", async () => {
   const state = setup(() => { throw new Error("Unexpected refresh"); });

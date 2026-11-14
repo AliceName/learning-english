@@ -1,0 +1,25 @@
+.venv/
+.tools/
+.cache/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+speechocean762-main/
+data/raw/*
+data/processed/*
+data/manifests/*
+features/*
+checkpoints/*
+logs/*
+!**/.gitkeep
+.venv-imported/
+
+# Publish the trained scorer; keep other training artifacts local.
+!checkpoints/pronunciation_scorer.pt
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key

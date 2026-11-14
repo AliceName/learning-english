@@ -6,9 +6,12 @@ export async function GET(request: Request) {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return Response.json({ title: "Đăng nhập để sử dụng từ điển." }, { status: 401, headers });
   const word = new URL(request.url).searchParams.get("word") ?? "";
+  const direction = new URL(request.url).searchParams.get("direction") ?? "en-en";
+  if (!["en-en", "en-vi", "vi-en"].includes(direction)) return Response.json({ title: "Hướng tra chưa hợp lệ." }, { status: 400, headers });
   if (!word.trim() || word.length > 300) return Response.json({ title: "Vui lòng nhập một từ hợp lệ." }, { status: 400, headers });
   const target = backendUrl("/api/v1/vocabulary");
   target.searchParams.set("word", word);
+  target.searchParams.set("direction", direction);
   try {
     const response = await fetch(target, {
       headers: { Authorization: `Bearer ${token}` }, cache: "no-store",

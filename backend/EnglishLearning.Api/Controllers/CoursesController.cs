@@ -15,34 +15,46 @@ namespace EnglishLearning.Api.Controllers;
 [Route("api/v1/courses")]
 [Tags("Courses")]
 [Produces("application/json")]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable)]
 public sealed class CoursesController(CourseCatalogService catalog, EnglishLearningDbContext dbContext,
     ILogger<CoursesController> logger) : ControllerBase
 {
+    [AllowAnonymous]
+    [HttpGet("featured")]
+    [ProducesResponseType<IReadOnlyList<FeaturedCourse>>(StatusCodes.Status200OK)]
+    public Task<ActionResult<IReadOnlyList<FeaturedCourse>>> Featured(CancellationToken cancellationToken) =>
+        ReadAsync<IReadOnlyList<FeaturedCourse>>(async () => Ok(await catalog.FeaturedAsync(cancellationToken)), cancellationToken);
+
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<CourseListResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     public Task<ActionResult<CourseListResponse>> List([FromQuery] CourseListQuery query, CancellationToken cancellationToken) =>
         ReadAsync<CourseListResponse>(async userId => await catalog.ListAsync(userId, query, cancellationToken), cancellationToken);
 
     [HttpGet("{courseId:int:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<CourseDetailResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public Task<ActionResult<CourseDetailResponse>> Get(int courseId, CancellationToken cancellationToken) =>
         ReadAsync(userId => catalog.GetAsync(userId, courseId, cancellationToken), cancellationToken);
 
-    private async Task<ActionResult<T>> ReadAsync<T>(Func<int, Task<T?>> read, CancellationToken cancellationToken) where T : class
-    {
-        Response.Headers.CacheControl = "no-store";
-        if (!int.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId) || userId <= 0)
-            return Unauthorized();
-        try
+    private Task<ActionResult<T>> ReadAsync<T>(Func<int, Task<T?>> read, CancellationToken cancellationToken) where T : class =>
+        ReadAsync<T>(async () =>
         {
-            if (!await dbContext.Users.AnyAsync(item => item.UserId == userId && item.IsActive, cancellationToken))
+            if (!int.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId) || userId <= 0 ||
+                !await dbContext.Users.AnyAsync(item => item.UserId == userId && item.IsActive, cancellationToken))
                 return Unauthorized();
             var result = await read(userId);
             return result is null ? NotFound() : Ok(result);
+        }, cancellationToken);
+
+    private async Task<ActionResult<T>> ReadAsync<T>(Func<Task<ActionResult<T>>> read, CancellationToken cancellationToken) where T : class
+    {
+        Response.Headers.CacheControl = "no-store";
+        try
+        {
+            return await read();
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
