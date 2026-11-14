@@ -11,6 +11,7 @@ namespace EnglishLearning.Api.Authentication;
 
 public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider timeProvider)
 {
+    public const string VersionClaim = "auth_ver";
     public LoginResponse CreateToken(User user, RefreshGrant? session = null)
     {
         var settings = options.Value;
@@ -22,6 +23,7 @@ public sealed class JwtTokenService(IOptions<JwtOptions> options, TimeProvider t
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim("name", user.FullName),
             new Claim(UserRoles.ClaimType, user.Role),
+            new Claim(VersionClaim, user.AuthVersion.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer32),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
             new Claim(JwtRegisteredClaimNames.Iat, now.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64)
         };

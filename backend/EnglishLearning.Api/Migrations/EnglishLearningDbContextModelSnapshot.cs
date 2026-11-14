@@ -404,7 +404,7 @@ namespace EnglishLearning.Api.Migrations
                         {
                             t.HasCheckConstraint("CK_Lessons_DifficultyLevel", "[DifficultyLevel] IN (N'A1', N'A2', N'B1', N'B2', N'C1', N'C2')");
 
-                            t.HasCheckConstraint("CK_Lessons_SkillType", "[SkillType] IN (N'speaking', N'writing', N'listening', N'reading')");
+                            t.HasCheckConstraint("CK_Lessons_SkillType", "[SkillType] IN (N'speaking', N'writing', N'listening', N'reading', N'grammar')");
                         });
                 });
 
@@ -521,6 +521,16 @@ namespace EnglishLearning.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("AuthVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("AvatarUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -534,6 +544,12 @@ namespace EnglishLearning.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(0);
+
+                    b.Property<int?>("DailyGoalMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -553,6 +569,10 @@ namespace EnglishLearning.Api.Migrations
                     b.Property<DateOnly?>("LastStudyDate")
                         .HasColumnType("date");
 
+                    b.Property<string>("LearningPurpose")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<int>("LongestStreak")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -562,6 +582,14 @@ namespace EnglishLearning.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.Property<string>("PreferredSkill")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Role")
                         .IsRequired()

@@ -13,6 +13,20 @@ public sealed class User
     public string Role { get; set; } = UserRoles.User;
     public string? AvatarUrl { get; set; }
     public string? TargetLevel { get; set; }
+    [JsonIgnore]
+    public string? PhoneNumber { get; set; }
+    [JsonIgnore]
+    public DateOnly? DateOfBirth { get; set; }
+    [JsonIgnore]
+    public string? Address { get; set; }
+    [JsonIgnore]
+    public string? LearningPurpose { get; set; }
+    [JsonIgnore]
+    public string? PreferredSkill { get; set; }
+    [JsonIgnore]
+    public int? DailyGoalMinutes { get; set; }
+    [JsonIgnore]
+    public int AuthVersion { get; set; }
     public int CurrentStreak { get; set; }
     public int LongestStreak { get; set; }
     public DateOnly? LastStudyDate { get; set; }

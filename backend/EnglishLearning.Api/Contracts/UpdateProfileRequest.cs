@@ -13,13 +13,16 @@ public sealed class UpdateProfileRequest : IValidatableObject
     public string? TargetLevel { get => targetLevel; init => targetLevel = string.IsNullOrWhiteSpace(value) ? null : value.Trim(); }
     [StringLength(500)]
     public string? AvatarUrl { get; init; }
+    // Omitted groups preserve existing details for older clients. Explicit null fields clear them.
+    public PersonalDetails? PersonalDetails { get; init; }
+    public LearningPreferences? LearningPreferences { get; init; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext context)
     {
         if (FullName.Any(char.IsControl))
             yield return new ValidationResult("Họ tên không được chứa ký tự điều khiển.", [nameof(FullName)]);
         if (AvatarUrl is not null && !System.Text.RegularExpressions.Regex.IsMatch(AvatarUrl,
-            @"^/avatars/profile-(blue|purple|green|orange|pink|teal)\.svg$", System.Text.RegularExpressions.RegexOptions.CultureInvariant))
+            @"^/avatars/(profile|mascot-(cat|bear|fox))-(blue|purple|green|orange|pink|teal)\.svg$", System.Text.RegularExpressions.RegexOptions.CultureInvariant))
             yield return new ValidationResult("Vui lòng chọn ảnh đại diện trong danh sách.", [nameof(AvatarUrl)]);
     }
 }

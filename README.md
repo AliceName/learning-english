@@ -64,7 +64,7 @@ User Secrets nằm ngoài repository, dùng cho cấu hình local. Không lưu m
 
 ## 4. Tạo database và áp dụng schema SQL
 
-Chạy **đủ 3 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
+Chạy **đủ 4 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
 
 ```powershell
 $sqlServerInstance = '.\SQLEXPRESS'
@@ -72,6 +72,7 @@ $sqlServerInstance = '.\SQLEXPRESS'
 sqlcmd -S $sqlServerInstance -d master -E -C -b -f 65001 -i backend/database/001_initial_schema.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/002_add_user_role.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/003_add_grammar_lesson_type.sql
+sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/004_profile_details_and_security.sql
 ```
 
 | Script | Mục đích |
@@ -79,10 +80,11 @@ sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/d
 | `001_initial_schema.sql` | Tạo `EnglishLearningDB` và các bảng còn thiếu |
 | `002_add_user_role.sql` | Bổ sung role `admin` / `user` |
 | `003_add_grammar_lesson_type.sql` | Cho phép bài học Grammar |
+| `004_profile_details_and_security.sql` | Thông tin cá nhân, mục tiêu học và thu hồi phiên bảo mật |
 
-Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database); chọn database `EnglishLearningDB` khi chạy script 002 và 003.
+Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database); chọn database `EnglishLearningDB` khi chạy script 002–004. Máy đã có schema 001–003 chỉ cần chạy thêm 004.
 
-Backend **không tự tạo hoặc cập nhật schema khi khởi động**. Không dùng `dotnet ef database update` hoặc `EnsureCreated` thay cho các script này. Với database đã có cấu trúc khác, cần đối chiếu [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) trước khi áp dụng.
+Backend **không tự tạo hoặc cập nhật schema khi khởi động**. Dùng các script trên cho quy trình cài mới; không dùng `EnsureCreated` thay migration. Máy đã quản lý lịch sử bằng EF có migration `ProfileDetailsAndSecurity` tương ứng để đồng bộ các thay đổi 003–004; xem [PROFILE.md](PROFILE.md). Với database đã có cấu trúc khác, cần đối chiếu [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) trước khi áp dụng.
 
 ## 5. Cấu hình MongoDB cho từ điển
 

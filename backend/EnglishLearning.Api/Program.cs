@@ -160,14 +160,8 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         bearer.IncludeErrorDetails = false;
         bearer.Events = new JwtBearerEvents
         {
-            OnTokenValidated = context =>
-            {
-                var session = context.Principal?.FindFirst(RefreshSessions.SessionClaim);
-                if (session is not null && (!Guid.TryParseExact(session.Value, "N", out var id) ||
-                    !context.HttpContext.RequestServices.GetRequiredService<RefreshSessions>().Touch(id)))
-                    context.Fail("Session expired or revoked.");
-                return Task.CompletedTask;
-            }
+            OnTokenValidated = AccountTokenValidation.Validate,
+            OnChallenge = AccountTokenValidation.Challenge
         };
         bearer.TokenValidationParameters = new TokenValidationParameters
         {

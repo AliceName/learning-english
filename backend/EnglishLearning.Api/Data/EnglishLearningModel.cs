@@ -24,6 +24,13 @@ internal static class EnglishLearningModel
             entity.Property(item => item.Role).HasColumnType("nvarchar(20)").HasMaxLength(20).IsRequired(true).HasDefaultValue(UserRoles.User);
             entity.Property(item => item.AvatarUrl).HasColumnType("nvarchar(500)").HasMaxLength(500).IsRequired(false);
             entity.Property(item => item.TargetLevel).HasColumnType("nvarchar(10)").HasMaxLength(10).IsRequired(false);
+            entity.Property(item => item.PhoneNumber).HasColumnType("nvarchar(25)").HasMaxLength(25).IsRequired(false);
+            entity.Property(item => item.DateOfBirth).HasColumnType("date").IsRequired(false);
+            entity.Property(item => item.Address).HasColumnType("nvarchar(500)").HasMaxLength(500).IsRequired(false);
+            entity.Property(item => item.LearningPurpose).HasColumnType("nvarchar(20)").HasMaxLength(20).IsRequired(false);
+            entity.Property(item => item.PreferredSkill).HasColumnType("nvarchar(20)").HasMaxLength(20).IsRequired(false);
+            entity.Property(item => item.DailyGoalMinutes).HasColumnType("int").IsRequired(false);
+            entity.Property(item => item.AuthVersion).HasColumnType("int").IsRequired().HasDefaultValue(0).IsConcurrencyToken();
             entity.Property(item => item.CurrentStreak).HasColumnType("int").IsRequired(true).HasDefaultValue(0);
             entity.Property(item => item.LongestStreak).HasColumnType("int").IsRequired(true).HasDefaultValue(0);
             entity.Property(item => item.LastStudyDate).HasColumnType("date").IsRequired(false);

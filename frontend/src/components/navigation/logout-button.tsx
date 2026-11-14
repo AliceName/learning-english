@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Icon from "@/components/site-icon";
 import styles from "./navbar.module.css";
 import { notifySessionChanged } from "@/lib/session-events";
+import { leaveProfile } from "@/lib/profile-navigation";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function LogoutButton() {
 
   return (
     <div className={styles.logoutWrap}>
-      <button type="button" className={styles.logout} onClick={logout} disabled={submitting}><Icon name="logout" /><span>{submitting ? "Đang đăng xuất…" : "Đăng xuất"}</span></button>
+      <button type="button" className={styles.logout} onClick={() => leaveProfile(logout)} disabled={submitting}><Icon name="logout" /><span>{submitting ? "Đang đăng xuất…" : "Đăng xuất"}</span></button>
       {error && <p className={styles.error} role="alert">{error}</p>}
     </div>
   );

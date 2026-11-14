@@ -18,7 +18,7 @@ public sealed class SchemaModelTests
         var schema = ApprovedSchema.Read();
         var entities = context.Model.GetEntityTypes().ToDictionary(entity => entity.GetTableName()!);
         Assert.Equal(13, schema.Count);
-        Assert.Equal(122, schema.Values.Sum(columns => columns.Count));
+        Assert.Equal(129, schema.Values.Sum(columns => columns.Count));
         Assert.Equal(schema.Keys.Order(), entities.Keys.Order());
 
         foreach (var (table, columns) in schema)
