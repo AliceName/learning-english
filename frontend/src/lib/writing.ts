@@ -77,6 +77,10 @@ export function isWritingTaskCatalogue(value: unknown): value is WritingTaskCata
 }
 
 export type WritingResult = {
+  versionNumber?: number | null;
+  parentVersionNumber?: number | null;
+  targetCefr?: string | null;
+  targetRecorded?: boolean;
   task?: WritingTask | null;
   practiceRootId?: number | null;
   parentSubmissionId?: number | null;
@@ -102,6 +106,25 @@ export type WritingResult = {
 };
 
 const levels = new Set(["A1", "A2", "B1", "B2", "C1", "C2"]);
+export function isCefrLevel(value: unknown): value is string {
+  return typeof value === "string" && levels.has(value);
+}
+
+export function isWritingRequestId(value: unknown): value is string {
+  return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(value)
+    && value !== "00000000-0000-0000-0000-000000000000";
+}
+
+export function validWritingVersion(item: Record<string, unknown>): boolean {
+  const number = item.versionNumber;
+  const parent = item.parentVersionNumber;
+  return (number == null || (Number.isInteger(number) && Number(number) >= 1 && Number(number) <= Number(item.submissionId)))
+    && (parent == null || (Number.isInteger(parent) && Number(parent) >= 1 && item.parentSubmissionId != null && Number(parent) < Number(number)))
+    && (item.parentSubmissionId == null || (Number.isInteger(item.parentSubmissionId) && Number(item.parentSubmissionId) > 0
+      && Number(item.parentSubmissionId) < Number(item.submissionId)))
+    && (item.targetRecorded === undefined || typeof item.targetRecorded === "boolean")
+    && (item.targetCefr == null || (item.targetRecorded === true && isCefrLevel(item.targetCefr)));
+}
 const criteria = new Set(["content", "organization", "vocabulary", "grammar"]);
 const boundedText = (value: unknown, max: number) => typeof value === "string" && value.trim().length > 0 && value.length <= max;
 const nullableText = (value: unknown, max: number) => value === null || boundedText(value, max);
@@ -205,6 +228,7 @@ export function isWritingResult(value: unknown): value is WritingResult {
   if (!value || typeof value !== "object") return false;
   const item = value as Record<string, unknown>;
   return Number.isInteger(item.submissionId) && Number(item.submissionId) > 0
+    && validWritingVersion(item)
     && (item.task == null || isWritingTask(item.task))
     && (item.practiceRootId == null || (Number.isInteger(item.practiceRootId) && Number(item.practiceRootId) > 0 && Number(item.practiceRootId) <= Number(item.submissionId)))
     && (item.parentSubmissionId == null || (Number.isInteger(item.parentSubmissionId) && Number(item.parentSubmissionId) > 0
@@ -213,7 +237,7 @@ export function isWritingResult(value: unknown): value is WritingResult {
     && Number(item.submissionId) <= 2147483647
     && (item.topic === null || (typeof item.topic === "string" && item.topic.length <= 500))
     && typeof item.originalText === "string" && item.originalText.trim().length > 0 && item.originalText.length <= 12000
-    && typeof item.cefrLevel === "string" && levels.has(item.cefrLevel)
+    && (isCefrLevel(item.cefrLevel) || item.cefrLevel === "")
     && (item.correctedText === null || (typeof item.correctedText === "string" && item.correctedText.length <= 24000))
     && Array.isArray(item.errors) && item.errors.length <= 200
     && item.errors.every(validSuggestion)

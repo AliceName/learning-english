@@ -366,14 +366,20 @@ Frontend chờ backend tối đa 120 giây trong Development để có thời gi
 
 ## Kiểm thử
 
-Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Để chạy thêm kiểm thử API và đối chiếu schema trên SQL Server, tạo CSDL ở trên trước rồi đặt biến môi trường:
+Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Các test SQL cần một catalog **riêng, dùng dữ liệu giả và đã được phê duyệt cho phép ghi**. Catalog ứng dụng `EnglishLearningDB` và các database hệ thống bị chặn ở test harness. Danh tính chạy test chỉ nên có quyền trong catalog kiểm thử. Tên catalog xác nhận và catalog trong chuỗi kết nối phải khớp.
+
+1. Nhờ người quản trị xác nhận instance, catalog, tài khoản và quyền ghi trước khi chuẩn bị. Dùng danh tính triển khai riêng để chuẩn bị schema từ các SQL script đã duyệt `001`, `002`, `003`. `001` chứa `USE master`, `CREATE DATABASE` và `USE EnglishLearningDB`, nên `sqlcmd -d` một mình không đổi được đích của script. Với catalog riêng, dùng bản sao để review phần định tuyến sang catalog kiểm thử đã tạo, hoặc nhờ DBA áp dụng phần DDL vào đúng catalog. Không sửa script gốc, nạp dữ liệu thật hay chạy EF `database update` lên database đã khởi tạo bằng SQL scripts.
+2. Cấp danh tính test quyền kết nối, đọc metadata và `SELECT`, `INSERT`, `UPDATE`, `DELETE` trên các bảng mà suite dùng, cùng quyền lấy `sp_getapplock` trong catalog đó. Nhóm Writing/Flashcards không cần quyền tạo database hay DDL. Một số nhóm khác có bài test DDL, ví dụ Grammar, nên dùng riêng một database dùng một lần và duyệt quyền tương ứng nếu chạy toàn bộ suite SQL.
+3. Kiểm tra instance và `DB_NAME()` bằng đúng danh tính test rồi chạy trong một phiên PowerShell riêng. Ví dụ dưới đây dùng Windows Authentication, tên database minh họa và chỉ chạy nhóm trong phạm vi Writing/Flashcards.
 
 ```powershell
-$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=MSI\MSSQLSERVER01;Database=EnglishLearningDB;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=5'
-dotnet test EnglishLearningSystem.sln --configuration Release
+$env:ENGLISHLEARNING_TEST_DATABASE = 'LinguaAI_Writing_Scratch'
+$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=<approved-test-instance>;Database=LinguaAI_Writing_Scratch;Integrated Security=True;Encrypt=True;Connect Timeout=5'
+dotnet test backend/EnglishLearning.Api.Tests/EnglishLearning.Api.Tests.csproj --configuration Release --filter 'FullyQualifiedName~Writing|FullyQualifiedName~Flashcard'
+Remove-Item Env:ENGLISHLEARNING_TEST_CONNECTION_STRING, Env:ENGLISHLEARNING_TEST_DATABASE
 ```
 
-Các kiểm thử tích hợp chạy trong transaction riêng và rollback sau mỗi test. Nếu không đặt biến môi trường, chúng được báo skipped; các kiểm thử còn lại vẫn chạy bình thường.
+Nhóm SQL cũ dùng transaction ngoài và rollback khi kết thúc. `WritingStudioSqlTests` dùng connection riêng theo request để kiểm transaction, khóa, lưu metadata `practice`, tạo nhánh từ phiên bản cũ, retry, phân quyền và trùng thẻ. Nhóm này dùng kết quả AI synthetic, ghi thật vào database kiểm thử và dọn theo hai email ngẫu nhiên của lượt chạy sau khi các request kết thúc. Nếu tiến trình bị dừng giữa chừng, đối chiếu email fixture hoặc để DBA loại bỏ catalog dùng một lần đã xác nhận. Khi thiếu biến chuỗi kết nối, SQL tests báo skipped. Nếu đã đặt chuỗi kết nối nhưng thiếu xác nhận catalog hoặc catalog sai, fixture dừng trước khi kết nối.
 
 ## Admin tạo và biên soạn khóa học
 

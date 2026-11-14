@@ -26,8 +26,10 @@ export default function WritingTaskLibrary() {
   const filtered = items.filter(t => (!level || t.level === level) && (!genre || t.genre === genre) && (!topic || t.topic === topic)
     && fold(`${t.title} ${t.topic}`).includes(fold(search.trim())));
   return <section className={styles.taskLibrary} aria-labelledby="task-library-heading">
-    <h2 id="task-library-heading">Chọn một bài luyện viết</h2>
-    <p>Chọn đề có sẵn theo nhóm trình độ, dạng bài và chủ đề. Bạn không cần tự nghĩ đề.</p>
+    <div className={styles.toolbar}>
+      <h2 id="task-library-heading">Đề luyện viết</h2>
+      <Link className={styles.submit} href="/writing?custom=1" prefetch={false}>Dùng đề riêng hoặc tiếp tục nháp đề riêng</Link>
+    </div>
     <p className={styles.hint}>Chưa rõ trình độ? Hãy xem nhóm Beginner và chọn nhiệm vụ bạn hiểu. Nhóm đề gợi ý độ khó; CEFR vẫn đang thử nghiệm, đặc biệt chưa đáng tin cậy ở A1/C2.</p>
     <div className={styles.taskFilters}>
       <label>Nhóm trình độ<select value={level} onChange={e => setLevel(e.target.value)}><option value="">Tất cả trình độ</option>{Object.entries(taskLevels).map(([v, label]) => <option key={v} value={v}>{label}</option>)}</select></label>
@@ -44,6 +46,5 @@ export default function WritingTaskLibrary() {
         <Link href={`/writing?taskId=${t.id}`} prefetch={false}>Xem đề & viết bài</Link>
       </article>)}</div>{filtered.length === 0 && <p>Không có đề phù hợp. Hãy đổi hoặc xóa bộ lọc.</p>}</>}
     <p className={styles.hint}>Nội dung W&I dùng cục bộ cho nghiên cứu. Checklist do agent diễn giải từ đề, chưa được chuyên gia kiểm định.</p>
-    <Link href="/writing?custom=1" prefetch={false}>Dùng đề riêng hoặc tiếp tục nháp đề riêng</Link>
   </section>;
 }

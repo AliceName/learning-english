@@ -7,7 +7,7 @@ type Context = { params: Promise<{ path: string[] }> };
 const headers = { "Cache-Control": "private, no-store", "Content-Type": "application/json" };
 async function proxy(request: Request, context: Context) {
   const route = (await context.params).path.join("/");
-  const allowed = request.method === "GET" ? /^decks(?:\/[1-9][0-9]*)?$/ : request.method === "POST" ? /^(decks|decks\/[1-9][0-9]*\/(cards|copy)|cards\/[1-9][0-9]*\/review)$/ : /^(decks|cards)\/[1-9][0-9]*$/;
+  const allowed = request.method === "GET" ? /^(decks(?:\/[1-9][0-9]*)?|writing\/[1-9][0-9]*)$/ : request.method === "POST" ? /^(decks|decks\/[1-9][0-9]*\/(cards|copy|writing\/[1-9][0-9]*)|cards\/[1-9][0-9]*\/review)$/ : /^(decks|cards)\/[1-9][0-9]*$/;
   if (!allowed.test(route)) return new NextResponse(null, { status: 404 });
   if (request.method !== "GET" && !isSameOrigin(request)) return NextResponse.json({ title: "Yêu cầu không hợp lệ." }, { status: 403, headers });
   const token = (await cookies()).get(SESSION_COOKIE)?.value;

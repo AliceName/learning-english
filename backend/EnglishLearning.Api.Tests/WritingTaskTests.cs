@@ -77,6 +77,35 @@ public sealed partial class RegistrationSqlServerTests
     }
 
     [SqlServerFact]
+    public async Task Writing_sql_persists_version_and_replays_the_submission_key()
+    {
+        var owner = await SignIn(await RegisterLoginUser());
+        await using var writingFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(
+            services => services.AddHttpClient<WritingAiClient>().ConfigurePrimaryHttpMessageHandler(() => new TaskWritingHandler())));
+        using var client = writingFactory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", owner.AccessToken);
+        const string path = "/api/v1/writing/submissions";
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync("/api/v1/auth/me",
+            new { fullName = "Learner", targetLevel = "B1" })).StatusCode);
+        using var initial = await client.PostAsJsonAsync(path, new { originalText = "First text." });
+        Assert.Equal(HttpStatusCode.Created, initial.StatusCode);
+        var root = (await initial.Content.ReadFromJsonAsync<WritingSubmissionResponse>())!;
+        Assert.Equal(HttpStatusCode.OK, (await client.PutAsJsonAsync("/api/v1/auth/me",
+            new { fullName = "Learner", targetLevel = "C1" })).StatusCode);
+        var request = new { parentSubmissionId = root.SubmissionId, originalText = "Second text.", requestId = Guid.NewGuid() };
+        using var created = await client.PostAsJsonAsync(path, request);
+        Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var version = (await created.Content.ReadFromJsonAsync<WritingSubmissionResponse>())!;
+        using var retry = await client.PostAsJsonAsync(path, request);
+        Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
+        Assert.Equal(version.SubmissionId, (await retry.Content.ReadFromJsonAsync<WritingSubmissionResponse>())!.SubmissionId);
+        var history = (await client.GetFromJsonAsync<WritingHistory>(path + $"?practiceRootId={root.SubmissionId}"))!;
+        Assert.Equal(new int?[] { 2, 1 }, history.Items.Select(item => item.VersionNumber));
+        Assert.Equal(new[] { "C1", "B1" }, history.Items.Select(item => item.TargetCefr));
+        Assert.Equal(1, history.Items[0].ParentVersionNumber);
+    }
+
+    [SqlServerFact]
     public async Task Task_revision_uses_server_snapshot_survives_missing_catalogue_and_groups_owned_history()
     {
         using var f = new TaskCatalogueFixture(); var handler = new TaskWritingHandler();
@@ -97,12 +126,15 @@ public sealed partial class RegistrationSqlServerTests
         var first=await Submit(new { taskId=f.Task.Id, taskVersion=f.Task.Version, originalText="Synthetic original sentence.", corrections=false });
         Assert.Equal(f.Task.Prompt, first.Task!.Prompt); Assert.Equal("Synthetic task",first.Topic);
         Assert.Equal(first.SubmissionId, first.PracticeRootId); Assert.Null(first.ParentSubmissionId);
+        Assert.Equal(1, first.VersionNumber);
         var separate=await Submit(new { taskId=f.Task.Id, taskVersion=f.Task.Version, originalText="New independent attempt.", corrections=false });
         Assert.Equal(separate.SubmissionId,separate.PracticeRootId);
         File.Delete(f.Path);
         var revision=await Submit(new { parentSubmissionId=first.SubmissionId, originalText="Revised text.", corrections=false });
         Assert.Equal(f.Task.Prompt,revision.Task!.Prompt); Assert.Equal(first.SubmissionId,revision.PracticeRootId);
         Assert.Equal(first.SubmissionId,revision.ParentSubmissionId);
+        Assert.Equal(2, revision.VersionNumber);
+        Assert.Equal(1, revision.ParentVersionNumber);
         var restored=await c.GetFromJsonAsync<WritingSubmissionResponse>($"/api/v1/writing/submissions/{revision.SubmissionId}");
         Assert.Equal(f.Task.Prompt,restored!.Task!.Prompt);
         var groups=(await c.GetFromJsonAsync<WritingPractices>("/api/v1/writing/practices?limit=1"))!;
@@ -114,6 +146,7 @@ public sealed partial class RegistrationSqlServerTests
         Assert.Equal(revision.SubmissionId,Assert.Single(versions.Items).SubmissionId);
         var old=(await c.GetFromJsonAsync<WritingHistory>($"/api/v1/writing/submissions?limit=1&practiceRootId={first.SubmissionId}&beforeId={versions.NextBeforeId}"))!;
         Assert.Equal(first.SubmissionId,Assert.Single(old.Items).SubmissionId); Assert.Null(old.NextBeforeId);
+        Assert.Equal(1, old.Items[0].VersionNumber);
         var legacy=await Submit(new { topic="Legacy custom topic", originalText="Custom text.",corrections=false });
         Assert.Null(legacy.Task);
         var legacyRevision=await Submit(new { parentSubmissionId=legacy.SubmissionId, originalText="Custom revision.",corrections=false });

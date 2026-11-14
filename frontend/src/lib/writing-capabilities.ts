@@ -1,3 +1,5 @@
+import { validWritingVersion } from "./writing";
+
 export type WritingCapabilities = {
   status: "ready" | "unavailable";
   busy: boolean;
@@ -22,7 +24,9 @@ export type WritingPreflight = {
 };
 
 export type WritingHistory = {
-  items: { submissionId: number; topic: string | null; cefrLevel: string; createdAt: string; preview: string }[];
+  items: { submissionId: number; topic: string | null; cefrLevel: string; createdAt: string; preview: string;
+    versionNumber?: number | null; parentSubmissionId?: number | null; parentVersionNumber?: number | null;
+    targetCefr?: string | null; targetRecorded?: boolean }[];
   nextBeforeId: number | null;
 };
 
@@ -104,7 +108,7 @@ export function isWritingHistory(value: unknown): value is WritingHistory {
     || !(value.nextBeforeId === null || integer(value.nextBeforeId, 1, 2147483647))) return false;
   let previousId = Infinity;
   const valid = value.items.every((item: unknown) => {
-    if (!record(item) || !integer(item.submissionId, 1, 2147483647) || item.submissionId >= previousId
+    if (!record(item) || !integer(item.submissionId, 1, 2147483647) || item.submissionId >= previousId || !validWritingVersion(item)
       || !(item.topic === null || (typeof item.topic === "string" && item.topic.length <= 500))
       || typeof item.cefrLevel !== "string" || !["", "A1", "A2", "B1", "B2", "C1", "C2"].includes(item.cefrLevel)
       || typeof item.createdAt !== "string" || !Number.isFinite(Date.parse(item.createdAt))

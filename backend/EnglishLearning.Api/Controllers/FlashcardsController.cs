@@ -1,6 +1,7 @@
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
@@ -16,6 +17,7 @@ namespace EnglishLearning.Api.Controllers;
 [RequestSizeLimit(16 * 1024)]
 public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvider clock, ILogger<FlashcardsController> logger) : ControllerBase
 {
+    private static readonly SemaphoreSlim InMemoryWritingImport = new(1);
     private DateTime Now => clock.GetUtcNow().UtcDateTime;
     private static DateTime Utc(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc);
     private static FlashcardResponse Card(Flashcard c, DateTime now) => new(c.CardId, c.DeckId, c.FrontText, c.BackText, c.ExampleSentence,
@@ -36,7 +38,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
             return await action(owner);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
-        catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException)
+        catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException or JsonException)
         { logger.LogError(error, "Flashcards request failed"); return Problem(statusCode: 503, title: "Chưa xử lý được bộ thẻ. Vui lòng thử lại."); }
     }
 
@@ -96,9 +98,81 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
     public Task<IActionResult> CreateCard(int id, SaveCardRequest request, CancellationToken ct) => Run(async owner => {
         var deck = await Owned(owner).SingleOrDefaultAsync(d => d.DeckId == id, ct); if (deck is null) return NotFound();
         if (await db.Flashcards.CountAsync(c => c.DeckId == id, ct) >= 500) return Problem(statusCode: 400, title: "Mỗi bộ tối đa 500 thẻ.");
-        var now = Now; var card = new Flashcard { DeckId = id, FrontText = request.FrontText, BackText = request.BackText, ExampleSentence = request.ExampleSentence?.Trim(), CreatedAt = now, UpdatedAt = now };
-        db.Flashcards.Add(card); deck.UpdatedAt = now; await db.SaveChangesAsync(ct); return StatusCode(201, Card(card, now));
+        return StatusCode(201, await InsertCard(deck, request, ct));
     }, ct);
+
+    [HttpGet("writing/{submissionId:int:min(1)}")]
+    public Task<IActionResult> SuggestedWritingCards(int submissionId, CancellationToken ct) => Run(async owner => {
+        var submission = await FindWriting(owner, submissionId, ct);
+        if (submission is null) return NotFound();
+        var analysis = WritingController.ReadAnalysis(submission);
+        var candidates = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors);
+        if (candidates.Length > 0)
+        {
+            var cards = await OwnedCards(owner).AsNoTracking().OrderBy(c => c.CardId)
+                .Select(c => new { c.CardId, c.FrontText }).ToListAsync(ct);
+            var similar = cards.ToLookup(c => WritingCardCandidates.NormalizeTerm(c.FrontText), StringComparer.Ordinal);
+            candidates = candidates.Select(c => c with { SimilarCardId = similar[c.Term].FirstOrDefault()?.CardId }).ToArray();
+        }
+        return Ok(new WritingCardSuggestions(submission.SubmissionId,
+            analysis.Practice?.RootSubmissionId ?? submission.SubmissionId, analysis.Practice?.VersionNumber,
+            analysis.Practice?.TargetCefr, candidates));
+    }, ct);
+
+    [HttpPost("decks/{id:int:min(1)}/writing/{submissionId:int:min(1)}")]
+    public Task<IActionResult> ImportWritingCard(int id, int submissionId, SaveWritingCardRequest request, CancellationToken ct) => Run(async owner => {
+        var submission = await FindWriting(owner, submissionId, ct);
+        if (submission is null) return NotFound();
+        var analysis = WritingController.ReadAnalysis(submission);
+        var candidate = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors)
+            .FirstOrDefault(candidate => candidate.Term == request.SourceTerm);
+        if (candidate is null)
+            return BadRequest(new { detail = "Gợi ý không thuộc phiên bản Writing này." });
+        var source = new WritingCardImportSource(submission.SubmissionId, analysis.Practice?.VersionNumber, candidate.Term, candidate.Context);
+        var relational = db.Database.IsRelational();
+        if (!relational) await InMemoryWritingImport.WaitAsync(ct);
+        try
+        {
+            await using var transaction = relational && db.Database.CurrentTransaction is null
+                ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
+            if (db.Database.IsSqlServer())
+            {
+                var resource = $"flashcard-writing-import:{owner}";
+                await db.Database.ExecuteSqlInterpolatedAsync($"""
+                    DECLARE @status int;
+                    EXEC @status = sys.sp_getapplock @Resource = {resource}, @LockMode = 'Exclusive',
+                        @LockOwner = 'Transaction', @LockTimeout = 5000;
+                    IF @status < 0 THROW 51000, 'Writing card import lock unavailable.', 1;
+                    """, ct);
+            }
+            var deck = await Owned(owner).SingleOrDefaultAsync(d => d.DeckId == id, ct);
+            if (deck is null) return NotFound();
+            var cards = await OwnedCards(owner).AsNoTracking().OrderBy(c => c.CardId).ToListAsync(ct);
+            var term = WritingCardCandidates.NormalizeTerm(request.FrontText);
+            var existing = cards.FirstOrDefault(c => WritingCardCandidates.NormalizeTerm(c.FrontText) == term
+                && c.BackText.Trim() == request.BackText && (c.ExampleSentence?.Trim() ?? "") == (request.ExampleSentence?.Trim() ?? ""));
+            if (existing is not null) return Ok(new WritingCardSave(Card(existing, Now), true, source));
+            if (cards.Count(c => c.DeckId == id) >= 500) return Problem(statusCode: 400, title: "Mỗi bộ tối đa 500 thẻ.");
+            var saved = await InsertCard(deck, request, ct);
+            if (transaction is not null) await transaction.CommitAsync(ct);
+            return StatusCode(201, new WritingCardSave(saved, false, source));
+        }
+        finally { if (!relational) InMemoryWritingImport.Release(); }
+    }, ct);
+
+    private Task<WritingSubmission?> FindWriting(int owner, int submissionId, CancellationToken ct) =>
+        db.WritingSubmissions.AsNoTracking().SingleOrDefaultAsync(s => s.UserId == owner && s.SubmissionId == submissionId, ct);
+
+    private async Task<FlashcardResponse> InsertCard(FlashcardDeck deck, SaveCardRequest request, CancellationToken ct)
+    {
+        var now = Now;
+        var card = new Flashcard { DeckId = deck.DeckId, FrontText = request.FrontText, BackText = request.BackText,
+            ExampleSentence = request.ExampleSentence?.Trim(), CreatedAt = now, UpdatedAt = now };
+        db.Flashcards.Add(card);
+        deck.UpdatedAt = now;
+        await db.SaveChangesAsync(ct);
+        return Card(card, now);
+    }
 
     [HttpPut("cards/{id:int:min(1)}")]
     public Task<IActionResult> UpdateCard(int id, SaveCardRequest request, CancellationToken ct) => Run(async owner => {

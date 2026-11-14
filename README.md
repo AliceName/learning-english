@@ -387,6 +387,8 @@ Các model/checkpoint, dữ liệu, cache, báo cáo riêng và environment loca
 
 ## Tài liệu trong repository
 
+- [Bàn giao AI Writing](docs/handoff-ai-writing/00_READ_ME_FIRST.md) hướng dẫn dựng môi trường, chẩn đoán GEC và đánh giá độ bám đề.
+
 | Tài liệu/thư mục | Nội dung |
 | --- | --- |
 | [frontend/README.md](frontend/README.md) | Giao diện, các luồng sử dụng và kiểm thử frontend |

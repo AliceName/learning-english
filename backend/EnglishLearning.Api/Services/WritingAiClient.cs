@@ -184,7 +184,7 @@ public sealed class WritingAiClient(HttpClient http)
             && coverage.Changed == result.Errors.Length;
     }
 
-    private static bool ValidSuggestion(WritingSuggestion? suggestion, string text) => suggestion is not null
+    internal static bool ValidSuggestion(WritingSuggestion? suggestion, string text) => suggestion is not null
         && Bounded(suggestion.Original, 12000, true) && Bounded(suggestion.Suggestion, 24000, true)
         && text.Contains(suggestion.Original, StringComparison.Ordinal)
         && ((suggestion.SourceStart is null && suggestion.SourceEnd is null)

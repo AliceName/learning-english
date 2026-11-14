@@ -36,8 +36,8 @@ public sealed class SqlServerFactAttribute : FactAttribute
 {
     public SqlServerFactAttribute()
     {
-        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ENGLISHLEARNING_TEST_CONNECTION_STRING")))
-            Skip = "Set ENGLISHLEARNING_TEST_CONNECTION_STRING to run SQL Server integration tests.";
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(SqlServerTestTarget.ConnectionVariable)))
+            Skip = $"Set {SqlServerTestTarget.ConnectionVariable} and {SqlServerTestTarget.CatalogVariable} for an approved disposable SQL Server database.";
     }
 }
 
@@ -51,7 +51,7 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        connection = new SqlConnection(Environment.GetEnvironmentVariable("ENGLISHLEARNING_TEST_CONNECTION_STRING"));
+        connection = new SqlConnection(SqlServerTestTarget.ConnectionString());
         await connection.OpenAsync();
         transaction = (SqlTransaction)await connection.BeginTransactionAsync();
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>

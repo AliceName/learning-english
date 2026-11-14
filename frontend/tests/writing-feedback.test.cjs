@@ -30,7 +30,7 @@ const feedback = { status: "ready", items: [
   { criterion: "organization", quote: "I learn English every day.", comment: "Ý chính xuất hiện ngay đầu bài.", action: "Nêu một ví dụ cụ thể.", suggestionIndex: null },
   { criterion: "grammar", quote: "I learn English every day.", comment: "Hãy xem lại gợi ý đang hiển thị.", action: "Đối chiếu với ý định diễn đạt.", suggestionIndex: 0 },
 ], message: "Nhận xét thử nghiệm.", modelId: "local/model", modelSha256: "a".repeat(64), promptVersion: "v1" };
-const result = { submissionId: 7, topic: "My habit", originalText: original, cefrLevel: "B1", correctedText: original,
+const result = { submissionId: 7, topic: "My habit", originalText: original, cefrLevel: "B1", correctedText: original.replace(suggestion.original, suggestion.suggestion),
   errors: [suggestion], warnings: ["Experimental"], createdAt: "2026-10-27T00:00:00Z", feedback,
   gecCoverage: { totalBodySentences: 22, changed: 1, unchanged: 15, rejected: 1, inputOverBudget: 1, incomplete: 2, sentenceLimit: 2 },
   provenance: { cefrRun: "cefr-my-first-run", cefrAdapterSha256: "b".repeat(64), gecRun: "gec-expanded-v1", gecAdapterSha256: "c".repeat(64), explanationVersion: "vi-v1", guardVersion: "gec-safety-v1" } };
@@ -164,37 +164,85 @@ test("malformed, foreign, missing feedback and interrupted upstream results neve
 
 test("saved feedback renders evidence as text without auto-requesting or changing the original essay", () => {
   const React = require("react"), { renderToStaticMarkup } = require("react-dom/server");
+  const styles = { default: new Proxy({}, { get: (_, key) => key }) };
+  const icon = { default: () => null };
+  const revision = loadTs("lib/writing-revision.ts", { "./writing-diff": writingDiff, "./writing": writing });
+  const review = loadTs("lib/writing-review.ts");
+  const comparison = loadTs("app/writing/writing-comparison.tsx", {
+    react: React, "react/jsx-runtime": require("react/jsx-runtime"),
+    "@/components/site-icon": icon, "@/lib/writing": writing, "@/lib/writing-revision": revision,
+    "./writing.module.css": styles,
+  });
   let fetchCalls = 0;
   const form = loadTs("app/writing/writing-form.tsx", {
     "react": React, "react/jsx-runtime": require("react/jsx-runtime"), "next/link": {
       default: ({ children, prefetch, ...props }) => { void prefetch; return React.createElement("a", props, children); },
     },
-    "@/components/site-icon": { default: () => null }, "@/lib/writing": writing,
+    "@/components/site-icon": icon, "@/lib/writing": writing,
     "@/lib/writing-diff": writingDiff,
-    "@/lib/writing-revision": loadTs("lib/writing-revision.ts", { "./writing-diff": writingDiff, "./writing": writing }),
-    "@/lib/writing-capabilities": loadTs("lib/writing-capabilities.ts"),
+    "@/lib/writing-revision": revision,
+    "@/lib/writing-capabilities": loadTs("lib/writing-capabilities.ts", { "./writing": writing }),
     "@/lib/writing-draft": loadTs("lib/writing-draft.ts", { "./writing": writing }),
     "@/lib/writing-return": loadTs("lib/writing-return.ts"),
+    "@/lib/writing-review": review,
     "./use-writing-preflight": { useWritingPreflight: () => ({ current: null, retry() {}, remember() {} }) },
     "./writing-history": { default: () => null },
+    "./writing-flashcards": { default: () => null },
     "./writing-task-library": { default: () => null, taskLevels: { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" } },
-    "./writing.module.css": { default: new Proxy({}, { get: (_, key) => key }) },
+    "./writing-comparison": comparison,
+    "./writing.module.css": styles,
   }, { fetch: () => { fetchCalls += 1; throw new Error("Unexpected automatic request"); } }).default;
-  const html = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false, initialResult: result }));
+  const html = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false, targetLevel: "B2", initialResult: result }));
   assert.equal(fetchCalls, 0);
   assert.ok(html.includes("Gợi ý thay learn bằng study."));
   assert.ok(html.includes("Ý chính xuất hiện ngay đầu bài."));
   assert.ok(html.includes("I learn English every day."));
   assert.ok(html.includes("Nhận xét tiếng Việt đang thử nghiệm"));
-  assert.match(html, /<del[^>]*>learn<\/del>/u);
-  assert.match(html, /<ins[^>]*>study<\/ins>/u);
-  assert.equal(/<del[^>]*>I learn English every day\.<\/del>/u.test(html), false);
-  assert.ok(html.includes("Chỉ tô màu những thay đổi AI đã đề xuất"));
-  assert.match(html, /Đã sinh hoàn tất: <strong>17\/22<\/strong>/u);
-  assert.match(html, /trong đó <strong>1<\/strong> câu có gợi ý bị chặn/u);
-  assert.match(html, /Chưa xử lý hoặc chưa hoàn tất: <strong>5<\/strong>/u);
-  assert.ok(html.includes("Không có gợi ý không có nghĩa là bài viết không còn lỗi."));
+  assert.match(html, /Bạn đã viết<\/h4><p lang="en">learn<\/p>/u);
+  assert.match(html, /Đề xuất của AI<\/h4><p lang="en">study<\/p>/u);
+  assert.ok(html.includes("Bản nháp chỉnh sửa"));
+  assert.match(html, /CEFR mục tiêu khi nộp<\/h3><strong>Chưa được ghi<\/strong>/u);
+  const recorded = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false,
+    targetLevel: "C1", initialResult: { ...result, targetRecorded: true, targetCefr: "B2", versionNumber: 1 } }));
+  assert.match(recorded, /CEFR mục tiêu khi nộp<\/h3><strong>B2<\/strong>/u);
+  assert.ok(recorded.includes("Tiếp tục từ phiên bản này"));
+  assert.equal(recorded.includes('id="writing-target"'), false);
+  const newDraft = renderToStaticMarkup(React.createElement(form, { authenticated: true, custom: true, targetLevel: "B2" }));
+  assert.match(newDraft, /CEFR mục tiêu từ Hồ sơ cá nhân<\/strong> B2/u);
+  assert.doesNotMatch(newDraft, /id="writing-target"/u);
+  const unsetDraft = renderToStaticMarkup(React.createElement(form, { authenticated: true, custom: true }));
+  assert.match(unsetDraft, /Chưa thiết lập. <a href="\/account">Mở Hồ sơ cá nhân<\/a>/u);
+  assert.match(html, /Bản nháp chỉnh sửa<\/h2>[^]*?<p lang="en">I learn English every day\./u);
+  assert.match(html, /<strong>17\/22 câu<\/strong>/u);
+  assert.ok(html.includes("1 câu có gợi ý bị chặn"));
+  assert.ok(html.includes("Chưa xử lý hoặc chưa hoàn tất: 5 câu"));
+  assert.match(html, /aria-label="Xem gợi ý 1: learn"/u);
+  const [firstEdit] = revision.writingEdits(result).edits;
+  assert.ok(html.includes(`id="writing-suggestion-${firstEdit.id}" tabindex="-1"`));
   const waiting = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false, initialResult: { ...result, feedback: null } }));
   assert.ok(waiting.includes("Nhận xét &amp; gợi ý cải thiện"));
   assert.equal(fetchCalls, 0);
+
+  const repeated = "😀 Tiếng Việt\r\nShe learn.\r\nShe learn.";
+  const second = repeated.lastIndexOf("She learn.");
+  const repeatedResult = { ...result, originalText: repeated, correctedText: repeated.slice(0, second) + "She learns.",
+    errors: [{ original: "She learn.", suggestion: "She learns.", sourceStart: second, sourceEnd: repeated.length }] };
+  const { edits } = revision.writingEdits(repeatedResult);
+  const repeatedHtml = renderToStaticMarkup(React.createElement(comparison.default, {
+    result: repeatedResult, draft: repeatedResult.correctedText, edits, accepted: edits.map(edit => edit.id),
+    visibleIds: new Set(edits.map(edit => edit.id)), draftPositionsKnown: true, showAnnotations: true, onSelect() {}, onEdit() {},
+  }));
+  assert.match(repeatedHtml, /😀 Tiếng Việt\r\nShe learn\.\r\nShe <button[^>]+aria-label="Xem gợi ý 1: learn"[^>]*>learn<\/button>\./u);
+  assert.match(repeatedHtml, /😀 Tiếng Việt\r\nShe learn\.\r\nShe <button[^>]+aria-label="Xem gợi ý 1: learns"[^>]*>learns<\/button>\./u);
+  const renderComparison = (visibleIds, draft, draftPositionsKnown) => renderToStaticMarkup(React.createElement(comparison.default, {
+    result: repeatedResult, draft, edits, accepted: edits.map(edit => edit.id), visibleIds,
+    draftPositionsKnown, showAnnotations: true, onSelect() {}, onEdit() {},
+  }));
+  assert.equal(renderComparison(new Set(), repeatedResult.correctedText, true).includes("data-review-id"), false);
+  const manual = renderComparison(new Set([edits[0].id]), "My own edit. " + repeatedResult.correctedText, false);
+  assert.ok(manual.includes("My own edit."));
+  assert.equal([...manual.matchAll(/data-review-id=/gu)].length, 1);
+  const empty = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false,
+    initialResult: { ...result, correctedText: null, errors: [], gecCoverage: null, feedback: null } }));
+  assert.equal(empty.includes("<progress"), false);
 });

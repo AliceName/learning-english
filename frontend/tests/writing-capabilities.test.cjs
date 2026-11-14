@@ -14,7 +14,8 @@ function load(relativePath, dependencies = {}, globals = {}) {
     require(name) { if (Object.hasOwn(dependencies, name)) return dependencies[name]; throw Error(name); }, ...globals }, { filename });
   return module.exports;
 }
-const types = load("lib/writing-capabilities.ts");
+const writing = load("lib/writing.ts");
+const types = load("lib/writing-capabilities.ts", { "./writing": writing });
 const caps = { status: "ready", busy: false, correctionsEnabled: true, feedbackEnabled: false,
   feedbackStatus: "disabled", cefrLimit: 512, gecInputLimit: 384, gecSentenceLimit: 20 };
 
@@ -72,6 +73,7 @@ function route(file, { token = "session", sameOrigin = true, reply = () => Respo
     "@/lib/server-auth": { SESSION_COOKIE: "session", isSameOrigin: () => sameOrigin,
       backendUrl: path => new URL(path, "http://backend.local") },
     "@/lib/writing-capabilities": types,
+    "@/lib/writing": writing,
   }, { fetch: async (...args) => { calls.push(args); return reply(); } }) };
 }
 

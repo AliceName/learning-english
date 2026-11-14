@@ -1,15 +1,15 @@
 "use client";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { isWritingHistory, isWritingPractices, type WritingHistory, type WritingPractices } from "@/lib/writing-capabilities";
 import styles from "./writing.module.css";
 
-export default function WritingHistoryPanel({ authenticated, submissionId, onCompare, onNavigate }: {
-  authenticated: boolean; submissionId: number | null; onCompare: (id: number) => void; onNavigate: () => void;
+export default function WritingHistoryPanel({ authenticated, submissionId, practiceRootId, onCompare, onNavigate }: {
+  authenticated: boolean; submissionId: number | null; practiceRootId?: number; onCompare: (id: number) => void; onNavigate: () => void;
 }) {
   const [practices, setPractices] = useState<WritingPractices>({ items: [], nextBeforeId: null });
   const [history, setHistory] = useState<WritingHistory>({ items: [], nextBeforeId: null });
-  const [root, setRoot] = useState<number | null>(null);
+  const [selectedRoot, setSelectedRoot] = useState<number | null | undefined>();
+  const root = selectedRoot === undefined ? practiceRootId : selectedRoot;
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(0);
@@ -46,17 +46,24 @@ export default function WritingHistoryPanel({ authenticated, submissionId, onCom
     finally { if (!controller.signal.aborted && version === generation.current) setLoading(false); }
   }
   if (!authenticated) return null;
+  // Reopen from the server even if an earlier URL is still cached in the client router.
   return <section className={styles.history} aria-labelledby="writing-history-heading">
     <h2 id="writing-history-heading">{root ? "Các phiên bản của lượt #" + root : "Lượt luyện đã lưu"}</h2>
-    <p className={styles.hint}>“Sửa bài này” nối cùng lượt; “Luyện lại từ đầu” tạo lượt riêng. Mọi phiên bản cũ vẫn được giữ.</p>
-    {root && <button type="button" onClick={() => { setRoot(null); setError(""); }}>Tất cả lượt luyện</button>}
+    <p className={styles.hint}>Mở một phiên bản rồi chọn “Tiếp tục từ phiên bản này” để soạn bản nháp từ bài đã lưu.</p>
+    {root && <button type="button" onClick={() => { setSelectedRoot(null); setError(""); }}>Tất cả lượt luyện</button>}
     {error && <p className={styles.error} role="alert">{error} <button type="button" onClick={() => setRefresh(n => n + 1)}>Tải lại</button></p>}
-    <ul>{root ? history.items.map(i => <li key={i.submissionId} aria-current={i.submissionId === submissionId ? "true" : undefined}>
-      <div><strong>Bài #{i.submissionId} · {i.cefrLevel}</strong><p>{i.topic || "Đề riêng"}</p><small>{new Date(i.createdAt).toLocaleString("vi-VN")}</small><p lang="en" className={styles.historyPreview}>{i.preview}</p></div>
-      <div className={styles.editActions}><Link href={"/writing?submissionId=" + i.submissionId} prefetch={false} onClick={onNavigate}>Mở bài #{i.submissionId}</Link>
-        {submissionId !== null && submissionId !== i.submissionId && <button type="button" onClick={() => onCompare(i.submissionId)}>Đối chiếu bài #{i.submissionId}</button>}</div>
+    <ul>{root ? history.items.map((i, index) => <li key={i.submissionId} aria-current={i.submissionId === submissionId ? "true" : undefined}>
+      <div><strong>{i.versionNumber ? `Phiên bản ${i.versionNumber}` : `Bài #${i.submissionId}`}</strong>
+        {index === 0 && <span className={styles.pill}>Mới nhất</span>}
+        {i.submissionId === submissionId && <span className={styles.pill}>Đang xem</span>}
+        <p>{i.topic || "Đề riêng"} · Ước lượng {i.cefrLevel || "chưa có"} · Mục tiêu {i.targetRecorded ? i.targetCefr ?? "chưa đặt" : "chưa được ghi"}</p>
+        <small>{new Date(i.createdAt).toLocaleString("vi-VN")}{i.parentSubmissionId
+          ? ` · Từ ${i.parentVersionNumber ? `phiên bản ${i.parentVersionNumber}` : `bài #${i.parentSubmissionId}`}` : ""}</small>
+        <p lang="en" className={styles.historyPreview}>{i.preview}</p></div>
+      <div className={styles.editActions}><a href={"/writing?submissionId=" + i.submissionId} onClick={onNavigate}>{i.versionNumber ? `Mở phiên bản ${i.versionNumber}` : `Mở bài #${i.submissionId}`}</a>
+        {submissionId !== null && submissionId !== i.submissionId && <button type="button" onClick={() => onCompare(i.submissionId)}>Đối chiếu</button>}</div>
     </li>) : practices.items.map(i => <li key={i.practiceRootId}><div><strong>Lượt #{i.practiceRootId} · {i.submissionCount} lần nộp</strong><p>{i.topic || "Đề riêng"}</p><small>Mới nhất: {i.cefrLevel} · {new Date(i.createdAt).toLocaleString("vi-VN")}</small></div>
-      <div className={styles.editActions}><Link href={"/writing?submissionId=" + i.latestSubmissionId} prefetch={false} onClick={onNavigate}>Tiếp tục lượt #{i.practiceRootId}</Link><button type="button" onClick={() => { setHistory({ items: [], nextBeforeId: null }); setRoot(i.practiceRootId); setError(""); }}>Xem các phiên bản</button></div></li>)}</ul>
+      <div className={styles.editActions}><a href={"/writing?submissionId=" + i.latestSubmissionId} onClick={onNavigate}>Tiếp tục lượt #{i.practiceRootId}</a><button type="button" onClick={() => { setHistory({ items: [], nextBeforeId: null }); setSelectedRoot(i.practiceRootId); setError(""); }}>Xem các phiên bản</button></div></li>)}</ul>
     {!error && (root ? history.items.length : practices.items.length) === 0 && <p className={styles.hint}>Chưa có bài trong danh sách này.</p>}
     {cursor && <button type="button" disabled={loading} onClick={more}>{loading ? "Đang tải…" : "Xem thêm"}</button>}
   </section>;

@@ -9,7 +9,7 @@ public sealed class SaveDeckRequest
     public string Title { get => title; init => title = value?.Trim() ?? ""; }
     [StringLength(500)] public string? Description { get; init; }
 }
-public sealed class SaveCardRequest
+public class SaveCardRequest
 {
     private string front = "", back = "";
     [Required(ErrorMessage = "Nhập từ hoặc mặt trước."), StringLength(500)]
@@ -18,6 +18,17 @@ public sealed class SaveCardRequest
     public string BackText { get => back; init => back = value?.Trim() ?? ""; }
     [StringLength(1000)] public string? ExampleSentence { get; init; }
 }
+public sealed class SaveWritingCardRequest : SaveCardRequest
+{
+    [Required, StringLength(100)] public string SourceTerm { get; init; } = "";
+}
+
+public sealed record WritingCardCandidate(string Term, string Context, string Source, string Reason, int? SimilarCardId = null);
+public sealed record WritingCardSuggestions(int SubmissionId, int PracticeRootId, int? VersionNumber, string? TargetCefr,
+    WritingCardCandidate[] Items);
+// The source validated for this import request. Durable history requires an approved relation.
+public sealed record WritingCardImportSource(int SubmissionId, int? VersionNumber, string Term, string Context);
+public sealed record WritingCardSave(FlashcardResponse Card, bool AlreadySaved, WritingCardImportSource? ValidatedSource = null);
 public sealed class ReviewCardRequest
 {
     [Required, Range(0, 3)] public int? Rating { get; init; }

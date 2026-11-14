@@ -1,18 +1,35 @@
-import { isWritingTask, type WritingTask } from "./writing";
+import { isWritingRequestId, isWritingTask, type WritingTask } from "./writing";
+import type { WritingReviewDecision } from "./writing-review";
 /** Drafts are local to the current browser tab session, never credentials or training labels. */
 export type WritingDraft = {
   version: 2;
   task?: WritingTask | null;
   checkedRequirements?: number[];
+  review?: WritingReviewDecision[];
+  requestId?: string;
+  continued?: boolean;
   topic: string;
   text: string;
   corrections: boolean;
   baseSubmissionId: number | null;
   updatedAt: number;
 };
-export type WritingDraftInput = Pick<WritingDraft, "topic" | "text" | "corrections" | "baseSubmissionId" | "task" | "checkedRequirements">;
+export type WritingDraftInput = Omit<WritingDraft, "version" | "updatedAt">;
 export type DraftStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 type StoredDraft = WritingDraft & { owner: number | null };
+
+function parseReview(value: unknown): WritingReviewDecision[] {
+  if (!Array.isArray(value) || value.length > 12000) return [];
+  const ids = new Set<string>();
+  const decisions: WritingReviewDecision[] = [];
+  for (const entry of value) {
+    if (!entry || typeof entry.id !== "string" || !/^\d{1,5}:(?:\d{1,5}|unmapped)$/u.test(entry.id)
+      || (entry.status !== "accepted" && entry.status !== "skipped") || ids.has(entry.id)) return [];
+    ids.add(entry.id);
+    decisions.push({ id: entry.id, status: entry.status });
+  }
+  return decisions;
+}
 
 function validId(value: unknown): value is number {
   return Number.isInteger(value) && Number(value) > 0 && Number(value) <= 2147483647;
@@ -41,8 +58,12 @@ function parse(raw: string | null, owner: number | null, base: number | null, ta
       || (value.checkedRequirements != null && (!Array.isArray(value.checkedRequirements)
         || new Set(value.checkedRequirements).size !== value.checkedRequirements.length
         || value.checkedRequirements.some(i => !Number.isInteger(i) || i < 0 || i >= (value.task?.requirements.length ?? 0))))) return null;
+    const review = owner !== null && base !== null ? parseReview(value.review) : [];
     return { version: 2, topic: value.topic, text: value.text, corrections: value.corrections,
       task: value.task ?? null, checkedRequirements: value.checkedRequirements ?? [],
+      ...(review.length ? { review } : {}),
+      ...(isWritingRequestId(value.requestId) ? { requestId: value.requestId } : {}),
+      ...(base !== null && value.continued === true ? { continued: true } : {}),
       baseSubmissionId: base, updatedAt: value.updatedAt };
   } catch { return null; }
 }
@@ -107,7 +128,9 @@ export function adoptAnonymousWritingDraft(storage: DraftStorage | null, owner: 
     storage.setItem(anonymousKey, JSON.stringify({ ...anonymous, updatedAt: adoptedAt, owner }));
     if (old && (old.topic !== anonymous.topic || old.text !== anonymous.text || old.corrections !== anonymous.corrections
       || old.task?.id !== anonymous.task?.id || old.task?.version !== anonymous.task?.version
-      || JSON.stringify(old.checkedRequirements ?? []) !== JSON.stringify(anonymous.checkedRequirements ?? []))) {
+      || JSON.stringify(old.checkedRequirements ?? []) !== JSON.stringify(anonymous.checkedRequirements ?? [])
+      || old.continued !== anonymous.continued
+      || Boolean(old.review?.length) || Boolean(old.requestId))) {
       storage.setItem(draftKey(owner, base, true, taskId)!, oldRaw!);
     }
     return saveWritingDraft(storage, owner, anonymous, adoptedAt);
