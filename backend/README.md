@@ -2,6 +2,8 @@
 
 Backend ASP.NET Core Web API dùng .NET 9, Controllers và Entity Framework Core cho SQL Server.
 
+Máy mới nên làm theo [quy trình clone và cài đặt ở README gốc](../README.md), trên nhánh **`nga`**. Cần SQL Server của chính bạn, đủ script **001–005**, khóa JWT local và frontend; cấu hình thêm MongoDB, Cloudinary, Gemini hoặc mô hình Python theo tính năng cần dùng. Không có tài khoản, database hay checkpoint riêng của máy phát triển được tải theo Git.
+
 ## Chạy ứng dụng
 
 Cài .NET SDK 9.0.307 hoặc bản vá mới hơn trong nhánh 9.0.3xx. Từ thư mục gốc repository:
@@ -267,12 +269,12 @@ Danh sách gồm FastAPI, Uvicorn, Pydantic Settings, Python Multipart và HTTPX
 
 ## Phạm vi project hiện tại
 
-- Đã ánh xạ đủ 13 bảng và 122 cột theo `DATABASE_SCHEMA.md`, bao gồm `Users.Role` được duyệt ngày 2026-10-21.
+- Entity/mapping SQL được mô tả trong `DATABASE_SCHEMA.md`; các thay đổi được áp dụng tường minh bằng script trong `database/`, gồm role, Grammar, Luyện phiên dịch và liên kết Flashcards với khóa học.
 - Có API đăng ký tài khoản, chuẩn hóa email, kiểm tra email trùng và băm mật khẩu bằng `PasswordHasher<User>` (PBKDF2 với salt).
 - Có API đăng nhập cấp JWT và API tài khoản cần xác thực; đăng ký trả về thông tin công khai của tài khoản vừa tạo.
 - Ứng dụng không tự tạo database, bảng, dữ liệu hoặc chạy migration khi khởi động.
 - Trước khi thêm entity hoặc migration, đối chiếu `DATABASE_SCHEMA.md`, `DATABASE_RULES.md` và schema thực tế.
-- Dịch vụ Python xử lý AI sẽ được tích hợp qua HTTP ở bước phát triển tiếp theo.
+- Dịch vụ Python cho Speaking/Writing được gọi qua HTTP local. Tạo khóa học AI gọi Gemini từ backend .NET, không cần Python.
 
 ## Tạo CSDL theo tài liệu
 
@@ -285,6 +287,8 @@ sqlcmd -S 'MSI\MSSQLSERVER01' -d master -E -C -b -f 65001 -i backend/database/00
 ```
 
 Thay server bằng instance SQL Server của bạn. Baseline này có đúng 13 bảng nghiệp vụ, 121 cột, 20 FK, 14 CHECK và 4 UNIQUE; chỉ `Lessons.CourseId` và `Flashcards.DeckId` có xóa cascade. Chưa dùng EF migrations history; không chạy `database update` hoặc `EnsureCreated` để khởi tạo lại CSDL này.
+
+**Baseline 001 chưa phải toàn bộ schema của bản hiện tại.** Khi tạo database mới, chạy tiếp lần lượt 002 → 003 → 004 → 005 theo [README gốc](../README.md#4-tạo-database-và-áp-dụng-schema-sql). Bản đã có 001–004 cần chạy bổ sung `database/005_link_flashcard_decks_to_courses.sql` để dùng bộ thẻ khóa học. Script 005 thêm `FlashcardDecks.CourseId INT NULL` cùng FK, giữ dữ liệu cũ; API không chạy script này khi khởi động.
 
 ### Role và tài khoản admin mặc định
 
@@ -464,13 +468,13 @@ Các API tạo/sửa bài hiện có nhận `skillType: "grammar"` và `grammar:
 
 Grammar có tối đa 30 câu hỏi với `type` là `multiple_choice`, `fill_blank`, `error_correction`. Mỗi câu có prompt, explanation và tag. Trắc nghiệm/sửa lỗi có 2–4 options và correctOptionIndex; sửa lỗi cần correction. Điền từ cần `[blank]`, answer, acceptedAnswers (tối đa 10 đáp án thay thế) và caseSensitive. Backend kiểm tra null, độ dài, số lựa chọn và chỉ số đáp án. Có thể lưu lý thuyết trống khi còn nháp; xuất bản cần topic, rules và ít nhất một câu hỏi hợp lệ. Chỉ Admin còn hoạt động được ghi; bài thuộc khóa đang hiển thị được chỉnh sửa nếu nội dung sau sửa vẫn đáp ứng điều kiện xuất bản.
 
-Danh sách/chi tiết khóa học hiển thị loại Grammar; `GET /api/v1/courses?skill=grammar` lọc khóa học có bài Grammar active. API học viên vẫn chỉ trả tóm tắt bài, không lộ đáp án quản trị. Chưa triển khai lưu điểm/bài nộp Grammar hay ErrorLogs cho học viên. `GrammarAuthoringTests.cs` kiểm tra migration chạy lại trong transaction rollback, khởi tạo/thêm/sửa, validation, xuất bản, lọc khóa học và quyền ghi; không để lại dữ liệu kiểm thử.
+Danh sách/chi tiết khóa học hiển thị loại Grammar; `GET /api/v1/courses?skill=grammar` lọc khóa học có bài Grammar active. API danh mục chỉ trả tóm tắt bài, không lộ đáp án quản trị. Luồng học viên tại `/api/v1/courses/{courseId}/lessons/{lessonId}/grammar` hỗ trợ lấy đề, nộp bài và xem kết quả; đáp án được loại khỏi đề trước nộp. `GrammarAuthoringTests.cs` kiểm tra migration chạy lại trong transaction rollback, khởi tạo/thêm/sửa, validation, xuất bản, lọc khóa học và quyền ghi; không để lại dữ liệu kiểm thử.
 
 ## Bài học Writing và Reading
 
 Đã hỗ trợ biên soạn đủ 5 loại Speaking, Listening, Reading, Writing và Grammar. `writing`/`reading` đã nằm trong CHECK Lessons.SkillType; chức năng này chỉ mở rộng DTO và JSON Lessons.Content, không có migration hay thay đổi schema mới. Skills lúc tạo khóa học nhận 1–5 loại không trùng. Các API POST/PUT lessons dùng chung và kiểm tra quyền Admin hiện tại trong database như trước.
 
-Writing: `writing: { taskType, topic, prompt, instructions, minWords, maxWords, sampleAnswer, rubric }`. TaskType nhận essay/email/paragraph/report/proposal. Topic là chủ đề riêng, tối đa 255 ký tự; bài cũ không có topic vẫn đọc được. MinWords/MaxWords từ 1–5000 và min ≤ max. Rubric tối đa 8 tiêu chí `{name,description,weight}`; khi có tiêu chí, tổng weight phải bằng 100. Có thể lưu nháp chưa có đề hoặc rubric; xuất bản cần đề bài và ít nhất một tiêu chí, tổng trọng số 100%. Bài mẫu không bắt buộc. Xem trước nhập bài thử và kiểm tra số từ; chưa có chấm điểm/nhận xét AI hoặc lưu bài nộp học viên.
+Writing: `writing: { taskType, topic, prompt, instructions, minWords, maxWords, sampleAnswer, rubric }`. TaskType nhận essay/email/paragraph/report/proposal. Topic là chủ đề riêng, tối đa 255 ký tự; bài cũ không có topic vẫn đọc được. MinWords/MaxWords từ 1–5000 và min ≤ max. Rubric tối đa 8 tiêu chí `{name,description,weight}`; khi có tiêu chí, tổng weight phải bằng 100. Có thể lưu nháp chưa có đề hoặc rubric; xuất bản cần đề bài và ít nhất một tiêu chí, tổng trọng số 100%. Bài mẫu không bắt buộc. Xem trước cho nhập bài thử và kiểm tra số từ. Luồng học viên lấy đề và nộp qua `/api/v1/courses/{courseId}/lessons/{lessonId}/writing`; hỗ trợ chấm/phản hồi cần dịch vụ Writing Python local theo README gốc.
 
 Reading: `reading: { passageTitle, category, imageUrl, imageAlt, imageCaption, passage, translation, instructions, vocabulary, questions }`. Category tối đa 255 ký tự; passage/translation tối đa 30000 ký tự mỗi trường, translation là bản dịch admin nhập tùy chọn. Vocabulary tối đa 30 mục `{word,meaning,example}`. Questions tối đa 30, hỗ trợ multiple_choice (options/correctOptionIndex), fill_blank (prompt có [blank], answer, acceptedAnswers, caseSensitive), short_answer (answer, acceptedAnswers, caseSensitive; không yêu cầu [blank]), true_false_not_given (answer true/false/not_given), matching (pairs left/right). Mỗi câu có focus (skimming/scanning/inference/vocabulary, mặc định scanning) và points (0.1–10, mặc định 1), explanation/reference cho dẫn chứng. Xuất bản cần bài đọc và ít nhất một câu hỏi. Preview hiển thị [blank] thành dấu chấm, giữ nguyên marker trong bản biên soạn và JSON lưu trữ.
 
@@ -478,7 +482,13 @@ Reading: `reading: { passageTitle, category, imageUrl, imageAlt, imageCaption, p
 
 Mỗi bài chỉ được gửi đúng một nội dung tương ứng skillType; audioUrl của Reading/Writing phải null. GET quản trị trả nội dung Reading/Writing đã lưu; API danh mục/chi tiết học viên chỉ trả tóm tắt và hỗ trợ lọc skill=reading/writing, không lộ đáp án/bài mẫu/rubric qua danh mục. `ReadingWritingAuthoringTests.cs` kiểm tra khởi tạo 5 loại, thêm vào khóa hiện có, save/reload/publish/filter, validation, giới hạn từ/trọng số, quyền ghi và isolation giữa khóa học. Dữ liệu test được rollback. `ReadingWritingDemoTests.cs` kiểm tra các trường của demo mới, short_answer, validation điểm/kỹ năng và tương thích JSON version 1 cũ.
 
-Writing/Reading hỗ trợ định dạng Markdown giới hạn: tiêu đề H2/H3, đậm, nghiêng, gạch chân (++), tô sáng (==), danh sách, trích dẫn và inline code. HTML/links/embeds không được thực thi. Frontend Reading mô phỏng chia đôi màn hình, chú giải từ vựng tại chỗ, song ngữ từ bản dịch nhập sẵn và Review tiến độ kiểm tra. Chưa kết nối dịch vụ chấm bài, dịch tự động hoặc sinh câu hỏi AI.
+Writing/Reading hỗ trợ định dạng Markdown giới hạn: tiêu đề H2/H3, đậm, nghiêng, gạch chân (++), tô sáng (==), danh sách, trích dẫn và inline code. HTML/links/embeds không được thực thi. Frontend Reading chia đôi bài đọc/câu hỏi, chú giải từ vựng tại chỗ, ảnh và bản dịch biên soạn sẵn; luồng học viên đã có chấm/nộp bài như phần dưới. Biên soạn thủ công không tự dịch hoặc sinh câu hỏi AI; tạo khóa học từ tài liệu dùng luồng Gemini riêng.
+
+### Học viên làm Reading và ghi chú
+
+Tiền tố API: `/api/v1/courses/{courseId}/lessons/{lessonId}/reading`. `GET` trả bài đọc/câu hỏi được phép xem, ảnh và phiên bản nội dung; loại đáp án trước nộp. `POST /submissions` nhận `contentVersion`, `answers`, `timeSpentSeconds`, chấm theo trọng số `points` và lưu `ExerciseResults`. Trả điểm, chữa câu và bản dịch đã biên soạn. Không gọi Gemini để chấm các câu Reading. Bài nộp phiên bản cũ bị từ chối nếu nội dung đã đổi.
+
+Tô sáng, gạch chân và Sổ tay là dữ liệu `localStorage` ở frontend, tách theo tài khoản/bài/phiên bản. Chưa có API lưu hoặc đồng bộ ghi chú; không thêm cột SQL cho tính năng này. Đáp án bài đọc và các ghi chú là hai luồng độc lập.
 
 ## Kiểm tra build
 
@@ -547,3 +557,48 @@ Phiên bản có bộ thẻ khóa học yêu cầu áp dụng riêng script `dat
 Admin mở `/admin/courses/[courseId]/flashcards` từ liên kết **Từ vựng & Flashcards** trong trang quản trị khóa học để tạo bộ, thêm/sửa thẻ hoặc tạo bộ từ từ vựng Reading. Học viên mở `/courses/[courseId]/flashcards` từ chi tiết khóa học hoặc bài Reading. Bộ từ Reading lấy từ nội dung đã lưu; thao tác xem không tạo dữ liệu. Học viên lưu bộ Reading hoặc tạo bản sao bộ Admin để có lịch ôn riêng; việc ôn không thay đổi bộ gốc.
 
 `GET /api/v1/courses/{courseId}/vocabulary` trả từ vựng Reading theo từng bài đang hoạt động. `POST /api/v1/courses/{courseId}/vocabulary/{lessonId}/copy` yêu cầu `contentVersion` và tạo bộ thuộc khóa học. API Flashcards hỗ trợ `GET /api/v1/flashcards/decks?courseId=...`; tạo bộ Admin nhận thêm `courseId` trong body. Các thao tác sửa bộ giữ nguyên liên kết khóa học. Khóa học ẩn/riêng tư được kiểm tra tại backend, kể cả khi mở từ thư viện Flashcards chung.
+
+## Tạo khóa học cá nhân bằng Gemini
+
+Học viên mở `/courses/create-ai`, tải tài liệu, chọn mục tiêu/CEFR/kỹ năng, duyệt dàn ý, yêu cầu tạo nội dung, xem lại rồi lưu thành khóa riêng (`SourceType=user_upload`). Backend dùng các bảng khóa học/bài học hiện có; không có script SQL riêng cho hàng đợi AI. Từ vựng Reading trong khóa AI có thể dùng qua luồng bộ thẻ khóa học sau khi đã áp dụng 005.
+
+### Cấu hình và dữ liệu local
+
+| Cấu hình | Vai trò |
+| --- | --- |
+| `CourseGenerationAi:ApiKey` | API key Gemini, lưu ở User Secrets hoặc biến môi trường `CourseGenerationAi__ApiKey` |
+| `CourseGenerationAi:Model` | Model văn bản; mặc định theo `appsettings.json` của repository |
+| `CourseGenerationAi:TtsModel` | Model TTS cho Listening; API key cần có quyền gọi model này |
+| `CourseGeneration:WorkerEnabled` | Mặc định `true`; tắt sẽ không xử lý các lượt chờ |
+| `CourseGeneration:DataRoot` | Kho file công việc, nguồn, audio tạm và nhật ký gọi AI; mặc định `App_Data/ai-courses` dưới content root của API |
+
+Xem [lệnh cấu hình Gemini](../README.md#cấu-hình-gemini-cho-tạo-khóa-học-ai-tùy-chọn). Backend cũng hỗ trợ key có sẵn theo thứ tự dự phòng: `TranslationAi:GenerationApiKey`, `TranslationAi:ApiKey`, `GEMINI_API_KEY`, `GOOGLE_API_KEY`. Nên cấu hình trực tiếp `CourseGenerationAi:ApiKey` để chọn rõ key cho tính năng này. Không đọc/in danh sách secrets để chia sẻ khi hỗ trợ lỗi.
+
+Chọn Listening cần Gemini TTS và `Cloudinary:Enabled=true` với thông tin Cloudinary hợp lệ; audio được upload trước khi bài hoàn tất. Các kỹ năng khác chỉ cần model văn bản. API gửi văn bản trích xuất từ tài liệu tới Gemini; lần sinh lại và TTS cũng tính vào hạn mức gọi.
+
+Kho AI hiện dùng file và khóa tiến trình trên **một máy**. Thư mục `DataRoot` phải ghi được và được giữ qua lần khởi động lại nếu muốn tiếp tục công việc. Khi chuyển máy, cần giữ kho này cùng dữ liệu SQL/media liên quan; clone hoặc pull Git không chuyển lịch sử tạo khóa. Không coi đây là hàng đợi phân tán nhiều máy.
+
+### API và giới hạn
+
+Tiền tố: `/api/v1/ai-course-generations`, cần JWT của tài khoản đang hoạt động; mỗi lượt chỉ chủ sở hữu truy cập.
+
+| Method / đường dẫn | Chức năng |
+| --- | --- |
+| `GET /options` | Kiểm tra key đã cấu hình, model và các giới hạn đầu vào; không chứng minh key/model gọi thành công |
+| `GET /` và `GET /{id}` | Danh sách lượt của tài khoản và chi tiết công việc |
+| `POST /` | Nhận multipart `file`, `config` cùng `Idempotency-Key` để bắt đầu lượt tạo |
+| `PUT /{id}/outline` | Lưu chỉnh sửa dàn ý trước khi tạo nội dung |
+| `POST /{id}/generate` | Xác nhận dàn ý và bắt đầu tạo bài học |
+| `POST /{id}/retry` | Tiếp tục từ bước đã lưu sau lỗi |
+| `POST /{id}/activate` | Lưu các bài hoàn tất thành khóa học riêng |
+| `GET /{id}/source` và `GET /{id}/audio/{lessonId}` | Đọc tài liệu/audio của lượt thuộc tài khoản |
+
+Đầu vào: PDF/DOCX tối đa 10 MB, PDF không quá 30 trang, văn bản trích xuất 100–50.000 ký tự. Không OCR. Chọn 1–5 kỹ năng; `lessonCount` 1–3 là **số bài mỗi kỹ năng**, tổng tối đa 15 bài. `questionsPerLesson` 3–5; Writing dùng đề và rubric. Bản thử giới hạn 3 yêu cầu tạo khóa mỗi tài khoản/ngày và không nhận lượt mới trong khi tài khoản còn lượt đang xử lý.
+
+### Nội dung lỗi, thử lại và theo dõi
+
+Sinh văn bản dùng JSON schema riêng cho từng kỹ năng và kiểm tra nội dung sau khi nhận. Một lần thử sinh lại mang theo lỗi validation được cho phép (tối đa 2 lần gọi cho một bước sinh văn bản). Không lưu nội dung chưa hợp lệ thành bài hoàn tất. Sau khi hết lượt sửa, công việc chuyển lỗi và có thể tiếp tục bằng `/retry`; các bài đã hoàn tất không bị sinh lại. Lỗi kết nối/dịch vụ bận có chính sách thử lại giới hạn riêng; hết hạn mức chờ thời điểm cho phép.
+
+Admin mở `/admin/ai-usage` để xem số lượt gọi, token do nguồn báo, lỗi và hạn mức. API quản trị có tiền tố `/api/v1/admin/ai`, gồm `GET /overview`. Hạn mức mặc định của ứng dụng là 10 lần gọi/phút, 100 lần/ngày toàn hệ thống, 30 lần/người/ngày và 500.000 token/ngày; Admin điều chỉnh qua trang quản trị. Đây là hạn mức ứng dụng, không thay thế quota của nhà cung cấp.
+
+Kiểm thử không gọi Gemini: `dotnet test EnglishLearningSystem.sln --filter 'FullyQualifiedName~AiCourse'` và `npm --prefix frontend run test:ai-courses`. Kiểm tra cấu hình thật bằng một tài liệu thử của bạn trên giao diện khi đã chuẩn bị key/media; thao tác đó gọi dịch vụ AI thật.
