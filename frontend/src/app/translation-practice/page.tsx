@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import MemberShell from "@/components/navigation/member-shell";
 import TranslationPractice from "@/components/translation-practice/translation-practice";
 import { getCurrentUser } from "@/lib/server-auth";
+import styles from "@/components/translation-practice/translation-practice.module.css";
 
 export const metadata: Metadata = { title: "Luyện phiên dịch | LEWA" };
 
@@ -18,7 +19,7 @@ async function TranslationPracticeContent() {
       </main>
     </MemberShell>;
   }
-  return <MemberShell user={session.user} variant="catalog">
+  return <MemberShell user={session.user} variant="catalog" contentClassName={styles.workspaceContent}>
     <TranslationPractice key={session.user.userId} />
   </MemberShell>;
 }

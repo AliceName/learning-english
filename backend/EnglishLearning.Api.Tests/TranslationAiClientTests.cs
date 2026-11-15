@@ -189,6 +189,79 @@ public sealed class TranslationAiClientTests
             Assert.Equal(code, retry.Code);
             Assert.Equal(1, calls);
         }
+        else Assert.Equal(1, calls);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Temporary_Gemini_failure_is_retried_with_a_fresh_request(bool networkFailure)
+    {
+        var calls = 0;
+        HttpRequestMessage? previous = null;
+        using var http = new HttpClient(new FakeHandler(request =>
+        {
+            calls++;
+            Assert.NotSame(previous, request);
+            previous = request;
+            if (calls > 1) return Task.FromResult(GeminiAnswer(GradedJson));
+            if (networkFailure) throw new HttpRequestException("Simulated connection interruption.");
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        }));
+        var client = CreateClient(http, new() { ApiKey = "fixture-google-key" });
+        var result = await client.GradeAsync(new(1, "A2", "Đi lại", "Tôi đã lỡ tàu.", ""), [], [], "I missed the train.", default);
+        Assert.Equal(25, result.Grammar);
+        Assert.Equal(2, calls);
+    }
+
+    [Fact]
+    public async Task Persistent_Gemini_503_stops_after_two_retries()
+    {
+        var calls = 0;
+        using var http = new HttpClient(new FakeHandler(_ =>
+        {
+            calls++;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        }));
+        var client = CreateClient(http, new() { ApiKey = "fixture-google-key" });
+        var error = await Assert.ThrowsAsync<TranslationPracticeException>(() =>
+            client.GradeAsync(new(1, "A2", "Đi lại", "Tôi đã lỡ tàu.", ""), [], [], "I missed the train.", default));
+        Assert.Equal("ai_provider_unavailable", error.Code);
+        Assert.Equal(3, calls);
+    }
+
+    [Fact]
+    public async Task Gemini_retries_respect_the_application_budget()
+    {
+        var calls = 0;
+        using var http = new HttpClient(new FakeHandler(_ =>
+        {
+            calls++;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        }));
+        var client = CreateClient(http, new() { ApiKey = "fixture-google-key", GradeCallsPerDay = 1 });
+        var error = await Assert.ThrowsAsync<TranslationPracticeException>(() =>
+            client.GradeAsync(new(1, "A2", "Đi lại", "Tôi đã lỡ tàu.", ""), [], [], "I missed the train.", default));
+        Assert.Equal("ai_quota_limited", error.Code);
+        Assert.Equal(1, calls);
+    }
+
+    [Fact]
+    public async Task Gemini_long_retry_after_is_not_retried_early()
+    {
+        var calls = 0;
+        using var http = new HttpClient(new FakeHandler(_ =>
+        {
+            calls++;
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable)
+                { Headers = { RetryAfter = new(TimeSpan.FromMinutes(1)) } });
+        }));
+        var client = CreateClient(http, new() { ApiKey = "fixture-google-key" });
+        var error = await Assert.ThrowsAsync<TranslationPracticeException>(() =>
+            client.GradeAsync(new(1, "A2", "Đi lại", "Tôi đã lỡ tàu.", ""), [], [], "I missed the train.", default));
+        Assert.Equal("ai_provider_unavailable", error.Code);
+        Assert.Equal(60, error.RetryAfter);
+        Assert.Equal(1, calls);
     }
 
     private static TranslationAiClient CreateClient(HttpClient http, TranslationAiOptions values, string? geminiEnvKey = null)

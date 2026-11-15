@@ -9,6 +9,9 @@ async function proxy(request: Request, context: Context) {
   const route = (await context.params).path.join("/");
   const allowed = request.method === "GET" ? /^decks(?:\/[1-9][0-9]*)?$/ : request.method === "POST" ? /^(decks|decks\/[1-9][0-9]*\/(cards|copy)|cards\/[1-9][0-9]*\/review)$/ : /^(decks|cards)\/[1-9][0-9]*$/;
   if (!allowed.test(route)) return new NextResponse(null, { status: 404 });
+  const courseId = new URL(request.url).searchParams.get("courseId");
+  if (courseId !== null && (request.method !== "GET" || route !== "decks" || !/^[1-9]\d*$/.test(courseId) || Number(courseId) > 2147483647))
+    return NextResponse.json({ title: "Khóa học không hợp lệ." }, { status: 400, headers });
   if (request.method !== "GET" && !isSameOrigin(request)) return NextResponse.json({ title: "Yêu cầu không hợp lệ." }, { status: 403, headers });
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return NextResponse.json({ title: "Vui lòng đăng nhập lại." }, { status: 401, headers });
@@ -30,7 +33,9 @@ async function proxy(request: Request, context: Context) {
       } catch { return NextResponse.json({ title: "Nội dung không hợp lệ." }, { status: 400, headers }); }
       finally { reader.releaseLock(); }
     }
-    const response = await fetch(backendUrl(`/api/v1/flashcards/${route}`), { method: request.method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body, cache: "no-store", signal: backendRequestSignal(request.signal) });
+    const target = backendUrl(`/api/v1/flashcards/${route}`);
+    if (courseId) target.searchParams.set("courseId", courseId);
+    const response = await fetch(target, { method: request.method, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body, cache: "no-store", signal: backendRequestSignal(request.signal) });
     return new NextResponse(response.status === 204 ? null : response.body, { status: response.status, headers });
   } catch { return NextResponse.json({ title: "Chưa kết nối được máy chủ. Hãy tải lại để kiểm tra trước khi thử lại." }, { status: 503, headers }); }
 }

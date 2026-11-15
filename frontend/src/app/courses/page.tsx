@@ -38,7 +38,7 @@ async function Catalog({ searchParams }: PageProps<"/courses">) {
             {data && <div className={`${styles.summary} ${styles.heroSummary}`}><span><i className={styles.heroStatIcon}><Icon name="book" /></i><strong>{data.summary.totalCourses}</strong> khóa học</span><span><i className={styles.heroStatIcon}><Icon name="play" /></i><strong>{data.summary.inProgress}</strong> đang học</span><span><i className={styles.heroStatIcon} data-tone="completed"><Icon name="check" /></i><strong>{data.summary.completed}</strong> đã hoàn thành</span></div>}
           </div>
           <div className={styles.catalogArtwork} aria-hidden="true"><Image src="/illustrations/course-discovery-cat.png" width={1536} height={1024} alt="" sizes="(max-width: 600px) 100px, (max-width: 1100px) 180px, 260px" loading="eager" /></div>
-          <div className={styles.aiPromo}><Icon name="sparkles" /><div><strong>Tạo khóa học AI <small>SẮP CÓ</small></strong><span>Từ tài liệu, theo mục tiêu của bạn</span></div></div>
+          <Link href="/courses/create-ai" className={styles.aiPromo}><Icon name="sparkles" /><div><strong>Tạo khóa học AI <small>DÙNG THỬ</small></strong><span>Từ tài liệu, theo mục tiêu của bạn</span></div></Link>
         </div>
       </section>
       {query.skill === "speaking" && <SpeakingLevels query={query} />}

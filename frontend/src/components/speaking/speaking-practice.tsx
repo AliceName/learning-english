@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import type { SpeakingAttempt, SpeakingLesson, SpeakingWord } from "@/lib/speaking";
 import { PcmRecorder, type RecordingStopReason } from "@/lib/pcm-recorder";
 import { allPracticeTargets, compareAttempts, completedPracticeTargets, getPracticeTarget, matchesPracticeTarget, mergeHistory, microphoneError, wordAudioRange, type SpeakingPracticeMode } from "@/lib/speaking-practice";
 import PronunciationFeedback from "./pronunciation-feedback";
+import SpeakingAssignment from "./speaking-assignment";
+import SpeakingScenery from "./speaking-artwork";
 import { feedbackMode } from "@/lib/pronunciation-feedback";
 import styles from "./speaking.module.css";
 
@@ -207,6 +210,21 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
     utterance.onerror = event => { if (mounted.current && event.error !== "canceled" && event.error !== "interrupted") setError("Chưa phát được giọng mẫu. Hãy kiểm tra giọng tiếng Anh của trình duyệt rồi thử lại."); };
     window.speechSynthesis.speak(utterance);
   }
+  async function playSample() {
+    if (!sampleUrl) { speak(); return; }
+    const audio = sampleAudio.current;
+    if (!audio || busy) return;
+    stopPlayback(audio);
+    const version = playbackGeneration.current;
+    try {
+      audio.currentTime = 0;
+      audio.playbackRate = rate;
+      await audio.play();
+    } catch {
+      if (mounted.current && version === playbackGeneration.current)
+        setError("Chưa phát được audio mẫu. Hãy thử lại hoặc mở tùy chọn giọng mẫu.");
+    }
+  }
   async function playWord(word: SpeakingWord) {
     if (!result || busy || !wordAudio.current) return;
     const range = wordAudioRange(word, result.assessment.durationSeconds);
@@ -231,6 +249,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
   }
 
   return <main ref={page} id="main-content" className={styles.page} tabIndex={-1}>
+    <SpeakingScenery />
     <div className={styles.workspace}>
     <nav className={styles.breadcrumb} aria-label="Đường dẫn trang">
       <Link href="/" aria-label="Trang chủ"><Icon name="home" /></Link><Icon name="chevron" />
@@ -238,8 +257,12 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
     </nav>
     <header className={styles.header}>
       <span className={styles.heroIcon}><Icon name="mic" /></span>
-      <div><h1>Speaking</h1><p>{lesson.title}</p>{lesson.goals && <p className={styles.goals}>{lesson.goals}</p>}</div>
-      <span className={styles.heroArt} aria-hidden="true" />
+      <div className={styles.headerCopy}>
+        <h1>Speaking<span className={styles.titleDoodle} aria-hidden="true"><i /><i /><i /></span></h1>
+        <SpeakingAssignment goals={lesson.goals} />
+      </div>
+      <Image className={styles.heroArt} src="/illustrations/translation-cat.svg" width={348} height={190}
+        sizes="(max-width: 600px) 120px, (max-width: 1000px) 220px, 320px" alt="" priority />
     </header>
     <div className={styles.layout}><div className={styles.practice}>
     <div className={styles.practiceMode} role="group" aria-label="Chế độ luyện nói">
@@ -251,11 +274,12 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       <progress value={completed.size} max={Math.max(1, targets.length)} aria-label={`Số ${mode === "segment" ? "cụm" : "câu"} đã luyện trong lượt này`} />
       {completed.size === targets.length ? <div className={styles.completion} role="status"><b>Đã luyện hết các {mode === "segment" ? "cụm" : "câu"} trong bài!</b><button disabled={busy} onClick={restartSession}>Luyện thêm một lượt</button>{mode === "segment" && <button disabled={busy} onClick={() => selectTarget(index, null)}>Thử đọc cả câu</button>}<Link href={`/courses/${lesson.courseId}`}>Về khóa học →</Link></div> : null}
     </section>
-    <nav className={styles.sentences} aria-label="Chọn câu luyện nói">{lesson.sentences.map((s, i) => <button key={i} disabled={busy} aria-current={i === index ? "step" : undefined} onClick={() => selectSentence(i)} title={s.text}>
-      {sentenceCompleted(i) ? "✓ " : ""}Câu {i + 1}{targets.some(item => item.sentenceIndex === i && clips[item.key] && !clips[item.key].submitted) && <small> · có bản nháp</small>}
-    </button>)}</nav>
       <section className={`${styles.card} ${styles.prompt}`} aria-labelledby="sentence-title">
-        <div className={styles.cardTop}><h2 id="sentence-title">{isSegment ? "Cụm luyện nói" : "Câu mẫu"}</h2><span>Tối đa {lesson.maxRecordingSeconds} giây</span></div>
+        <div className={styles.cardTop}>
+          <h2 id="sentence-title">{isSegment ? "Cụm luyện nói" : "Câu mẫu"}</h2>
+          <button type="button" className={`${styles.secondary} ${styles.changeSentence}`} disabled={busy || lesson.sentences.length < 2}
+            onClick={() => selectSentence((index + 1) % lesson.sentences.length)}><Icon name="replay" />Câu khác</button>
+        </div>
         {isSegment && <>
           <p className={styles.phraseLabel}>Cụm {(target.segmentIndex ?? 0) + 1}/{segments.length} · chọn một cụm bên dưới để luyện</p>
           {segments.length > 1 && <nav className={styles.phraseContext} aria-label="Các cụm trong câu đầy đủ">{segments.map(segment => {
@@ -267,32 +291,39 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           })}</nav>}
         </>}
         <div className={styles.promptText}>
-          {sampleUrl ? <span className={styles.speaker}><Icon name="volume" /></span> : <button className={styles.speaker} type="button" disabled={busy} aria-label={`Nghe ${unit} mẫu`} onClick={speak}><Icon name="volume" /></button>}
+          <button className={styles.speaker} type="button" disabled={busy} aria-label={`Nghe ${unit} mẫu`}
+            onClick={() => void playSample()}><Icon name="volume" /></button>
           <div><blockquote lang="en">{target.text}</blockquote>{!isSegment && sentence.ipa && <p className={styles.ipa} lang="en">{sentence.ipa}</p>}</div>
         </div>
+        {isSegment && <div className={styles.segmentNavigation}><button className={styles.secondary} disabled={busy || segmentIndex === 0} onClick={() => selectTarget(index, segmentIndex - 1)}>← Cụm trước</button>
+          {segmentIndex < segments.length - 1 ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(index, segmentIndex + 1)}>Cụm tiếp theo →</button> : <button className={styles.secondary} disabled={busy} onClick={() => selectTarget(index, null)}>Ôn lại cả câu</button>}</div>}
+        <details className={styles.sampleOptions}>
+          <summary>Giọng mẫu và chọn câu luyện</summary>
         <div className={styles.sampleControls}><label>Tốc độ mẫu <select value={rate} disabled={busy} onChange={event => { const next = Number(event.target.value); setRate(next); if (sampleAudio.current) sampleAudio.current.playbackRate = next; }}><option value={.75}>Chậm · 0,75×</option><option value={1}>Bình thường · 1×</option></select></label>
           <button className={styles.secondary} disabled={busy} onClick={() => stopPlayback()}>Dừng nghe</button></div>
         {sampleUrl ? <audio ref={sampleAudio} key={sampleUrl} controls preload="metadata" src={sampleUrl} aria-label="Audio câu mẫu" onLoadedMetadata={event => { event.currentTarget.playbackRate = rate; }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onError={() => setError("Chưa tải được audio mẫu. Bạn vẫn có thể đọc câu và thử tải lại trang sau.")} /> : <p className={styles.hint}>Giọng mẫu do trình duyệt tổng hợp, có thể khác nhau giữa các thiết bị.</p>}
-        {isSegment && <div className={styles.segmentNavigation}><button className={styles.secondary} disabled={busy || segmentIndex === 0} onClick={() => selectTarget(index, segmentIndex - 1)}>← Cụm trước</button>
-          {segmentIndex < segments.length - 1 ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(index, segmentIndex + 1)}>Cụm tiếp theo →</button> : <button className={styles.secondary} disabled={busy} onClick={() => selectTarget(index, null)}>Ôn lại cả câu</button>}</div>}
         <div className={styles.sentenceNavigation}><button disabled={busy || index === 0} onClick={() => selectSentence(index - 1)}>← Câu trước</button><span>{index + 1} / {lesson.sentences.length}</span><button disabled={busy || index === lesson.sentences.length - 1} onClick={() => selectSentence(index + 1)}>Câu tiếp theo →</button></div>
+          <nav className={styles.sentences} aria-label="Chọn câu luyện nói">{lesson.sentences.map((s, i) => <button key={i} disabled={busy}
+            aria-current={i === index ? "step" : undefined} onClick={() => selectSentence(i)} title={s.text}>
+            {sentenceCompleted(i) ? "✓ " : ""}Câu {i + 1}
+            {targets.some(item => item.sentenceIndex === i && clips[item.key] && !clips[item.key].submitted) && <small> · có bản nháp</small>}
+          </button>)}</nav>
+        </details>
       </section>
       <section className={`${styles.card} ${styles.recorder}`} aria-labelledby="recorder-title">
-        <div className={styles.cardTop}><h2 id="recorder-title"><span className={`${styles.recorderDot} ${isRecording ? styles.live : ""}`} />Phòng thu âm</h2><span>{isRecording ? `${seconds.toFixed(1)} / ` : ""}{lesson.maxRecordingSeconds} giây</span></div>
+        <div className={styles.cardTop}><h2 id="recorder-title" className={styles.visuallyHidden}>Phòng thu âm</h2><span>{isRecording ? `${seconds.toFixed(1)} / ` : ""}{lesson.maxRecordingSeconds} giây</span></div>
+        <div className={styles.recorderStage}>
         <div className={`${styles.wave} ${isRecording ? styles.activeWave : ""}`} aria-hidden="true">{waveform.map((height, i) => <span key={i} style={{ height: 5 + height * (isRecording ? .18 + Math.min(level * 2.8, .8) : .18) }} />)}</div>
         <button type="button" className={`${styles.mic} ${isRecording ? styles.live : ""}`} disabled={busy && !isRecording}
           aria-label={isRecording ? "Dừng và nghe lại" : clip || result ? "Ghi âm lại" : "Bắt đầu ghi âm"} onClick={() => isRecording ? void finish() : void start()}>
           {isRecording ? <span className={styles.stopIcon} /> : <Icon name="mic" />}
         </button>
+        </div>
         <p className={styles.recorderStatus} role="status">{isRecording ? "Đang ghi âm giọng đọc của bạn…" : phase === "starting" ? "Đang mở microphone…" : phase === "encoding" ? "Đang chuẩn bị bản ghi…" : phase === "submitting" ? "Đang chấm bài nói…" : clip && !clip.submitted ? "Bản ghi đã sẵn sàng để nghe lại" : "Bấm microphone để bắt đầu"}</p>
-        <p className={styles.hint}>{isRecording ? "Bấm lần nữa khi bạn đọc xong." : `Đọc ${isSegment ? "cụm đang chọn" : "cả câu trong một bản ghi"}.`}</p>
-        <label className={styles.autoStop}><input type="checkbox" checked={stopOnSilence} disabled={busy} onChange={event => setAutoStopPreference(event.target.checked)} />Tự dừng sau khoảng 1,5 giây im lặng</label>
-        <p className={styles.hint}>{stopOnSilence ? "Nếu cần ngắt hơi lâu hơn, hãy tắt tự dừng." : "Bấm Dừng và nghe lại sau khi đọc xong."}</p>
         {phase === "recording" && <div className={styles.recordingStats}><span>{seconds.toFixed(1)} / {lesson.maxRecordingSeconds} giây</span><meter min={0} max={1} value={level} aria-label="Mức âm lượng microphone" /><span className={styles.volumeHint}>{level < .03 ? "Chưa nghe rõ · kiểm tra mic" : level > .9 ? "Âm lượng lớn · thử lùi mic" : "Đã nhận âm thanh"}</span></div>}
         <div className={styles.actions}>
           {isRecording && <button className={styles.secondary} onClick={cancelRecording}>Hủy lần ghi</button>}
           {phase === "starting" && <button className={styles.secondary} onClick={cancelRecording}>Hủy mở microphone</button>}
-          <label className={`${styles.fileButton} ${busy ? styles.disabled : ""}`}>Chọn tệp WAV<input type="file" accept=".wav,audio/wav" disabled={busy} onChange={event => { upload(event.target.files?.[0]); event.target.value = ""; }} /></label>
         </div>
         {phase === "submitting" && <div className={styles.waiting} role="status"><span className={styles.spinner} aria-hidden="true" />Đang gửi và chấm bản ghi…</div>}
         {clip && (phase === "idle" || phase === "submitting") && <div className={styles.preview}><p className={styles.clipName}>{clip.name}{clip.submitted ? " · đã gửi chấm" : " · chưa gửi chấm"}</p>
@@ -300,7 +331,16 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           {!clip.submitted && <button className={styles.primary} disabled={busy} onClick={() => void submit()}><Icon name="sparkles" />Gửi chấm điểm</button>}
           <button className={styles.secondary} disabled={busy} onClick={() => { stopPlayback(); saveClip(target.key, null); setNotice(`Đã bỏ bản ghi tạm của ${unit} này.`); }}>Bỏ bản ghi tạm</button>
         </div>}
-        <p className={styles.hint}>Bản nháp được giữ riêng cho từng cụm và cả câu khi chuyển qua lại trong tab này. Tải lại hoặc đóng trang sẽ mất bản nháp. Tệp WAV tối đa 2 MB.</p>
+        <details className={styles.recorderOptions}>
+          <summary>Tùy chọn ghi âm</summary>
+          <p className={styles.hint}>{isRecording ? "Bấm lần nữa khi bạn đọc xong." : `Đọc ${isSegment ? "cụm đang chọn" : "cả câu trong một bản ghi"}.`}</p>
+          <label className={styles.autoStop}><input type="checkbox" checked={stopOnSilence} disabled={busy}
+            onChange={event => setAutoStopPreference(event.target.checked)} />Tự dừng sau khoảng 1,5 giây im lặng</label>
+          <p className={styles.hint}>{stopOnSilence ? "Nếu cần ngắt hơi lâu hơn, hãy tắt tự dừng." : "Bấm Dừng và nghe lại sau khi đọc xong."}</p>
+          <label className={`${styles.fileButton} ${busy ? styles.disabled : ""}`}>Chọn tệp WAV<input type="file" accept=".wav,audio/wav"
+            disabled={busy} onChange={event => { upload(event.target.files?.[0]); event.target.value = ""; }} /></label>
+          <p className={styles.hint}>Bản nháp được giữ riêng cho từng cụm và cả câu khi chuyển qua lại trong tab này. Tải lại hoặc đóng trang sẽ mất bản nháp. Tệp WAV tối đa 2 MB.</p>
+        </details>
       </section>
       {notice && <p className={styles.notice} role="status">{notice}</p>}
       {error && <div className={styles.error} role="alert">{error}</div>}
@@ -333,7 +373,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
         <div className={styles.resultActions}>{isSegment && <button className={styles.secondary} disabled={busy} onClick={() => selectTarget(index, null)}>Thử đọc cả câu</button>}
           {following ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(following.sentenceIndex, following.segmentIndex)}>{following.sentenceIndex === index ? "Luyện cụm tiếp theo →" : "Luyện câu tiếp theo →"}</button> : nextPending && nextPending.key !== target.key ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(nextPending.sentenceIndex, nextPending.segmentIndex)}>Luyện phần chưa hoàn tất →</button> : <Link className={styles.back} href={`/courses/${lesson.courseId}`}>Quay lại khóa học →</Link>}</div>
       </section> : <section className={`${styles.card} ${styles.pendingResult}`} aria-labelledby="empty-result-title">
-        <div className={styles.cardTop}><h2 id="empty-result-title">Kết quả phát âm</h2><span><Icon name="sparkles" /> AI</span></div>
+        <div className={styles.cardTop}><h2 id="empty-result-title"><Icon name="trend" />Kết quả phát âm</h2><span><Icon name="sparkles" /> AI</span></div>
         <span className={styles.emptyIcon}><Icon name="mic" /></span>
         <h3>{phase === "submitting" ? "Đang phân tích bản ghi" : "Chưa có kết quả"}</h3>
         <p>{phase === "submitting" ? "Điểm và phản hồi sẽ xuất hiện tại đây." : "Ghi âm và gửi chấm để xem điểm, độ phủ và phản hồi từng từ."}</p>

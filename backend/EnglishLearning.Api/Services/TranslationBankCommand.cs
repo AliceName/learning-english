@@ -14,6 +14,17 @@ public sealed class TranslationBankCommand(EnglishLearningDbContext db, Translat
     {
         switch (command)
         {
+            case "check-ai":
+                var assessment = await ai.GradeAsync(
+                    new(0, "A1", "Thời gian rảnh", "Công viên này rất đẹp vào mùa xuân.", ""),
+                    ["Công viên này rất đẹp vào mùa xuân."], ["This park is very beautiful in spring."],
+                    "This park is beautiful on spring", ct);
+                Console.WriteLine(JsonSerializer.Serialize(new
+                {
+                    status = "ok", assessment.Meaning, assessment.Grammar, assessment.Naturalness,
+                    assessment.CorrectedText, assessment.CorrectionExplanation, assessment.Alternative
+                }, Output));
+                break;
             case "generate":
                 await GenerateAsync(ct);
                 break;
@@ -56,7 +67,7 @@ public sealed class TranslationBankCommand(EnglishLearningDbContext db, Translat
                 Console.WriteLine($"Prompt {promptId}: blocked.");
                 break;
             default:
-                throw new ArgumentException("Use --translation-command=generate|import|replace|list-pending|approve|reject|block.");
+                throw new ArgumentException("Use --translation-command=check-ai|generate|import|replace|list-pending|approve|reject|block.");
         }
     }
 

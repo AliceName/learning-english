@@ -61,9 +61,6 @@ public sealed class TranslationAiBudget(TimeProvider time, IOptions<TranslationA
         }
     }
 
-    internal static TranslationPracticeException Unavailable() =>
-        new(503, "ai_unavailable", "Bộ chấm AI hiện chưa sẵn sàng. Bạn có thể thử lại sau.");
-
     internal static TranslationPracticeException QuotaLimited(int retryAfter) =>
         new(503, "ai_quota_limited", "Bộ chấm AI đã đạt hạn mức. Vui lòng thử lại sau.", retryAfter);
 }
@@ -239,24 +236,30 @@ public sealed class TranslationAiClient(HttpClient client, IOptions<TranslationA
             throw ConfigurationError("Missing or invalid key or model");
 
         var text = JsonSerializer.Serialize(input, TranslationPracticeSupport.Json);
-        using var request = gemini
-            ? GeminiRequest(model, apiKey.Trim(), instruction, text, generation)
-            : ChatRequest(options.Endpoint, model, apiKey.Trim(), instruction, text, maxTokens);
         var providerName = gemini ? "Gemini" : "ChatCompletions";
-
-        budget.Reserve(generation);
         var stopwatch = Stopwatch.StartNew();
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        deadline.CancelAfter(TimeSpan.FromSeconds(30));
 
         try
         {
-            using var response = await client.SendAsync(request, ct);
+            using var response = await SendWithRetryAsync(() => gemini
+                ? GeminiRequest(model, apiKey.Trim(), instruction, text, generation)
+                : ChatRequest(options.Endpoint, model, apiKey.Trim(), instruction, text, maxTokens),
+                providerName, operation, generation, deadline.Token);
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogWarning("Translation AI {Provider} {Operation} returned HTTP {Status} in {ElapsedMs} ms.",
                     providerName, operation, (int)response.StatusCode, stopwatch.ElapsedMilliseconds);
                 if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.NotFound)
                     throw ConfigurationError("Provider rejected the request");
-                if (response.StatusCode != HttpStatusCode.TooManyRequests) throw TranslationAiBudget.Unavailable();
+                if (response.StatusCode != HttpStatusCode.TooManyRequests)
+                {
+                    var waitForProvider = ProviderRetryDelay(response);
+                    throw new TranslationPracticeException(503, "ai_provider_unavailable",
+                        "Dịch vụ chấm AI đang tạm bận. Vui lòng thử lại sau.",
+                        waitForProvider > TimeSpan.Zero ? (int)Math.Clamp(Math.Ceiling(waitForProvider.TotalSeconds), 1, 86400) : null);
+                }
                 var retry = response.Headers.RetryAfter;
                 var wait = retry?.Delta ?? (retry?.Date is { } date ? date - time.GetUtcNow() : TimeSpan.FromMinutes(1));
                 var seconds = (int)Math.Clamp(Math.Ceiling(wait.TotalSeconds), 1, 86400);
@@ -264,7 +267,7 @@ public sealed class TranslationAiClient(HttpClient client, IOptions<TranslationA
                 throw TranslationAiBudget.QuotaLimited(seconds);
             }
 
-            var (content, tokens) = gemini ? await ReadGeminiAsync(response.Content, ct) : await ReadChatAsync(response.Content, ct);
+            var (content, tokens) = gemini ? await ReadGeminiAsync(response.Content, deadline.Token) : await ReadChatAsync(response.Content, deadline.Token);
             var result = JsonSerializer.Deserialize<T>(content, TranslationPracticeSupport.Json) ?? throw InvalidResponse();
             logger.LogInformation("Translation AI {Provider} {Operation} completed in {ElapsedMs} ms using {Tokens} tokens.",
                 providerName, operation, stopwatch.ElapsedMilliseconds, tokens);
@@ -280,11 +283,55 @@ public sealed class TranslationAiClient(HttpClient client, IOptions<TranslationA
             logger.LogWarning("Translation AI {Operation} timed out after {ElapsedMs} ms.", operation, stopwatch.ElapsedMilliseconds);
             throw new TranslationPracticeException(504, "ai_timeout", "AI phản hồi quá lâu. Vui lòng thử lại.");
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException error)
         {
-            logger.LogWarning("Translation AI {Operation} could not connect.", operation);
-            throw TranslationAiBudget.Unavailable();
+            logger.LogWarning("Translation AI {Provider} {Operation} connection failed: {Reason}.", providerName, operation, error.HttpRequestError);
+            throw new TranslationPracticeException(503, "ai_connection_failed",
+                "Chưa kết nối được dịch vụ chấm AI. Vui lòng kiểm tra kết nối mạng và thử lại.");
         }
+    }
+
+    private async Task<HttpResponseMessage> SendWithRetryAsync(Func<HttpRequestMessage> createRequest,
+        string provider, string operation, bool generation, CancellationToken ct)
+    {
+        const int maxRetries = 2;
+        var delay = TimeSpan.Zero;
+        for (var attempt = 0; ; attempt++)
+        {
+            if (delay > TimeSpan.Zero) await Task.Delay(delay, time, ct);
+            ct.ThrowIfCancellationRequested();
+            using var request = createRequest();
+            budget.Reserve(generation);
+            HttpResponseMessage response;
+            try { response = await client.SendAsync(request, ct); }
+            catch (HttpRequestException error) when (attempt < maxRetries)
+            {
+                logger.LogWarning("Translation AI {Provider} {Operation} retry {Attempt} after connection failure: {Reason}.",
+                    provider, operation, attempt + 1, error.HttpRequestError);
+                delay = RetryDelay(attempt);
+                continue;
+            }
+
+            var transient = response.StatusCode is HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway or
+                HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout;
+            if (!transient || attempt >= maxRetries) return response;
+
+            var requestedDelay = ProviderRetryDelay(response);
+            // Let the caller retry later if the provider asks for a longer wait than this interactive operation allows.
+            if (requestedDelay > TimeSpan.FromSeconds(5)) return response;
+            delay = requestedDelay > TimeSpan.Zero ? requestedDelay : RetryDelay(attempt);
+            logger.LogWarning("Translation AI {Provider} {Operation} retry {Attempt} after HTTP {Status}.",
+                provider, operation, attempt + 1, (int)response.StatusCode);
+            response.Dispose();
+        }
+    }
+
+    private static TimeSpan RetryDelay(int attempt) => TimeSpan.FromMilliseconds(1000 * (1 << attempt) + Random.Shared.Next(250));
+
+    private TimeSpan ProviderRetryDelay(HttpResponseMessage response)
+    {
+        var retryAfter = response.Headers.RetryAfter;
+        return retryAfter?.Delta ?? (retryAfter?.Date is { } date ? date - time.GetUtcNow() : TimeSpan.Zero);
     }
 
     private HttpRequestMessage GeminiRequest(string model, string apiKey, string instruction, string text, bool generation)

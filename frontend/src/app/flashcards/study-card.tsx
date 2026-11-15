@@ -15,19 +15,20 @@ function Example({ sentence, word }: { sentence: string; word: string }) {
   return <>{sentence.slice(0, position)}<mark>{sentence.slice(position, position + word.length)}</mark>{sentence.slice(position + word.length)}</>;
 }
 
-export default function StudyCard({ account, card, flipped, busy, flipRef, onFlip }: {
-  account?: string; card: Flashcard; flipped: boolean; busy: boolean;
+export default function StudyCard({ account, card, flipped, busy, flipRef, onFlip, difficultyLevel, onPrevious, onNext }: {
+  account?: string; card: Pick<Flashcard, "frontText" | "backText" | "exampleSentence"> & Partial<Pick<Flashcard, "cardId" | "deckId">>; flipped: boolean; busy: boolean; difficultyLevel?: string | null;
   flipRef: RefObject<HTMLButtonElement | null>; onFlip: (flipped: boolean) => void;
+  onPrevious?: () => void; onNext?: () => void;
 }) {
   const [preferences, setPreferences] = useState<CardPreferences | null>(null);
   const [issue, setIssue] = useState("");
   const phonetic = useFlashcardPhonetic(!account || preferences ? card.frontText : "", preferences?.phonetic);
-  const level = levels.find(level => level === preferences?.level) ?? "Chưa chọn";
+  const level = levels.find(level => level === (preferences?.level || difficultyLevel)) ?? "Chưa chọn";
   const [meaning, ...description] = card.backText.split(/\r?\n/);
 
   useEffect(() => {
     let active = true;
-    if (account) void readPreference<CardPreferences>(deckPreferencePrefix(account, card.deckId) + card.cardId)
+    if (account && card.deckId !== undefined && card.cardId !== undefined) void readPreference<CardPreferences>(deckPreferencePrefix(account, card.deckId) + card.cardId)
       .catch(() => undefined).then(value => { if (active) setPreferences(value ?? emptyPreferences); });
     return () => { active = false; window.speechSynthesis?.cancel(); };
   }, [account, card.deckId, card.cardId]);
@@ -37,12 +38,13 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
   return <>
     <div className={styles.studyScene}>
       <Image src="/illustrations/speaking-reading-books.webp" alt="" width={320} height={320} className={styles.studyBooks} />
-      <button className={styles.faceArrow} type="button" aria-label="Xem mặt trước" disabled={busy || !flipped} onClick={() => onFlip(false)}><Icon name="chevron" /></button>
+      <button className={styles.cardArrow} type="button" aria-label="Thẻ trước" disabled={busy || !onPrevious} onClick={onPrevious}><Icon name="chevron" /></button>
       <div className={styles.studyStack}>
         <span className={styles.binderRings} aria-hidden="true"><i /><i /></span>
         <div className={styles.studyPaper} data-flipped={flipped}>
-          <button ref={flipRef} type="button" className={styles.flipCard} disabled={busy} onClick={() => onFlip(!flipped)}
-            aria-label={flipped ? "Đang xem nghĩa. Bấm để xem từ." : "Bấm để lật thẻ và xem nghĩa."} aria-pressed={flipped} />
+          <button ref={flipRef} type="button" className={styles.flipCard} disabled={busy}
+            onClick={event => { if (event.detail === 0) onFlip(!flipped); }} onDoubleClick={() => onFlip(!flipped)}
+            aria-label={flipped ? "Đang xem nghĩa. Nhấn đúp để xem từ." : "Nhấn đúp để lật thẻ và xem nghĩa."} aria-pressed={flipped} />
           <div className={styles.studyContent}>
             <span className={styles.studyRibbon}>{flipped ? "Mặt sau · Nghĩa & Ví dụ" : "Mặt trước · Từ vựng"}</span>
             <span className={styles.studyStar} aria-hidden="true"><Icon name="star" /></span>
@@ -54,7 +56,7 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
               {phonetic && <span className={styles.studyPhonetic} lang="en-fonipa">{phonetic}</span>}
               <Image src={preferences?.image || "/illustrations/speaking-reading-cat.webp"} width={640} height={440}
                 alt={preferences?.image ? "Ảnh minh họa từ vựng" : ""} className={preferences?.image ? styles.studyCustomImage : styles.studyCat} unoptimized={!!preferences?.image} />
-              <span className={styles.studyFlipHint}>Bấm hoặc nhấn Enter để lật thẻ</span>
+              <span className={styles.studyFlipHint}>Nhấn đúp hoặc nhấn Enter để lật thẻ</span>
             </> : <>
               <div className={styles.studyMeaning}>
                 <Icon name="book" /><div lang="vi"><strong>{meaning}</strong>{description.length > 0 && <p>{description.join("\n")}</p>}</div>
@@ -70,7 +72,7 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
           </div>
         </div>
       </div>
-      <button className={styles.faceArrow} type="button" aria-label="Xem mặt sau" disabled={busy || flipped} onClick={() => onFlip(true)}><Icon name="chevron" /></button>
+      <button className={styles.cardArrow} type="button" aria-label="Thẻ tiếp" disabled={busy || !onNext} onClick={onNext}><Icon name="chevron" /></button>
       <Image src="/illustrations/speaking-reading-books.webp" alt="" width={320} height={320} className={`${styles.studyBooks} ${styles.studyBooksRight}`} />
     </div>
     <div className={styles.studyDots} aria-label="Mặt thẻ đang xem">

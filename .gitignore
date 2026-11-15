@@ -33,6 +33,9 @@ TestResults/
 # Next.js and Node.js
 node_modules/
 .next/
+.next-ai-preview/
+.next-ai-build/
+backend/.ai-preview-build/
 out/
 *.tsbuildinfo
 coverage/

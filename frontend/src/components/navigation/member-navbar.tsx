@@ -19,7 +19,7 @@ const links: { label: string; icon: SiteIconName; href?: string }[] = [
   { label: "Luyện nói", icon: "mic", href: "/speaking" },
   { label: "Luyện phiên dịch", icon: "translate", href: "/translation-practice" },
   { label: "Luyện viết", icon: "writing", href: "/writing" },
-  { label: "Tạo khóa học AI", icon: "sparkles" },
+  { label: "Tạo khóa học AI", icon: "sparkles", href: "/courses/create-ai" },
   { label: "Flashcards", icon: "cards", href: "/flashcards" },
   { label: "Ôn tập lỗi sai", icon: "replay" },
   { label: "Bookmark", icon: "bookmark" },
@@ -42,7 +42,7 @@ export default function MemberNavbar({ user, variant = "workspace" }: { user?: P
     <nav aria-label="Điều hướng học tập" className={styles.navigation}>
       {user?.role === "admin" && <Link href="/admin/courses"><Icon name="shield"/><span>Quản trị khóa học</span></Link>}
       {links.map(item => item.href ? <Link key={item.label} href={item.href}
-        aria-current={pathname === item.href || item.href === "/courses" && pathname.startsWith("/courses/") ? "page" : undefined}
+        aria-current={pathname === item.href || item.href === "/courses" && pathname.startsWith("/courses/") && pathname !== "/courses/create-ai" ? "page" : undefined}
         onClick={() => drawer.current?.close()}><Icon name={item.icon} /><span>{item.label}</span></Link>
         : <span key={item.label} className={styles.unavailable} aria-disabled="true" title="Chức năng đang được phát triển"><Icon name={item.icon} /><span>{item.label}</span><small>Sắp có</small></span>)}
     </nav>

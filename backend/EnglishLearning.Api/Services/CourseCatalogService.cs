@@ -100,7 +100,10 @@ public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
         if (course is null) return null;
         var lessons = await dbContext.Lessons.AsNoTracking().Where(item => item.CourseId == courseId && item.IsActive)
             .OrderBy(item => item.OrderIndex).ThenBy(item => item.LessonId)
-            .Select(item => new CourseLessonSummary(item.LessonId, item.Title, item.SkillType, item.DifficultyLevel, item.EstimatedMinutes, item.OrderIndex, null))
+            .Select(item => new CourseLessonSummary(item.LessonId, item.Title, item.SkillType, item.DifficultyLevel, item.EstimatedMinutes, item.OrderIndex, null,
+                dbContext.ExerciseResults.Any(result => result.UserId == userId && result.LessonId == item.LessonId) ||
+                dbContext.SpeakingAttempts.Any(attempt => attempt.UserId == userId && attempt.LessonId == item.LessonId) ||
+                dbContext.WritingSubmissions.Any(submission => submission.UserId == userId && submission.LessonId == item.LessonId)))
             .ToListAsync(cancellationToken);
         var enrollment = await dbContext.UserCourses.AsNoTracking().SingleOrDefaultAsync(item => item.CourseId == courseId && item.UserId == userId, cancellationToken);
         var count = await dbContext.UserCourses.CountAsync(item => item.CourseId == courseId && item.Status != "abandoned", cancellationToken);

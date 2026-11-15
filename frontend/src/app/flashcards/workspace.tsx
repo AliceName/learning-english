@@ -28,8 +28,9 @@ const dateLabel = (date: string | null) => date ? dateFormat.format(new Date(dat
 type DeckForm = { original?: Deck; title: string; description: string };
 type Editor = { card?: Flashcard; preferences: CardPreferences };
 
-export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: {
+export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, course, initialDeckId, createOnOpen, onReturn }: {
   initialDecks: Deck[] | null; account?: string; isAdmin: boolean;
+  course?: { courseId: number; title: string }; initialDeckId?: number; createOnOpen?: boolean; onReturn?: () => void;
 }) {
   const [decks, setDecks] = useState(initialDecks);
   const [detail, setDetail] = useState<DeckDetail | null>(null);
@@ -37,12 +38,14 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
   const [progressUnavailable, setProgressUnavailable] = useState(false);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [favoriteReady, setFavoriteReady] = useState(false);
-  const [deckForm, setDeckForm] = useState<DeckForm | null>(null);
+  const [deckForm, setDeckForm] = useState<DeckForm | null>(createOnOpen ? { title: "", description: "" } : null);
+  const [initialLoading, setInitialLoading] = useState(!!initialDeckId);
   const [editor, setEditor] = useState<Editor | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [study, setStudy] = useState<Flashcard[] | null>(null);
+  const [studyIndex, setStudyIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [total, setTotal] = useState(0);
@@ -51,9 +54,21 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
   const centerReview = useRef(false);
   const studyCard = useRef<HTMLButtonElement>(null);
   const studyHeading = useRef<HTMLHeadingElement>(null);
-  const current = study?.[0];
+  const current = study?.[studyIndex];
   const view = editor ? "editor" : detail ? "detail" : "library";
   const deckDialogOpen = deckForm !== null;
+  const listPath = course ? `decks?courseId=${course.courseId}` : "decks";
+
+  useEffect(() => {
+    if (!initialDeckId) return;
+    const controller = new AbortController();
+    void api<DeckDetail>("decks/" + initialDeckId, "GET", undefined, controller.signal).then(value => {
+      if (!controller.signal.aborted) { setDetail(value); setInitialLoading(false); }
+    }, failure => {
+      if (!controller.signal.aborted) { setError(failure instanceof Error ? failure.message : "Chưa tải được bộ thẻ."); setInitialLoading(false); }
+    });
+    return () => controller.abort();
+  }, [initialDeckId]);
 
   useEffect(() => {
     if (deckDialogOpen) deckDialog.current?.showModal();
@@ -145,6 +160,8 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
 
   function showLibrary() {
     if (busy) return;
+    window.speechSynthesis?.cancel();
+    if (onReturn) { onReturn(); return; }
     setEditor(null); setDetail(null); setStudy(null); setError(""); setNotice("");
   }
 
@@ -177,6 +194,7 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
       const original = deckForm.original;
       const deck = await api<Deck>(original ? "decks/" + original.deckId : "decks", original ? "PUT" : "POST", {
         title: deckForm.title, description: deckForm.description || null,
+        ...(!original && course ? { courseId: course.courseId } : {}),
       });
       updateDeck(deck, true);
       let message = "Đã lưu bộ thẻ.";
@@ -184,7 +202,7 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
         setDetail({ deck, cards: [] }); setStudy(null); setEditor(null);
         // A create from the retry state may be the only deck in memory until the next list request.
         if (!decks) {
-          try { setDecks(await api<Deck[]>("decks")); }
+          try { setDecks(await api<Deck[]>(listPath)); }
           catch { message = "Đã lưu bộ thẻ. Tải lại trang để cập nhật danh sách."; }
         }
       } else if (detail?.deck.deckId === deck.deckId) {
@@ -293,25 +311,34 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
       const queue = fresh.cards.filter(card => card.isDue).sort((a, b) =>
         (a.nextReviewAt ?? "").localeCompare(b.nextReviewAt ?? "") || a.cardId - b.cardId);
       centerReview.current = true;
-      setStudy(queue); setTotal(queue.length); setReviewed(0); setFlipped(false);
+      setStudy(queue); setStudyIndex(0); setTotal(queue.length); setReviewed(0); setFlipped(false);
     });
+  }
+
+  function moveStudy(change: number) {
+    if (busy || !study?.length) return;
+    window.speechSynthesis?.cancel();
+    setStudyIndex(value => Math.max(0, Math.min(study.length - 1, value + change))); setFlipped(false);
   }
 
   function rate(rating: number) {
     if (!current || !detail || !flipped) return;
     void perform(async () => {
       const result = await api<Flashcard>("cards/" + current.cardId + "/review", "POST", { rating, expectedUpdatedAt: current.updatedAt });
-      setStudy(previous => previous?.slice(1) ?? null);
+      setStudy(previous => previous?.filter(card => card.cardId !== current.cardId) ?? null);
+      setStudyIndex(Math.min(studyIndex, Math.max(0, (study?.length ?? 0) - 2)));
       setFlipped(false); setReviewed(previous => previous + 1);
       applyCards(detail, detail.cards.map(item => item.cardId === result.cardId ? result : item));
     });
   }
 
   return <main id="main-content" tabIndex={-1} className={styles.page}>
+    {course && <div className={styles.actions}><button type="button" disabled={busy} onClick={showLibrary}>← Bộ thẻ khóa học: {course.title}</button></div>}
+    {initialLoading && <p role="status">Đang tải bộ thẻ…</p>}
     {notice && <p role="status" className={styles.notice}>{notice}</p>}
     {error && !deckDialogOpen && <p role="alert" className={styles.error}>{error}</p>}
-    {!detail ? <FlashcardLibrary decks={decks} learned={learned} favorites={favorites} favoriteReady={favoriteReady} progressUnavailable={progressUnavailable} busy={busy}
-      onRefresh={() => void perform(async () => setDecks(await api<Deck[]>("decks")))}
+    {initialLoading ? null : !detail && course ? <section className={styles.panel}><h2>Bộ thẻ từ vựng khóa học</h2><p>Chọn bộ thẻ trong khóa học để tiếp tục.</p><button type="button" onClick={showLibrary}>Về danh sách bộ thẻ</button></section> : !detail ? <FlashcardLibrary decks={decks} learned={learned} favorites={favorites} favoriteReady={favoriteReady} progressUnavailable={progressUnavailable} busy={busy}
+      onRefresh={() => void perform(async () => setDecks(await api<Deck[]>(listPath)))}
       onCreate={() => openDeckForm()} onOpen={openDeck} onAdd={deck => openDeck(deck, true)} onFavorite={toggleFavorite}
       onEdit={openDeckForm} onDelete={deleteDeck} /> : editor ? <FlashcardEditor
       key={editor.card?.cardId ?? "create"} detail={detail} decks={decks ?? [detail.deck]} card={editor.card} initialPreferences={editor.preferences}
@@ -338,10 +365,11 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
         </div>
       </section>
       {study !== null ? <section className={`${styles.panel} ${styles.studyPanel}`} aria-label="Ôn tập thẻ">
-        <div className={styles.top}><h2 ref={studyHeading} tabIndex={-1}>Phiên ôn tập</h2><span>{reviewed} / {total} thẻ</span></div>
+        <div className={styles.top}><h2 ref={studyHeading} tabIndex={-1}>Phiên ôn tập</h2><span>{current && <>Thẻ {studyIndex + 1}/{study?.length} · </>}Đã ôn {reviewed} / {total} thẻ</span></div>
         <progress className={styles.progress} value={reviewed} max={Math.max(total, 1)} aria-label="Tiến độ phiên ôn" />
         {current ? <>
-          <StudyCard key={current.cardId} account={account} card={current} flipped={flipped} busy={busy} flipRef={studyCard} onFlip={setFlipped} />
+          <StudyCard key={current.cardId} account={account} card={current} flipped={flipped} busy={busy} flipRef={studyCard} onFlip={setFlipped}
+            onPrevious={studyIndex > 0 ? () => moveStudy(-1) : undefined} onNext={studyIndex < study!.length - 1 ? () => moveStudy(1) : undefined} />
           {flipped ? <div className={styles.ratings} aria-label="Tự đánh giá mức ghi nhớ">
             {["Quên", "Khó", "Nhớ", "Dễ"].map((label, rating) => <button type="button" key={label} disabled={busy} onClick={() => rate(rating)}>
               <strong>{label}</strong><small>{rating === 0 ? "Ôn lại sau 5 phút" : "Lên lịch lần tới"}</small>
@@ -375,7 +403,7 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin }: 
         <div className={styles.top}><h2 id="flashcards-deck-title">{deckForm.original ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"}</h2>
           <button type="button" aria-label="Đóng" disabled={busy} onClick={() => deckDialog.current?.close()}><Icon name="close" /></button>
         </div>
-        {isAdmin && <p>Bộ thẻ do admin tạo được chia sẻ ở chế độ chỉ đọc.</p>}
+        {isAdmin && <p>{course ? "Bộ thẻ này thuộc khóa học “" + course.title + "”. Học viên xem bộ gốc và tạo bản sao riêng để lưu lịch ôn." : "Bộ thẻ do admin tạo được chia sẻ ở chế độ chỉ đọc."}</p>}
         <form onSubmit={saveDeck}><fieldset disabled={busy} className={styles.form}>
           <label>Tên bộ thẻ<input autoFocus required maxLength={255} value={deckForm.title} placeholder="Ví dụ: Từ vựng giao tiếp"
             onChange={event => setDeckForm({ ...deckForm, title: event.target.value })} /></label>

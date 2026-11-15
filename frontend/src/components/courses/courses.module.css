@@ -134,10 +134,11 @@
 .lessons small { margin-left: auto; flex-shrink: 0; color: #929aab; font-size: 12px; }
 .lessonNote, .lessonEmpty { color: #8a94aa; font-size: 12px; margin: 20px 0 0; line-height: 1.8; }
 .lessonAction { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
+.lessonButton { display: inline-flex; align-items: center; justify-content: center; min-width: 96px; min-height: 32px; padding: 6px 18px; border: 1px solid #0754e5; border-radius: 6px; background: #0754e5; color: #fff; box-shadow: 0 2px 5px #0754e51a; text-decoration: none; font-size: 12px; font-weight: 700; line-height: 18px; white-space: nowrap; transition: background .15s, border-color .15s, box-shadow .15s; }
+.lessonButton:hover { background: #0043c4; border-color: #0043c4; box-shadow: 0 3px 7px #0754e524; }
+.lessonRetry { border-color: #9db7ff; background: linear-gradient(180deg, #fff, #f1f5ff); color: #0754e5; box-shadow: none; }
+.lessonRetry:hover { border-color: #6f96ff; background: #eaf1ff; box-shadow: none; }
 .listeningStatus { color: #64829b; font-size: 11px; margin: 7px 0 0; }
-.listeningProgress { display: flex; gap: 12px; align-items: center; font-size: 12px; color: #6580a6; padding: 12px 0 20px; flex-wrap: wrap; }
-.listeningProgress strong { color: #004ac6; }
-.listeningProgress progress { height: 6px; width: min(240px, 100%); accent-color: #004ac6; }
 @media(max-width:600px) { .lessons li { flex-wrap: wrap; } .lessonAction { width: 100%; padding-left: 46px; justify-content: space-between; } .lessonAction small { margin-left: 0; } }
 @media(min-width:1700px) { .grid { gap: 26px; } .cover { height: 210px; } .coverBadges { gap: 137px; } .levelBadge { top: 162px; } }
 @media(max-width:1250px) { .pageHeading { align-items: flex-start; } .aiPromo { padding: 14px; } .aiPromo strong { font-size: 12px; } .aiPromo div > span { font-size: 10px; } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .filterRow { align-items: flex-start; } .filterLabel { padding-top: 8px; } }

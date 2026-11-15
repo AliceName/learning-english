@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
+import { ResultIllustration, TranslationScenery } from "./translation-artwork";
 import styles from "./translation-practice.module.css";
 
 const levels = ["A1", "A2", "B1"] as const;
@@ -139,6 +140,7 @@ export default function TranslationPractice() {
   }
 
   return <main id="main-content" tabIndex={-1} className={styles.page}>
+    <TranslationScenery />
     <header className={styles.hero}>
       <nav aria-label="Vị trí trang" className={styles.breadcrumb}>
         <Link href="/account" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" />
@@ -146,30 +148,34 @@ export default function TranslationPractice() {
       </nav>
       <div className={styles.heroTitle}>
         <span className={styles.heroIcon}><Icon name="translate" /></span>
-        <div><h1>Phản xạ dịch</h1><p>Rèn phản xạ dịch Việt → Anh chính xác và tự nhiên theo từng trình độ.</p></div>
+        <h1>Phản xạ dịch<span className={styles.titleDoodle} aria-hidden="true"><i /><i /><i /></span></h1>
       </div>
-      <Image className={styles.mascot} src="/illustrations/speaking-reading-cat.webp" width={210} height={174} alt="" priority />
+      <Image className={styles.mascot} src="/illustrations/translation-cat.svg" width={348} height={190}
+        sizes="(max-width: 600px) 115px, (max-width: 1200px) 190px, 300px" alt="" priority />
     </header>
 
     <section aria-label="Trình độ và tiến độ" className={styles.toolbar}>
       <div className={styles.levels} aria-label="Cấp độ" role="group">
+        <span className={styles.levelLabel}>Trình độ (CEFR)</span>
         {levels.map(level => <button type="button" key={level} aria-pressed={selection.level === level}
           disabled={grading} onClick={() => { if (level !== selection.level) selectNext(level, false); }}>{level}</button>)}
       </div>
       {selection.review && <button className={styles.secondary} type="button" disabled={grading || loading}
         onClick={() => selectNext(selection.level, false)}>Kết thúc ôn lại</button>}
-      <div className={styles.progress}><span>Tiến độ phiên <strong>{Math.min(done.size, sessionGoal)}/{sessionGoal}</strong> câu</span>
+      <div className={styles.progress}><span>Tiến độ phiên dịch <strong>{Math.min(done.size, sessionGoal)}/{sessionGoal}</strong> câu</span>
         <progress aria-label="Tiến độ phiên" max={sessionGoal} value={Math.min(done.size, sessionGoal)} /></div>
     </section>
 
     <div className={styles.columns}>
       <div className={styles.exercise}>
         <section aria-labelledby="prompt-heading" className={`${styles.card} ${styles.prompt}`} aria-busy={loading}>
-          <div className={styles.row}><h2 id="prompt-heading" className={styles.eyebrow}>{prompt?.topic ?? "Câu tiếng Việt"}</h2>
-            {prompt && <button type="button" className={styles.iconButton} aria-label="Nghe câu tiếng Việt"
-              onClick={() => speak(prompt.vietnameseText, "vi-VN")}><Icon name="volume" /></button>}</div>
+          <h2 id="prompt-heading" className={styles.eyebrow}><span aria-hidden="true">“</span>{prompt?.topic ?? "Câu tiếng Việt"}</h2>
           {loading && <p className={styles.muted} role="status">Đang lấy câu luyện…</p>}
-          {prompt && <p className={styles.question} lang="vi">“{prompt.vietnameseText}”</p>}
+          {prompt && <div className={styles.questionRow}>
+            <p className={styles.question} lang="vi">“{prompt.vietnameseText}”</p>
+            <button type="button" className={styles.iconButton} aria-label="Nghe câu tiếng Việt"
+              onClick={() => speak(prompt.vietnameseText, "vi-VN")}><Icon name="volume" /></button>
+          </div>}
           {promptError && <div className={styles.notice} role="status"><p>{promptError.title}</p>
             {promptError.code === "review_available"
               ? <button className={styles.primary} type="button" onClick={() => selectNext(selection.level, true)}>Ôn lại</button>
@@ -186,21 +192,23 @@ export default function TranslationPractice() {
           <div className={styles.actions}>
             <button className={styles.secondary} type="button" disabled={!answer || grading} onClick={() => { updateAnswer(""); textarea.current?.focus(); }}>
               <Icon name="trash" /> Xóa</button>
-            <button className={styles.secondary} type="button" disabled={!prompt || loading || grading} onClick={() => selectNext()}>
-              <Icon name="translate" /> Đổi câu</button>
-            <button className={styles.primary} type="submit" disabled={!prompt || !answer.trim() || grading}>{grading ? "Đang chấm…" : "Chấm câu"}</button>
+            <div className={styles.answerActions}>
+              <button className={styles.secondary} type="button" disabled={!prompt || loading || grading} onClick={() => selectNext()}>
+                <Icon name="translate" /> Đổi câu</button>
+              <button className={styles.primary} type="submit" disabled={!prompt || !answer.trim() || grading}>{grading ? "Đang chấm…" : "Chấm câu"}</button>
+            </div>
           </div>
           {speechMessage && <p role="status" className={styles.muted}>{speechMessage}</p>}
         </form>
       </div>
 
       <section className={`${styles.card} ${styles.results}`} aria-labelledby="result-heading" aria-busy={grading}>
-        <h2 id="result-heading">Kết quả bản dịch</h2>
+        <h2 id="result-heading" className={styles.resultHeading}><Icon name="trend" />Kết quả bản dịch</h2>
         {gradeError && <div className={styles.warning} role="alert">
           <strong>Chưa chấm được</strong><p>{gradeError.title}</p>
           {!!gradeError.retryAfter && <p>Hãy thử lại sau khoảng {Math.ceil(gradeError.retryAfter / 60)} phút.</p>}
         </div>}
-        {!grade && !gradeError && <div className={styles.empty}><span><Icon name={grading ? "clock" : "clipboard"} /></span>
+        {!grade && !gradeError && <div className={styles.empty}><ResultIllustration />
           <p role="status">{grading ? "Đang đối chiếu bản dịch của bạn…" : "Phản hồi sẽ xuất hiện sau khi bạn chấm câu."}</p></div>}
         {grade && <div className={styles.feedback} role="status">
           <div className={styles.scoreRow}>

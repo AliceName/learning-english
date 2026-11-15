@@ -7,6 +7,7 @@ using EnglishLearning.Api.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.RateLimiting;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.AiCourses;
 using EnglishLearning.Api.Services.CloudinaryMedia;
 using EnglishLearning.Api.Services.MediaMigration;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +21,17 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Read-only deployment preflight: no listener, database access, AI calls or secret values in output.
+if (builder.Configuration.GetValue<bool>("ai-course-preflight"))
+{
+    var cloud = builder.Configuration.GetSection(CloudinarySettings.SectionName).Get<CloudinarySettings>() ?? new();
+    var geminiConfigured = GeminiCourseClient.IsConfigured(builder.Configuration);
+    var cloudConfigured = cloud.Enabled && new CloudinarySettingsValidator().Validate(null, cloud).Succeeded;
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { geminiConfigured, cloudConfigured }));
+    Environment.ExitCode = geminiConfigured && cloudConfigured ? 0 : 2;
+    return;
+}
 
 // Explicit migration CLI: SELECT/Find reference audit only, no API listener, startup seed or DB/schema writes.
 if (builder.Configuration["media-migration"] is not null)
@@ -119,6 +131,15 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddSingleton<AiCourseStore>();
+builder.Services.AddSingleton<AiApiGateway>();
+builder.Services.AddHttpClient<GeminiCourseClient>(client =>
+{
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    client.MaxResponseContentBufferSize = 32 * 1024 * 1024;
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
+builder.Services.AddScoped<AiCourseService>();
+builder.Services.AddHostedService<AiCourseWorker>();
 builder.Services.AddSingleton<WritingTaskLibrary>();
 builder.Services.AddHttpClient<WritingAiClient>(client =>
 {
@@ -138,6 +159,10 @@ builder.Services.AddHttpClient<TranslationAiClient>(client =>
 }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
 builder.Services.AddSingleton<ListeningGradingService>();
 builder.Services.AddScoped<ListeningPracticeService>();
+builder.Services.AddScoped<GrammarPracticeService>();
+builder.Services.AddScoped<CourseReadingGrading>();
+builder.Services.AddScoped<CourseTextLessonService>();
+builder.Services.AddScoped<CourseVocabularyService>();
 builder.Services.AddScoped<SpeakingLessonService>();
 builder.Services.AddSingleton<SpeakingStorage>();
 builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services, client) =>
@@ -346,7 +371,7 @@ if (builder.Configuration["translation-command"] is { } translationCommand)
     using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(2));
     await using var scope = app.Services.CreateAsyncScope();
     try { await scope.ServiceProvider.GetRequiredService<TranslationBankCommand>().RunAsync(translationCommand, deadline.Token); }
-    catch (TranslationPracticeException error) { Console.Error.WriteLine(error.Message); Environment.ExitCode = 1; }
+    catch (TranslationPracticeException error) { Console.Error.WriteLine($"{error.Code}: {error.Message}"); Environment.ExitCode = 1; }
     catch (Exception error) when (error is ArgumentException or IOException or System.Text.Json.JsonException)
     { Console.Error.WriteLine(error.Message); Environment.ExitCode = 1; }
     catch (Exception error) when (error is Microsoft.Data.SqlClient.SqlException or DbUpdateException or OperationCanceledException)

@@ -438,6 +438,14 @@ Khi triển khai với Gemini, đặt `TranslationAi__Provider=Gemini` và `Tran
 
 Để dùng nhà cung cấp tương thích Chat Completions, truyền `-Provider ChatCompletions -Model <model-id>` và thêm `-Endpoint <url>` nếu dùng endpoint khác OpenAI. Khi triển khai, đặt `TranslationAi__Provider=ChatCompletions` cùng các thông số tương ứng. Model và endpoint Chat Completions đã lưu trước đây vẫn dùng được nếu chưa chỉ định provider và model không phải Gemini.
 
+Kiểm tra kết nối bằng một lượt chấm câu mẫu, với cấu hình của backend đang chọn.
+
+```powershell
+dotnet run --project backend/EnglishLearning.Api --launch-profile http -- --translation-command=check-ai
+```
+
+Lệnh trả điểm và câu sửa khi thành công, hoặc mã lỗi khi gặp vấn đề. Backend tự thử lại tối đa hai lần cho lỗi mạng và HTTP 500/502/503/504, với tổng thời gian xử lý yêu cầu AI tối đa 30 giây. Mỗi lần gọi nguồn được tính vào hạn mức. Phản hồi phân biệt lỗi cấu hình, hết hạn mức, mất kết nối và dịch vụ tạm bận.
+
 `TranslationPractice:CooldownDays` mặc định 7 ngày. `TranslationAi:GradeCallsPerDay` mặc định 300 lượt mỗi ngày UTC cho từng tiến trình API. Mỗi lần gọi lệnh `generate` sinh tối đa 10 đề và dùng một lượt riêng. Có thể đặt `TranslationAi:GenerationApiKey` và `TranslationAi:GenerationModel` cho công việc sinh đề. Với nhiều instance API, cấu hình chung kho khóa ASP.NET Data Protection để các instance đọc được mã lượt. Cache chống gửi trùng hoạt động trong từng tiến trình trong 5 phút.
 
 ```powershell
@@ -532,3 +540,10 @@ Audio phát âm Anh–Anh dùng endpoint hiện tại. Audio nghĩa Việt dùng
 TTS mặc định tắt để nghiệm thu chất lượng giọng. Sau khi nghe đánh giá mẫu và đối chiếu điều kiện lưu media, bật bằng biến môi trường `DefinitionAudioSettings__Enabled=true` cùng cấu hình Cloudinary hợp lệ, rồi khởi động lại backend. `MaxTextLength`, `VoiceProfile`, giới hạn byte, thời lượng, deadline, số tác vụ và hạn mức tài khoản cấu hình trong `DefinitionAudioSettings`. Kiểm tra server xác nhận MIME, kích thước, chuỗi khung MPEG Layer III và thời lượng. Trình duyệt xử lý giải mã và phản hồi lỗi phát. Đánh giá nghe xác nhận độ chính xác đọc nội dung.
 
 Kiểm thử liên quan nằm trong `BilingualVocabularyTests`, `BilingualHttpTests`, `DefinitionAudioTests`, `DefinitionAudioCloudTests` và `BilingualLiveTests`. Test nguồn thật bật bằng `ENGLISHLEARNING_RUN_LIVE_BILINGUAL_TEST=1`. Test MongoDB bật bằng `ENGLISHLEARNING_TEST_MONGODB_CONNECTION_STRING`, dùng database kết thúc bằng `Tests` và collection có prefix test. Test giao diện `frontend/tests/bilingual-dictionary.mjs` dùng Playwright, hỗ trợ `PLAYWRIGHT_MODULE_PATH` và `VOCABULARY_TEST_BASE_URL`.
+## Bộ thẻ từ vựng trong khóa học
+
+Phiên bản có bộ thẻ khóa học yêu cầu áp dụng riêng script `database/005_link_flashcard_decks_to_courses.sql` vào đúng database trước khi khởi động lại API. Script thêm `FlashcardDecks.CourseId INT NULL` và FK tới `Courses`, giữ nguyên các bộ thẻ hiện hữu. API không tự chạy script. Thay đổi này được người dùng duyệt ngày 14/11/2026.
+
+Admin mở `/admin/courses/[courseId]/flashcards` từ liên kết **Từ vựng & Flashcards** trong trang quản trị khóa học để tạo bộ, thêm/sửa thẻ hoặc tạo bộ từ từ vựng Reading. Học viên mở `/courses/[courseId]/flashcards` từ chi tiết khóa học hoặc bài Reading. Bộ từ Reading lấy từ nội dung đã lưu; thao tác xem không tạo dữ liệu. Học viên lưu bộ Reading hoặc tạo bản sao bộ Admin để có lịch ôn riêng; việc ôn không thay đổi bộ gốc.
+
+`GET /api/v1/courses/{courseId}/vocabulary` trả từ vựng Reading theo từng bài đang hoạt động. `POST /api/v1/courses/{courseId}/vocabulary/{lessonId}/copy` yêu cầu `contentVersion` và tạo bộ thuộc khóa học. API Flashcards hỗ trợ `GET /api/v1/flashcards/decks?courseId=...`; tạo bộ Admin nhận thêm `courseId` trong body. Các thao tác sửa bộ giữ nguyên liên kết khóa học. Khóa học ẩn/riêng tư được kiểm tra tại backend, kể cả khi mở từ thư viện Flashcards chung.

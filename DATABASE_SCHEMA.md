@@ -144,10 +144,13 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 
 ### 2.9. FlashcardDecks (trang 22–23)
 
+Mở rộng được người dùng phê duyệt ngày 14/11/2026: `CourseId INT NULL`, FK → `Courses.CourseId`, `ON DELETE NO ACTION`. Script `backend/database/005_link_flashcard_decks_to_courses.sql` được áp dụng riêng trước khi chạy phiên bản API này; không chạy tự động khi khởi động. `NULL` giữ hành vi bộ thẻ độc lập hiện có. Không thêm index hoặc cascade delete.
+
 | Cột | SQL Server type | Ràng buộc |
 |---|---|---|
 | DeckId | INT | PK, IDENTITY(1,1), NN |
 | UserId | INT | NN, FK → Users.UserId |
+| CourseId | INT | NULL, FK → Courses.CourseId, ON DELETE NO ACTION; mở rộng được duyệt 14/11/2026 |
 | Title | NVARCHAR(255) | NN |
 | Description | NVARCHAR(500) | NULL |
 | CreatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |

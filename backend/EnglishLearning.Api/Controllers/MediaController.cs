@@ -5,6 +5,7 @@ using EnglishLearning.Api.Authentication;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.AiCourses;
 using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EnglishLearning.Api.Controllers;
 
 [ApiController, Authorize, Route("api/v1"), Tags("Course media")]
-public sealed class MediaController(IMediaStorage storage, EnglishLearningDbContext db, ILogger<MediaController> logger) : ControllerBase
+public sealed class MediaController(IMediaStorage storage, EnglishLearningDbContext db, ILogger<MediaController> logger, AiCourseStore privateMedia) : ControllerBase
 {
     [Authorize(Roles = UserRoles.Admin), HttpPost("admin/uploads"), RequestSizeLimit(27 * 1024 * 1024)]
     [RequestFormLimits(MemoryBufferThreshold = 28 * 1024 * 1024, MultipartBodyLengthLimit = 27 * 1024 * 1024)]
@@ -50,6 +51,8 @@ public sealed class MediaController(IMediaStorage storage, EnglishLearningDbCont
             var user = await CurrentUserAsync(ct);
             if (user is null) return Unauthorized();
             if (!MediaStorage.IsManagedFileName(fileName)) return NotFound();
+            // Generated audio remains private to its creator, including when another admin requests it.
+            if (privateMedia.PrivateMediaOwner(fileName) is int owner && owner != user.UserId) return NotFound();
             var url = "/api/media/" + fileName;
             if (user.Role != UserRoles.Admin)
             {
