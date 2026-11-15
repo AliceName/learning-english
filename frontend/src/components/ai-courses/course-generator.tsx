@@ -140,11 +140,19 @@ export default function CourseGenerator({ fullName, targetLevel }: { fullName?: 
   }
 
   return <main id="main-content" tabIndex={-1} className={styles.page}>
-    <nav className={styles.breadcrumb} aria-label="Đường dẫn"><Link href="/courses">Khóa học</Link><Icon name="chevron" /><span>Tạo khóa học AI</span></nav>
-    <header className={styles.intro}>
-      <div><span className={styles.eyebrow}>LEWA LEARNING STUDIO</span><p className={styles.greeting}>Chào {firstName}, cùng tạo một lộ trình mới.</p><h1>Học điều bạn cần.<br /><span>Theo cách của bạn.</span></h1><p className={styles.introText}>Biến tài liệu của bạn thành khóa học tiếng Anh.<br />Bạn chọn mục tiêu, AI giúp bạn xây dựng từng bài học.</p></div>
-      <div className={styles.introAside}><span className={styles.private}><Icon name="shield" />Không gian học tập cá nhân</span><Link href="/courses?source=user_upload">Khóa học của tôi<Icon name="arrow" /></Link><a href="#ai-course-history">Lượt tạo gần đây<small>{jobs.length}</small></a></div>
-    </header>
+    <div className={styles.hero}>
+      <nav className={styles.breadcrumb} aria-label="Đường dẫn"><Link href="/account" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" /><Link href="/courses">Khóa học</Link><Icon name="chevron" /><span>Tạo khóa học AI</span></nav>
+      <header className={styles.intro}>
+        <div className={styles.introCopy}>
+          <p className={styles.greeting}>Chào {firstName}, cùng tạo một lộ trình mới.</p>
+          <h1>Học điều bạn cần.<br /><span>Theo cách của bạn.</span></h1>
+          <p className={styles.introText}>Biến tài liệu của bạn thành khóa học tiếng Anh.<br />Bạn chọn mục tiêu, AI giúp bạn xây dựng từng bài học.</p>
+          <ul className={styles.benefits} aria-label="Lợi ích khóa học AI"><li><Icon name="book" />Cá nhân hóa nội dung</li><li><Icon name="bolt" />Tạo khóa học nhanh</li><li><Icon name="trend" />Học hiệu quả hơn</li></ul>
+        </div>
+        <div className={styles.heroArt} aria-hidden="true"><Image src="/illustrations/ai-course-hero.png" alt="" width={1536} height={1024} sizes="(max-width: 600px) 250px, (max-width: 1449px) 34vw, 400px" loading="eager" /></div>
+        <div className={styles.introAside}><span className={styles.private}><Icon name="shield" />Không gian học tập cá nhân</span><Link href="/courses?source=user_upload">Khóa học của tôi<Icon name="arrow" /></Link><a href="#ai-course-history">Lượt tạo gần đây<small>{jobs.length}</small></a></div>
+      </header>
+    </div>
     <ol className={styles.workflow} aria-label="Quy trình tạo khóa học"><li><span>01</span><div><strong>Thiết lập lộ trình</strong><small>Tài liệu & mục tiêu của bạn</small></div></li><li><span>02</span><div><strong>Duyệt dàn ý</strong><small>Điều chỉnh trước khi tạo bài</small></div></li><li><span>03</span><div><strong>Sẵn sàng học</strong><small>Kiểm tra & lưu khóa học riêng</small></div></li></ol>
     {error && <div role="alert" className={styles.error}><Icon name="bulb" /><span>{error}</span></div>}
     {ready === false && <p role="status" className={styles.notice}>Tạo khóa học AI tạm thời chưa khả dụng. Bạn vẫn có thể chuẩn bị tài liệu và thiết lập lộ trình trước.</p>}
