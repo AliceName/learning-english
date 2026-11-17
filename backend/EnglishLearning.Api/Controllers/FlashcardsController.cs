@@ -1,4 +1,5 @@
 using System.Data;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text.Json;
@@ -23,11 +24,15 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
     private static FlashcardResponse Card(Flashcard c, DateTime now) => new(c.CardId, c.DeckId, c.FrontText, c.BackText, c.ExampleSentence,
         c.IntervalDays, c.Repetition, c.NextReviewAt is { } date ? Utc(date) : null, Utc(c.UpdatedAt), c.NextReviewAt is null || c.NextReviewAt <= now);
     private IQueryable<FlashcardDeck> Owned(int owner) => db.FlashcardDecks.Where(d => d.UserId == owner);
-    private IQueryable<FlashcardDeck> Visible(int owner) => db.FlashcardDecks.Where(d => d.UserId == owner || db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin"));
+    private IQueryable<FlashcardDeck> Visible(int owner) => db.FlashcardDecks.Where(d => d.UserId == owner ||
+        db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin") &&
+        (d.CourseId == null || db.Courses.Any(c => c.CourseId == d.CourseId && c.IsPublished && (c.SourceType == "system" || c.CreatedBy == owner))));
     private IQueryable<Flashcard> OwnedCards(int owner) => db.Flashcards.Where(c => db.FlashcardDecks.Any(d => d.UserId == owner && d.DeckId == c.DeckId));
-    private IQueryable<DeckSummary> Summaries(int owner, DateTime now, int? deckId = null) => Visible(owner).Where(d => deckId == null || d.DeckId == deckId).OrderByDescending(d => d.UpdatedAt).ThenByDescending(d => d.DeckId)
+    private IQueryable<DeckSummary> Summaries(int owner, DateTime now, int? deckId = null, int? courseId = null) => Visible(owner)
+        .Where(d => (deckId == null || d.DeckId == deckId) && (courseId == null || d.CourseId == courseId)).OrderByDescending(d => d.UpdatedAt).ThenByDescending(d => d.DeckId)
         .Select(d => new DeckSummary(d.DeckId, d.Title, d.Description, db.Flashcards.Count(c => c.DeckId == d.DeckId), d.UserId == owner ? db.Flashcards.Count(c => c.DeckId == d.DeckId && (c.NextReviewAt == null || c.NextReviewAt <= now)) : 0,
-            d.UserId == owner, db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin")));
+            d.UserId == owner, db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin"), d.CourseId,
+            db.Courses.Where(c => c.CourseId == d.CourseId).Select(c => c.Title).FirstOrDefault()));
     private async Task<IActionResult> Run(Func<int, Task<IActionResult>> action, CancellationToken ct)
     {
         Response.Headers.CacheControl = "private, no-store";
@@ -43,13 +48,21 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
     }
 
     [HttpGet("decks")]
-    public Task<IActionResult> List(CancellationToken ct) => Run(async owner => Ok(await Summaries(owner, Now).ToArrayAsync(ct)), ct);
+    public Task<IActionResult> List([FromQuery, Range(1, int.MaxValue)] int? courseId, CancellationToken ct) => Run(async owner => {
+        if (courseId is { } id && !await db.Courses.AnyAsync(c => c.CourseId == id &&
+            (c.IsPublished && (c.SourceType == "system" || c.CreatedBy == owner) ||
+             c.SourceType == "system" && db.Users.Any(u => u.UserId == owner && u.Role == "admin")), ct)) return NotFound();
+        return Ok(await Summaries(owner, Now, courseId: courseId).ToArrayAsync(ct));
+    }, ct);
 
     [HttpPost("decks")]
     public Task<IActionResult> CreateDeck(SaveDeckRequest request, CancellationToken ct) => Run(async owner => {
+        if (request.CourseId is { } courseId && (!await db.Users.AnyAsync(u => u.UserId == owner && u.Role == "admin", ct)
+            || !await db.Courses.AnyAsync(c => c.CourseId == courseId && c.SourceType == "system", ct)))
+            return NotFound();
         if (await Owned(owner).CountAsync(ct) >= 100) return Problem(statusCode: 400, title: "Mỗi tài khoản tối đa 100 bộ thẻ.");
         var now = Now;
-        var deck = new FlashcardDeck { UserId = owner, Title = request.Title, Description = request.Description?.Trim(), CreatedAt = now, UpdatedAt = now };
+        var deck = new FlashcardDeck { UserId = owner, CourseId = request.CourseId, Title = request.Title, Description = request.Description?.Trim(), CreatedAt = now, UpdatedAt = now };
         db.FlashcardDecks.Add(deck); await db.SaveChangesAsync(ct);
         return StatusCode(201, await Summaries(owner, now, deck.DeckId).SingleAsync(ct));
     }, ct);
@@ -72,7 +85,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
         var sourceCards = await db.Flashcards.AsNoTracking().Where(c => c.DeckId == id).OrderBy(c => c.CardId).Take(501).ToArrayAsync(ct);
         if (sourceCards.Length > 500) return Problem(statusCode: 400, title: "Bộ nguồn vượt giới hạn 500 thẻ.");
         var now = Now; const string suffix = " (bản sao riêng)";
-        var copy = new FlashcardDeck { UserId = owner, Title = source.Title[..Math.Min(source.Title.Length, 255 - suffix.Length)] + suffix, Description = source.Description, CreatedAt = now, UpdatedAt = now };
+        var copy = new FlashcardDeck { UserId = owner, CourseId = source.CourseId, Title = source.Title[..Math.Min(source.Title.Length, 255 - suffix.Length)] + suffix, Description = source.Description, CreatedAt = now, UpdatedAt = now };
         db.FlashcardDecks.Add(copy); await db.SaveChangesAsync(ct);
         db.Flashcards.AddRange(sourceCards.Select(c => new Flashcard { DeckId = copy.DeckId, FrontText = c.FrontText, BackText = c.BackText, ExampleSentence = c.ExampleSentence, CreatedAt = now, UpdatedAt = now }));
         await db.SaveChangesAsync(ct);

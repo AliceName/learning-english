@@ -652,6 +652,11 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "PdfPig": {
+        "type": "Transitive",
+        "resolved": "0.1.16",
+        "contentHash": "qQcbsNMYVY+K5ELptax2S8thNMk0+rSQq3H/KdYj3LLcko8yTCz8y5KIvsKxIyAuTN0ZYNnfsZkM+0EvxTwHVA=="
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl": {
         "type": "Transitive",
         "resolved": "4.3.2",
@@ -1403,6 +1408,7 @@
           "Microsoft.AspNetCore.OpenApi": "[9.0.21, )",
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.21, )",
           "MongoDB.Driver": "[3.13.0, )",
+          "PdfPig": "[0.1.16, )",
           "Swashbuckle.AspNetCore.SwaggerUI": "[9.0.6, )"
         }
       }

@@ -18,6 +18,7 @@ export default function CourseWorkspace({initialCourse,children}:{initialCourse:
   return <Context.Provider value={{course,replaceCourse,drafts,setDraft:(key,value)=>setDrafts(previous=>({...previous,[key]:typeof value==="function"?value(previous[key]):value})),generalDraft,setGeneralDraft}}>
     <div className={styles.breadcrumb}><Link href="/admin/courses">Quản lý khóa học</Link><span>›</span><span>CRS-{course.courseId}</span></div>
     <div className={styles.pageHeader}><div><Link href="/admin/courses" className={styles.back}>← Quay về danh sách</Link><h1>{course.title}</h1></div><span className={course.isPublished?styles.published:styles.draft}>{`${course.isPublished?"Đang hiển thị":"Đang ẩn / Bản nháp"}${dirty?" · Có thay đổi chưa lưu":""}`}</span></div>
+    <p className={styles.courseVocabularyNav}><Link href={`/admin/courses/${course.courseId}/flashcards`}>Từ vựng & Flashcards →</Link></p>
     <CourseSteps courseId={course.courseId} published={course.isPublished} firstSkill={course.lessons.map(item=>item.skillType).find(isAuthoringSkill)}/><p className={styles.notice}>{course.isPublished?"Khóa học đang hiển thị. Nội dung hợp lệ sẽ cập nhật cho học viên ngay khi lưu. Bạn có thể ẩn khóa học ở bước Hiển thị để tiếp tục soạn nội dung chưa hoàn chỉnh.":"Khóa học đang ẩn với học viên. Hoàn thiện nội dung rồi chọn Hiện khóa học ở bước Hiển thị."}</p>{children}
   </Context.Provider>;
 }

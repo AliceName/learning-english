@@ -8,7 +8,7 @@ type Vocabulary=Reading["vocabulary"];
 function GlossaryTerm({word,item}:{word:string;item:Vocabulary[number]}) {
   const [open,setOpen]=useState(false);
   const id=useId();
-  return <span className={styles.glossaryTerm}><button type="button" aria-expanded={open} aria-controls={id} onClick={()=>setOpen(!open)}>{word}</button>{open&&<span id={id} className={styles.glossaryMeaning}><strong>{item.meaning}</strong>{item.example&&<span>{item.example}</span>}</span>}</span>;
+  return <span className={styles.glossaryTerm}><button type="button" aria-expanded={open} aria-controls={id} onClick={()=>setOpen(!open)}>{word}</button>{open&&<span id={id} data-annotation-ignore className={styles.glossaryMeaning}><strong>{item.meaning}</strong>{item.example&&<span>{item.example}</span>}</span>}</span>;
 }
 function glossaryText(text:string,vocabulary:Vocabulary):ReactNode {
   const entries=vocabulary.filter(item=>item.word.trim()&&item.meaning.trim());

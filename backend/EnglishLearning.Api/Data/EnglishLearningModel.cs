@@ -182,6 +182,9 @@ internal static class EnglishLearningModel
         modelBuilder.Entity<FlashcardDeck>(entity =>
         {
             entity.ToTable("FlashcardDecks", "dbo");
+            entity.Property(item => item.CourseId).HasColumnType("int");
+            entity.HasOne<Course>().WithMany().HasForeignKey(item => item.CourseId).OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_FlashcardDecks_Courses");
             entity.HasKey(item => item.DeckId);
             entity.Property(item => item.DeckId).HasColumnType("int").IsRequired(true).UseIdentityColumn(1, 1);
             entity.Property(item => item.UserId).HasColumnType("int").IsRequired(true);

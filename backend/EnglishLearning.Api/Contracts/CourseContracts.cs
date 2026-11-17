@@ -44,7 +44,7 @@ public sealed record FeaturedCourse(
     int LessonCount, int EstimatedMinutes, int TimedLessonCount, IReadOnlyList<string> Levels);
 public sealed record CourseLessonSummary(
     int LessonId, string Title, string SkillType, string? DifficultyLevel,
-    int? EstimatedMinutes, int OrderIndex, ListeningLessonStatus? ListeningStatus = null);
+    int? EstimatedMinutes, int OrderIndex, ListeningLessonStatus? ListeningStatus = null, bool HasAttempted = false);
 public sealed record ListeningLessonStatus(int AttemptCount, decimal LatestScore);
 public sealed record CourseDetailResponse(CourseListItem Course, IReadOnlyList<CourseLessonSummary> Lessons,
     ListeningCourseProgress? ListeningProgress = null);

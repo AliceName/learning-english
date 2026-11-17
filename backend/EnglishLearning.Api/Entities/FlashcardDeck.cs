@@ -4,6 +4,7 @@ public sealed class FlashcardDeck
 {
     public int DeckId { get; set; }
     public int UserId { get; set; }
+    public int? CourseId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }

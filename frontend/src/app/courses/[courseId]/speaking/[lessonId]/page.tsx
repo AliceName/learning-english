@@ -5,6 +5,7 @@ import MemberShell from "@/components/navigation/member-shell";
 import SpeakingPractice from "@/components/speaking/speaking-practice";
 import { getCurrentUser } from "@/lib/server-auth";
 import { getSpeakingLesson, getSpeakingHistory } from "@/lib/server-speaking";
+import styles from "@/components/speaking/speaking.module.css";
 
 export const metadata = { title: "Luyện nói | LinguaAI" };
 export const instant = false;
@@ -19,7 +20,10 @@ async function Practice({ params }: { params: Promise<{ courseId: string; lesson
   const user = session.status === "authenticated" ? session.user : undefined;
   if (!result || result.status !== "ok") return <MemberShell user={user}><main id="main-content" style={{ padding: 32 }}><h1>Chưa tải được bài luyện nói</h1><p>Vui lòng thử lại khi máy chủ sẵn sàng.</p><Link href={`/courses/${courseId}`}>Quay lại khóa học</Link></main></MemberShell>;
   const history = await getSpeakingHistory(Number(lessonId));
-  return <MemberShell user={user}><SpeakingPractice key={result.data.lessonId} lesson={result.data} initialHistory={history.status === "ok" ? history.data : []} historyUnavailable={history.status !== "ok"} /></MemberShell>;
+  return <MemberShell user={user} variant="catalog" contentClassName={styles.workspaceContent}>
+    <SpeakingPractice key={result.data.lessonId} lesson={result.data}
+      initialHistory={history.status === "ok" ? history.data : []} historyUnavailable={history.status !== "ok"} />
+  </MemberShell>;
 }
 export default function SpeakingPage(props: { params: Promise<{ courseId: string; lessonId: string }> }) {
   return <Suspense fallback={<p style={{ padding: 32 }} role="status">Đang tải bài luyện nói…</p>}><Practice {...props} /></Suspense>;

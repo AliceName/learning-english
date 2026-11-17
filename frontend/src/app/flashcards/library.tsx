@@ -136,6 +136,7 @@ export default function FlashcardLibrary({ decks, learned, favorites, favoriteRe
               <span className={styles.deckIcon}><Icon name={art.icon} /></span>
               <strong>{deck.title}</strong>
               <span className={styles.deckMeta}><Icon name="cards" /> {deck.cardCount} từ{!deck.canEdit && " · Chỉ đọc"}</span>
+              {deck.courseTitle && <span className={styles.deckMeta}>Khóa học: {deck.courseTitle}</span>}
               {deck.canEdit && <span className={styles.deckProgress}>
                 {percent === null ? <i className={styles.meterTrack} aria-hidden="true" /> :
                   <progress max={100} value={percent} aria-label={`Tiến độ ${deck.title}`} />}

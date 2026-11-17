@@ -239,7 +239,7 @@
 .studyStack::after { transform: rotate(-3deg) translate(-7px, 1px); background: #e7e3ff; }
 .studyPaper { position: relative; border: 1px solid #bebcfd; border-radius: 30px; background: linear-gradient(145deg, #fff 5%, #f7f6ff 55%, #eff3ff); box-shadow: 0 10px 20px #5b63ba2b, inset 0 1px 0 white; transform: rotate(-1.1deg); }
 .studyPaper[data-flipped=true] { transform: rotate(-.6deg); }
-.page .flipCard { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; }
+.page .flipCard { touch-action: manipulation; position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; min-height: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; }
 .page .flipCard:hover:not(:disabled) { background: #eaf0ff26; }
 .studyContent { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: stretch; gap: 13px; min-height: 345px; padding: 28px 32px 24px; pointer-events: none; }
 .studyContent button { pointer-events: auto; }
@@ -273,9 +273,9 @@
 .panel .studyNoExample { margin: 5px; color: #7785a5; font-size: .85rem; }
 .studyBooks { position: absolute; z-index: -1; left: -16px; bottom: -25px; width: min(12%, 118px); height: auto; opacity: .8; }
 .studyBooksRight { right: -16px; left: auto; }
-.page .faceArrow { width: 42px; min-height: 42px; padding: 0; border: 1px solid #d8d5ff; border-radius: 50%; background: linear-gradient(#fff, #f3f2ff); color: #152d65; box-shadow: 0 4px 9px #8081b625; }
-.faceArrow:first-of-type svg { transform: rotate(180deg); }
-.page .faceArrow:disabled { opacity: .4; }
+.page .cardArrow { width: 42px; min-height: 42px; padding: 0; border: 1px solid #d8d5ff; border-radius: 50%; background: linear-gradient(#fff, #f3f2ff); color: #152d65; box-shadow: 0 4px 9px #8081b625; }
+.cardArrow:first-of-type svg { transform: rotate(180deg); }
+.page .cardArrow:disabled { opacity: .4; }
 .studyDots { display: flex; justify-content: center; gap: 10px; margin: 12px 0 25px; }
 .page .studyDots button { width: 12px; min-height: 12px; height: 12px; padding: 0; border: 0; border-radius: 50%; background: #c7d0ff; }
 .page .studyDots button[aria-pressed=true] { background: #0661ed; }
@@ -306,8 +306,8 @@
 }
 @container (max-width: 680px) {
   .studyScene { grid-template-columns: 30px minmax(0, 1fr) 30px; gap: 10px; margin-top: 35px; }
-  .page .faceArrow { width: 30px; min-height: 30px; }
-  .faceArrow svg { width: 17px; height: 17px; }
+  .page .cardArrow { width: 30px; min-height: 30px; }
+  .cardArrow svg { width: 17px; height: 17px; }
   .studyContent { min-height: 325px; gap: 12px; padding: 24px 18px 20px; }
   .studyRibbon { padding: 6px 14px; font-size: .72rem; }
   .studyStar { top: 25px; right: 14px; }
@@ -334,7 +334,7 @@
 }
 @container (max-width: 420px) {
   .studyScene { gap: 6px; grid-template-columns: 24px minmax(0, 1fr) 24px; }
-  .page .faceArrow { width: 24px; min-height: 28px; }
+  .page .cardArrow { width: 24px; min-height: 28px; }
   .studyContent { padding: 24px 13px 18px; }
   .studyMeaning > svg { display: none; }
   .studyMeaning > img { max-width: 65px; }

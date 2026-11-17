@@ -8,6 +8,7 @@ public sealed class SaveDeckRequest
     [Required(ErrorMessage = "Nhập tên bộ thẻ."), StringLength(255)]
     public string Title { get => title; init => title = value?.Trim() ?? ""; }
     [StringLength(500)] public string? Description { get; init; }
+    [Range(1, int.MaxValue)] public int? CourseId { get; init; }
 }
 public class SaveCardRequest
 {
@@ -34,7 +35,8 @@ public sealed class ReviewCardRequest
     [Required, Range(0, 3)] public int? Rating { get; init; }
     [Required] public DateTime? ExpectedUpdatedAt { get; init; }
 }
-public sealed record DeckSummary(int DeckId, string Title, string? Description, int CardCount, int DueCount, bool CanEdit = true, bool IsAdminDeck = false);
+public sealed record DeckSummary(int DeckId, string Title, string? Description, int CardCount, int DueCount, bool CanEdit = true, bool IsAdminDeck = false,
+    int? CourseId = null, string? CourseTitle = null);
 public sealed record FlashcardResponse(int CardId, int DeckId, string FrontText, string BackText, string? ExampleSentence,
     int IntervalDays, int Repetition, DateTime? NextReviewAt, DateTime UpdatedAt, bool IsDue);
 public sealed record DeckDetail(DeckSummary Deck, FlashcardResponse[] Cards);

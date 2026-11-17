@@ -1,6 +1,8 @@
-# LinguaAI frontend
+# LEWA frontend
 
 Next.js 16 và React 19. Trang đăng ký tại `/register` được nối với backend ASP.NET Core 9.
+
+Nếu vừa clone repository, bắt đầu bằng [hướng dẫn cài đặt ở README gốc](../README.md). Nhánh `nga` có Reading có ảnh và ghi chú, Flashcards theo khóa học, trang tạo khóa học AI cá nhân hóa và công cụ làm bài Grammar. Backend cần đủ 5 script SQL, bao gồm `005_link_flashcard_decks_to_courses.sql`.
 
 ## Bong bóng tra từ điển
 
@@ -30,6 +32,9 @@ Khởi tạo CSDL và chạy backend theo `../backend/README.md`, sau đó chạ
 
 ```powershell
 npm ci
+if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+# Dùng khi máy chưa chuẩn bị mô hình Speaking local.
+$env:SPEAKING_AUTO_START = '0'
 npm run dev
 ```
 
@@ -45,7 +50,7 @@ Trang đăng nhập: http://localhost:3000/login. Sau khi đăng nhập thành c
 - `HomeNavbar` xác minh phiên bằng `getCurrentUser()` ở server trong Suspense. Nếu API tạm thời không phản hồi, vẫn giữ liên kết tài khoản và thao tác đăng xuất. Token không được truyền xuống client component.
 - Form email cuối trang chuyển sang `/register?email=...` và điền sẵn email. Các thẻ khóa học có hộp xem chi tiết; câu mẫu có thể nghe bằng giọng đọc của trình duyệt khi được hỗ trợ.
 
-Phần AI, khóa học, số liệu và đánh giá trên trang chủ hiện là nội dung minh họa. Chọn/kéo thả tài liệu chỉ xem trước tên và dung lượng, kiểm tra định dạng và giới hạn 50 MB; tệp chưa được tải lên, chưa có xử lý AI. Trang chủ vẫn hiển thị cho khách khi backend chưa chạy.
+Phần giới thiệu AI, khóa học, số liệu và đánh giá trên trang chủ là nội dung minh họa. Khu vực chọn/kéo thả tài liệu trên trang chủ chỉ xem trước tên và dung lượng, kiểm tra định dạng và giới hạn 50 MB; không tải tệp lên. **Tính năng tạo khóa học thật** nằm tại `/courses/create-ai` sau đăng nhập, dùng PDF/DOCX tối đa **10 MB** và cấu hình Gemini ở backend. Trang chủ vẫn hiển thị cho khách khi backend chưa chạy.
 
 ## Không gian sau đăng nhập và khóa học
 
@@ -67,7 +72,44 @@ Thông tin phiên `PublicUser` có `role: "admin" | "user"` từ backend. Không
 - `/courses` yêu cầu đăng nhập, hỗ trợ tìm theo tên/mô tả, lọc CEFR/kỹ năng/trạng thái/nguồn, sắp xếp và phân trang. Bộ lọc lưu trong URL, hỗ trợ reload, Back/Forward và chia sẻ liên kết. Chọn CEFR/kỹ năng áp dụng ngay; tìm kiếm và các select áp dụng khi bấm Tìm kiếm/Áp dụng.
 - `/courses/[courseId]` hiển thị mô tả và danh sách bài học thật; khóa học không được phép xem trả trang không tìm thấy. Có trạng thái tải, lỗi kết nối và danh sách trống, cùng ảnh bìa dự phòng khi thiếu hoặc lỗi ảnh.
 - Server Components gọi `/api/v1/courses` và `/api/v1/courses/{id}` bằng JWT trong cookie HttpOnly, `cache: no-store`. `server-courses.ts` gọi `connection()` trước fetch/timeout để tương thích Cache Components; không truyền JWT cho client và không cache chung tiến độ cá nhân.
-- Nội dung trang khóa học lấy từ database, không dùng danh sách minh họa của landing page. Khi database chưa có Courses, giao diện hiển thị trạng thái chưa có khóa học. Bài Listening đã có luồng vào học, làm bài và xem kết quả như phần dưới; các kỹ năng khác và AI/bookmark được phát triển riêng.
+- Nội dung trang khóa học lấy từ database, không dùng danh sách minh họa của landing page. Khi database chưa có Courses, giao diện hiển thị trạng thái chưa có khóa học. Các luồng học Listening, Reading, Grammar, Speaking và tạo khóa học AI được mô tả ở các mục tương ứng; mục Bookmark hiện hiển thị Sắp có.
+
+### Nhập câu hỏi từ Word
+
+Trong bài Reading hoặc Grammar, mở **Nhập câu hỏi từ tệp**, tải mẫu DOCX và thay nội dung mẫu bằng đề của bạn. Hệ thống đọc trắc nghiệm một đáp án và điền từ có `[blank]`. Dùng dòng `Đáp án:` dưới câu hoặc bảng trắc nghiệm hai hàng `Câu` và `Chọn` ở cuối đề.
+
+Đối chiếu trích đoạn, sửa câu thiếu đáp án và chọn **Thêm câu đã chọn**. Tổng số câu trong bài tối đa 30. Thao tác thêm đưa câu vào bản đang soạn. Bấm **Lưu bài học** để ghi nội dung. File DOCX tối đa 2 MB.
+
+## Học viên làm bài Reading và ghi chú
+
+Mở bài Reading từ chi tiết khóa học tại `/courses/[courseId]/lessons/[lessonId]/reading`. Giao diện chia bài đọc và câu hỏi, hiển thị ảnh/ghi chú ảnh do Admin biên soạn, hỗ trợ phóng to ảnh, đổi cỡ chữ và xem bản dịch khi bài có sẵn bản dịch. Học viên chọn/điền đáp án, bấm **Nộp bài & xem kết quả** để xem điểm, đáp án và giải thích; có thể làm lại. Đáp án chưa nộp giữ trong bộ nhớ của lần mở bài, kết quả đã nộp lưu qua backend.
+
+Thanh bút hỗ trợ **Đọc / Tô sáng / Gạch chân / Ghi chú** và chọn màu. Kéo chọn đoạn tiếng Anh để đánh dấu; mở **Sổ tay** để xem lại, sửa/xóa ghi chú hoặc quay tới đoạn đã chọn. Có hoàn tác/làm lại. Đây là thao tác đánh dấu văn bản; không có canvas vẽ tay lên ảnh.
+
+Các đánh dấu dùng `localStorage`, tách theo user, course, lesson và `contentVersion`; chỉ lưu trên trình duyệt hiện tại, chưa đồng bộ tài khoản qua thiết bị. Phiên bản bài mới không áp ghi chú cũ. Chế độ **Đọc** giữ thao tác tra từ thông thường. Công cụ ghi chú chỉ nằm trong vùng bài đọc, không chặn chọn đáp án trong vùng câu hỏi.
+
+Kiểm tra logic ghi chú và nội dung bài: `npm run test:reading`.
+
+## Flashcards theo khóa học
+
+- Admin quản lý tại `/admin/courses/[courseId]/flashcards`, từ liên kết **Từ vựng & Flashcards**. Có thể tạo bộ/thẻ thủ công hoặc tổng hợp từ `reading.vocabulary` đã lưu của các bài trong khóa.
+- Học viên xem tại `/courses/[courseId]/flashcards`, đi từ chi tiết khóa học hoặc bài Reading. Hiển thị cả bộ từ Reading và bộ do Admin tạo, tuân theo quyền xem khóa học.
+- **Mũi tên trái/phải chuyển thẻ**. **Nhấn đúp lật thẻ**; Enter khi focus vào thẻ hoặc nút mặt trước/mặt sau cũng đổi mặt. Nút nghe phát từ hoặc câu ví dụ khi trình duyệt có giọng hỗ trợ.
+- Lưu bộ Reading hoặc tạo bản sao bộ của Admin để ôn với bộ cá nhân trong `/flashcards`. Không sửa bộ gốc qua thao tác ôn.
+
+Nếu không tải được bộ khóa học, kiểm tra backend đã áp dụng script SQL 005 vào đúng database. Từ vựng và bộ thẻ cũ vẫn được giữ.
+
+## Tạo khóa học cá nhân bằng AI
+
+`/courses/create-ai` yêu cầu đăng nhập, dùng `MemberShell` và dữ liệu hồ sơ để gợi ý CEFR/tên học viên. Giao diện nền pastel xanh–hồng, hình mèo laptop, ba nhãn lợi ích và liên kết khóa cá nhân/lượt tạo gần đây; các khung bo góc nhẹ, hỗ trợ desktop/mobile. Hình minh họa đã được commit tại `public/illustrations/ai-course-hero.png`, máy mới không cần sinh ảnh lại.
+
+Chọn PDF/DOCX có văn bản tối đa 10 MB (PDF tối đa 30 trang, 100–50.000 ký tự trích xuất), mục tiêu học, CEFR và các kỹ năng. Số bài tính **cho mỗi kỹ năng**, từ 1–3; số câu luyện từ 3–5. Duyệt/sửa dàn ý trước khi tạo nội dung, xem lại bài/audio rồi bấm **Lưu vào khóa học của tôi**. Khóa đã lưu thuộc riêng tài khoản tạo.
+
+Lượt đang làm có thể mở lại từ danh sách hoặc URL có `?job=...`. Khi lỗi, dùng **Thử lại từ bước đã lưu** để tiếp tục. Backend lưu công việc và giới hạn bản thử 3 yêu cầu tạo khóa mỗi tài khoản/ngày; frontend không tự tạo lại khóa khi tải trang.
+
+Cấu hình [Gemini và Cloudinary theo README gốc](../README.md#cấu-hình-gemini-cho-tạo-khóa-học-ai-tùy-chọn). Không đặt API key trong `.env.local` hoặc mã client. Chọn Listening cần TTS và Cloudinary; các kỹ năng còn lại dùng model văn bản. Proxy `/api/ai-courses` chuyển tiếp tới API `/api/v1/ai-course-generations`, giữ JWT tại server Next.js. Admin theo dõi gọi AI tại `/admin/ai-usage`.
+
+Kiểm tra: `npm run test:ai-courses`, `npm run lint`, `npm run build`. `node tests/ai-course-preview.mjs` mở fixture component thật tại `http://127.0.0.1:4177/courses/create-ai` bằng dữ liệu giả; không dùng tài khoản thật hoặc gọi Gemini. Dừng bằng Ctrl+C khi xem xong.
 
 ## Học viên làm bài Listening
 
@@ -109,13 +151,13 @@ Reading có một ảnh minh họa tùy chọn: tải/kéo thả JPG, PNG, WebP 
 
 Trình soạn hỗ trợ Markdown giới hạn: H2/H3, đậm/nghiêng/gạch chân (++), highlight (==), danh sách, trích dẫn và inline code. Chế độ Soạn thảo/Xem định dạng giữ nguyên nội dung nguồn. HTML, links và embeds không được chạy. Dữ liệu lưu qua API quản trị hiện có trong Lessons.Content version 1, tương thích bài cũ; không đổi schema SQL. Hai loại vẫn dùng chung navbar, bước tạo khóa học, lưu nháp và xuất bản. Trạng thái lưu phản ánh thao tác lưu thực tế, không hiển thị giờ tự lưu giả của demo.
 
-Các nút AI của mẫu hiển thị chưa tích hợp và bị vô hiệu hóa: chưa chấm Writing/kiểm tra ngữ pháp AI, chưa dịch/sinh câu hỏi/trích xuất từ vựng tự động. Bộ đếm và Review chỉ phản ánh thao tác trong mô phỏng, không giả điểm IELTS.
+Trong bản xem trước quản trị, các nút AI của mẫu chưa tích hợp và bị vô hiệu hóa; không tự chấm, dịch hoặc sinh câu hỏi/từ vựng khi soạn bài. Học viên nộp Reading/Writing và tạo khóa học AI qua các luồng riêng đã nêu ở trên. Bộ đếm và Review chỉ phản ánh thao tác trong mô phỏng, không giả điểm IELTS.
 
 Trắc nghiệm Reading/Listening/Grammar khởi tạo với 2 lựa chọn. Component dùng chung cho phép thêm/xóa trong khoảng 2–4; khi xóa lựa chọn phía trước đáp án đúng thì tự cập nhật chỉ số, khi xóa chính đáp án đúng thì yêu cầu chọn lại. Grammar chọn phần sai cũng dùng cùng cơ chế. Các câu cũ có 4 lựa chọn được giữ nguyên.
 
-## Các thư viện đã sử dụng
-## Mastcot:
-    npm i page-mascot
+## Tài nguyên giao diện
+
+`page-mascot` có sẵn trong `package.json`/lockfile; chỉ cần `npm ci`, không cài riêng. Ảnh, sprite và hình minh họa dùng trong giao diện được lấy từ `public/` đã commit. File upload của người dùng và checkpoint AI nằm ngoài các tài nguyên tĩnh này, không được sao chép theo khi clone.
 
 ## Quản lý khóa học đã xuất bản
 

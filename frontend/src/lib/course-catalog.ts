@@ -10,8 +10,19 @@ export type CourseItem = {
 };
 export type CourseList = { items: CourseItem[]; totalCount: number; page: number; pageSize: number; totalPages: number; summary: { totalCourses: number; inProgress: number; completed: number } };
 export type CourseDetail = { course: CourseItem; lessons: { lessonId: number; title: string; skillType: string; difficultyLevel: string | null; estimatedMinutes: number | null; orderIndex: number;
+  hasAttempted?: boolean;
   listeningStatus?: { attemptCount: number; latestScore: number } | null }[];
   listeningProgress?: { completedLessons: number; totalLessons: number; percent: number } | null };
+
+export function lessonHasAttempted(lesson: CourseDetail["lessons"][number]) {
+  return lesson.hasAttempted ?? ((lesson.listeningStatus?.attemptCount ?? 0) > 0);
+}
+
+export function courseCompletion(lessons: CourseDetail["lessons"]) {
+  const completedLessons = lessons.filter(lessonHasAttempted).length;
+  const totalLessons = lessons.length;
+  return { completedLessons, totalLessons, percent: totalLessons ? Math.round(10000 * completedLessons / totalLessons) / 100 : 0 };
+}
 
 export function parseCourseQuery(params: Record<string, string | string[] | undefined>): CourseQuery {
   const value = (key: string) => typeof params[key] === "string" ? params[key] as string : "";

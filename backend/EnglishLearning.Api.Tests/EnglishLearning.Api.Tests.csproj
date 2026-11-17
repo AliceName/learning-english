@@ -23,6 +23,7 @@
     <ProjectReference Include="..\EnglishLearning.Api\EnglishLearning.Api.csproj" />
     <None Include="..\..\DATABASE_SCHEMA.md" Link="DATABASE_SCHEMA.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\database\003_add_grammar_lesson_type.sql" Link="003_add_grammar_lesson_type.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\frontend\public\templates\mau-nhap-cau-hoi.docx" Link="mau-nhap-cau-hoi.docx" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
