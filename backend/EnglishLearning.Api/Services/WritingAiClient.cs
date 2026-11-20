@@ -157,6 +157,32 @@ public sealed class WritingAiClient(HttpClient http)
         }
     }
 
+    /// <summary>Scores prompt relevance. Any failure returns null so the submission still succeeds.</summary>
+    public async Task<WritingRelevance?> RelevanceAsync(string text, string prompt, CancellationToken cancellationToken)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(TimeSpan.FromSeconds(15));
+        try
+        {
+            using var response = await http.PostAsJsonAsync("internal/writing/relevance", new { text, prompt }, deadline.Token);
+            if (!response.IsSuccessStatusCode) return null;
+            var result = await response.Content.ReadFromJsonAsync<WritingRelevance>(FeedbackJsonOptions, deadline.Token);
+            return ValidRelevance(result, text) ? result : null;
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { return null; }
+        catch (Exception error) when (error is HttpRequestException or JsonException or NotSupportedException) { return null; }
+    }
+
+    private static bool ValidRelevance(WritingRelevance? r, string text) =>
+        r is not null && r.Score is >= 0 and <= 5 && r.OffTopic == (r.Score == 0)
+        && double.IsFinite(r.TopicSimilarity) && r.TopicSimilarity is >= -1 and <= 1
+        && r.Points is { Length: <= 20 } && r.Keywords is { Length: <= 12 }
+        && r.Points.All(p => Bounded(p.Point, 400, true) && (p.Evidence is null || (p.Covered && text.Contains(p.Evidence, StringComparison.Ordinal))))
+        && r.Keywords.All(k => Bounded(k, 40, true) && text.Contains(k, StringComparison.OrdinalIgnoreCase))
+        && (r.PointsTotal is null ? r.PointsCovered is null && r.Points.Length == 0
+            : r.PointsTotal == r.Points.Length && r.PointsCovered == r.Points.Count(p => p.Covered))
+        && Bounded(r.ThresholdsVersion, 80, true) && Bounded(r.Model, 160, true);
+
     public static WritingFeedback UnavailableFeedback(string? message = null) =>
         new("unavailable", [], message ?? "Phần nhận xét chưa khả dụng. Bài viết và kết quả chấm đã lưu vẫn được giữ.");
 

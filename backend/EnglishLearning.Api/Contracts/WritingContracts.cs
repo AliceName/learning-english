@@ -39,16 +39,21 @@ public sealed record WritingFeedbackItem(string Criterion, string Quote, string 
     int? SuggestionIndex = null);
 public sealed record WritingFeedback(string Status, WritingFeedbackItem[] Items, string Message,
     string? ModelId = null, string? ModelSha256 = null, string? PromptVersion = null);
+/// <summary>Prompt relevance (0-5) from the local embedding model; only for library tasks.</summary>
+public sealed record WritingRelevancePoint(string Point, bool Covered, string? Evidence);
+public sealed record WritingRelevance(int Score, bool OffTopic, double TopicSimilarity, int? PointsCovered, int? PointsTotal,
+    WritingRelevancePoint[] Points, string[] Keywords, string ThresholdsVersion, string Model);
 public sealed record WritingAnalysis(string Cefr, string? CorrectedText,
     WritingSuggestion[] Errors, string[] Warnings, WritingProvenance? Provenance = null,
     WritingFeedback? Feedback = null, WritingGecCoverage? GecCoverage = null,
-    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null);
+    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null, WritingRelevance? Relevance = null);
 public sealed record WritingSubmissionResponse(int SubmissionId, string? Topic, string OriginalText,
     string CefrLevel, string? CorrectedText, WritingSuggestion[] Errors, string[] Warnings, DateTime CreatedAt,
     WritingProvenance? Provenance = null, WritingFeedback? Feedback = null,
     WritingGecCoverage? GecCoverage = null, WritingTaskSnapshot? Task = null,
     int? PracticeRootId = null, int? ParentSubmissionId = null, int? VersionNumber = null,
-    int? ParentVersionNumber = null, string? TargetCefr = null, bool TargetRecorded = false);
+    int? ParentVersionNumber = null, string? TargetCefr = null, bool TargetRecorded = false,
+    WritingRelevance? Relevance = null);
 
 public sealed record WritingTaskSnapshot(string Id, string Version, string Title, string Prompt,
     string Level, string Genre, string Topic, int MinWords, int MaxWords, string WordMode,

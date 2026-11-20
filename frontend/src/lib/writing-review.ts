@@ -3,7 +3,7 @@ import type { WritingEdit } from "./writing-revision";
 import type { WritingExplanation, WritingSuggestion } from "./writing";
 
 export const writingReviewTypes = {
-  grammar: "Ngữ pháp", vocabulary: "Từ vựng", expression: "Cải thiện diễn đạt", unclassified: "Chưa phân loại",
+  grammar: "Ngữ pháp", vocabulary: "Từ vựng", mechanics: "Chính tả & dấu câu", expression: "Cải thiện diễn đạt", unclassified: "Chưa phân loại",
 } as const;
 export const writingReviewStatuses = { pending: "Chưa xử lý", accepted: "Đã nhận", selfFixed: "Đã tự sửa", skipped: "Đã bỏ qua" } as const;
 export type WritingReviewType = keyof typeof writingReviewTypes;
@@ -14,7 +14,24 @@ export type WritingReviewItem = {
   type: WritingReviewType; explanations: WritingExplanation[];
 };
 
-const grammarCategories = new Set(["ARTICLE", "NOUN:NUM", "VERB:FORM", "VERB:SVA"]);
+const templateVersions = new Set(["vi-edit-templates-v1", "vi-edit-templates-v2"]);
+// v1 whitelist categories plus the ERRANT kinds used by vi-edit-templates-v2.
+const reviewTypeByCategory: Record<string, WritingReviewType> = {
+  ARTICLE: "grammar", "NOUN:NUM": "grammar", "VERB:FORM": "grammar", "VERB:SVA": "grammar", "VERB:TENSE": "grammar",
+  "VERB:INFL": "grammar", "NOUN:POSS": "grammar", "NOUN:INFL": "grammar", DET: "grammar", PREP: "grammar", PRON: "grammar",
+  CONJ: "grammar", PART: "grammar", "ADJ:FORM": "grammar", MORPH: "grammar", WO: "grammar",
+  VERB: "vocabulary", NOUN: "vocabulary", ADJ: "vocabulary", ADV: "vocabulary",
+  SPELL: "mechanics", PUNCT: "mechanics", ORTH: "mechanics", CONTR: "mechanics",
+};
+
+/** Short Vietnamese names of explanation categories, shown without revealing the answer. */
+export const writingCategoryLabels: Record<string, string> = {
+  ARTICLE: "Mạo từ", DET: "Mạo từ / từ hạn định", "NOUN:NUM": "Số ít / số nhiều", "NOUN:POSS": "Sở hữu cách",
+  "NOUN:INFL": "Dạng số nhiều", "VERB:FORM": "Dạng động từ", "VERB:SVA": "Hòa hợp chủ ngữ – động từ", "VERB:TENSE": "Thì động từ",
+  "VERB:INFL": "Chia động từ", PREP: "Giới từ", PRON: "Đại từ", CONJ: "Từ nối", PART: "Tiểu từ", "ADJ:FORM": "So sánh tính từ",
+  MORPH: "Loại từ", WO: "Trật tự từ", VERB: "Chọn động từ", NOUN: "Chọn danh từ", ADJ: "Chọn tính từ", ADV: "Chọn trạng từ",
+  SPELL: "Chính tả", PUNCT: "Dấu câu", ORTH: "Viết hoa / viết liền", CONTR: "Dạng rút gọn",
+};
 
 export function writingReviewItems(suggestions: WritingSuggestion[], edits: WritingEdit[]): WritingReviewItem[] {
   return suggestions.flatMap<WritingReviewItem>((suggestion, suggestionIndex) => {
@@ -29,8 +46,8 @@ export function writingReviewItems(suggestions: WritingSuggestion[], edits: Writ
         ? (suggestion.explanations ?? []).filter(explanation => explanation.original === before && explanation.suggestion === after)
         : [];
       const evidence = explanations[0];
-      const type = explanations.length === 1 && evidence.templateVersion === "vi-edit-templates-v1"
-        && grammarCategories.has(evidence.category) ? "grammar" : "unclassified";
+      const type: WritingReviewType = explanations.length === 1 && templateVersions.has(evidence.templateVersion ?? "")
+        ? reviewTypeByCategory[evidence.category] ?? "unclassified" : "unclassified";
       return { id: edit.id, suggestionIndex, edit, number: `${suggestionIndex + 1}.${index + 1}`, type, explanations };
     });
   });

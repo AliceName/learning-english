@@ -28,7 +28,8 @@ export function practiceOrder<T extends { type: string }>(entries: readonly T[])
 
 /** Ask the learner to self-fix first only when a rule explains the change. */
 export function hideAnswerFirst(type: string): boolean {
-  return type === "grammar";
+  // Word choice (vocabulary) is a matter of meaning and GEC often over-corrects it, so its answer stays visible.
+  return type === "grammar" || type === "mechanics";
 }
 
 /**
@@ -152,4 +153,51 @@ export function targetAboveTask(taskLevel: string, target: string | null | undef
   const ceiling = taskCeiling[taskLevel];
   const wanted = cefrOrder.indexOf(target as typeof cefrOrder[number]);
   return ceiling !== undefined && wanted > ceiling;
+}
+
+export type SentenceShade = { start: number; end: number; suggestionIndex: number; state: "pending" | "fixed" | "skipped" };
+
+/**
+ * Write & Improve-style sentence shading. Every suggested sentence is shaded, even when its
+ * word-level suggestions are not revealed yet: "pending" while any change in it is undecided,
+ * "done" once all are handled. Only exact saved offsets (or a unique legacy match) are used;
+ * overlapping or mismatched spans are skipped rather than guessed.
+ */
+export function sentenceShades(originalText: string,
+  errors: readonly { original: string; sourceStart?: number | null; sourceEnd?: number | null }[],
+  items: readonly { suggestionIndex: number; status: string }[]): SentenceShade[] {
+  const shades: SentenceShade[] = [];
+  for (const [suggestionIndex, error] of errors.entries()) {
+    let start = error.sourceStart ?? null;
+    if (start === null) {
+      const first = originalText.indexOf(error.original);
+      if (!error.original || first < 0 || originalText.indexOf(error.original, first + 1) >= 0) continue;
+      start = first;
+    }
+    const end = error.sourceEnd ?? start + error.original.length;
+    if (!error.original || originalText.slice(start, end) !== error.original) continue;
+    if (shades.some(shade => start! < shade.end && shade.start < end)) continue;
+    const own = items.filter(item => item.suggestionIndex === suggestionIndex);
+    // Skipping is not fixing: a sentence counts as fixed only if at least one change was accepted or self-fixed.
+    const state = own.some(item => item.status === "pending") ? "pending"
+      : own.some(item => item.status === "accepted" || item.status === "selfFixed") ? "fixed" : "skipped";
+    shades.push({ start, end, suggestionIndex, state });
+  }
+  return shades.sort((a, b) => a.start - b.start);
+}
+
+/**
+ * Sentences of the current version that are not in the previous version (rewritten or added)
+ * and have no suggestion now: shown as "improved", like Write & Improve after a re-check.
+ */
+export function improvedSentences(current: string, previous: string, shades: readonly { start: number; end: number }[]) {
+  const spans: { start: number; end: number }[] = [];
+  for (const match of current.matchAll(/[^.!?\n]+[.!?]*/gu)) {
+    const text = match[0].trim();
+    if (!text || !/[A-Za-z]/u.test(text)) continue;
+    const start = (match.index ?? 0) + match[0].indexOf(text), end = start + text.length;
+    if (previous.includes(text) || shades.some(shade => start < shade.end && shade.start < end)) continue;
+    spans.push({ start, end });
+  }
+  return spans;
 }

@@ -84,12 +84,23 @@ test('review types require exact, versioned evidence for the individual change',
   };
   const { edits } = writingEdits(result);
   const items = writingReviewItems(result.errors, edits);
-  assert.deepEqual(Array.from(items, item => item.type), ['grammar', 'unclassified', 'unclassified']);
+  assert.deepEqual(Array.from(items, item => item.type), ['grammar', 'mechanics', 'unclassified']);
   assert.equal(items[2].edit, null);
   assert.equal(writingReviewView(items, [], 'vocabulary', 'all').visible.length, 0);
   assert.equal(writingReviewView(items, [], 'expression', 'all').visible.length, 0);
   result.errors[0].explanations[0].templateVersion = 'unknown';
   assert.equal(writingReviewItems(result.errors, edits)[0].type, 'unclassified');
+});
+
+test('ERRANT-typed (v2) explanations map to grammar, vocabulary or mechanics', () => {
+  const v2 = 'vi-edit-templates-v2';
+  const result = { originalText: 'They was here. It is funny. Hi Ken.', correctedText: null, errors: [
+    { original: 'They was here.', suggestion: 'They were here.', explanations: [{ original: 'was', suggestion: 'were', category: 'VERB:SVA', templateVersion: v2 }] },
+    { original: 'It is funny.', suggestion: 'It is fun.', explanations: [{ original: 'funny', suggestion: 'fun', category: 'ADJ', templateVersion: v2 }] },
+    { original: 'Hi Ken.', suggestion: 'Hi Ken!', explanations: [{ original: '.', suggestion: '!', category: 'PUNCT', templateVersion: v2 }] },
+  ] };
+  const { edits } = writingEdits(result);
+  assert.deepEqual(Array.from(writingReviewItems(result.errors, edits), item => item.type), ['grammar', 'vocabulary', 'mechanics']);
 });
 
 test('combined filters select the same stable IDs and leave progress and draft decisions intact', () => {

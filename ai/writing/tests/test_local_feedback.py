@@ -38,7 +38,7 @@ class TemplatesTests(unittest.TestCase):
                  ("a habit of learn English", "a habit of learning English", "VERB:FORM"),
                  ("She go home.", "She goes home.", "VERB:SVA"),
                  ("I like books becuase they help.", "I like books because they help.", "SPELL"),
-                 ("I study in home.", "I study at home.", "OTHER"),
+                 ("I study in home.", "I study at home.", "PREP"),
                  ("I read book.", "I read a book.", "ARTICLE")]
         for original, suggestion, category in cases:
             with self.subTest(original=original):
@@ -47,10 +47,14 @@ class TemplatesTests(unittest.TestCase):
                 for row in rows:
                     self.assertIn(row["original"], original)
                     self.assertIn(row["suggestion"], suggestion)
-                    self.assertEqual(row["templateVersion"], TEMPLATE_VERSION)
+                    # v1 whitelist rules keep v1; other changes are typed by ERRANT as v2 (kind only, hedged).
+                    self.assertEqual(row["templateVersion"], "vi-edit-templates-v2" if category == "PREP" else TEMPLATE_VERSION)
 
     def test_no_context_does_not_claim_plural_rule_and_whitespace_is_noop(self):
-        self.assertEqual(explain_accepted_change("month", "months")[0]["category"], "OTHER")
+        # Without context the v1 plural rule is not claimed; v2 may only name the kind of change.
+        row = explain_accepted_change("month", "months")[0]
+        self.assertTrue(row["category"] == "OTHER" or row["templateVersion"] == "vi-edit-templates-v2")
+        self.assertNotEqual(row["templateVersion"] if row["category"] == "NOUN:NUM" else "", TEMPLATE_VERSION)
         self.assertEqual(explain_accepted_change("Same.\r\n", " Same. \n"), [])
 
     def test_only_real_whitelisted_inflections_get_rule_templates(self):

@@ -64,6 +64,8 @@ secrets.json
 # Private Writing data, prepared sets, weights, caches and local Python environment
 ai/writing/data/
 ai/writing/artifacts/
+# Relevance thresholds are statistics derived from the Cambridge W&I corpus: build locally, never publish.
+ai/writing/config/relevance-*.json
 ai/writing/.cache/
 ai/writing/.venv/
 # Historical CEFR utilities are bound to private developer audit artifacts.

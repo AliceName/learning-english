@@ -70,6 +70,8 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
             else if (request.TaskVersion is not null)
                 return BadRequest(new { detail = "Thiếu mã đề thư viện." });
             var analysis = await ai.AnalyzeAsync(request, cancellationToken);
+            // Relevance is calibrated on the library prompts only; custom topics are not scored.
+            var relevance = task is null ? null : await ai.RelevanceAsync(request.OriginalText, task.Prompt, cancellationToken);
             var sqlServer = db.Database.IsSqlServer();
             if (!sqlServer) await NonSqlSubmissionLock.WaitAsync(cancellationToken);
             try
@@ -98,7 +100,7 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
                     version = checked(1 + await VersionRank(userId, root, int.MaxValue, cancellationToken));
                     parentVersion = await VersionRank(userId, root, source, cancellationToken);
                 }
-                analysis = analysis with { Task = task, Practice = practice with
+                analysis = analysis with { Task = task, Relevance = relevance, Practice = practice with
                     { VersionNumber = version, ParentVersionNumber = parentVersion, TargetCefr = target, RequestId = requestId, RequestHash = requestHash } };
                 var submission = new WritingSubmission
                 {
@@ -341,7 +343,7 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
             analysis?.Errors ?? [], analysis?.Warnings ?? [], item.CreatedAt, analysis?.Provenance, analysis?.Feedback,
             analysis?.GecCoverage, analysis?.Task, analysis?.Practice?.RootSubmissionId ?? item.SubmissionId,
             analysis?.Practice?.ParentSubmissionId, analysis?.Practice?.VersionNumber, analysis?.Practice?.ParentVersionNumber,
-            analysis?.Practice?.TargetCefr, targetRecorded ?? (analysis?.Practice?.VersionNumber is not null));
+            analysis?.Practice?.TargetCefr, targetRecorded ?? (analysis?.Practice?.VersionNumber is not null), analysis?.Relevance);
 
     private async Task<ActionResult<T>> WithUser<T>(
         Func<int, Task<ActionResult<T>>> action, CancellationToken cancellationToken)

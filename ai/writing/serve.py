@@ -28,6 +28,28 @@ class WritingRequest(BaseModel):
         return value
 
 
+class RelevanceRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+    text: str = Field(min_length=1, max_length=12000)
+    prompt: str = Field(min_length=1, max_length=8000)
+
+
+class LazyRelevance:
+    """Loads the local MiniLM scorer on first use; disabled when weights or thresholds are missing."""
+
+    def __init__(self):
+        from relevance import THRESHOLDS_PATH
+        self.available = os.getenv("WRITING_RELEVANCE", "1") != "0" and THRESHOLDS_PATH.exists()
+        self._scorer, self._lock = None, threading.Lock()
+
+    def score(self, text: str, prompt: str):
+        with self._lock:
+            if self._scorer is None:
+                from relevance import RelevanceScorer, SentenceEmbedder, load_thresholds
+                self._scorer = RelevanceScorer(SentenceEmbedder("cpu"), load_thresholds())
+            return self._scorer.score(text, prompt)
+
+
 class AcceptedExplanation(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     category: str = Field(min_length=1, max_length=100)
@@ -58,7 +80,7 @@ class FeedbackRequest(BaseModel):
         return value
 
 
-def create_app(engine_factory=None, feedback_factory=None):
+def create_app(engine_factory=None, feedback_factory=None, relevance_factory=None):
     @asynccontextmanager
     async def lifespan(app):
         if engine_factory:
@@ -71,6 +93,11 @@ def create_app(engine_factory=None, feedback_factory=None):
             app.state.engine = WritingEngine(cefr, ROOT / gec if gec.strip() else None,
                                              os.getenv("WRITING_DEVICE", "auto"))
         app.state.feedback_engine = feedback_factory() if feedback_factory else FeedbackEngine.from_env()
+        if relevance_factory:
+            app.state.relevance = relevance_factory()
+        else:
+            lazy = LazyRelevance()
+            app.state.relevance = lazy if lazy.available else None
         try:
             yield
         finally:
@@ -82,7 +109,10 @@ def create_app(engine_factory=None, feedback_factory=None):
     @app.get("/health")
     def health(request: Request):
         engine = request.app.state.engine
+        from writing_explanations import errant_available
         return {"status": "ready", "correctionsEnabled": engine.gec is not None,
+                "explanations": "v2-errant" if errant_available() else "v1-only (install requirements-service.txt)",
+                "relevanceEnabled": request.app.state.relevance is not None,
                 "cefrRun": getattr(getattr(engine, "cefr", None), "run_name", None),
                 "gecRun": getattr(engine.gec, "run_name", None),
                 **request.app.state.feedback_engine.health()}
@@ -93,6 +123,7 @@ def create_app(engine_factory=None, feedback_factory=None):
         feedback = request.app.state.feedback_engine.health()
         enabled = bool(feedback.get("feedbackEnabled"))
         return {"status": "ready", "busy": engine.lock.locked(), **engine.processing_limits(), "feedbackEnabled": enabled,
+                "relevanceEnabled": request.app.state.relevance is not None,
                 "feedbackStatus": "enabled" if enabled else
                     "unavailable" if feedback.get("feedbackStatus") == "configuration_error" else "disabled"}
 
@@ -126,6 +157,17 @@ def create_app(engine_factory=None, feedback_factory=None):
             engine.cancel(cancelled)
             task.add_done_callback(lambda completed: completed.exception() if not completed.cancelled() else None)
             raise
+
+    @app.post("/internal/writing/relevance")
+    def relevance(body: RelevanceRequest, request: Request):
+        scorer = request.app.state.relevance
+        if scorer is None:
+            raise HTTPException(status_code=503, detail="Chấm độ bám đề chưa được bật.")
+        try:
+            return scorer.score(body.text, body.prompt)
+        except Exception as error:
+            logging.getLogger(__name__).error("Relevance scoring failed: %s", type(error).__name__)
+            raise HTTPException(status_code=503, detail="Chưa chấm được độ bám đề. Bài viết vẫn được lưu.") from error
 
     @app.post("/internal/writing/analyze")
     def analyze(body: WritingRequest, request: Request):

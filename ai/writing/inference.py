@@ -125,7 +125,7 @@ class WritingEngine:
         try:
             level = self.cefr.classify(text)  # Always score the learner's original text.
             warnings = ["CEFR là ước lượng thử nghiệm; A1 và C2 chưa được nhận diện đáng tin cậy.",
-                        "Kết quả chưa đánh giá độ bám đề và không phải điểm IELTS hoặc điểm 0–10."]
+                        "CEFR không xét độ bám đề và không phải điểm IELTS hoặc điểm 0–10."]
             warnings.extend(assessment['warnings'])
             errors = []
             corrected = None

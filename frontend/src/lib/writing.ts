@@ -103,7 +103,32 @@ export type WritingResult = {
     inputPolicyVersion?: string | null;
   } | null;
   feedback?: WritingFeedback | null;
+  relevance?: WritingRelevance | null;
 };
+
+/** Prompt relevance from the local embedding model (library tasks only). */
+export type WritingRelevance = {
+  score: number; offTopic: boolean; topicSimilarity: number; pointsCovered: number | null; pointsTotal: number | null;
+  points: { point: string; covered: boolean; evidence: string | null }[]; keywords: string[];
+  thresholdsVersion: string; model: string;
+};
+
+function validRelevance(value: unknown, text: string): boolean {
+  if (value == null) return true;
+  if (typeof value !== "object") return false;
+  const r = value as Record<string, unknown>;
+  const points = r.points, keywords = r.keywords;
+  return Number.isInteger(r.score) && Number(r.score) >= 0 && Number(r.score) <= 5 && r.offTopic === (r.score === 0)
+    && typeof r.topicSimilarity === "number" && Number.isFinite(r.topicSimilarity)
+    && Array.isArray(points) && points.length <= 20 && points.every(p => p && typeof p === "object"
+      && boundedText((p as Record<string, unknown>).point, 400) && typeof (p as Record<string, unknown>).covered === "boolean"
+      && ((p as Record<string, unknown>).evidence == null || ((p as Record<string, unknown>).covered === true
+        && typeof (p as Record<string, unknown>).evidence === "string" && text.includes((p as Record<string, unknown>).evidence as string))))
+    && (r.pointsTotal == null ? r.pointsCovered == null && points.length === 0
+      : r.pointsTotal === points.length && r.pointsCovered === points.filter(p => (p as Record<string, unknown>).covered).length)
+    && Array.isArray(keywords) && keywords.length <= 12 && keywords.every(k => boundedText(k, 40))
+    && boundedText(r.thresholdsVersion, 80) && boundedText(r.model, 160);
+}
 
 const levels = new Set(["A1", "A2", "B1", "B2", "C1", "C2"]);
 export function isCefrLevel(value: unknown): value is string {
@@ -258,5 +283,6 @@ export function isWritingResult(value: unknown): value is WritingResult {
         || boundedText((item.provenance as Record<string, unknown>).guardVersion, 100))
       && ((item.provenance as Record<string, unknown>).inputPolicyVersion == null
         || boundedText((item.provenance as Record<string, unknown>).inputPolicyVersion, 100))))
-    && validFeedback(item.feedback, item.originalText as string, item.topic, item.errors as WritingSuggestion[]);
+    && validFeedback(item.feedback, item.originalText as string, item.topic, item.errors as WritingSuggestion[])
+    && validRelevance(item.relevance, item.originalText as string);
 }

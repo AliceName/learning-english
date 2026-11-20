@@ -1,8 +1,9 @@
 import { Fragment } from "react";
 import Icon from "@/components/site-icon";
-import { type WritingResult, writingCoverageSummary } from "@/lib/writing";
+import { type WritingRelevance, type WritingResult, writingCoverageSummary } from "@/lib/writing";
 import { type WritingDiff } from "@/lib/writing-diff";
 import { type WritingEdit, currentEditPosition } from "@/lib/writing-revision";
+import type { SentenceShade } from "@/lib/writing-practice";
 import styles from "./writing.module.css";
 
 export function visibleEdit(text: string) {
@@ -41,16 +42,70 @@ function LinkedEdits({ text, edits, accepted, visibleIds, draft = false, onSelec
   return <>{parts}{text.slice(cursor)}</>;
 }
 
-export default function WritingComparison({ result, draft, draftPositionsKnown, edits, accepted, visibleIds, showAnnotations, onSelect, onEdit, editDisabled, continued }: {
+const shadeClass = { pending: "shadePending", fixed: "shadeFixed", skipped: "shadeSkipped" } as const;
+const shadeTitle = { pending: "Câu này có gợi ý cần xem", fixed: "Bạn đã sửa câu này; nộp lại để AI kiểm tra", skipped: "Bạn đã bỏ qua gợi ý ở câu này" };
+const markClass = { pending: "markPending", accepted: "markFixed", selfFixed: "markFixed", skipped: "markSkipped" } as const;
+
+/**
+ * Original essay with Write & Improve-style sentence shading. Each suggested sentence shows its
+ * state (needs review / fixed, waiting for re-check / skipped) and a "?" button that explains why;
+ * revealed word-level changes are coloured by the learner's decision. Sentences rewritten since
+ * the previous version that now have no suggestion are marked as improved.
+ */
+function ShadedOriginal({ text, shades, improved, edits, visibleIds, statusById, onSelect, onSentence }: {
+  text: string; shades: readonly SentenceShade[]; improved: readonly { start: number; end: number }[]; edits: WritingEdit[];
+  visibleIds: ReadonlySet<string>; statusById: ReadonlyMap<string, keyof typeof markClass>; onSelect: (id: string) => void;
+  onSentence: (suggestionIndex: number) => void;
+}) {
+  const marks = (from: number, to: number) => {
+    const inside = edits.filter(edit => visibleIds.has(edit.id) && edit.start >= from && edit.end <= to);
+    const parts = [];
+    let cursor = from;
+    for (const edit of inside) {
+      const fragment = text.slice(edit.start, edit.end);
+      const status = statusById.get(edit.id) ?? "pending";
+      parts.push(<Fragment key={edit.id}>{text.slice(cursor, edit.start)}<button type="button"
+        className={`${styles.annotation} ${styles[markClass[status]]}`}
+        aria-label={`Xem gợi ý ${edit.suggestionIndex + 1}: ${fragment.trim() || visibleEdit(fragment) || "chỗ có thể cần thêm từ"}`}
+        data-review-id={edit.id} onClick={() => onSelect(edit.id)}>{fragment || "＋"}</button></Fragment>);
+      cursor = edit.end;
+    }
+    return <>{parts}{text.slice(cursor, to)}</>;
+  };
+  const regions = [...shades.map(shade => ({ ...shade, improved: false })),
+    ...improved.map(span => ({ ...span, improved: true, suggestionIndex: -1, state: "fixed" as const }))].sort((x, y) => x.start - y.start);
+  const parts = [];
+  let cursor = 0;
+  for (const region of regions) {
+    if (region.start < cursor) continue;
+    parts.push(<Fragment key={region.start}>{marks(cursor, region.start)}{region.improved
+      ? <span className={styles.shadeImproved} title="Đã cải thiện so với bản trước: AI không còn gợi ý ở câu này">{text.slice(region.start, region.end)}</span>
+      : <span className={styles[shadeClass[region.state]]} title={shadeTitle[region.state]}>
+        <button type="button" className={styles.sentenceInfo} aria-label={`Vì sao câu ${region.suggestionIndex + 1} cần xem`}
+          onClick={() => onSentence(region.suggestionIndex)}>?</button>{marks(region.start, region.end)}</span>}</Fragment>);
+    cursor = region.end;
+  }
+  return <>{parts}{marks(cursor, text.length)}</>;
+}
+
+export default function WritingComparison({ result, draft, draftPositionsKnown, edits, accepted, visibleIds, shades = [], improved = [],
+  statusById = new Map(), onSentence = () => {}, showAnnotations, onSelect, onEdit, editDisabled, continued }: {
   result: WritingResult; draft: string; draftPositionsKnown: boolean; continued?: boolean;
-  edits: WritingEdit[]; accepted: string[]; visibleIds: ReadonlySet<string>;
+  edits: WritingEdit[]; accepted: string[]; visibleIds: ReadonlySet<string>; shades?: readonly SentenceShade[];
+  improved?: readonly { start: number; end: number }[]; statusById?: ReadonlyMap<string, "pending" | "accepted" | "selfFixed" | "skipped">;
+  onSentence?: (suggestionIndex: number) => void;
   showAnnotations: boolean; onSelect: (id: string) => void; onEdit: () => void; editDisabled: boolean;
 }) {
   return <>
     <section aria-label="Đối chiếu bài viết">
-      {showAnnotations && edits.some(edit => visibleIds.has(edit.id)) && <p className={styles.annotationHint}>
-        Chọn phần được tô để mở thẻ gợi ý tương ứng.
-      </p>}
+      {showAnnotations && (shades.length > 0 || improved.length > 0) && <div className={styles.shadeLegend}>
+        <span><span className={styles.shadePending}>Vàng</span> cần xem — bấm <b>?</b> để biết vì sao</span>
+        <span><span className={styles.shadeFixed}>Gạch chéo xanh</span> đã sửa, nộp lại để AI kiểm tra</span>
+        <span><span className={styles.shadeSkipped}>Viền chấm</span> đã bỏ qua</span>
+        {improved.length > 0 && <span><span className={styles.shadeImproved}>Xanh lá</span> đã cải thiện so với bản trước</span>}
+        <span><span className={`${styles.annotation} ${styles.markPending}`}>Từ gạch chân</span> chọn để mở gợi ý</span>
+        <span>Nền trắng: AI không có gợi ý (vẫn có thể còn lỗi)</span>
+      </div>}
       {showAnnotations && !draftPositionsKnown && accepted.some(id => visibleIds.has(id))
         && <p className={styles.hint}>Bản nháp có chỉnh sửa riêng nên vị trí gợi ý chỉ được đánh dấu trên bài gốc.</p>}
       <div className={styles.studioCompare}>
@@ -60,7 +115,7 @@ export default function WritingComparison({ result, draft, draftPositionsKnown, 
             <h2>Bản gốc của bạn</h2>
             <span className={styles.pill}>{result.originalText.trim().split(/\s+/u).filter(Boolean).length} từ</span>
           </header>
-          <p lang="en">{showAnnotations ? <LinkedEdits text={result.originalText} edits={edits} accepted={accepted} visibleIds={visibleIds} onSelect={onSelect} /> : result.originalText}</p>
+          <p lang="en">{showAnnotations ? <ShadedOriginal text={result.originalText} shades={shades} improved={improved} edits={edits} visibleIds={visibleIds} statusById={statusById} onSelect={onSelect} onSentence={onSentence} /> : result.originalText}</p>
         </article>
         <article className={styles.essayCard}>
           <header>
@@ -83,6 +138,7 @@ export default function WritingComparison({ result, draft, draftPositionsKnown, 
 export function WritingSummary({ result }: { result: WritingResult }) {
   const coverage = result.gecCoverage && writingCoverageSummary(result.gecCoverage);
   const requirements = result.task?.requirements ?? [];
+  const relevance = result.relevance ?? null;
   return <section className={styles.summarySection} aria-labelledby="writing-summary-heading">
     <div className={styles.sectionHeading}>
       <span className={`${styles.icon} ${styles.primaryIcon}`}><Icon name="trend" /></span>
@@ -99,18 +155,48 @@ export function WritingSummary({ result }: { result: WritingResult }) {
         <strong>{result.correctedText !== null ? result.errors.length : "Không bật"}</strong>
         <p>{result.correctedText !== null ? "Số câu có gợi ý ngữ pháp" : "Lần nộp này chỉ có ước lượng CEFR"}</p>
       </article>
-      <article>
+      {relevance ? <article className={relevance.offTopic ? styles.offTopicCard : undefined}>
+        <h3>Bám đề</h3>
+        <strong>{relevance.score}/5</strong>
+        <ol className={styles.gauge} aria-label={`Điểm bám đề ${relevance.score} trên 5`}>
+          {[0, 1, 2, 3, 4, 5].map(n => <li key={n} className={n === relevance.score ? styles.gaugeActive : n < relevance.score ? styles.gaugeFilled : undefined}>{n}</li>)}
+        </ol>
+        <p>{relevanceLabel(relevance.score)}</p>
+      </article> : <article>
         <h3>Bám đề</h3>
         <strong>Chưa đánh giá</strong>
-        <p>LEWA chưa chấm được bài có trả lời đúng đề hay không.{requirements.length > 0 && " Hãy tự đối chiếu:"}</p>
+        <p>{result.task ? "Chưa chấm được độ bám đề cho bài này." : "Đề tự đặt chưa được chấm bám đề."}{requirements.length > 0 && " Hãy tự đối chiếu:"}</p>
         {requirements.length > 0 && <ul className={styles.summaryList}>{requirements.map(requirement => <li key={requirement}>{requirement}</li>)}</ul>}
-      </article>
+      </article>}
       {coverage && coverage.unprocessed > 0 && <article>
         <h3>Câu chưa được kiểm tra</h3>
         <strong>{coverage.unprocessed} câu</strong>
         <p>Quá dài hoặc vượt giới hạn 20 câu mỗi lượt. Hãy tự rà soát các câu này.</p>
       </article>}
     </div>
+    {relevance?.offTopic && <p className={styles.offTopicNotice} role="status">Bài có vẻ không trả lời đề này. Hãy đọc lại đề và các ý cần viết trước khi sửa ngữ pháp.</p>}
+    {relevance && <RelevanceDetails relevance={relevance} />}
     <p className={styles.hint}>CEFR ước lượng mức ngôn ngữ của bài viết, không phải của bạn, và không xét bài có đúng đề hay không. Đề ngắn, đơn giản có ít chỗ thể hiện cấu trúc phức tạp nên thường khó đạt mức cao.</p>
   </section>;
+}
+
+function relevanceLabel(score: number) {
+  return score === 0 ? "Có vẻ lạc đề" : score === 1 ? "Chưa bám sát đề" : score <= 3 ? "Đúng chủ đề, có thể còn thiếu ý" : "Bám đề tốt";
+}
+
+/** Points of the task with the essay sentence that seems to answer each one, plus the keywords used. */
+function RelevanceDetails({ relevance }: { relevance: WritingRelevance }) {
+  return <details className={styles.relevanceDetails} open={relevance.score <= 3}>
+    <summary>Bài của bạn trả lời đề thế nào?</summary>
+    {relevance.points.length > 0 ? <ul className={styles.pointList}>
+      {relevance.points.map(item => <li key={item.point} className={item.covered ? styles.pointFound : styles.pointMissing}>
+        <span lang="en">{item.point}</span>
+        {item.covered && item.evidence
+          ? <small>Câu liên quan: <q lang="en">{item.evidence}</q></small>
+          : <small>Chưa tìm thấy câu tương ứng — hãy tự kiểm tra bạn đã viết ý này chưa.</small>}
+      </li>)}
+    </ul> : <p className={styles.hint}>Đề này không liệt kê từng ý nên chỉ đánh giá mức liên quan chung.</p>}
+    {relevance.keywords.length > 0 && <p className={styles.hint}>Bài có nhắc tới từ của đề: <span lang="en">{relevance.keywords.join(", ")}</span></p>}
+    <p className={styles.hint}>Thử nghiệm: điểm do AI so nghĩa giữa bài và đề. Phát hiện lạc đề rõ ràng đã được kiểm trên bài Write &amp; Improve (báo nhầm khoảng 2–3% bài đúng đề); phần kiểm từng ý chưa có nhãn của giáo viên để đối chiếu.</p>
+  </details>;
 }

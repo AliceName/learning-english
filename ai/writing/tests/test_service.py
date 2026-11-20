@@ -340,3 +340,43 @@ class EngineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(SERVICE_AVAILABLE, "Install requirements-service.txt for API tests")
+class RelevanceServiceTests(unittest.TestCase):
+    def app(self, scorer):
+        return create_app(lambda: SimpleNamespace(gec=None, lock=SimpleNamespace(locked=lambda: False),
+                                                  processing_limits=lambda: {}), relevance_factory=lambda: scorer)
+
+    def test_relevance_scores_essay_against_the_prompt_and_reports_capability(self):
+        calls = []
+        scorer = SimpleNamespace(score=lambda text, prompt: calls.append((text, prompt)) or {"score": 4, "offTopic": False})
+        with TestClient(self.app(scorer)) as client:
+            self.assertTrue(client.get("/internal/writing/capabilities").json()["relevanceEnabled"])
+            response = client.post("/internal/writing/relevance", json={"text": "Hi Ken, thanks.", "prompt": "Write to Ken."})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["score"], 4)
+        self.assertEqual(calls, [("Hi Ken, thanks.", "Write to Ken.")])
+
+    def test_relevance_rejects_extra_fields_and_reports_disabled_scorer(self):
+        with TestClient(self.app(None)) as client:
+            self.assertFalse(client.get("/internal/writing/capabilities").json()["relevanceEnabled"])
+            self.assertEqual(client.post("/internal/writing/relevance", json={"text": "x", "prompt": "y"}).status_code, 503)
+            self.assertEqual(client.post("/internal/writing/relevance", json={"text": "x", "prompt": "y", "extra": 1}).status_code, 422)
+
+    def test_relevance_errors_do_not_echo_details(self):
+        def boom(text, prompt):
+            raise RuntimeError("secret detail")
+        with TestClient(self.app(SimpleNamespace(score=boom))) as client:
+            response = client.post("/internal/writing/relevance", json={"text": "x", "prompt": "y"})
+        self.assertEqual(response.status_code, 503)
+        self.assertNotIn("secret", response.text)
+
+
+@unittest.skipUnless(SERVICE_AVAILABLE, "Install requirements-service.txt for API tests")
+class HealthReportsOptionalPartsTests(unittest.TestCase):
+    def test_health_names_explanation_mode_and_relevance(self):
+        with TestClient(create_app(lambda: SimpleNamespace(gec=None), relevance_factory=lambda: None)) as client:
+            body = client.get("/health").json()
+        self.assertIn(body["explanations"], ("v2-errant", "v1-only (install requirements-service.txt)"))
+        self.assertFalse(body["relevanceEnabled"])

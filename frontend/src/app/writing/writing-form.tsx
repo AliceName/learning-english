@@ -12,9 +12,9 @@ import { isWritingCapabilities, writingInputIssue, type WritingCapabilities } fr
 import { clearWritingDraft, loadPreviousWritingDraft, loadWritingDraft, restorePreviousWritingDraft,
   saveWritingDraft, writingDraftStorage } from "@/lib/writing-draft";
 import { writingAuthHref } from "@/lib/writing-return";
-import { restoreWritingReview, writingReviewItems, writingReviewStatuses, writingReviewTypes, writingReviewView,
+import { restoreWritingReview, writingCategoryLabels, writingReviewItems, writingReviewStatuses, writingReviewTypes, writingReviewView,
   type WritingReviewDecision, type WritingReviewItem, type WritingReviewStatus, type WritingReviewType } from "@/lib/writing-review";
-import { hideAnswerFirst, locateSentence, practiceOrder, progressiveReview, revealLimit, reviewExhausted, targetAboveTask } from "@/lib/writing-practice";
+import { hideAnswerFirst, locateSentence, practiceOrder, progressiveReview, revealLimit, reviewExhausted, improvedSentences, sentenceShades, targetAboveTask } from "@/lib/writing-practice";
 import { checkWritingPreflight, useWritingPreflight } from "./use-writing-preflight";
 import { RevisionChecklistPanel, SelfCheck, TaskPrompt, VersionProgressCard } from "./writing-practice-panels";
 import WritingComparison, { DiffText, visibleEdit, WritingSummary } from "./writing-comparison";
@@ -26,8 +26,6 @@ import styles from "./writing.module.css";
 const criterionLabels = { content: "Nội dung & bám đề", organization: "Tổ chức & mạch lạc",
   vocabulary: "Từ vựng & văn phong", grammar: "Giải thích chỉnh sửa ngữ pháp" };
 const taskBands: Record<string, string> = { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" };
-const explanationLabels: Record<string, string> = { SPELL: "Chính tả", ARTICLE: "Mạo từ",
-  "NOUN:NUM": "Số của danh từ", "VERB:FORM": "Dạng động từ", "VERB:SVA": "Hòa hợp chủ ngữ và động từ" };
 
 export default function WritingForm({ authenticated, unavailable, userId = null, targetLevel = null, draftBaseId = null, initialResult = null, initialNotice = "", initialTask = null, draftTaskId = null, custom = false }: {
   authenticated: boolean; unavailable: boolean; userId?: number | null; draftBaseId?: number | null;
@@ -85,6 +83,11 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const practice = useMemo(() => progressiveReview(practiceOrder(review.visible), revealLimit((result?.task ?? task)?.level), showAllSuggestions),
     [review.visible, result?.task, task, showAllSuggestions]);
   const shownIds = useMemo(() => new Set(practice.shown.map(item => item.id)), [practice]);
+  // Sentence shading uses every suggestion (also those not revealed yet), like Write & Improve.
+  const allEntries = useMemo(() => writingReviewView(reviewItems, decisions, "all", "all").visible, [reviewItems, decisions]);
+  const statusById = useMemo(() => new Map(allEntries.map(item => [item.id, item.status])), [allEntries]);
+  const shades = useMemo(() => result ? sentenceShades(result.originalText, result.errors, allEntries) : [], [result, allEntries]);
+  const [sentenceFocus, setSentenceFocus] = useState<number | null>(null);
   const accepted = decisions.filter(decision => decision.status === "accepted").map(decision => decision.id);
   const managedText = result ? applyWritingEdits(result.originalText, editMap.edits, accepted) : "";
   const draftPositionsKnown = text === managedText;
@@ -357,7 +360,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
       setResult(data); setBaseId(data.submissionId);
       setContinued(false);
       setDecisions([]); setTypeFilter("all"); setStatusFilter("all"); setPartialConsent(null); setPreviousDraft(false);
-      setShownAnswers([]); setShowAllSuggestions(false);
+      setShownAnswers([]); setShowAllSuggestions(false); setSentenceFocus(null);
       setFeedbackNotice("");
       const savedUrl = new URL(window.location.href);
       savedUrl.search = "";
@@ -573,9 +576,27 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         </div>}
       </section>}
       <WritingComparison result={result} draft={text}
-        draftPositionsKnown={draftPositionsKnown} edits={editMap.edits} accepted={accepted} visibleIds={shownIds}
+        draftPositionsKnown={draftPositionsKnown} edits={editMap.edits} accepted={accepted} visibleIds={shownIds} shades={shades} statusById={statusById}
+        improved={comparison && comparison.submissionId === result.parentSubmissionId ? improvedSentences(result.originalText, comparison.originalText, shades) : []}
+        onSentence={index => { setSentenceFocus(index); requestAnimationFrame(() => document.getElementById("writing-sentence-why")?.focus()); }}
         showAnnotations={showAnnotations} onSelect={openSuggestion}
         onEdit={continueVersion} continued={continued} editDisabled={pending || feedbackPending || !draftReady} />
+      {sentenceFocus !== null && result.errors[sentenceFocus] && <section className={styles.sentencePanel} aria-labelledby="writing-sentence-why">
+        <h3 id="writing-sentence-why" tabIndex={-1}>Vì sao câu này cần xem?</h3>
+        <p lang="en"><q>{result.errors[sentenceFocus].original}</q></p>
+        <ul>{allEntries.filter(item => item.suggestionIndex === sentenceFocus).map(item => {
+          const evidence = item.explanations[0];
+          const shown = shownIds.has(item.id);
+          return <li key={item.id}>
+            <strong>{evidence ? writingCategoryLabels[evidence.category] ?? "Chưa phân loại" : "Chưa phân loại"}</strong>
+            {": "}{evidence ? evidence.message : "AI đề xuất thay đổi ở đây nhưng chưa phân loại được loại lỗi."}
+            {" "}{item.status !== "pending" ? <em>({writingReviewStatuses[item.status]})</em>
+              : shown ? <button type="button" onClick={() => openSuggestion(item.id)}>Mở gợi ý {item.number}</button>
+              : <em>(gợi ý chi tiết sẽ hiện ở lượt sau — hãy thử tự tìm trước)</em>}
+          </li>; })}</ul>
+        <p className={styles.hint}>Đây là loại lỗi AI nghĩ có trong câu, chưa phải đáp án. AI có thể nhầm.</p>
+        <button type="button" onClick={() => setSentenceFocus(null)}>Đóng</button>
+      </section>}
       <div className={`${styles.reviewGrid} ${showFeedbackPanel ? "" : styles.reviewSingle}`}>
         <section className={styles.review} aria-labelledby="writing-suggestions-heading">
           <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="writing" /></span><h2 id="writing-suggestions-heading">Chi tiết gợi ý sửa bài</h2></div>
@@ -604,7 +625,9 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           </section>}
           {review.total > 0 && review.visible.length === 0 && <p className={styles.hint}>Không có gợi ý phù hợp với bộ lọc.</p>}
           {practice.shown.length > 0 && <p className={styles.hint}>Thử tự sửa trước: chọn “Tự sửa tại vị trí”, sửa trong bản nháp rồi chọn “Đã tự sửa”; chỉ xem đáp án khi cần. Gợi ý gắn “Chưa có quy tắc giải thích” có thể đúng hoặc sai — hãy tự cân nhắc trước khi nhận.</p>}
-          {practice.shown.map(item => {
+          {practice.shown.map((item, position) => {
+            const next = practice.shown.slice(position + 1).find(other => other.status === "pending")
+              ?? practice.shown.slice(0, position).find(other => other.status === "pending");
             const suggestion = result.errors[item.suggestionIndex];
             const edit = item.edit;
             const uncertain = !hideAnswerFirst(item.type);
@@ -631,11 +654,12 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               {edit && answerShown && <button type="button" disabled={!canChooseEdits || item.status !== "pending"} onClick={() => chooseEdit(item, "accepted")}>Nhận thay đổi {item.number}</button>}
               <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "selfFixed")}>Đã tự sửa {item.number}</button>
               <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "skipped")}>Bỏ qua {item.number}</button>
+              {next && <button type="button" className={styles.nextSuggestion} onClick={() => openSuggestion(next.id)}>Gợi ý tiếp ({next.number}) →</button>}
             </div>
             {!edit && <p className={styles.hint}>Vị trí chưa xác định chắc chắn. Bạn có thể tự sửa trong bản nháp.</p>}
             {selfFixNotice === item.id && <p className={styles.hint} role="status">Không còn tìm thấy câu gốc trong bản nháp — có thể bạn đã sửa câu này. Nếu xong, chọn “Đã tự sửa {item.number}” để sang gợi ý tiếp theo.</p>}
             {item.explanations.map((explanation, explanationIndex) => <div className={styles.explanation} key={explanationIndex}>
-              <Icon name="bulb" /><p>{Object.hasOwn(explanationLabels, explanation.category) && <strong>{explanationLabels[explanation.category]}. </strong>}{explanation.message}</p>
+              <Icon name="bulb" /><p>{Object.hasOwn(writingCategoryLabels, explanation.category) && <strong>{writingCategoryLabels[explanation.category]}. </strong>}{explanation.message}</p>
             </div>)}
           </article>; })}
           {practice.shown.some(item => item.explanations.length > 0) && <p className={styles.hint}>Hãy kiểm tra ý nghĩa của gợi ý trong ngữ cảnh bài viết.</p>}

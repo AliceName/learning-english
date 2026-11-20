@@ -102,6 +102,7 @@ test('rule-explained grammar suggestions come first, otherwise text order is kep
 
 test('only rule-explained suggestions hide the answer; uncertain ones show it with a warning', () => {
   assert.equal(hideAnswerFirst('grammar'), true);
+  assert.equal(hideAnswerFirst('mechanics'), true);
   assert.equal(hideAnswerFirst('unclassified'), false);
   assert.equal(hideAnswerFirst('vocabulary'), false);
 });
@@ -141,4 +142,66 @@ test('a closing "Write ..." instruction is split off even after a single space',
   const parts = JSON.parse(JSON.stringify(taskPromptParts('In your email: * apologise to Alex * suggest another day when you could meet. Write your email in about 100 words.')));
   assert.deepEqual(parts.bullets, ['apologise to Alex', 'suggest another day when you could meet.']);
   assert.equal(parts.outro, 'Write your email in about 100 words.');
+});
+
+const { sentenceShades } = load('writing-practice');
+
+test('each suggested sentence is shaded: pending while any change in it is undecided, done after', () => {
+  const originalText = 'I go home. It is fine. She go to school.';
+  const errors = [
+    { original: 'I go home.', suggestion: 'I went home.', sourceStart: 0, sourceEnd: 10 },
+    { original: 'She go to school.', suggestion: 'She goes to school.', sourceStart: 23, sourceEnd: 40 },
+  ];
+  const items = [{ id: '0:1', suggestionIndex: 0, status: 'selfFixed' }, { id: '1:1', suggestionIndex: 1, status: 'pending' }];
+  const shades = JSON.parse(JSON.stringify(sentenceShades(originalText, errors, items)));
+  assert.deepEqual(shades, [
+    { start: 0, end: 10, suggestionIndex: 0, state: 'fixed' },
+    { start: 23, end: 40, suggestionIndex: 1, state: 'pending' },
+  ]);
+});
+
+test('sentences without a trustworthy position or overlapping an earlier one are not shaded', () => {
+  const originalText = 'Hi. Hi. Bye.';
+  const errors = [
+    { original: 'Hi.', suggestion: 'Hello.' },
+    { original: 'Bye.', suggestion: 'Goodbye.', sourceStart: 8, sourceEnd: 12 },
+    { original: 'Bye.', suggestion: 'Bye!', sourceStart: 8, sourceEnd: 12 },
+    { original: 'wrong', suggestion: 'x', sourceStart: 0, sourceEnd: 3 },
+  ];
+  const items = errors.map((_, i) => ({ id: i + ':1', suggestionIndex: i, status: 'pending' }));
+  const shades = JSON.parse(JSON.stringify(sentenceShades(originalText, errors, items)));
+  assert.deepEqual(shades.map(s => s.suggestionIndex), [1]);
+});
+
+const writingLib = load('writing');
+
+test('saved relevance is accepted only when consistent and quoting the essay', () => {
+  const base = { submissionId: 5, topic: 'T', originalText: 'Hi Ken. We went to the beach.', cefrLevel: 'A2', correctedText: null,
+    errors: [], warnings: [], createdAt: '2026-11-20T10:00:00Z' };
+  const relevance = { score: 3, offTopic: false, topicSimilarity: 0.41, pointsCovered: 1, pointsTotal: 2,
+    points: [{ point: 'say hello', covered: true, evidence: 'Hi Ken.' }, { point: 'suggest a time', covered: false, evidence: null }],
+    keywords: ['ken', 'beach'], thresholdsVersion: 'relevance-minilm-v1', model: 'minilm' };
+  assert.equal(writingLib.isWritingResult({ ...base, relevance }), true);
+  assert.equal(writingLib.isWritingResult({ ...base, relevance: null }), true);
+  assert.equal(writingLib.isWritingResult({ ...base, relevance: { ...relevance, score: 7 } }), false);
+  assert.equal(writingLib.isWritingResult({ ...base, relevance: { ...relevance, points: [{ point: 'x', covered: true, evidence: 'Not in essay.' }], pointsTotal: 1 } }), false);
+});
+
+test('a sentence whose suggestions were all skipped is not shown as fixed', () => {
+  const text = 'I go home. She go out.';
+  const errors = [{ original: 'I go home.', suggestion: 'I went home.', sourceStart: 0, sourceEnd: 10 },
+    { original: 'She go out.', suggestion: 'She goes out.', sourceStart: 11, sourceEnd: 22 }];
+  const items = [{ suggestionIndex: 0, status: 'skipped' }, { suggestionIndex: 1, status: 'skipped' }, { suggestionIndex: 1, status: 'accepted' }];
+  const shades = JSON.parse(JSON.stringify(sentenceShades(text, errors, items)));
+  assert.deepEqual(shades.map(s => s.state), ['skipped', 'fixed']);
+});
+
+const { improvedSentences } = load('writing-practice');
+
+test('sentences rewritten since the previous version that now have no suggestion count as improved', () => {
+  const previous = 'I go home. She go out. It rains.';
+  const current = 'I went home. She go out. It rains. We play.';
+  const shades = [{ start: 13, end: 24, suggestionIndex: 0, state: 'pending' }];
+  const improved = JSON.parse(JSON.stringify(improvedSentences(current, previous, shades)));
+  assert.deepEqual(improved.map(s => current.slice(s.start, s.end)), ['I went home.', 'We play.']);
 });
