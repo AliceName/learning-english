@@ -1,5 +1,7 @@
 # Bàn giao LinguaAI / LEWA — AI Writing
 
+> Hướng dẫn cài đặt và chạy Writing hiện hành (thư viện đề, bám đề 0–5, giải thích v2): [../WRITING_SETUP_FOR_AGENTS.md](../WRITING_SETUP_FOR_AGENTS.md).
+
 Dự án gồm Next.js, ASP.NET Core, SQL Server và dịch vụ Python cục bộ. Công việc đầu tiên của người tiếp nhận là **tái lập và chẩn đoán ByT5 GEC**. Công việc song song là **xây chuẩn đánh giá độ bám đề**. Giao diện và phần lưu lịch sử đã có mã và kiểm thử hồi quy. Độ tin cậy của AI, ghi đồng thời trên SQL và liên kết nguồn Flashcards vẫn có tiêu chí nghiệm thu riêng.
 
 Runtime local ngày 14/11/2026 trả `cefr-my-first-run` và `gec-viet-full-18ep-bs2-ga8-20261111`, bật sửa lỗi và tắt feedback sinh. Smoke synthetic tái hiện lỗi bỏ sót hòa hợp động từ trong câu đã được sửa một phần. Hiện chưa có thành phần chuyên đo độ bám đề. DeBERTa dự đoán CEFR từ bài viết. Mục tiêu CEFR là giá trị người học quản lý trong Hồ sơ cá nhân.

@@ -354,6 +354,8 @@ Các lệnh `test:ai-courses`, `test:reading`, `test:grammar`, `test:speaking` v
 
 Tính năng Writing chạy qua ba thành phần local: trang Next.js `/writing`, API .NET và dịch vụ Python FastAPI tại `127.0.0.1:8000`. Dịch vụ Python dùng checkpoint đã huấn luyện; cài package không tự cung cấp checkpoint. Trang Writing là công cụ gợi ý sửa và phản hồi theo khả năng được bật, không phải chứng nhận CEFR/IELTS/TOEFL. Kết quả phụ thuộc dữ liệu, checkpoint và cấu hình local; cần tự xem xét trước khi áp dụng.
 
+> **Cài đặt và chạy Writing trên máy mới (dành cho agent/người mới):** làm theo [docs/WRITING_SETUP_FOR_AGENTS.md](docs/WRITING_SETUP_FOR_AGENTS.md). Tài liệu này gồm thư viện đề, điểm bám đề, giải thích lỗi v2, kịch bản nghiệm thu và các quy tắc giấy phép.
+
 ### Quyền dữ liệu và mô hình
 
 Pipeline có thể dùng Write & Improve Corpus 2024. Mỗi thành viên phải tự tải và chấp thuận giấy phép từ [Cambridge](https://researchdatasets.cambridge.org/datasets/write-and-improve-corpus-2024). Giấy phép chỉ cho nghiên cứu/giáo dục phi thương mại; không cung cấp corpus cho người khác hoặc đưa lên GitHub, kể cả khi họ cũng đã ký giấy phép. Điều 6 cho phép một ngoại lệ giới hạn đối với trích đoạn xuất bản dưới 100 từ. Cambridge yêu cầu xin chấp thuận trước khi phát hành mô hình hoặc thống kê dẫn xuất. Không commit corpus, dữ liệu chuẩn bị, predictions riêng tư, cache, checkpoint hoặc adapter vào Git; các đường dẫn dữ liệu/runtime tương ứng đã được ignore cục bộ. Không gửi learner text tới dịch vụ bên ngoài. Nếu định dùng trong sản phẩm/dịch vụ, cần giải quyết quyền sử dụng với Cambridge trước.
