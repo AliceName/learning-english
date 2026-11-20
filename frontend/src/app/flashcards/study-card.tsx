@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction } from "@/lib/learning-activity";
+
 import Image from "next/image";
 import { useEffect, useState, type RefObject } from "react";
 import Icon from "@/components/site-icon";
@@ -35,6 +37,11 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
 
   useEffect(() => () => window.speechSynthesis?.cancel(), [flipped]);
 
+  function flip(toBack: boolean) {
+    if (toBack) void recordLearningInteraction("flashcards");
+    onFlip(toBack);
+  }
+
   return <>
     <div className={styles.studyScene}>
       <Image src="/illustrations/speaking-reading-books.webp" alt="" width={320} height={320} className={styles.studyBooks} />
@@ -43,7 +50,7 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
         <span className={styles.binderRings} aria-hidden="true"><i /><i /></span>
         <div className={styles.studyPaper} data-flipped={flipped}>
           <button ref={flipRef} type="button" className={styles.flipCard} disabled={busy}
-            onClick={event => { if (event.detail === 0) onFlip(!flipped); }} onDoubleClick={() => onFlip(!flipped)}
+            onClick={event => { if (event.detail === 0) flip(!flipped); }} onDoubleClick={() => flip(!flipped)}
             aria-label={flipped ? "Đang xem nghĩa. Nhấn đúp để xem từ." : "Nhấn đúp để lật thẻ và xem nghĩa."} aria-pressed={flipped} />
           <div className={styles.studyContent}>
             <span className={styles.studyRibbon}>{flipped ? "Mặt sau · Nghĩa & Ví dụ" : "Mặt trước · Từ vựng"}</span>
@@ -77,7 +84,7 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
     </div>
     <div className={styles.studyDots} aria-label="Mặt thẻ đang xem">
       <button type="button" aria-label="Mặt trước" aria-pressed={!flipped} disabled={busy} onClick={() => onFlip(false)} />
-      <button type="button" aria-label="Mặt sau" aria-pressed={flipped} disabled={busy} onClick={() => onFlip(true)} />
+      <button type="button" aria-label="Mặt sau" aria-pressed={flipped} disabled={busy} onClick={() => flip(true)} />
     </div>
     {issue && <p className={styles.error} role="status">{issue}</p>}
   </>;

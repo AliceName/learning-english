@@ -129,6 +129,7 @@ builder.Services.AddDbContext<EnglishLearningDbContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.CommandTimeout(10)));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<LearningActivityService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();

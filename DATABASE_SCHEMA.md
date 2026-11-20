@@ -4,11 +4,13 @@
 >
 > **BẮT BUỘC:** Đọc cùng `DATABASE_RULES.md`. Không tự thêm/xóa/đổi tên bảng hoặc cột. Khi tài liệu không nói rõ, báo `CHƯA XÁC ĐỊNH` và hỏi người dùng trước khi quyết định.
 
-## 1. Danh sách bảng được phép (16 bảng)
+## 1. Danh sách bảng được phép (17 bảng)
 
 `Users`, `Courses`, `UserCourses`, `Lessons`, `SpeakingAttempts`, `WritingSubmissions`, `ExerciseResults`, `ErrorLogs`, `FlashcardDecks`, `Flashcards`, `Bookmarks`, `LearningProgress`, `UploadedDocuments`.
 
 Phản xạ dịch bổ sung `TranslationPrompts`, `TranslationAcceptedAnswers` và `UserTranslationPromptExposures` theo yêu cầu triển khai kế hoạch ngày 10/11/2026.
+
+Chuỗi ngày học bổ sung `UserLearningDays` theo phê duyệt ngày 17/11/2026.
 
 **Cấm tự tạo thêm bảng**, kể cả `Roles`, `Permissions`, `Questions`, `Answers`, `Notifications`, `RefreshTokens`, `AuditLogs`, `Categories` hoặc bảng AI phụ trợ, nếu chưa được duyệt. Không suy luận từ chức năng, giao diện hay API rằng phải có bảng mới.
 
@@ -253,6 +255,16 @@ Mở rộng được người dùng phê duyệt ngày 14/11/2026: `CourseId INT
 | LastShownAtUtc | DATETIME2 | NN, ứng dụng ghi thời điểm UTC |
 
 `RotationKey` là mã chung của các bản đề. Một dòng lưu lần phát gần nhất của cặp tài khoản và mã đề. Các FK ở mục 2.14–2.16 dùng `NO ACTION`. Áp dụng [script 004](backend/database/004_add_translation_practice.sql) tường minh sau các script hiện có.
+
+### 2.17. UserLearningDays
+
+| Cột | SQL Server type | Ràng buộc |
+|---|---|---|
+| UserId | INT | PK ghép, NN, FK → Users.UserId, ON DELETE NO ACTION |
+| StudyDate | DATE | PK ghép, NN, tính theo giờ Việt Nam |
+| Kind | INT | PK ghép, NN, CHECK từ 1 đến 8 |
+
+Mỗi loại hoạt động được ghi một lần trên mỗi tài khoản và ngày. Giá trị `Kind` lần lượt là Nghe, Nói, Đọc, Viết, Ngữ pháp, Flashcards, Phiên dịch và Từ vựng. Áp dụng [script 006](backend/database/006_add_learning_activity.sql) tường minh. Script không nhập lại dữ liệu học cũ. API tính streak từ các ngày được ghi nhận trong bảng này.
 
 ## 3. Các ràng buộc Code First không được vi phạm
 

@@ -25,7 +25,7 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
     private static readonly ConcurrentDictionary<(int UserId, int SubmissionId), byte> FeedbackRequests = new();
     private static readonly SemaphoreSlim NonSqlSubmissionLock = new(1);
 
-    [HttpPost]
+    [HttpPost, LearningActivity(LearningKind.Writing, 201)]
     [RequestSizeLimit(65536)]
     public Task<ActionResult<WritingSubmissionResponse>> Submit(SubmitWritingRequest request, CancellationToken cancellationToken) =>
         WithUser<WritingSubmissionResponse>(async userId =>

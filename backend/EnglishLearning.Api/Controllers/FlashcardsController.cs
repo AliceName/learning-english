@@ -202,7 +202,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
         db.Flashcards.Remove(card); await db.SaveChangesAsync(ct); return NoContent();
     }, ct);
 
-    [HttpPost("cards/{id:int:min(1)}/review")]
+    [HttpPost("cards/{id:int:min(1)}/review"), LearningActivity(LearningKind.Flashcards)]
     public Task<IActionResult> Review(int id, ReviewCardRequest request, CancellationToken ct) => Run(async owner => {
         await using var transaction = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
         var card = await OwnedCards(owner).SingleOrDefaultAsync(c => c.CardId == id, ct); if (card is null) return NotFound();

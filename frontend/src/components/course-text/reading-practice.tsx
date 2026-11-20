@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
@@ -49,6 +51,7 @@ export default function CourseReadingPractice({ lesson, userId }: { lesson: Read
   const [result, setResult] = useState<ReadingResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [readingNotice, setReadingNotice] = useState("");
   const [confirmMissing, setConfirmMissing] = useState(false);
   const [font, setFont] = useState(16);
   const [bilingual, setBilingual] = useState(false);
@@ -71,6 +74,7 @@ export default function CourseReadingPractice({ lesson, userId }: { lesson: Read
   }, [answers, result, invalid]);
 
   function update(questionId: number, change: Partial<ReadingAnswer>) {
+    void recordLearningInteraction("reading");
     setAnswers(current => ({ ...current, [questionId]: { ...(current[questionId] ?? { questionId, matches: [] }), ...change } }));
     setConfirmMissing(false);
   }
@@ -83,7 +87,7 @@ export default function CourseReadingPractice({ lesson, userId }: { lesson: Read
         ...aiJson("POST", { contentVersion: lesson.contentVersion, answers: Object.values(answers), timeSpentSeconds: Math.min(86400, Math.max(0, Math.floor((performance.now() - start.current) / 1000))) }),
         signal: signal.current?.signal,
       });
-      if (!signal.current?.signal.aborted) setResult(value);
+      if (!signal.current?.signal.aborted) { notifyLearningActivity(); setResult(value); }
     } catch (failure) {
       if (!signal.current?.signal.aborted) setError(failure instanceof Error ? failure.message : "Chưa nộp được bài đọc. Hãy thử lại.");
     } finally { sending.current = false; setBusy(false); }
@@ -130,6 +134,10 @@ export default function CourseReadingPractice({ lesson, userId }: { lesson: Read
           <p className={styles.readingHint}><Icon name="bulb" />Bấm vào từ được gạch chân để xem nghĩa.</p>
           <PassageImage key={lesson.imageUrl} lesson={lesson} />
           <AnnotatedReadingText region="passage" className={styles.passageText} style={{ fontSize: font }}><LessonRichText text={lesson.passage} vocabulary={lesson.vocabulary} /></AnnotatedReadingText>
+          <button type="button" className={styles.secondary} onClick={() => {
+            void recordLearningInteraction("reading").then(saved => setReadingNotice(saved ? "Đã ghi nhận hoạt động đọc." : "Chưa ghi nhận được. Bấm lại để thử."));
+          }}>Ghi nhận đã đọc</button>
+          {readingNotice && <p className={styles.readingHint} role="status">{readingNotice}</p>}
           {bilingual && translation && <aside className={styles.translation} aria-label="Bản dịch tham khảo"><h3><Icon name="translate" />Bản dịch tham khảo</h3><LessonRichText text={translation} /></aside>}
           {!!lesson.vocabulary.length && <><Link className={styles.flashcardsLink} href={courseFlashcardsHref(lesson.courseId, lesson.lessonId)}><Icon name="cards" />Ôn từ vựng bằng Flashcards<Icon name="arrow" /></Link><details className={styles.vocabulary}><summary>Từ vựng trong bài <span>{lesson.vocabulary.length} từ</span></summary><dl>{lesson.vocabulary.map((item, index) => <div key={index}><dt lang="en">{item.word}</dt><dd>{item.meaning}{item.example && <p lang="en">{item.example}</p>}</dd></div>)}</dl></details></>}
         </article>

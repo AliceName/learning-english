@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,13 +17,13 @@ public sealed class CourseTextLessonsController(EnglishLearningDbContext db, Cou
     [HttpGet("reading")]
     public Task<IActionResult> Reading(int courseId, int lessonId, CancellationToken ct) =>
         ExecuteAsync(async user => Ok(await lessons.ReadingAsync(user, courseId, lessonId, ct)), ct);
-    [HttpPost("reading/submissions")]
+    [HttpPost("reading/submissions"), LearningActivity(LearningKind.Reading)]
     public Task<IActionResult> ReadingSubmit(int courseId, int lessonId, ListeningSubmissionRequest input, CancellationToken ct) =>
         ExecuteAsync(async user => Ok(await lessons.SubmitReadingAsync(user, courseId, lessonId, input, ct)), ct);
     [HttpGet("writing")]
     public Task<IActionResult> Writing(int courseId, int lessonId, CancellationToken ct) =>
         ExecuteAsync(async user => Ok(await lessons.WritingAsync(user, courseId, lessonId, ct)), ct);
-    [HttpPost("writing/submissions")]
+    [HttpPost("writing/submissions"), LearningActivity(LearningKind.Writing)]
     public Task<IActionResult> WritingSubmit(int courseId, int lessonId, CourseWritingRequest input, CancellationToken ct) =>
         ExecuteAsync(async user => Ok(await lessons.SubmitWritingAsync(user, courseId, lessonId, input, ct)), ct);
     private async Task<IActionResult> ExecuteAsync(Func<int, Task<IActionResult>> action, CancellationToken ct)

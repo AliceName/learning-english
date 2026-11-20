@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace EnglishLearning.Api.Controllers;
 [ApiController, Authorize, Route("api/v1/translation-practice"), Tags("Translation practice")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None), RequestSizeLimit(8192)]
 public sealed class TranslationPracticeController(TranslationPracticeService practice, TranslationRequestReplay replay,
-    ILogger<TranslationPracticeController> logger) : ControllerBase
+    LearningActivityService activity, ILogger<TranslationPracticeController> logger) : ControllerBase
 {
     [HttpPost("prompts/next"), EnableRateLimiting("TranslationNext")]
     public Task<IActionResult> Next(TranslationNextRequest request, CancellationToken ct) => ExecuteAsync((userId) =>
@@ -24,7 +25,13 @@ public sealed class TranslationPracticeController(TranslationPracticeService pra
     public Task<IActionResult> Grade(TranslationGradeRequest request, CancellationToken ct) => ExecuteAsync((userId) =>
         replay.RunAsync("grade", userId, request.RequestId,
             Convert.ToHexString(TranslationPracticeSupport.Hash($"{request.AttemptToken}:{request.IncludeAiFeedback}:{request.Answer}")),
-            token => practice.GradeAsync(userId, request, token), ct));
+            async token =>
+            {
+                var day = activity.Today;
+                var result = await practice.GradeAsync(userId, request, token);
+                await activity.RecordCompletedAsync(userId, LearningKind.Translation, day);
+                return result;
+            }, ct));
 
     private async Task<IActionResult> ExecuteAsync<T>(Func<int, Task<T>> run)
     {

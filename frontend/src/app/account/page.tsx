@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import MemberShell from "@/components/navigation/member-shell";
 import { getCurrentUser } from "@/lib/server-auth";
 import ProfileForm from "./profile-form";
+import StreakCalendar from "./streak-calendar";
 import styles from "./account.module.css";
 
 export const metadata: Metadata = { title: "Tài khoản của bạn | LEWA" };
@@ -16,9 +17,12 @@ async function AccountContent() {
   const user = session.user;
   return (
     <MemberShell user={user}>
-      <main id="main-content" className={styles.panel} tabIndex={-1}>
-        <ProfileForm key={user.userId} user={user} />
-        <Link href="/courses" className={styles.homeLink}>Khám phá khóa học →</Link>
+      <main id="main-content" tabIndex={-1}>
+        <div className={styles.panel}>
+          <ProfileForm key={user.userId} user={user} />
+          <Link href="/courses" className={styles.homeLink}>Khám phá khóa học →</Link>
+        </div>
+        <StreakCalendar key={user.userId} />
       </main>
     </MemberShell>
   );

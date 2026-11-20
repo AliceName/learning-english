@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -108,15 +110,25 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
     const updated = { ...previous, [questionId]: { ...(previous[questionId] ?? { questionId, matches: [] }), ...change } };
     currentAnswers.current = updated;
     setAnswers(updated);
+    void recordLearningInteraction("listening");
     const saved = writeListeningDraft(draftKey, { contentVersion: lesson.contentVersion, answers: updated, timeSpentSeconds: elapsed });
     setDraftStatus(saved ? "saved" : "unavailable");
   }
   const replay = useCallback((seconds: number | null) => { if (seconds !== null) setSeek(previous => ({ seconds, nonce: (previous?.nonce ?? 0) + 1 })); }, []);
   async function toggleTranscript() {
     if (!canShowTranscript || sessionInvalid || transcriptBusy) return;
-    if (transcript !== null) { setTranscriptOpen(value => !value); return; }
+    if (transcript !== null) {
+      if (!transcriptOpen) void recordLearningInteraction("listening");
+      setTranscriptOpen(value => !value);
+      return;
+    }
     setTranscriptBusy(true); setError("");
-    try { const response = await listeningRequest<{ transcript: string }>(`${path}/transcript`, { signal: controller.current?.signal }); controller.current?.signal.throwIfAborted(); setTranscript(response.transcript); setTranscriptOpen(true); }
+    try {
+      const response = await listeningRequest<{ transcript: string }>(`${path}/transcript`, { signal: controller.current?.signal });
+      controller.current?.signal.throwIfAborted();
+      setTranscript(response.transcript); setTranscriptOpen(true);
+      void recordLearningInteraction("listening");
+    }
     catch (reason) { showError(reason); }
     finally { setTranscriptBusy(false); }
   }
@@ -144,6 +156,7 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
       controller.current?.signal.throwIfAborted();
       clearListeningDraft(draftKey);
       setDraftStatus(null);
+      notifyLearningActivity();
       setResult(response); setProgress(response.progress); setHistory(null);
       requestAnimationFrame(() => { resultHeading.current?.focus(); resultHeading.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     } catch (reason) { showError(reason); }

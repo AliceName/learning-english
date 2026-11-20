@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Icon from "@/components/site-icon";
@@ -20,6 +22,7 @@ export function playSample(text: string, reportError: (message: string) => void)
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
   utterance.rate = .85;
+  utterance.onstart = () => { void recordLearningInteraction("speaking"); };
   utterance.onerror = event => {
     if (event.error !== "canceled" && event.error !== "interrupted") reportError("Chưa phát được giọng mẫu. Vui lòng thử lại.");
   };
@@ -174,6 +177,7 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
       const data = await response.json().catch(() => null);
       if (!response.ok || !data) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." :
         data?.title || "Chưa chấm được bản ghi. Hãy thử lại.");
+      notifyLearningActivity();
       const next = { assessment: data as SpeakingAssessment, recording: clip };
       const saved = await onScore(sentence, next);
       if (!controller.signal.aborted) {

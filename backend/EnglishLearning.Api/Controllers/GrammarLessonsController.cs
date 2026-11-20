@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +21,7 @@ public sealed class GrammarLessonsController(GrammarPracticeService practice, En
     public Task<ActionResult<GrammarPracticeResponse>> Get(int courseId, int lessonId, CancellationToken ct) =>
         ExecuteAsync(userId => practice.GetAsync(userId, courseId, lessonId, ct), ct);
 
-    [HttpPost("submissions")]
+    [HttpPost("submissions"), LearningActivity(LearningKind.Grammar)]
     public Task<ActionResult<GrammarResultResponse>> Submit(int courseId, int lessonId, GrammarSubmissionRequest request, CancellationToken ct) =>
         ExecuteAsync(userId => practice.SubmitAsync(userId, courseId, lessonId, request, ct), ct);
 

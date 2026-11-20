@@ -24,6 +24,7 @@ public sealed class AuthController(
     RefreshSessions refreshSessions,
     LoginAttemptLimiter loginAttemptLimiter,
     EnglishLearningDbContext dbContext,
+    LearningActivityService learningActivity,
     ILogger<AuthController> logger) : ControllerBase
 {
     [AllowAnonymous]
@@ -176,13 +177,14 @@ public sealed class AuthController(
         {
             var user = await dbContext.Users.SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, cancellationToken);
             if (user is null) return Unauthorized();
+            var streak = await learningActivity.SummaryAsync(userId, learningActivity.Today, cancellationToken);
             user.FullName = request.FullName;
             user.TargetLevel = request.TargetLevel;
             user.AvatarUrl = request.AvatarUrl;
             user.UpdatedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync(cancellationToken);
             return Ok(new CurrentUserResponse(user.UserId, user.Email, user.FullName, user.TargetLevel,
-                user.CreatedAt, user.CurrentStreak, user.AvatarUrl, user.Role));
+                user.CreatedAt, streak.CurrentStreak, user.AvatarUrl, user.Role));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -210,8 +212,9 @@ public sealed class AuthController(
         {
             var user = await dbContext.Users.AsNoTracking().SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, cancellationToken);
             if (user is null) return Unauthorized();
+            var streak = await learningActivity.SummaryAsync(userId, learningActivity.Today, cancellationToken);
             return Ok(new CurrentUserResponse(user.UserId, user.Email, user.FullName, user.TargetLevel,
-                user.CreatedAt, user.CurrentStreak, user.AvatarUrl, user.Role));
+                user.CreatedAt, streak.CurrentStreak, user.AvatarUrl, user.Role));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

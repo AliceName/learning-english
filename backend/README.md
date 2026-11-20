@@ -2,7 +2,7 @@
 
 Backend ASP.NET Core Web API dùng .NET 9, Controllers và Entity Framework Core cho SQL Server.
 
-Máy mới nên làm theo [quy trình clone và cài đặt ở README gốc](../README.md), trên nhánh **`nga`**. Cần SQL Server của chính bạn, đủ script **001–005**, khóa JWT local và frontend; cấu hình thêm MongoDB, Cloudinary, Gemini hoặc mô hình Python theo tính năng cần dùng. Không có tài khoản, database hay checkpoint riêng của máy phát triển được tải theo Git.
+Máy mới nên làm theo [quy trình clone và cài đặt ở README gốc](../README.md), trên nhánh **`nga`**. Cần SQL Server của chính bạn, đủ script **001–006**, khóa JWT local và frontend; cấu hình thêm MongoDB, Cloudinary, Gemini hoặc mô hình Python theo tính năng cần dùng. Không có tài khoản, database hay checkpoint riêng của máy phát triển được tải theo Git.
 
 ## Chạy ứng dụng
 
@@ -288,7 +288,7 @@ sqlcmd -S 'MSI\MSSQLSERVER01' -d master -E -C -b -f 65001 -i backend/database/00
 
 Thay server bằng instance SQL Server của bạn. Baseline này có đúng 13 bảng nghiệp vụ, 121 cột, 20 FK, 14 CHECK và 4 UNIQUE; chỉ `Lessons.CourseId` và `Flashcards.DeckId` có xóa cascade. Chưa dùng EF migrations history; không chạy `database update` hoặc `EnsureCreated` để khởi tạo lại CSDL này.
 
-**Baseline 001 chưa phải toàn bộ schema của bản hiện tại.** Khi tạo database mới, chạy tiếp lần lượt 002 → 003 → 004 → 005 theo [README gốc](../README.md#4-tạo-database-và-áp-dụng-schema-sql). Bản đã có 001–004 cần chạy bổ sung `database/005_link_flashcard_decks_to_courses.sql` để dùng bộ thẻ khóa học. Script 005 thêm `FlashcardDecks.CourseId INT NULL` cùng FK, giữ dữ liệu cũ; API không chạy script này khi khởi động.
+Khi tạo database mới, chạy tiếp lần lượt 002 → 003 → 004 → 005 → 006 theo [README gốc](../README.md#4-tạo-database-và-áp-dụng-schema-sql). Với database hiện có, áp dụng các script còn thiếu trước khi khởi động API. Script 006 tạo `UserLearningDays` để ghi theo ngày Việt Nam và loại hoạt động. Dữ liệu học cũ không được hồi tố. API yêu cầu bảng này khi tải hồ sơ và không tự chạy script lúc khởi động.
 
 ### Role và tài khoản admin mặc định
 

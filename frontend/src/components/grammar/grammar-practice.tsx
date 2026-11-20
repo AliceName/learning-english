@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -107,11 +109,13 @@ export default function GrammarPractice({ lesson, userId }: { lesson: GrammarLes
   }
   function updateAnswer(value: GrammarAnswer) {
     if (locked) return;
+    void recordLearningInteraction("grammar");
     setAnswers(previous => ({ ...previous, [question.questionId]: value }));
     setError("");
   }
   function openModal(value: "handbook" | "submit" | "pause") {
     if (value === "pause") setPaused(true);
+    if (value === "handbook") void recordLearningInteraction("grammar");
     setModal(value); dialog.current?.showModal();
   }
   function closeModal() {
@@ -124,6 +128,7 @@ export default function GrammarPractice({ lesson, userId }: { lesson: GrammarLes
     try {
       const response = await submitGrammar(lesson, Object.values(answers), elapsedRef.current, controller.signal);
       if (controller.signal.aborted) return;
+      notifyLearningActivity();
       setResult(response); setCurrent(0);
       requestAnimationFrame(() => questionHeading.current?.focus());
     } catch (failure) {

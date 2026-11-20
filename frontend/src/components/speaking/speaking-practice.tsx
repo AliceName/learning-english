@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -179,6 +181,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại trước khi gửi." : data.title || "Chưa chấm được bản ghi. Vui lòng thử lại.");
       if (mounted.current) {
+        notifyLearningActivity();
         const attempt = data as SpeakingAttempt;
         saveClip(target.key, { ...clip, submitted: true });
         setResult(attempt); setHistory(old => mergeHistory([attempt], old));
@@ -207,6 +210,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
     stopPlayback();
     const utterance = new SpeechSynthesisUtterance(target.text);
     utterance.lang = "en-US"; utterance.rate = rate;
+    utterance.onstart = () => { void recordLearningInteraction("speaking"); };
     utterance.onerror = event => { if (mounted.current && event.error !== "canceled" && event.error !== "interrupted") setError("Chưa phát được giọng mẫu. Hãy kiểm tra giọng tiếng Anh của trình duyệt rồi thử lại."); };
     window.speechSynthesis.speak(utterance);
   }
@@ -301,7 +305,10 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           <summary>Giọng mẫu và chọn câu luyện</summary>
         <div className={styles.sampleControls}><label>Tốc độ mẫu <select value={rate} disabled={busy} onChange={event => { const next = Number(event.target.value); setRate(next); if (sampleAudio.current) sampleAudio.current.playbackRate = next; }}><option value={.75}>Chậm · 0,75×</option><option value={1}>Bình thường · 1×</option></select></label>
           <button className={styles.secondary} disabled={busy} onClick={() => stopPlayback()}>Dừng nghe</button></div>
-        {sampleUrl ? <audio ref={sampleAudio} key={sampleUrl} controls preload="metadata" src={sampleUrl} aria-label="Audio câu mẫu" onLoadedMetadata={event => { event.currentTarget.playbackRate = rate; }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onError={() => setError("Chưa tải được audio mẫu. Bạn vẫn có thể đọc câu và thử tải lại trang sau.")} /> : <p className={styles.hint}>Giọng mẫu do trình duyệt tổng hợp, có thể khác nhau giữa các thiết bị.</p>}
+        {sampleUrl ? <audio ref={sampleAudio} key={sampleUrl} controls preload="metadata" src={sampleUrl} aria-label="Audio câu mẫu" onLoadedMetadata={event => { event.currentTarget.playbackRate = rate; }}
+          onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }}
+          onPlaying={() => { if (!busy) void recordLearningInteraction("speaking"); }}
+          onError={() => setError("Chưa tải được audio mẫu. Bạn vẫn có thể đọc câu và thử tải lại trang sau.")} /> : <p className={styles.hint}>Giọng mẫu do trình duyệt tổng hợp, có thể khác nhau giữa các thiết bị.</p>}
         <div className={styles.sentenceNavigation}><button disabled={busy || index === 0} onClick={() => selectSentence(index - 1)}>← Câu trước</button><span>{index + 1} / {lesson.sentences.length}</span><button disabled={busy || index === lesson.sentences.length - 1} onClick={() => selectSentence(index + 1)}>Câu tiếp theo →</button></div>
           <nav className={styles.sentences} aria-label="Chọn câu luyện nói">{lesson.sentences.map((s, i) => <button key={i} disabled={busy}
             aria-current={i === index ? "step" : undefined} onClick={() => selectSentence(i)} title={s.text}>

@@ -185,6 +185,6 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
             Assert.Equal(ApprovedSchema.NormalizeDefault(column.Default), ApprovedSchema.NormalizeDefault(reader.IsDBNull(8) ? null : reader.GetString(8)));
             count++;
         }
-        Assert.Equal(139, count);
+        Assert.Equal(schema.Values.Sum(columns => columns.Count), count);
     }
 }

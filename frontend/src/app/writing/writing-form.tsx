@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
@@ -345,6 +347,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         setNotice("AI trả về kết quả chưa hợp lệ. Bài viết vẫn được giữ để bạn thử lại.");
         return;
       }
+      notifyLearningActivity();
       comparisonRequest.current?.abort();
       if (result) setComparison(result);
       // A reviewed submission keeps its session decisions when reopened from history.
@@ -427,7 +430,11 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         <p className={styles.hint}>Tối đa 500 ký tự.</p></>}
       {result && task && <SelfCheck requirements={task.requirements} />}
       <label htmlFor="writing-text">Nội dung bài viết <span className={styles.required}>*</span></label>
-      <textarea ref={editor} id="writing-text" lang="en" className={styles.essay} placeholder="Start writing in English here…" value={text} onChange={event => { setRequestId(undefined); setText(event.target.value); }} maxLength={12000} rows={13} required aria-describedby="writing-hint writing-count writing-draft-status" />
+      <textarea ref={editor} id="writing-text" lang="en" className={styles.essay} placeholder="Start writing in English here…" value={text} onChange={event => {
+        const value = event.target.value;
+        setRequestId(undefined); setText(value);
+        if (authenticated && value.trim()) void recordLearningInteraction("writing");
+      }} maxLength={12000} rows={13} required aria-describedby="writing-hint writing-count writing-draft-status" />
       <div className={styles.count} id="writing-count"><span><strong>{words}</strong> từ</span><span>{text.length.toLocaleString("vi-VN")} / 12.000 ký tự</span></div>
       {task && <p id="writing-hint" className={styles.hint}>{taskWordGuidance(task)}.</p>}
       {task && (((task.wordMode === "minimum" || task.wordMode === "range") && words < task.minWords) || (task.wordMode === "range" && words > task.maxWords)) && <p className={styles.hint}>Số từ hiện chưa theo yêu cầu đề.</p>}

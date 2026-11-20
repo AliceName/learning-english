@@ -1,5 +1,7 @@
 "use client";
 
+import { notifyLearningActivity } from "@/lib/learning-activity";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -34,7 +36,10 @@ async function send<T>(action: "next" | "grade", payload: object, signal?: Abort
   const response = await fetch(`/api/translation-practice/${action}`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload), signal,
   });
-  if (response.ok) return await response.json() as T;
+  if (response.ok) {
+    if (action === "grade") notifyLearningActivity();
+    return await response.json() as T;
+  }
   const problem = await response.json().catch(() => null) as Failure | null;
   const retryAfter = Number(response.headers.get("retry-after"));
   throw { title: problem?.title ?? "Chưa kết nối được. Vui lòng thử lại.", code: problem?.code, retryAfter } satisfies Failure;

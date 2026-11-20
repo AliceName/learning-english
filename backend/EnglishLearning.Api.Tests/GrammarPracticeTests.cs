@@ -54,6 +54,9 @@ public sealed partial class RegistrationSqlServerTests
         Assert.Equal(0m, (await retry.Content.ReadFromJsonAsync<GrammarResultResponse>())!.Result.Score);
         var refreshed = (await client.GetFromJsonAsync<GrammarPracticeResponse>(url))!;
         Assert.Equal(0m, refreshed.LatestResult!.Score);
+        var activity = (await client.GetFromJsonAsync<LearningCalendar>("/api/v1/learning-activity"))!;
+        Assert.Equal(new[] { "grammar" }, Assert.Single(activity.Days).Activities);
+        Assert.Equal(new StreakSummary(1, 1, true), activity.Streak);
     }
 
     [SqlServerFact]
@@ -89,5 +92,6 @@ public sealed partial class RegistrationSqlServerTests
         using var scope = factory.Services.CreateScope(); var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
         Assert.False(await db.ExerciseResults.AnyAsync(item => item.LessonId == fixture.Lesson.LessonId));
         Assert.False(await db.UserCourses.AnyAsync(item => item.UserId == fixture.UserId && item.CourseId == fixture.Course.CourseId));
+        Assert.False(await db.UserLearningDays.AnyAsync(item => item.UserId == fixture.UserId));
     }
 }

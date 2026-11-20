@@ -1,5 +1,7 @@
 "use client";
 
+import { notifyLearningActivity } from "@/lib/learning-activity";
+
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
 import type { Deck, DeckDetail, Flashcard } from "@/lib/flashcards";
@@ -325,6 +327,7 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
     if (!current || !detail || !flipped) return;
     void perform(async () => {
       const result = await api<Flashcard>("cards/" + current.cardId + "/review", "POST", { rating, expectedUpdatedAt: current.updatedAt });
+      notifyLearningActivity();
       setStudy(previous => previous?.filter(card => card.cardId !== current.cardId) ?? null);
       setStudyIndex(Math.min(studyIndex, Math.max(0, (study?.length ?? 0) - 2)));
       setFlipped(false); setReviewed(previous => previous + 1);

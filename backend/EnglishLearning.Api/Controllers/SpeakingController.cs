@@ -20,7 +20,7 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
     public Task<IActionResult> Lesson(int lessonId, CancellationToken ct) => Execute(async uid =>
         await lessons.GetAsync(uid, lessonId, ct) is { } lesson ? Ok(lesson) : NotFound(), ct);
 
-    [HttpPost("attempts"), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
+    [HttpPost("attempts"), LearningActivity(LearningKind.Speaking, 201), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
     public Task<IActionResult> Submit([FromForm] SubmitSpeakingRequest request, CancellationToken ct) => Execute(async uid =>
     {
         var lesson = await lessons.GetAsync(uid, request.LessonId, ct);
@@ -50,7 +50,7 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
         return Created($"/api/v1/speaking/attempts/{attempt.AttemptId}", ToResponse(attempt));
     }, ct);
 
-    [HttpPost("free/score"), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
+    [HttpPost("free/score"), LearningActivity(LearningKind.Speaking), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
     public Task<IActionResult> ScoreFree([FromForm] ScoreFreeSpeakingRequest request, CancellationToken ct) => Execute(async _ =>
     {
         var (_, assessment) = await AssessAsync(request.File, request.Text.Trim(), ct);

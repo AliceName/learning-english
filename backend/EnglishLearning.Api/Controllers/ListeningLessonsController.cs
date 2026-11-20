@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +33,7 @@ public sealed class ListeningLessonsController(ListeningPracticeService practice
     public Task<ActionResult<ListeningPositionResponse>> Position(int courseId, int lessonId, ListeningPositionRequest request, CancellationToken ct) =>
         ExecuteAsync(userId => practice.SavePositionAsync(userId, courseId, lessonId, request, ct), ct);
 
-    [HttpPost("submissions")]
+    [HttpPost("submissions"), LearningActivity(LearningKind.Listening)]
     public Task<ActionResult<ListeningResultResponse>> Submit(int courseId, int lessonId, ListeningSubmissionRequest request, CancellationToken ct) =>
         ExecuteAsync(userId => practice.SubmitAsync(userId, courseId, lessonId, request, ct), ct);
 
