@@ -4,6 +4,8 @@ import { connection } from "next/server";
 import { backendUrl, SESSION_COOKIE } from "./server-auth";
 import { backendRequestSignal } from "./backend-request";
 import { courseQueryString, type CourseQuery, type CourseList, type CourseDetail, type CourseItem } from "./course-catalog";
+import type { CourseVocabulary } from "./course-flashcards";
+import type { Deck } from "./flashcards";
 
 type FeaturedCourse = Pick<CourseItem, "courseId" | "title" | "description" | "lessonCount" | "estimatedMinutes" | "timedLessonCount" | "levels">;
 
@@ -22,6 +24,8 @@ async function read<T>(path: string): Promise<CatalogResult<T>> {
 }
 export function getCourses(query: CourseQuery) { return read<CourseList>(`/api/v1/courses?${courseQueryString(query)}`); }
 export function getCourse(courseId: number) { return read<CourseDetail>(`/api/v1/courses/${courseId}`); }
+export function getCourseVocabulary(courseId: number) { return read<CourseVocabulary>(`/api/v1/courses/${courseId}/vocabulary`); }
+export function getCourseDecks(courseId: number) { return read<Deck[]>(`/api/v1/flashcards/decks?courseId=${courseId}`); }
 
 export async function getFeaturedCourses(): Promise<FeaturedCourse[] | null> {
   try {

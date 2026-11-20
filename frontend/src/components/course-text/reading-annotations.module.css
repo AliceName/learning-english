@@ -1,0 +1,84 @@
+.toolbar, .dialog, .selectionBar { --yellow: #f5d95c; --green: #96d7ad; --blue: #9bc9ed; --pink: #eeb1cc; color: #365448; font: inherit; }
+.toolbar { border-bottom: 1px solid #dfe8df; padding: 12px 24px 10px; background: #f7faf5; }
+.toolRow, .pens, .colors, .history { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.toolRow { gap: 12px; }
+.toolbar .toolRow button { font-size: 11px; }
+.toolbar button, .selectionBar button, .dialog button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 9px; border: 1px solid #d8e3d6; border-radius: 3px; background: white; color: #4d6b54; font: inherit; font-size: 11px; line-height: 1.5; cursor: pointer; }
+.toolbar button:disabled, .dialog button:disabled { opacity: .4; cursor: default; }
+.toolbar button:hover:not(:disabled), .selectionBar button:hover, .dialog button:hover:not(:disabled) { border-color: #8fae88; background: #edf5e9; }
+.toolbar button:focus-visible, .selectionBar button:focus-visible, .dialog :is(button,textarea):focus-visible { outline: 3px solid #70ad91; outline-offset: 3px; }
+.toolbar svg, .selectionBar svg, .dialog svg, .notePin svg { width: 15px; height: 15px; flex-shrink: 0; }
+.pens button[aria-pressed=true] { background: #e1eddb; border-color: #87a87c; color: #315d36; font-weight: 700; }
+.colors { gap: 6px; border-left: 1px solid #dce5d7; padding-left: 12px; }
+.colors button { width: 25px; height: 25px; border: 2px solid transparent; padding: 3px; color: #304b3c; }
+.colors button[data-color=yellow] { background: var(--yellow); }
+.colors button[data-color=green] { background: var(--green); }
+.colors button[data-color=blue] { background: var(--blue); }
+.colors button[data-color=pink] { background: var(--pink); }
+.colors button[aria-pressed=true] { outline: 1px solid #527256; outline-offset: 2px; border-color: #ffffffa0; }
+.history { gap: 3px; }
+.history button { padding: 7px; }
+.redo svg { transform: scaleX(-1); }
+.openBook { margin-left: auto; }
+.openBook span { min-width: 18px; background: #edf3e9; border-radius: 2px; text-align: center; font-size: 10px; }
+.help { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px 15px; margin-top: 9px; color: #667b65; font-size: 10px; line-height: 1.7; }
+.help small { font-size: inherit; color: #73816e; }
+.region { position: relative; isolation: isolate; display: flow-root; }
+.region[data-tool=highlight], .region[data-tool=underline], .region[data-tool=note] { cursor: text; }
+.text { position: relative; }
+.text > div { font-size: inherit; line-height: inherit; color: inherit; }
+.text ::selection { background: #bcd9b9; color: #233b2a; }
+.overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; overflow: visible; }
+.overlay span { position: absolute; pointer-events: none; border-radius: 2px; background: #f5d95c66; }
+.overlay span[data-color=green] { background: #70ca8e55; }
+.overlay span[data-color=blue] { background: #7ab8eb55; }
+.overlay span[data-color=pink] { background: #e58bb855; }
+.overlay span[data-kind=underline] { background: none; border-bottom: 2px solid #b78813; border-radius: 0; }
+.overlay span[data-kind=underline][data-color=green] { border-color: #378154; }
+.overlay span[data-kind=underline][data-color=blue] { border-color: #367cac; }
+.overlay span[data-kind=underline][data-color=pink] { border-color: #ae4e7b; }
+.overlay span[data-kind=note] { border-bottom: 1px dashed #7d7754; }
+.notePin { position: absolute; left: -18px; z-index: 3; display: grid; place-items: center; width: 17px; height: 21px; padding: 1px; border: 0; border-radius: 2px; color: #4e7b46; background: #eaf3e4; cursor: pointer; }
+.notePin svg { width: 12px; height: 12px; }
+.selectionBar { position: fixed; z-index: 70; left: calc(50% + 136px); transform: translateX(-50%); bottom: 22px; width: min(570px,calc(100vw - 50px)); padding: 13px 15px; background: #fff; border: 1px solid #a8c29e; border-radius: 5px; box-shadow: 0 6px 35px #20362126; font-family: var(--font-jakarta), Arial, sans-serif; }
+.selectionBar > span { display: flex; gap: 9px; font-size: 11px; min-width: 0; margin-bottom: 9px; }
+.selectionBar b { color: #6c8065; white-space: nowrap; font-weight: 500; }
+.selectionBar q { color: #3c5e3e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.selectionBar > div { display: flex; align-items: center; gap: 7px; }
+.selectionBar button:last-child { margin-left: auto; padding: 7px; }
+.dialog { width: min(520px,calc(100vw - 32px)); max-height: calc(100dvh - 40px); margin: auto; box-sizing: border-box; border: 1px solid #c6d8bd; border-radius: 5px; padding: 24px; background: #fff; box-shadow: 0 12px 70px #1a322a30; font-family: var(--font-jakarta),Arial,sans-serif; }
+.dialog *, .selectionBar * { box-sizing: border-box; }
+.dialog::backdrop { background: #1c302656; backdrop-filter: blur(2px); }
+.dialog header { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
+.dialog header small { color: #688362; font-size: 9px; letter-spacing: 1.3px; font-weight: 750; }
+.dialog h2 { font-size: 18px; line-height: 1.6; margin: 5px 0 0; color: #2f5139; }
+.dialog h2 span { font-size: 12px; padding: 3px 7px; background: #edf4e8; margin-left: 5px; }
+.dialog header > button { padding: 6px; }
+.dialog blockquote { max-height: 150px; overflow: auto; margin: 0 0 20px; border-left: 3px solid #aac498; background: #f6f9f1; padding: 13px 15px; font-size: 13px; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; }
+.noteLabel { display: grid; gap: 8px; color: #476644; font-size: 12px; font-weight: 600; }
+.noteLabel textarea { width: 100%; min-height: 130px; padding: 12px; border: 1px solid #cbdac2; border-radius: 3px; font: inherit; font-size: 14px; font-weight: 400; line-height: 1.8; color: #334e38; resize: vertical; }
+.noteLimit { color: #74866e; font-size: 10px; text-align: right; margin: 7px 0 20px; }
+.dialog footer { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.dialog footer > span { flex: 1; font-size: 10px; line-height: 1.7; color: #73826c; }
+.dialog .save { background: #527e45; border-color: #527e45; color: white; }
+.dialog .save:hover:not(:disabled) { background: #416a35; color: white; }
+.bookHint { font-size: 11px; color: #74806f; line-height: 1.8; margin-bottom: 18px; }
+.entries { display: grid; gap: 14px; max-height: 55dvh; overflow-y: auto; margin: 0 -4px 18px; padding: 4px; scrollbar-width: thin; }
+.entries article { border: 1px solid #e0e7d9; border-left: 3px solid #d8b23d; padding: 13px 15px; border-radius: 2px; }
+.entries article[data-color=green] { border-left-color: #68ad7d; }
+.entries article[data-color=blue] { border-left-color: #70a9d3; }
+.entries article[data-color=pink] { border-left-color: #cc7da1; }
+.entryMeta, .entryMeta > div { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+.entryMeta { margin-bottom: 8px; }
+.entryMeta > span { color: #7c8c72; font-size: 10px; }
+.entryMeta button { padding: 4px; border: 0; }
+.entryMeta svg { width: 13px; height: 13px; }
+.entries .quoteLink { display: block; width: 100%; border: 0; background: #f7f9f3; padding: 9px 10px; font-size: 12px; color: #486744; text-align: left; line-height: 1.8; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 130px; overflow: auto; }
+.savedNote { margin: 10px 0 0; font-size: 13px; line-height: 1.8; color: #3a4e39; white-space: pre-wrap; overflow-wrap: anywhere; }
+.empty { text-align: center; padding: 25px 10px 32px; color: #64815c; }
+.empty > svg { width: 28px; height: 28px; }
+.empty p { font-size: 14px; }
+.empty span { font-size: 11px; line-height: 1.8; }
+@media(max-width:1000px) { .selectionBar { left: 50%; } }
+@media(max-width:600px) { .toolbar { padding: 12px 16px; } .toolRow { gap: 11px 9px; } .pens { width: 100%; gap: 5px; } .toolbar .pens button { flex: 1; padding: 8px 6px; font-size: 10px; } .pens svg { width: 13px; height: 13px; } .colors { padding-left: 0; border-left: 0; } .colors button { width: 26px; height: 26px; } .history { margin-left: 6px; } .openBook { font-size: 10px !important; } .help { margin-top: 10px; } .help > span { flex-basis: 100%; } .selectionBar { width: calc(100vw - 24px); bottom: 12px; padding: 11px; } .selectionBar button { padding: 7px; font-size: 10px; } .selectionBar svg { width: 13px; height: 13px; } .dialog { padding: 19px; } .dialog h2 { font-size: 16px; } .noteLabel textarea { font-size: 16px; } }
+@media(max-width:360px) { .pens { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); } .pens button { gap: 4px; padding: 8px 4px; } .pens svg { width: 11px; height: 11px; } .toolRow { gap: 9px 4px; } .toolbar { padding-left: 12px; padding-right: 12px; } .colors { gap: 5px; } .colors button { width: 24px; height: 24px; } .history { margin-left: 1px; } .history button { padding: 6px; } }

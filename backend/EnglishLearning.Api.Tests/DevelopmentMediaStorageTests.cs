@@ -6,6 +6,7 @@ using EnglishLearning.Api.Controllers;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.AiCourses;
 using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -86,7 +87,10 @@ public sealed class DevelopmentMediaStorageTests : IDisposable
         var cloud = Options.Create(new CloudinarySettings());
         var storage = new CloudinaryCourseMediaStorage(() => throw new InvalidOperationException("Cloud is disabled"),
             () => throw new InvalidOperationException("Cloud is disabled"), () => throw new InvalidOperationException("Legacy must not be resolved"), cloud);
-        var controller = new MediaController(storage, db, NullLogger<MediaController>.Instance) { ControllerContext = new ControllerContext
+        var privateConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            { ["CourseGeneration:DataRoot"] = Path.Combine(root, "ai-courses") }).Build();
+        var privateMedia = new AiCourseStore(privateConfig, new AudioTestEnvironment());
+        var controller = new MediaController(storage, db, NullLogger<MediaController>.Instance, privateMedia) { ControllerContext = new ControllerContext
             { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(JwtRegisteredClaimNames.Sub, admin.UserId.ToString())], "test")) } } };
         var result = Assert.IsType<ObjectResult>(await controller.Get(new string('a', 32) + ".png", default));
         Assert.Equal(503, result.StatusCode); Assert.Equal(503, Assert.IsType<ProblemDetails>(result.Value).Status);

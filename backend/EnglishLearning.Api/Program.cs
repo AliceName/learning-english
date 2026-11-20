@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.AiCourses;
 using EnglishLearning.Api.Services.CloudinaryMedia;
 using EnglishLearning.Api.Services.MediaMigration;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,17 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Read-only deployment preflight: no listener, database access, AI calls or secret values in output.
+if (builder.Configuration.GetValue<bool>("ai-course-preflight"))
+{
+    var cloud = builder.Configuration.GetSection(CloudinarySettings.SectionName).Get<CloudinarySettings>() ?? new();
+    var geminiConfigured = GeminiCourseClient.IsConfigured(builder.Configuration);
+    var cloudConfigured = cloud.Enabled && new CloudinarySettingsValidator().Validate(null, cloud).Succeeded;
+    Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { geminiConfigured, cloudConfigured }));
+    Environment.ExitCode = geminiConfigured && cloudConfigured ? 0 : 2;
+    return;
+}
 
 // Explicit migration CLI: SELECT/Find reference audit only, no API listener, startup seed or DB/schema writes.
 if (builder.Configuration["media-migration"] is not null)
@@ -121,6 +133,15 @@ builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddSingleton<AiCourseStore>();
+builder.Services.AddSingleton<AiApiGateway>();
+builder.Services.AddHttpClient<GeminiCourseClient>(client =>
+{
+    client.Timeout = Timeout.InfiniteTimeSpan;
+    client.MaxResponseContentBufferSize = 32 * 1024 * 1024;
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
+builder.Services.AddScoped<AiCourseService>();
+builder.Services.AddHostedService<AiCourseWorker>();
 builder.Services.AddSingleton<WritingTaskLibrary>();
 builder.Services.AddHttpClient<WritingAiClient>(client =>
 {
@@ -133,6 +154,20 @@ if (builder.Environment.IsDevelopment() && Assembly.GetEntryAssembly() == typeof
 {
     builder.Services.AddHostedService<WritingAiStartup>();
 }
+builder.Services.AddScoped<TranslationPracticeService>();
+builder.Services.AddScoped<TranslationBankCommand>();
+builder.Services.AddSingleton<TranslationRequestReplay>();
+builder.Services.AddSingleton<TranslationAiBudget>();
+builder.Services.Configure<TranslationAiOptions>(builder.Configuration.GetSection("TranslationAi"));
+builder.Services.AddHttpClient<TranslationAiClient>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.MaxResponseContentBufferSize = 64 * 1024;
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
+builder.Services.AddScoped<GrammarPracticeService>();
+builder.Services.AddScoped<CourseReadingGrading>();
+builder.Services.AddScoped<CourseTextLessonService>();
+builder.Services.AddScoped<CourseVocabularyService>();
 builder.Services.AddScoped<SpeakingLessonService>();
 builder.Services.AddSingleton<SpeakingStorage>();
 builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services, client) =>
@@ -287,6 +322,13 @@ builder.Services.AddSingleton<IDictionaryAudioStorage>(services => new Cloudinar
 builder.Services.AddSingleton<DictionaryAudioService>();
 builder.Services.AddRateLimiter(options =>
 {
+    foreach (var (name, limit) in new[] { ("TranslationNext", 45), ("TranslationGrade", 20) })
+        options.AddPolicy(name, context => RateLimitPartition.GetFixedWindowLimiter(
+            context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "anonymous",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = limit, Window = TimeSpan.FromMinutes(1), QueueLimit = 0, AutoReplenishment = true
+            }));
     options.AddPolicy("DefinitionAudio", context => RateLimitPartition.GetFixedWindowLimiter(
         context.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value ?? "anonymous",
         _ => new FixedWindowRateLimiterOptions
@@ -314,10 +356,11 @@ builder.Services.AddRateLimiter(options =>
         context.HttpContext.Response.Headers.CacheControl = "no-store";
         if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
             context.HttpContext.Response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var translation = context.HttpContext.Request.Path.StartsWithSegments("/api/v1/translation-practice");
         await context.HttpContext.Response.WriteAsJsonAsync(new Microsoft.AspNetCore.Mvc.ProblemDetails
         {
-            Status = 429, Title = "Bạn đã tra quá nhiều lần. Vui lòng chờ một lát.",
-            Extensions = { ["code"] = "lookup_rate_limited" }
+            Status = 429, Title = translation ? "Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ một lát." : "Bạn đã tra quá nhiều lần. Vui lòng chờ một lát.",
+            Extensions = { ["code"] = translation ? "translation_rate_limited" : "lookup_rate_limited" }
         }, cancellationToken: token);
     };
 });
@@ -329,6 +372,19 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
+if (builder.Configuration["translation-command"] is { } translationCommand)
+{
+    using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+    await using var scope = app.Services.CreateAsyncScope();
+    try { await scope.ServiceProvider.GetRequiredService<TranslationBankCommand>().RunAsync(translationCommand, deadline.Token); }
+    catch (TranslationPracticeException error) { Console.Error.WriteLine($"{error.Code}: {error.Message}"); Environment.ExitCode = 1; }
+    catch (Exception error) when (error is ArgumentException or IOException or System.Text.Json.JsonException)
+    { Console.Error.WriteLine(error.Message); Environment.ExitCode = 1; }
+    catch (Exception error) when (error is Microsoft.Data.SqlClient.SqlException or DbUpdateException or OperationCanceledException)
+    { Console.Error.WriteLine("The translation bank command could not finish. Check the database setup and try again."); Environment.ExitCode = 1; }
+    return;
+}
 
 if (builder.Configuration.GetValue<bool>("initialize-bilingual-vocabulary"))
 {

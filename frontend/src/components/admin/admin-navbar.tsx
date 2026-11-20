@@ -9,7 +9,7 @@ import Brand from "@/components/navigation/brand";
 import styles from "./admin.module.css";
 const items: {name:string;icon:SiteIconName;href?:string}[] = [
   {name:"Tổng quan",icon:"dashboard",href:"/account"},{name:"Quản lý khóa học",icon:"book",href:"/admin/courses"},
-  {name:"Quản lý người dùng",icon:"users"},{name:"Quản lý AI & Prompts",icon:"brain"}
+  {name:"Quản lý người dùng",icon:"users"},{name:"Quản lý API AI",icon:"brain",href:"/admin/ai-usage"}
 ];
 export default function AdminNavbar({user}:{user:PublicUser}) {
   const path = usePathname(); const drawer = useRef<HTMLDialogElement>(null);

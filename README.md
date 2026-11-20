@@ -1,6 +1,27 @@
-# LEWA — English Learning
+# LEWA — Learning English With AI
 
-LEWA có Speaking, Listening, Reading, Writing Studio, Flashcards, hồ sơ cá nhân, quản trị khóa học và từ điển song ngữ dùng MongoDB. Xem hướng dẫn [Speaking](SPEAKING.md), [Writing Studio](docs/handoff-ai-writing/00_READ_ME_FIRST.md), [Hồ sơ](PROFILE.md), [Flashcards](FLASHCARDS.md) và [từ điển](MONGODB_SCHEMA.md).
+Ứng dụng học tiếng Anh với khóa học 5 kỹ năng, bộ thẻ từ vựng và lộ trình cá nhân tạo từ tài liệu. Hướng dẫn này dùng **Windows PowerShell**, dành cho người lấy mã nguồn ở nhánh **`Dat`** về chạy trên máy cá nhân.
+
+Xem hướng dẫn [Speaking](SPEAKING.md), [Writing Studio](docs/handoff-ai-writing/00_READ_ME_FIRST.md), [Hồ sơ](PROFILE.md) và [từ điển](MONGODB_SCHEMA.md).
+
+## Tính năng hiện có
+
+| Tính năng | Cách sử dụng |
+| --- | --- |
+| Khóa học | Học viên tìm, lọc và học các khóa đã xuất bản; Admin biên soạn Speaking, Listening, Reading, Writing, Grammar và quản lý hiển thị |
+| Reading | Đọc bài có ảnh, phóng to ảnh, điều chỉnh cỡ chữ, làm câu hỏi và xem kết quả; tô sáng, gạch chân, ghi chú đoạn tiếng Anh trong Sổ tay |
+| Flashcards khóa học | Tổng hợp từ vựng Reading và bộ thẻ do Admin tạo; nút mũi tên chuyển thẻ, nhấn đúp để lật thẻ; lưu bản riêng để ôn |
+| Tạo khóa học AI | Tải PDF/DOCX, chọn mục tiêu, CEFR và kỹ năng; duyệt dàn ý, tạo nội dung rồi lưu khóa học riêng. Giao diện có nền pastel và hình mèo minh họa |
+| Listening và Grammar | Làm bài, nộp đáp án và xem phản hồi theo nội dung đã biên soạn |
+| Speaking | Nghe mẫu, ghi âm/chọn WAV, gửi chấm và xem lịch sử khi đã cấu hình dịch vụ mô hình local |
+| Từ điển và luyện phiên dịch | Tra từ Anh–Anh/Anh–Việt/Việt–Anh; luyện dịch với kho đề và dịch vụ chấm được cấu hình riêng |
+| Writing | Biên soạn bài trong khóa học; công cụ hỗ trợ viết tại `/writing` dùng dịch vụ Python và checkpoint local |
+
+**Để chạy lần đầu:** làm lần lượt mục 1–9 bên dưới. SQL Server cần cho tài khoản và dữ liệu học tập. MongoDB, Cloudinary và các dịch vụ AI được bật theo tính năng bạn muốn dùng; không cần huấn luyện mô hình để mở website hoặc học Reading/Grammar/Flashcards.
+
+- [Chuẩn bị môi trường](#1-chuẩn-bị-môi-trường) · [Lấy mã nguồn](#2-clone-code-và-cài-dependencies) · [Tạo database](#4-tạo-database-và-áp-dụng-schema-sql)
+- [Chạy ứng dụng local](#7-chạy-ứng-dụng-local) · [Chạy frontend](#8-cấu-hình-và-chạy-frontend) · [Dùng các tính năng mới](#sử-dụng-các-tính-năng-mới)
+- [Cập nhật bản đã cài](#10-những-lần-chạy-tiếp-theo) · [Xử lý lỗi](#lỗi-thường-gặp-sau-khi-clone)
 
 ## 1. Chuẩn bị môi trường
 
@@ -13,8 +34,9 @@ LEWA có Speaking, Listening, Reading, Writing Studio, Flashcards, hồ sơ cá 
 | `sqlcmd` hoặc SQL Server Management Studio (SSMS) | Kết nối được SQL Server của bạn | Chạy các script tạo schema |
 | MongoDB | MongoDB local hoặc MongoDB Atlas; cần cho chức năng từ điển | Lưu các mục từ và cache nghĩa |
 | Cloudinary | Cần cho media trên cloud và audio từ điển; Development có chế độ media khóa học local rõ ràng | Lưu media của ứng dụng |
+| Gemini API | API key có quyền dùng model văn bản; cần thêm model TTS nếu tạo Listening | Tạo khóa học AI; không cần cho các bài học được Admin biên soạn sẵn |
 
-Python và model đã train cần cho chấm Speaking. `npm run dev` / `npm start` tự khởi động bộ chấm theo [SPEAKING.md](SPEAKING.md). Khi phát triển các phần khác trên máy chưa cài model, đặt `$env:SPEAKING_AUTO_START='0'` trong terminal frontend để bỏ qua bước này. Cần Internet để tải dependencies; tra từ chưa có trong cache, lấy audio nguồn và truy cập Cloudinary cũng cần kết nối mạng.
+Chấm Speaking và hỗ trợ Writing bằng mô hình local cần Python cùng checkpoint riêng; xem [SPEAKING.md](SPEAKING.md) và mục 12. `npm run dev` / `npm start` tự khởi động bộ chấm Speaking. Khi phát triển trên máy chưa cài model, đặt `$env:SPEAKING_AUTO_START='0'` trong terminal frontend để bỏ qua bước này. Cần Internet để tải dependencies và gọi các dịch vụ ngoài như Gemini, nguồn từ điển, Cloudinary.
 
 Kiểm tra các công cụ đã vào `PATH`:
 
@@ -30,9 +52,8 @@ Cài riêng SDK được yêu cầu trong `global.json`; chỉ có SDK thuộc n
 ## 2. Clone code và cài dependencies
 
 ```powershell
-git clone https://github.com/AliceName/learning-english.git
+git clone --branch Dat --single-branch https://github.com/AliceName/learning-english.git
 cd learning-english
-git switch --track origin/Viet
 
 dotnet restore EnglishLearningSystem.sln --locked-mode
 dotnet tool restore
@@ -41,7 +62,7 @@ npm --prefix frontend ci
 
 `npm ci` sử dụng `frontend/package-lock.json`; không cần cài từng package thủ công. `dotnet tool restore` cài các công cụ trong `.config/dotnet-tools.json`, không tự tạo database.
 
-Lệnh `git switch --track origin/Viet` dùng sau khi nhánh `Viet` đã được chủ repo publish; hiện nhánh này chưa được push. Nếu bạn clone sau khi nhánh đã có trên GitHub, lệnh trên checkout nhánh nhóm thay vì `main`.
+Lệnh clone chọn trực tiếp nhánh `Dat`. Kiểm tra bằng `git branch --show-current`. Nếu đã có repository trên máy, xem mục 10 để cập nhật.
 
 GitHub chỉ cung cấp mã nguồn và tài nguyên được commit. Database, tài khoản đã tạo trên máy khác, .NET User Secrets, `.env.local`, cache và media trên Cloudinary **không được sao chép theo khi clone**. Các bước sau thiết lập chúng cho máy của bạn.
 
@@ -67,7 +88,7 @@ User Secrets nằm ngoài repository, dùng cho cấu hình local. Không lưu m
 
 ## 4. Tạo database và áp dụng schema SQL
 
-Chạy **đủ 4 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
+Chạy **6 script theo thứ tự**, chỉ chuyển sang lệnh tiếp theo khi lệnh trước thành công. Nếu mở terminal mới, khai báo lại `$sqlServerInstance` với instance ở bước 3.
 
 ```powershell
 $sqlServerInstance = '.\SQLEXPRESS'
@@ -76,6 +97,8 @@ sqlcmd -S $sqlServerInstance -d master -E -C -b -f 65001 -i backend/database/001
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/002_add_user_role.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/003_add_grammar_lesson_type.sql
 sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/004_profile_details_and_security.sql
+sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/004_add_translation_practice.sql
+sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/005_link_flashcard_decks_to_courses.sql
 ```
 
 | Script | Mục đích |
@@ -84,8 +107,10 @@ sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/d
 | `002_add_user_role.sql` | Bổ sung role `admin` / `user` |
 | `003_add_grammar_lesson_type.sql` | Cho phép bài học Grammar |
 | `004_profile_details_and_security.sql` | Thông tin cá nhân, mục tiêu học và thu hồi phiên bảo mật |
+| `004_add_translation_practice.sql` | Tạo kho câu, kho đáp án và lịch sử phát đề cho Luyện phiên dịch |
+| `005_link_flashcard_decks_to_courses.sql` | Thêm `FlashcardDecks.CourseId INT NULL` và khóa ngoại tới `Courses` cho bộ thẻ trong khóa học; giữ các bộ thẻ cũ |
 
-Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database); chọn database `EnglishLearningDB` khi chạy script 002–004. Máy đã có schema 001–003 chỉ cần chạy thêm 004.
+Các lệnh trên dùng Windows Authentication (`-E`). Nếu chỉ dùng SSMS, mở và chạy lần lượt các file trong [backend/database](backend/database). Chọn database `EnglishLearningDB` cho script 002 đến 005. Script 005 cần cả `Courses` và `FlashcardDecks` đã được tạo bởi baseline 001.
 
 Backend **không tự tạo hoặc cập nhật schema khi khởi động**. Dùng các script trên cho quy trình cài mới; không dùng `EnsureCreated` thay migration. Máy đã quản lý lịch sử bằng EF có migration `ProfileDetailsAndSecurity` tương ứng để đồng bộ các thay đổi 003–004; xem [PROFILE.md](PROFILE.md). Với database đã có cấu trúc khác, cần đối chiếu [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) trước khi áp dụng.
 
@@ -103,7 +128,13 @@ dotnet run --project backend/EnglishLearning.Api --launch-profile http -- --init
 
 Nếu dùng Atlas, thay URI local bằng URI của môi trường riêng và cho phép máy của bạn kết nối. Giữ URI có mật khẩu trong User Secrets.
 
-Lệnh `--initialize-vocabulary=true` tạo collection/validator theo [MONGODB_SCHEMA.md](MONGODB_SCHEMA.md), sau đó thoát; đây chưa phải lệnh chạy API. Khởi động bình thường không tự áp dụng validator. Từ điển sẽ lấy và lưu mục từ khi người đã đăng nhập tra lần đầu, không cần nhập sẵn toàn bộ từ vựng.
+Lệnh `--initialize-vocabulary=true` tạo collection/validator từ điển Anh–Anh theo [MONGODB_SCHEMA.md](MONGODB_SCHEMA.md), sau đó thoát; đây chưa phải lệnh chạy API. Để dùng thêm Anh–Việt và Việt–Anh, chạy tiếp:
+
+```powershell
+dotnet run --project backend/EnglishLearning.Api --launch-profile http -- --initialize-bilingual-vocabulary=true
+```
+
+Khởi động bình thường không tự áp dụng validator. Từ điển sẽ lấy và lưu mục từ khi người đã đăng nhập tra lần đầu, không cần nhập sẵn toàn bộ từ vựng.
 
 Nếu chỉ cần xem giao diện hoặc dùng phần tài khoản/khóa học, có thể chưa chạy MongoDB; chức năng từ điển sẽ không có đầy đủ khả năng lưu cache. Việc MongoDB mất kết nối không ngăn API khởi động, nhưng cấu hình MongoDB vẫn phải hợp lệ.
 
@@ -126,6 +157,27 @@ Có thể kiểm tra kết nối bằng script riêng; lệnh này tạo rồi d
 ```
 
 Xem [hướng dẫn backend](backend/README.md) nếu cần cấu hình nâng cao hoặc chuyển dữ liệu media đã có từ một môi trường khác. Máy mới không cần chạy các lệnh migration/cleanup media để bắt đầu.
+
+### Cấu hình Gemini cho tạo khóa học AI (tùy chọn)
+
+Lưu API key của bạn ở backend, thay giá trị mẫu trước khi chạy:
+
+```powershell
+dotnet user-secrets set 'CourseGenerationAi:ApiKey' 'THAY_BANG_GEMINI_API_KEY_CUA_BAN' --project backend/EnglishLearning.Api
+```
+
+Model văn bản và TTS được khai báo trong [appsettings.json](backend/EnglishLearning.Api/appsettings.json), lần lượt là `CourseGenerationAi:Model` và `CourseGenerationAi:TtsModel`. Chọn model mà API key của bạn có quyền truy cập; có thể ghi đè bằng User Secrets:
+
+```powershell
+dotnet user-secrets set 'CourseGenerationAi:Model' 'TEN_MODEL_VAN_BAN_CUA_BAN' --project backend/EnglishLearning.Api
+dotnet user-secrets set 'CourseGenerationAi:TtsModel' 'TEN_MODEL_TTS_CUA_BAN' --project backend/EnglishLearning.Api
+```
+
+Hai lệnh ghi đè model chỉ cần chạy khi đổi cấu hình mặc định; các giá trị `TEN_MODEL_...` là chỗ điền, không phải model dùng được. API key không được đặt trong frontend. Khởi động lại backend sau khi cấu hình.
+
+Tạo bài Listening cần **cả Gemini TTS và Cloudinary đã bật** để sinh/lưu audio. Nếu chưa cấu hình media/TTS, bỏ chọn Listening trước khi tạo; các kỹ năng khác dùng model văn bản. Chức năng này gửi văn bản trích xuất từ tài liệu đến Gemini và có thể sử dụng hạn mức/chi phí của API key của bạn.
+
+Nếu chưa có key, bạn vẫn chạy ứng dụng, học khóa có sẵn và dùng các chức năng không gọi Gemini. Trang tạo khóa học AI sẽ báo chưa khả dụng.
 
 ## 7. Chạy ứng dụng local
 
@@ -166,6 +218,8 @@ Mở **terminal thứ hai** từ thư mục gốc repository:
 ```powershell
 cd frontend
 if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+# Máy mới chưa có mô hình Speaking: bỏ qua bước tự khởi động bộ chấm local.
+$env:SPEAKING_AUTO_START = '0'
 npm run dev
 ```
 
@@ -177,7 +231,9 @@ API_BASE_URL=http://localhost:5000
 
 Biến này được đọc ở server Next.js, không cần tiền tố `NEXT_PUBLIC_`. Nếu đổi cổng backend, sửa giá trị rồi khởi động lại frontend. Các yêu cầu đăng nhập/khóa học/từ điển đi qua proxy cùng origin của Next.js.
 
-Mở [http://localhost:3000](http://localhost:3000) và dùng nhất quán hostname này khi đăng nhập. Kiểm thử hiện tại xác nhận đường đăng nhập qua `127.0.0.1` còn có thể bị kiểm tra Origin từ chối; không tắt bảo vệ Origin để bỏ qua.
+`SPEAKING_AUTO_START=0` chỉ áp dụng cho terminal hiện tại, giúp chạy web khi chưa chuẩn bị mô hình Speaking. Khi đã cài mô hình theo [SPEAKING.md](SPEAKING.md), đặt `SPEAKING_TRAINING_ROOT` tới thư mục training có `.venv` và checkpoint, rồi bỏ biến trên bằng `Remove-Item Env:SPEAKING_AUTO_START -ErrorAction SilentlyContinue`. Lần chạy `npm run dev` tiếp theo sẽ tự kiểm tra/khởi động bộ chấm. Bỏ qua bộ chấm không ngăn giao diện chạy, nhưng chưa thể gửi bản ghi để chấm phát âm.
+
+Mở [http://localhost:3000](http://localhost:3000). Frontend cũng cho phép địa chỉ local [http://127.0.0.1:3000](http://127.0.0.1:3000) trong Development; nên dùng nhất quán một địa chỉ khi đăng nhập vì cookie của hai hostname không dùng chung.
 
 | Đường dẫn | Chức năng |
 | --- | --- |
@@ -188,9 +244,17 @@ Mở [http://localhost:3000](http://localhost:3000) và dùng nhất quán hostn
 | `/courses` | Danh sách khóa học, cần đăng nhập |
 | `/courses/[courseId]/speaking/[lessonId]` | Luyện nói theo cụm/câu và xem kết quả phát âm |
 | `/courses/[courseId]/lessons/[lessonId]/listening` | Luyện nghe và xem kết quả/lịch sử |
-| `/flashcards` | Bộ thẻ cá nhân và bộ thẻ dùng chung |
 | `/account#profile` | Hồ sơ, mục tiêu học tập và ảnh đại diện |
+| `/courses/create-ai` | Tạo khóa học cá nhân từ PDF/DOCX bằng Gemini, cần đăng nhập |
+| `/courses/{courseId}` | Chi tiết khóa học và đường dẫn vào từng bài |
+| `/courses/{courseId}/lessons/{lessonId}/reading` | Bài đọc có ảnh, câu hỏi và công cụ ghi chú |
+| `/courses/{courseId}/flashcards` | Từ vựng Reading và bộ thẻ của khóa học |
+| `/flashcards` | Thư viện bộ thẻ và ôn tập cá nhân |
+| `/speaking` | Chọn bài luyện phát âm; gửi chấm cần mô hình Speaking |
+| `/translation-practice` | Luyện phiên dịch Việt → Anh, cần đăng nhập và [nạp kho đề](backend/README.md#luyện-phiên-dịch) |
 | `/admin/courses` | Quản trị khóa học, cần role `admin` |
+| `/admin/courses/{courseId}/flashcards` | Admin tạo bộ thẻ hoặc lấy từ vựng Reading của khóa học |
+| `/admin/ai-usage` | Admin xem lượt gọi, hạn mức và lỗi tạo khóa học AI |
 | `/writing` | Công cụ gợi ý sửa bài Writing; cần backend và model run phù hợp |
 
 Database mới chưa có tài khoản hoặc khóa học mẫu. Tạo học viên tại `/register`; để biên soạn nội dung, tạo admin ở bước tiếp theo rồi tạo/xuất bản khóa học. Trang chủ vẫn xem được khi backend chưa chạy, nhưng đăng ký/đăng nhập và dữ liệu học tập cần API/SQL Server hoạt động.
@@ -208,11 +272,60 @@ Email mặc định là `admin@linguaai.local`; mật khẩu được tạo ng�
 
 Chạy lại script không tạo admin trùng hoặc tự reset mật khẩu. Đăng ký công khai luôn tạo role `user`, không tạo admin. Sau khi đăng nhập admin, mở `/admin/courses` để tạo và xuất bản khóa học.
 
+## Sử dụng các tính năng mới
+
+### Reading có ảnh và Sổ tay
+
+Từ **Khóa học**, mở khóa học rồi chọn bài Reading. Hình trong bài có thể phóng to; nút **A− / A+** thay đổi cỡ chữ. Bản dịch đã được biên soạn được mở sau khi nộp bài, không tự dịch bằng AI.
+
+Để đánh dấu, chọn **Tô sáng**, **Gạch chân** hoặc **Ghi chú**, chọn màu rồi kéo chọn đoạn tiếng Anh. **Sổ tay** liệt kê các đoạn đã đánh dấu, cho phép mở lại, sửa hoặc xóa ghi chú; có hoàn tác/làm lại. Chọn **Đọc** để quay về thao tác tra từ thông thường.
+
+Ghi chú tự lưu **trên trình duyệt hiện tại**, tách theo tài khoản, bài học và phiên bản nội dung. Chúng chưa đồng bộ sang máy khác; xóa dữ liệu trình duyệt sẽ mất ghi chú. Khi nội dung bài đổi, ghi chú của phiên bản cũ không được áp lên văn bản mới. Đáp án chưa nộp chỉ giữ trong lần mở bài; bấm **Nộp bài & xem kết quả** để chấm và lưu kết quả vào tài khoản.
+
+### Bộ thẻ từ vựng trong khóa học
+
+- **Admin:** mở khóa trong trang quản trị → **Từ vựng & Flashcards**; tạo bộ thủ công hoặc lấy từ vựng đã lưu trong các bài Reading, sau đó chỉnh từ, nghĩa và câu ví dụ.
+- **Học viên:** mở **Bộ thẻ từ vựng** trong chi tiết khóa học hoặc từ bài Reading. Nút mũi tên trái/phải chuyển thẻ; **nhấn đúp** trên thẻ để lật. Khi focus vào thẻ, có thể dùng **Enter** để lật; cũng có nút chọn mặt trước/mặt sau.
+- Bộ từ Reading hiển thị từ nội dung đã biên soạn. Muốn có lịch ôn riêng, lưu bộ Reading hoặc tạo bản sao bộ của Admin vào thư viện cá nhân; thao tác ôn không sửa bộ gốc.
+
+Nếu trang báo không tải được bộ thẻ hoặc backend báo `Invalid column name 'CourseId'`, kiểm tra script **005** đã chạy trên đúng database trong connection string, rồi tải lại trang.
+
+### Tạo khóa học riêng từ tài liệu
+
+1. Đăng nhập và mở **Tạo khóa học AI** tại `/courses/create-ai`.
+2. Chọn PDF có văn bản hoặc DOCX, tối đa **10 MB**; PDF tối đa **30 trang**, văn bản trích xuất cần từ **100 đến 50.000 ký tự**. PDF scan cần được chuyển thành văn bản trước; hệ thống chưa có OCR.
+3. Chọn mục tiêu, CEFR và 1–5 kỹ năng. **Số bài là số bài cho mỗi kỹ năng**: chọn 3 kỹ năng × 2 bài sẽ tạo 6 bài. Có thể đặt 3–5 câu luyện mỗi bài; Writing dùng đề viết và rubric.
+4. Bấm **Tạo dàn ý khóa học**, kiểm tra và sửa tên, mô tả, tiêu đề/mục tiêu các bài trước khi xác nhận tạo nội dung.
+5. Xem nội dung và audio nếu có, sau đó bấm **Lưu vào khóa học của tôi**. Khóa này thuộc tài khoản đã tạo; mở lại qua **Khóa học của tôi** hoặc bộ lọc nguồn khóa cá nhân.
+
+**Lượt tạo gần đây** cho phép quay lại công việc đang làm. Bản thử giới hạn **3 yêu cầu tạo khóa mỗi tài khoản/ngày**; mặc định chỉ xử lý một lượt đang chạy cho mỗi tài khoản. Khi có lỗi, mở đúng lượt cũ và chọn **Thử lại từ bước đã lưu** thay vì tạo lại toàn bộ. Các bài đã hoàn tất được giữ để tiếp tục bước còn thiếu.
+
+Nội dung AI được kiểm tra cấu trúc và có một lần yêu cầu sinh lại khi chưa hợp lệ. Nếu vẫn báo “Nội dung AI chưa đúng cấu trúc bài học”, dùng nút thử lại; Admin xem lỗi tại `/admin/ai-usage` và kiểm tra model/hạn mức. Đây là nội dung luyện tập do AI sinh, cần rà soát trước khi sử dụng.
+
 ## 10. Những lần chạy tiếp theo
 
 Khởi động SQL Server và MongoDB nếu dùng từ điển, sau đó chạy lại hai terminal ở bước 7 và 8. Không cần tạo lại database, JWT hoặc admin mỗi lần mở dự án.
 
-Khi pull code mới, kiểm tra thay đổi trong README/schema. Chạy lại `npm --prefix frontend ci` khi dependencies frontend đổi và `dotnet restore EnglishLearningSystem.sln --locked-mode` khi dependencies backend đổi; chỉ áp dụng script SQL/MongoDB bổ sung khi phiên bản đó yêu cầu.
+Để cập nhật từ GitHub, trước hết lưu các thay đổi riêng bằng commit hoặc stash. Từ thư mục gốc repository, khi đang ở nhánh `Dat` và không có thay đổi chưa lưu:
+
+```powershell
+git fetch origin
+git switch Dat
+git pull --ff-only origin Dat
+dotnet restore EnglishLearningSystem.sln --locked-mode
+npm --prefix frontend ci
+```
+
+Nếu clone cũ chưa có nhánh `Dat`, sau `git fetch origin`, dùng `git switch --track origin/Dat` thay cho `git switch Dat`. Nếu clone ban đầu chỉ lấy một nhánh khác bằng `--single-branch`, dùng `git remote set-branches --add origin Dat` trước khi fetch. `--ff-only` dừng khi lịch sử local và remote đã tách, để bạn xử lý thay đổi riêng trước.
+
+**Nâng cấp từ bản đã chạy script 001–004:** khai báo lại instance SQL của bạn và chạy bổ sung:
+
+```powershell
+$sqlServerInstance = '.\SQLEXPRESS'
+sqlcmd -S $sqlServerInstance -d EnglishLearningDB -E -C -b -f 65001 -i backend/database/005_link_flashcard_decks_to_courses.sql
+```
+
+Sau đó khởi động lại backend và frontend. API không tự chạy SQL; không xóa/tạo lại database chỉ để lấy giao diện hoặc tính năng mới. Giữ `.env.local`, User Secrets và các thư mục dữ liệu local. Ngoài SQL, tiến trình tạo khóa AI được lưu tại `backend/EnglishLearning.Api/App_Data/ai-courses/` (hoặc `CourseGeneration:DataRoot` đã cấu hình); cần giữ thư mục này nếu muốn tiếp tục các lượt cũ sau khi đổi máy/triển khai lại. Git không mang theo dữ liệu đó.
 
 ## 11. Kiểm tra build và test
 
@@ -223,6 +336,10 @@ dotnet build EnglishLearningSystem.sln
 dotnet test EnglishLearningSystem.sln --configuration Release
 npm --prefix frontend run lint
 npm --prefix frontend run build
+npm --prefix frontend run test:ai-courses
+npm --prefix frontend run test:reading
+npm --prefix frontend run test:grammar
+npm --prefix frontend run test:speaking
 npm --prefix frontend run test:writing
 npm run test:dev
 ```
@@ -233,19 +350,9 @@ Các integration test SQL/MongoDB cần cấu hình kiểm thử riêng; nhiều
 
 Kiểm thử trình duyệt và yêu cầu Playwright được mô tả trong [frontend/README.md](frontend/README.md).
 
-### Kết quả kiểm chứng của bản bàn giao 2026-11-11
+### Phạm vi kiểm thử
 
-| Lệnh/phạm vi | Kết quả trên worktree `Viet` | Giới hạn |
-| --- | --- | --- |
-| `npm --prefix frontend run test:writing` | 61 passed | Mock/local tests, không gọi backend thật |
-| `npm run test:dev` | 6 passed | Dùng tiến trình giả lập cho launcher |
-| `npm --prefix frontend run lint` và `npm --prefix frontend run build` | Cả hai passed; `/writing` có trong build | Build không khởi chạy ứng dụng |
-| `dotnet test EnglishLearningSystem.sln --configuration Release --no-restore` | 354 passed, 78 skipped, 0 failed | Skips gồm SQL/MongoDB/live-model prerequisites; chưa xác minh integration trên máy thành viên |
-| Python unit tests cho bộ file dự kiến commit | 181 passed, 2 skipped, 0 failed | Python 3.11.9; dùng service dependencies ở overlay tạm; hai skip cần ERRANT và model spaCy evaluator |
-| `pip check`, Python AST, `train.py/data.py/predict.py/evaluate_gec.py --help` | Passed | Chỉ kiểm dependency, syntax và CLI parsing |
-| `npm ci` | Cài thành công; npm báo 7 moderate vulnerabilities | Chưa chạy `npm audit fix`; không tự nâng cấp dependency |
-
-Trong lần kiểm chứng này chưa chạy database/app services, corpus preparation trên dữ liệu thật, model load/inference, đánh giá corpus, hay full training. Các lệnh CLI `--help` đã chạy; lệnh huấn luyện/đánh giá trong các mục dưới đây chỉ là hướng dẫn, chưa được thực thi ở lần bàn giao này.
+Các lệnh `test:ai-courses`, `test:reading`, `test:grammar`, `test:speaking` và `test:writing` trong frontend dùng unit/contract test; không tự tạo tài khoản hoặc gọi Gemini. Một số kiểm thử mô hình thật và SQL/MongoDB chỉ chạy khi có biến môi trường, dữ liệu và dịch vụ tương ứng; các ca chưa đủ điều kiện có thể được bỏ qua. Build thành công xác nhận mã biên dịch được, chưa xác nhận thông tin kết nối hoặc quyền gọi dịch vụ AI trên máy mới.
 
 ## 12. AI Writing (GEC/CEFR) — nghiên cứu tùy chọn
 
@@ -378,15 +485,23 @@ Các model/checkpoint, dữ liệu, cache, báo cáo riêng và environment loca
 | Hiện tượng | Kiểm tra/cách xử lý |
 | --- | --- |
 | Không tìm được .NET SDK phù hợp | Cài SDK đúng nhánh trong `global.json`, kiểm tra bằng `dotnet --list-sdks` |
-| `sqlcmd` không được nhận diện | Cài công cụ vào `PATH`, hoặc chạy 3 script SQL bằng SSMS |
+| `sqlcmd` không được nhận diện | Cài công cụ vào `PATH`, hoặc chạy đủ 6 script SQL theo thứ tự bằng SSMS |
 | SQL health trả `503`, đăng ký/đăng nhập lỗi | Kiểm tra instance SQL đang chạy, connection string trên máy mới và quyền của tài khoản kết nối |
 | Lỗi cột `Role` hoặc không lưu được Grammar | Kiểm tra đã chạy script 002 và 003 trên đúng database |
+| Bộ thẻ khóa học không tải được / `Invalid column name 'CourseId'` | Chạy script 005 trên database mà backend đang kết nối; database cũ đã có 001–004 chỉ cần bổ sung 005 |
 | Lỗi `JwtOptions.SigningKey` | Chạy `Initialize-JwtSecret.ps1`; nếu đã có khóa sai/quá ngắn, sửa cấu hình trong User Secrets. Chạy backend bằng môi trường Development |
 | Từ điển không lưu được dữ liệu | Kiểm tra MongoDB, URI/quyền truy cập và chạy `--initialize-vocabulary=true` trên đúng database |
 | Upload/audio báo chưa cấu hình storage | Chạy `Set-CloudinarySecrets.ps1`, kiểm tra Cloudinary rồi khởi động lại API |
 | Frontend báo không kết nối được API | Kiểm tra backend đang chạy và `API_BASE_URL`; sửa `.env.local` rồi khởi động lại Next.js |
 | Next.js chặn dev resource khi dùng địa chỉ khác | Dùng `localhost:3000` hoặc `127.0.0.1:3000` đã được cấu hình; hostname khác cần khai báo cụ thể trong `allowedDevOrigins` rồi khởi động lại dev server |
 | Danh sách khóa học trống | Database mới không tự có khóa học; đăng nhập admin, tạo nội dung hợp lệ và xuất bản |
+| Trang tạo khóa học AI báo chưa khả dụng | Đặt `CourseGenerationAi:ApiKey` trong User Secrets của backend, kiểm tra model rồi khởi động lại API |
+| Tạo khóa học có Listening báo chưa cấu hình media | Bật Cloudinary theo mục 6 và bảo đảm API key dùng được model TTS; hoặc bỏ chọn Listening |
+| AI báo nội dung chưa đúng cấu trúc bài học | Mở lượt tạo cũ, chọn **Thử lại từ bước đã lưu**; kiểm tra model/lỗi trong `/admin/ai-usage` nếu lặp lại |
+| Gemini báo hạn mức / dịch vụ bận | Chờ thời gian thử lại hiển thị; Admin kiểm tra hạn mức ứng dụng và tài khoản Gemini. Tạo lượt mới không giải quyết hạn mức |
+| PDF không đọc được hoặc quá dài | Dùng PDF chọn được chữ hoặc DOCX; kiểm tra 10 MB, 30 trang PDF và 100–50.000 ký tự trích xuất |
+| Ghi chú Reading không xuất hiện trên máy khác | Ghi chú lưu local theo trình duyệt/tài khoản/phiên bản bài, chưa có đồng bộ đa thiết bị |
+| Frontend chờ Speaking hoặc không tìm thấy Python | Máy chưa cài bộ chấm: đặt `$env:SPEAKING_AUTO_START='0'` trước khi chạy npm. Muốn chấm thật, chuẩn bị mô hình và `SPEAKING_TRAINING_ROOT` theo `SPEAKING.md` |
 | `Install-Training.ps1` không tìm thấy Python | Cài Python 3.11 x64 và Python Launcher (`py`), xác minh bằng `py -0p`; script tạo environment riêng dưới `ai/writing/.venv` |
 | Thiếu base model/tokenizer hoặc checkpoint khi inference | Cài dependencies Python, chuẩn bị model base theo revision trong `modeling.py`, rồi chọn run có `run.json` hợp lệ; weights không được clone từ Git |
 | Không tìm thấy corpus hoặc schema/cặp file sai | Đặt corpus được cấp phép ngoài repo đúng layout ở mục chuẩn bị dữ liệu; xem `data.py --help`; không dùng test split để huấn luyện |
@@ -404,4 +519,5 @@ Các model/checkpoint, dữ liệu, cache, báo cáo riêng và environment loca
 | [backend/database](backend/database) | Các script schema SQL chạy tường minh |
 | [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md) | Thiết kế dữ liệu SQL Server |
 | [MONGODB_SCHEMA.md](MONGODB_SCHEMA.md) | Collection và validator từ điển |
+| [SPEAKING.md](SPEAKING.md) | Dịch vụ chấm Speaking, checkpoint và giới hạn kết quả |
 | [ai/writing/requirements.txt](ai/writing/requirements.txt) | Dependencies Python cho huấn luyện |

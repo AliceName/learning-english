@@ -178,6 +178,7 @@ public sealed partial class RegistrationSqlServerTests : IAsyncLifetime
             var column = Assert.Single(schema[table], column => column.Name == reader.GetString(1));
             var type = reader.GetString(2);
             if (type == "nvarchar") type += reader.GetInt16(3) == -1 ? "(max)" : $"({reader.GetInt16(3) / 2})";
+            if (type == "binary") type += $"({reader.GetInt16(3)})";
             if (type == "decimal") type += $"({reader.GetByte(4)},{reader.GetByte(5)})";
             Assert.Equal(column.Type.ToLowerInvariant(), type);
             Assert.Equal(column.Nullable, reader.GetBoolean(6));
