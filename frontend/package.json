@@ -13,7 +13,7 @@
     "test:grammar": "node --test tests/grammar-practice.test.cjs",
     "test:reading": "node --test tests/reading-annotations.test.cjs tests/course-text.test.cjs",
     "test:speaking": "node --test tests/speaking-wav.test.mjs tests/speaking-feedback.test.mjs tests/speaking-practice.test.mjs tests/recording-silence.test.mjs",
-    "test:writing": "node --test tests/writing-capabilities.test.cjs tests/writing-diff.test.cjs tests/writing-draft.test.cjs tests/writing-feedback.test.cjs tests/writing-flow.test.cjs tests/writing-revision.test.cjs tests/writing-tasks.test.cjs"
+    "test:writing": "node --test tests/writing-capabilities.test.cjs tests/writing-diff.test.cjs tests/writing-draft.test.cjs tests/writing-feedback.test.cjs tests/writing-flow.test.cjs tests/writing-practice.test.cjs tests/writing-revision.test.cjs tests/writing-tasks.test.cjs"
   },
   "dependencies": {
     "next": "16.4.2",

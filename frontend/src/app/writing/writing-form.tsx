@@ -12,8 +12,10 @@ import { clearWritingDraft, loadPreviousWritingDraft, loadWritingDraft, restoreP
 import { writingAuthHref } from "@/lib/writing-return";
 import { restoreWritingReview, writingReviewItems, writingReviewStatuses, writingReviewTypes, writingReviewView,
   type WritingReviewDecision, type WritingReviewItem, type WritingReviewStatus, type WritingReviewType } from "@/lib/writing-review";
+import { hideAnswerFirst, locateSentence, practiceOrder, progressiveReview, revealLimit, reviewExhausted, targetAboveTask } from "@/lib/writing-practice";
 import { checkWritingPreflight, useWritingPreflight } from "./use-writing-preflight";
-import WritingComparison, { DiffText, visibleEdit } from "./writing-comparison";
+import { RevisionChecklistPanel, SelfCheck, TaskPrompt, VersionProgressCard } from "./writing-practice-panels";
+import WritingComparison, { DiffText, visibleEdit, WritingSummary } from "./writing-comparison";
 import WritingHistoryPanel from "./writing-history";
 import WritingFlashcards from "./writing-flashcards";
 import WritingTaskLibrary, { taskLevels } from "./writing-task-library";
@@ -21,6 +23,7 @@ import styles from "./writing.module.css";
 
 const criterionLabels = { content: "Nội dung & bám đề", organization: "Tổ chức & mạch lạc",
   vocabulary: "Từ vựng & văn phong", grammar: "Giải thích chỉnh sửa ngữ pháp" };
+const taskBands: Record<string, string> = { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" };
 const explanationLabels: Record<string, string> = { SPELL: "Chính tả", ARTICLE: "Mạo từ",
   "NOUN:NUM": "Số của danh từ", "VERB:FORM": "Dạng động từ", "VERB:SVA": "Hòa hợp chủ ngữ và động từ" };
 
@@ -34,7 +37,8 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const [restart, setRestart] = useState(false);
   const [topic, setTopic] = useState(initialResult?.topic ?? initialTask?.title ?? "");
   const [text, setText] = useState(initialResult?.originalText ?? "");
-  const [corrections, setCorrections] = useState(initialResult?.correctedText != null);
+  // New essays ask for grammar suggestions by default; a saved essay keeps the mode it was checked with.
+  const [corrections, setCorrections] = useState(initialResult ? initialResult.correctedText != null : true);
   const [continued, setContinued] = useState(false);
   const [requestId, setRequestId] = useState<string>();
   const [pending, setPending] = useState(false);
@@ -57,6 +61,9 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const [partialConsent, setPartialConsent] = useState<{ text: string; corrections: boolean } | null>(null);
   const [phase, setPhase] = useState<"checking" | "analyzing">("checking");
   const [elapsed, setElapsed] = useState(0);
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+  const [shownAnswers, setShownAnswers] = useState<string[]>([]);
+  const [selfFixNotice, setSelfFixNotice] = useState("");
   const inFlight = useRef(false);
   const resultHeading = useRef<HTMLHeadingElement>(null);
   const editor = useRef<HTMLTextAreaElement>(null);
@@ -72,6 +79,10 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const editMap = useMemo(() => result ? writingEdits(result) : { edits: [], unmapped: 0 }, [result]);
   const reviewItems = useMemo(() => writingReviewItems(result?.errors ?? [], editMap.edits), [result, editMap]);
   const review = useMemo(() => writingReviewView(reviewItems, decisions, typeFilter, statusFilter), [reviewItems, decisions, typeFilter, statusFilter]);
+  // Show a few undecided suggestions at a time (Write & Improve-style), in text order.
+  const practice = useMemo(() => progressiveReview(practiceOrder(review.visible), revealLimit((result?.task ?? task)?.level), showAllSuggestions),
+    [review.visible, result?.task, task, showAllSuggestions]);
+  const shownIds = useMemo(() => new Set(practice.shown.map(item => item.id)), [practice]);
   const accepted = decisions.filter(decision => decision.status === "accepted").map(decision => decision.id);
   const managedText = result ? applyWritingEdits(result.originalText, editMap.edits, accepted) : "";
   const draftPositionsKnown = text === managedText;
@@ -87,7 +98,13 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const editing = Boolean(result || task || custom);
   const returnTarget = baseId ? `/writing?submissionId=${baseId}` : taskScope ? `/writing?taskId=${taskScope}` : custom ? "/writing?custom=1" : "/writing";
   const principal = authenticated ? userId : null;
-  const preflightBlocksSubmit = !requestId && (checked?.canAnalyze === false || !!inputIssue || (partialSentences.length > 0 && !partialAccepted));
+  // The experimental qualitative-feedback column is hidden while the runtime has it switched off.
+  const showFeedbackPanel = Boolean(result?.feedback) || capabilities?.feedbackStatus !== "disabled";
+  // Limits are only shown when something needs the learner's attention.
+  const preflightProblem = !authenticated || Boolean(preflight.current?.error) || (checked != null && (!checked.canAnalyze
+    || Boolean(inputIssue) || (checked.inputAssessment?.warnings.length ?? 0) > 0
+    || (corrections && !checked.correctionsEnabled) || partialSentences.length > 0));
+  const preflightBlocksSubmit =!requestId && (checked?.canAnalyze === false || !!inputIssue || (partialSentences.length > 0 && !partialAccepted));
 
   useEffect(() => {
     mounted.current = true;
@@ -111,6 +128,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         setContinued(Boolean(restored.continued || (result && restored.text !== result.originalText)));
         setRequestId(restored.requestId);
         setDecisions(restoreWritingReview(restored, result?.submissionId, reviewItems));
+        setShownAnswers(restored.baseSubmissionId === result?.submissionId ? restored.shownAnswers ?? [] : []);
         setDraftStatus("Đã khôi phục bản nháp trong phiên này. Bản nháp chưa phải bài đã lưu tài khoản.");
       }
       if (principal !== null) setPreviousDraft(Boolean(loadPreviousWritingDraft(storage, principal, baseId, taskScope)));
@@ -127,13 +145,13 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     const persist = () => {
       const storage = writingDraftStorage();
       const matchesSaved = result !== null && result.submissionId === baseId && !changed;
-      if (!requestId && !continued && !decisions.length
+      if (!requestId && !continued && !decisions.length && !shownAnswers.length
         && ((matchesSaved && !checkedRequirements.length) || (!text && !task && !topic && !corrections))) {
         clearWritingDraft(storage, principal, baseId, taskScope);
         setDraftStatus(matchesSaved ? `Đang xem bài #${baseId} đã lưu trong tài khoản.` : "Chưa có bản nháp.");
       } else {
         const saved = saveWritingDraft(storage, principal, { topic, text, corrections, task, checkedRequirements, baseSubmissionId: baseId,
-          review: decisions, requestId, continued });
+          review: decisions, shownAnswers, requestId, continued });
         setDraftStatus(saved ? "Bản nháp đã lưu trong phiên trình duyệt này; sẽ giữ khi đăng nhập hoặc tải lại."
           : "Không lưu được nháp trong trình duyệt. Hãy sao chép bài trước khi rời trang.");
       }
@@ -141,7 +159,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     const timer = setTimeout(persist, 0);
     window.addEventListener("pagehide", persist);
     return () => { clearTimeout(timer); window.removeEventListener("pagehide", persist); };
-  }, [draftReady, unavailable, principal, baseId, topic, text, corrections, result, changed, task, checkedRequirements, taskScope, editing, decisions, continued, requestId]);
+  }, [draftReady, unavailable, principal, baseId, topic, text, corrections, result, changed, task, checkedRequirements, taskScope, editing, decisions, shownAnswers, continued, requestId]);
 
   useEffect(() => {
     if (!authenticated) return;
@@ -155,6 +173,23 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     return () => controller.abort();
   }, [authenticated, capabilityRetry]);
 
+  // Suggestions are on by default; when the AI service runs without GEC, fall back to
+  // CEFR-only instead of blocking the first submission.
+  const correctionsUnavailable = capabilities?.correctionsEnabled === false;
+  useEffect(() => {
+    if (!correctionsUnavailable) return;
+    queueMicrotask(() => setCorrections(false));
+  }, [correctionsUnavailable]);
+
+  // Reopening a later version loads the version it came from, for the progress card.
+  const parentId = result?.parentSubmissionId ?? null;
+  useEffect(() => {
+    if (!authenticated || parentId === null || comparison !== null) return;
+    void compareSubmission(parentId);
+    // compareSubmission is stable enough here: it only reads refs and setters.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authenticated, parentId]);
+
   useEffect(() => {
     if (!pending) return;
     const timer = setInterval(() => setElapsed(Math.floor((Date.now() - started.current) / 1000)), 1000);
@@ -165,7 +200,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
 
   function saveDraft(key?: string) {
     if (!unavailable && draftReady && editing) saveWritingDraft(writingDraftStorage(), principal, { topic, text, corrections, task,
-      checkedRequirements, baseSubmissionId: baseId, review: decisions, requestId: key, continued });
+      checkedRequirements, baseSubmissionId: baseId, review: decisions, shownAnswers, requestId: key, continued });
   }
 
   function continueVersion() {
@@ -179,7 +214,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
       setNotice("Không xóa được nháp trong trình duyệt. Bài hiện tại vẫn được giữ; hãy kiểm tra quyền lưu trữ trước khi thử lại."); return;
     }
     setTopic(result?.topic ?? task?.title ?? ""); setText(result?.originalText ?? ""); setCheckedRequirements([]);
-    setCorrections(result?.correctedText != null); setDecisions([]);
+    setCorrections(result ? result.correctedText != null : true); setDecisions([]); setShownAnswers([]);
     setContinued(false); setRequestId(undefined);
     setDraftStatus("Đã bỏ bản nháp. Các bài đã lưu tài khoản vẫn được giữ.");
   }
@@ -193,6 +228,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     setContinued(Boolean(restored.continued || (result && restored.text !== result.originalText)));
     setRequestId(restored.requestId);
     setDecisions(restoreWritingReview(restored, result?.submissionId, reviewItems)); setPreviousDraft(false);
+    setShownAnswers(restored.baseSubmissionId === result?.submissionId ? restored.shownAnswers ?? [] : []);
     setDraftStatus("Đã khôi phục nháp của tài khoản trước lần đăng nhập này.");
   }
 
@@ -227,6 +263,17 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     const editorOffset = (offset: number) => text.slice(0, offset).replace(/\r\n/g, "\n").length;
     editor.current?.focus(); editor.current?.setSelectionRange(editorOffset(start), editorOffset(end));
     editor.current?.scrollIntoView({ behavior: "auto", block: "center" });
+  }
+
+  // Exact edit span while the draft still matches the saved result; otherwise the
+  // suggestion's original sentence, found again in the hand-edited draft.
+  function selfFix(id: string, edit: WritingReviewItem["edit"], suggestion: WritingResult["errors"][number]) {
+    const span = edit && draftPositionsKnown ? currentEditPosition(edit, editMap.edits, accepted)
+      : locateSentence(text, suggestion.original, suggestion.sourceStart ?? edit?.start ?? 0);
+    setSelfFixNotice(span ? "" : id);
+    if (!span) return;
+    continueVersion();
+    requestAnimationFrame(() => locate(span.start, span.end));
   }
 
   function openSuggestion(id: string) {
@@ -307,6 +354,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
       setResult(data); setBaseId(data.submissionId);
       setContinued(false);
       setDecisions([]); setTypeFilter("all"); setStatusFilter("all"); setPartialConsent(null); setPreviousDraft(false);
+      setShownAnswers([]); setShowAllSuggestions(false);
       setFeedbackNotice("");
       const savedUrl = new URL(window.location.href);
       savedUrl.search = "";
@@ -374,40 +422,33 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         <p>Đề thư viện đã được cập nhật. Nháp đang giữ yêu cầu cũ; hãy đọc lại đề mới trước khi nộp.</p>
         <button type="button" onClick={() => { setRequestId(undefined); setTask(initialTask); setTopic(initialTask.title); setCheckedRequirements([]); }}>Dùng phiên bản đề mới, giữ nội dung nháp</button>
       </div>}
-      {task ? <section className={styles.taskPrompt} aria-label="Tự kiểm yêu cầu đề">
-        <h3>Tự kiểm yêu cầu đề</h3><p className={styles.hint}>Hãy tự đánh dấu khi đã đáp ứng. Checklist chưa được chuyên gia kiểm định.</p>
-        {task.requirements.map((r, i) => <label className={styles.checkbox} key={i}><input type="checkbox" checked={checkedRequirements.includes(i)} onChange={e => setCheckedRequirements(old => e.target.checked ? [...old, i] : old.filter(n => n !== i))} /><span>{r}</span></label>)}
-      </section> : !result && <><label htmlFor="writing-topic">Đề bài riêng (không bắt buộc)</label>
+      {!task && !result && <><label htmlFor="writing-topic">Đề bài riêng (không bắt buộc)</label>
         <textarea id="writing-topic" className={styles.topic} value={topic} maxLength={500} rows={2} onChange={event => { setRequestId(undefined); setTopic(event.target.value); }} placeholder="Nhập hoặc dán đề bài riêng tại đây…" />
         <p className={styles.hint}>Tối đa 500 ký tự.</p></>}
-      {authenticated && <p className={styles.hint}>
-        <strong>CEFR mục tiêu từ Hồ sơ cá nhân</strong>{" "}
-        {isCefrLevel(targetLevel) ? targetLevel : <>Chưa thiết lập. <Link href="/account">Mở Hồ sơ cá nhân</Link></>}
-      </p>}
+      {result && task && <SelfCheck requirements={task.requirements} />}
       <label htmlFor="writing-text">Nội dung bài viết <span className={styles.required}>*</span></label>
       <textarea ref={editor} id="writing-text" lang="en" className={styles.essay} placeholder="Start writing in English here…" value={text} onChange={event => { setRequestId(undefined); setText(event.target.value); }} maxLength={12000} rows={13} required aria-describedby="writing-hint writing-count writing-draft-status" />
       <div className={styles.count} id="writing-count"><span><strong>{words}</strong> từ</span><span>{text.length.toLocaleString("vi-VN")} / 12.000 ký tự</span></div>
-      <p id="writing-hint" className={styles.hint}>{task && `${taskWordGuidance(task)}. `}Khả năng xử lý của mô hình được kiểm tra trước khi nộp.</p>
-      {task && (((task.wordMode === "minimum" || task.wordMode === "range") && words < task.minWords) || (task.wordMode === "range" && words > task.maxWords)) && <p className={styles.hint}>Số từ hiện chưa theo yêu cầu đề. Đây là nhắc độ dài, không phải điểm bám đề.</p>}
-      <label className={styles.checkbox}><input type="checkbox" checked={corrections} onChange={event => { setRequestId(undefined); setCorrections(event.target.checked); }} /><span>Thử gợi ý sửa ngữ pháp <small>Đang thử nghiệm · cần kiểm tra lại bản sửa</small></span></label>
-      <p className={styles.modeSummary}><strong>{corrections ? "Chế độ: CEFR + gợi ý sửa lỗi thử nghiệm" : "Chế độ: chỉ ước lượng CEFR"}</strong><br />{corrections ? "Bạn tự quyết định từng gợi ý; AI có thể bỏ sót hoặc tạo lỗi mới." : "Lần nộp này sẽ không tìm hoặc đề xuất sửa lỗi ngữ pháp."}</p>
+      {task && <p id="writing-hint" className={styles.hint}>{taskWordGuidance(task)}.</p>}
+      {task && (((task.wordMode === "minimum" || task.wordMode === "range") && words < task.minWords) || (task.wordMode === "range" && words > task.maxWords)) && <p className={styles.hint}>Số từ hiện chưa theo yêu cầu đề.</p>}
+      <label className={styles.checkbox}><input type="checkbox" checked={corrections} onChange={event => { setRequestId(undefined); setCorrections(event.target.checked); }} /><span>Gợi ý sửa lỗi ngữ pháp <small>Bỏ chọn nếu chỉ muốn ước lượng CEFR</small></span></label>
+      {!corrections && <p className={styles.modeSummary}>Lần nộp này chỉ ước lượng CEFR, không có gợi ý sửa lỗi.</p>}
       <div className={styles.draftStatus} id="writing-draft-status"><span role="status">{unavailable ? "Nháp hiện chỉ nằm trên trang này." : !draftReady ? "Đang kiểm tra bản nháp…" : draftStatus || "Nháp sẽ được lưu trong phiên trình duyệt hiện tại."}</span>
-        <small>Nháp trong phiên sẽ mất khi đóng phiên trình duyệt; khác với bài đã lưu vào tài khoản.</small>
         <div className={styles.editActions}><button type="button" disabled={!draftReady || unavailable} onClick={discardDraft}>{result ? "Bỏ nháp, trở lại bài đã lưu" : "Xóa bản nháp"}</button>
           {previousDraft && <button type="button" onClick={recoverPreviousDraft}>Khôi phục nháp trước đăng nhập</button>}</div>
       </div>
-      {composing && text.trim() && <section className={styles.preflight} aria-labelledby="writing-preflight-heading">
-        <h3 id="writing-preflight-heading">Kiểm tra trước khi nộp</h3>
+      {composing && text.trim() && preflightProblem && <section className={styles.preflight} aria-labelledby="writing-preflight-heading">
+        <h3 id="writing-preflight-heading">Cần xem trước khi nộp</h3>
         {!authenticated ? <p>Đăng nhập để kiểm tra khả năng xử lý bằng mô hình. Bản nháp của bạn được giữ trong phiên.</p>
           : !preflight.current ? <p role="status">Đang kiểm tra giới hạn của bài hiện tại…</p>
           : preflight.current.error ? <p className={styles.error}>{preflight.current.error} <button type="button" onClick={preflight.retry}>Kiểm tra lại</button></p>
           : checked ? <>
-            <p>{checked.canAnalyze ? "Bài nằm trong giới hạn token CEFR." : "Bài quá dài để chấm CEFR. Hãy rút ngắn bài trước khi nộp."}</p>
+            {!checked.canAnalyze && <p>Bài quá dài để chấm CEFR. Hãy rút ngắn bài trước khi nộp.</p>}
             {inputIssue && <p className={styles.error} role="status">{inputIssue}</p>}
             {checked.inputAssessment?.warnings.map(warning => <p key={warning} className={styles.hint}>{warning}</p>)}
             <p className={styles.hint}>Kiểm tra đầu vào không xác nhận bài đúng tiếng Anh, đúng đề hoặc có chất lượng tốt.</p>
             {checked.canAnalyze && corrections && !checked.correctionsEnabled && <p>Gợi ý sửa lỗi chưa được bật. Hãy bỏ chọn sửa lỗi nếu bạn muốn chấm CEFR.</p>}
-            {checked.canAnalyze && corrections && checked.correctionsEnabled && <p>Có thể sửa {checked.sentences.filter(sentence => sentence.status === "ready").length}/{checked.sentences.length} câu thân bài. Tối đa {checked.gecSentenceLimit} câu mỗi lượt.</p>}
+            {checked.canAnalyze && corrections && checked.correctionsEnabled && partialSentences.length > 0 && <p>Có thể sửa {checked.sentences.filter(sentence => sentence.status === "ready").length}/{checked.sentences.length} câu thân bài. Tối đa {checked.gecSentenceLimit} câu mỗi lượt.</p>}
             {partialSentences.length > 0 && <>
               <ul>{partialSentences.map(sentence => <li key={sentence.index}>
                 Câu {sentence.index + 1}: {sentence.status === "sentenceLimit" ? "ngoài giới hạn số câu" : "quá dài để sửa"}.
@@ -421,7 +462,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           </> : null}
       </section>}
       {notice && !restart && <p className={styles.error} role="alert">{notice}</p>}
-      <div className={styles.actions}><span><Icon name="shield" />{result ? "Bài nộp lại được lưu trong cùng lượt luyện." : "Nộp thành công để lưu bài vào tài khoản."}</span><button className={styles.submit} type="submit" disabled={!authenticated || !draftReady || !text.trim() || feedbackPending || preflightBlocksSubmit}>{pending ? phase === "checking" ? "Đang kiểm tra…" : "AI đang đọc bài…" : result ? "Nộp lại bài viết" : "Nộp bài & chấm CEFR"}<Icon name="arrow" /></button></div>
+      <div className={styles.actions}><span><Icon name="shield" />{result ? "Bài nộp lại được lưu trong cùng lượt luyện." : "Nộp thành công để lưu bài vào tài khoản."}</span><button className={styles.submit} type="submit" disabled={!authenticated || !draftReady || !text.trim() || feedbackPending || preflightBlocksSubmit}>{pending ? phase === "checking" ? "Đang kiểm tra…" : "AI đang đọc bài…" : result ? "Nộp lại bài viết" : corrections ? "Nộp để nhận phản hồi" : "Nộp & ước lượng CEFR"}<Icon name="arrow" /></button></div>
     </fieldset>
   </form>;
   if (!editing) return <main id="main-content" className={styles.page}>
@@ -444,18 +485,24 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         {displayedTask && <span className={styles.pill}>{taskWordGuidance(displayedTask)}</span>}
         {result && <span className={`${styles.pill} ${styles.savedPill}`}><Icon name="check" /> {result.versionNumber ? `Đang xem phiên bản ${result.versionNumber}` : `Đã lưu bài #${result.submissionId}`}</span>}
         {result && continued && <span className={styles.pill}>Bản nháp từ {result.versionNumber ? `phiên bản ${result.versionNumber}` : `bài #${result.submissionId}`}</span>}
+        {authenticated && (isCefrLevel(targetLevel)
+          ? <span className={styles.pill}>Mục tiêu {targetLevel}</span>
+          : <Link className={styles.pill} href="/account">Đặt CEFR mục tiêu</Link>)}
       </div>
+      {authenticated && displayedTask && targetAboveTask(displayedTask.level, targetLevel) && <p className={styles.hint}>
+        Đề {displayedTask.level} thường chỉ thể hiện được mức {taskBands[displayedTask.level]}; muốn luyện mức {targetLevel}, hãy chọn đề khó hơn.</p>}
       <div className={styles.headingBody}>
         <div>
           <h1 ref={resultHeading} tabIndex={-1}>{displayedTask?.title || result?.topic || (result ? "Kết quả bài viết" : "Luyện viết theo đề riêng")}</h1>
-          {displayedTask && <p className={styles.promptText} lang="en">{displayedTask.prompt}</p>}
+          {displayedTask && <TaskPrompt prompt={displayedTask.prompt} />}
           {result && <p className={styles.hint}>Lượt #{result.practiceRootId ?? result.submissionId}{result.parentSubmissionId
             ? ` · Phát triển từ ${result.parentVersionNumber ? `phiên bản ${result.parentVersionNumber}` : `bài #${result.parentSubmissionId}`}` : ""}
             {" · "}<Link href={`/writing?submissionId=${result.submissionId}`} target="_blank" rel="noopener noreferrer" prefetch={false}>Mở lại bài đã lưu</Link></p>}
         </div>
         {result && <div className={styles.headingActions}>
           {hasAnnotations && <button type="button" className={styles.secondaryButton} aria-pressed={showAnnotations} onClick={() => setShowAnnotations(value => !value)}><Icon name="eye" /> Chú thích</button>}
-          <button type="button" className={styles.submit} disabled={pending || feedbackPending || !draftReady} aria-expanded={restart} aria-controls="writing-restart" onClick={() => { setNotice(""); setRestart(value => !value); }}><Icon name="replay" /> Luyện lại từ đầu</button>
+          {!continued && <button type="button" className={styles.submit} disabled={pending || feedbackPending || !draftReady} onClick={continueVersion}><Icon name="writing" /> Sửa bài này</button>}
+          <button type="button" className={styles.secondaryButton} disabled={pending || feedbackPending || !draftReady} aria-expanded={restart} aria-controls="writing-restart" onClick={() => { setNotice(""); setRestart(value => !value); }}><Icon name="replay" /> Luyện lại từ đầu</button>
         </div>}
       </div>
       {result && <div id="writing-restart" hidden={!restart}>
@@ -467,7 +514,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               persistBeforeNavigation();
               const storage = writingDraftStorage();
               if (!clearWritingDraft(storage, principal, null, task?.id)
-                || (!task && !saveWritingDraft(storage, principal, { topic, text: "", corrections: false, baseSubmissionId: null }))) {
+                || (!task && !saveWritingDraft(storage, principal, { topic, text: "", corrections: true, baseSubmissionId: null }))) {
                 event.preventDefault(); setNotice("Chưa tạo được nháp mới. Nội dung vẫn được giữ.");
               }
             }}>Xác nhận bắt đầu lượt mới</Link>
@@ -482,9 +529,13 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     {capabilities?.busy && <p className={styles.hint} role="status">AI đang xử lý một yêu cầu khác. Bạn vẫn có thể soạn và kiểm tra giới hạn.</p>}
     {pending && <div className={styles.pending} role="status"><strong>{phase === "checking" ? "Đang kiểm tra giới hạn" : "Đang phân tích bài viết"} · {elapsed} giây</strong><p>Máy chủ sẽ xác nhận khi lưu bài thành công.</p></div>}
     {result ? <>
+      <WritingSummary result={result} />
+      {comparison && comparison.submissionId === result.parentSubmissionId && <VersionProgressCard previous={comparison} current={result} />}
       {review.total > 0 && <section className={styles.reviewControls} aria-labelledby="writing-review-heading">
+        <h2 id="writing-review-heading">Xem xét gợi ý</h2>
+        <p className={styles.hint}>AI có thể sai hoặc bỏ sót lỗi; bạn quyết định từng gợi ý.</p>
+        <details className={styles.filters} open={typeFilter !== "all" || statusFilter !== "all"}><summary>Bộ lọc</summary>
         <div className={styles.toolbar}>
-          <h2 id="writing-review-heading">Xem xét gợi ý</h2>
           <label>Loại gợi ý
             <select value={typeFilter} onChange={event => setTypeFilter(event.target.value as typeof typeFilter)}>
               <option value="all">Tất cả loại</option>
@@ -502,23 +553,28 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             document.getElementById("writing-review-status")?.focus();
           }}>Xóa bộ lọc</button>}
         </div>
+        </details>
         <div className={styles.reviewStats}>
-          <p role="status">Tổng {review.total} · Đã nhận {review.accepted} · Đã bỏ qua {review.skipped} · Chưa xử lý {review.pending}</p>
+          <p role="status">Tổng {review.total} · Đã tự sửa {review.selfFixed} · Đã nhận {review.accepted} · Đã bỏ qua {review.skipped} · Chưa xử lý {review.pending}</p>
           <span>{Math.round(review.percent ?? 0)}% đã xem xét</span>
         </div>
-        <progress aria-label="Tiến độ xem xét toàn bộ gợi ý" value={review.accepted + review.skipped} max={review.total} />
-        <p className={styles.hint} role="status">Đang hiển thị {review.visible.length}/{review.total} gợi ý.</p>
+        <progress aria-label="Tiến độ xem xét toàn bộ gợi ý" value={review.reviewed} max={review.total} />
+        <p className={styles.hint} role="status">Đang hiển thị {practice.shown.length}/{review.total} gợi ý.</p>
+        {(practice.hidden > 0 || showAllSuggestions) && <div className={styles.revealNotice}>
+          <p>{showAllSuggestions ? "Đang hiện mọi gợi ý cùng lúc." : `Mỗi lượt hiện ${revealLimit((result.task ?? task)?.level)} gợi ý chưa xử lý; còn ${practice.hidden} gợi ý sẽ hiện khi bạn xử lý các gợi ý trên.`}</p>
+          <button type="button" onClick={() => setShowAllSuggestions(value => !value)}>{showAllSuggestions ? "Hiện từng phần" : "Hiện tất cả gợi ý"}</button>
+        </div>}
       </section>}
       <WritingComparison result={result} draft={text}
-        draftPositionsKnown={draftPositionsKnown} edits={editMap.edits} accepted={accepted} visibleIds={review.visibleIds}
+        draftPositionsKnown={draftPositionsKnown} edits={editMap.edits} accepted={accepted} visibleIds={shownIds}
         showAnnotations={showAnnotations} onSelect={openSuggestion}
         onEdit={continueVersion} continued={continued} editDisabled={pending || feedbackPending || !draftReady} />
-      <div className={styles.reviewGrid}>
+      <div className={`${styles.reviewGrid} ${showFeedbackPanel ? "" : styles.reviewSingle}`}>
         <section className={styles.review} aria-labelledby="writing-suggestions-heading">
           <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="writing" /></span><h2 id="writing-suggestions-heading">Chi tiết gợi ý sửa bài</h2></div>
           {result.warnings.length > 0 && <div className={styles.limits}>{result.warnings.map(warning => <p key={warning}>{warning}</p>)}</div>}
           {result.errors.length === 0 && <p className={styles.hint}>{result.correctedText === null ? "Chưa có phân tích ngữ pháp cho bài này." : "Không có gợi ý được trả về. Hãy tự kiểm tra lại bài gốc."}</p>}
-          {result.correctedText !== null && result.correctedText !== result.originalText &&
+          {result.correctedText !== null && result.correctedText !== result.originalText && review.pending === 0 &&
             <details className={styles.proposal}><summary>Xem toàn bộ bản AI đề xuất đã lưu</summary><p lang="en">{result.correctedText}</p>
               {result.errors.flatMap(item => item.explanations ?? [])
                 .filter(explanation => !reviewItems.some(item => item.explanations.includes(explanation)))
@@ -526,8 +582,9 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             </details>}
           {comparison && comparison.submissionId !== result.submissionId && <section className={styles.comparison} aria-label="Đối chiếu hai bài đã lưu">
             <h3>Đối chiếu với bài #{comparison.submissionId}</h3>
-            <p>CEFR: <strong>{comparison.cefrLevel} → {result.cefrLevel}</strong>. Số câu có gợi ý: <strong>{comparison.errors.length} → {result.errors.length}</strong>.</p>
-            <p className={styles.hint}>Số gợi ý không phải điểm chất lượng. Sửa vài lỗi có thể không làm đổi mức CEFR. Hai bài có thể khác đề; hãy tự kiểm tra nội dung.</p>
+            {comparison.submissionId === result.parentSubmissionId ? <p className={styles.hint}>Tóm tắt CEFR và số gợi ý nằm ở thẻ “So với phiên bản trước” phía trên.</p> : <>
+              <p>CEFR: <strong>{comparison.cefrLevel} → {result.cefrLevel}</strong>. Số câu có gợi ý: <strong>{comparison.errors.length} → {result.errors.length}</strong>.</p>
+              <p className={styles.hint}>Số gợi ý không phải điểm chất lượng. Sửa vài lỗi có thể không làm đổi mức CEFR. Hai bài có thể khác đề; hãy tự kiểm tra nội dung.</p></>}
             {comparisonDiff && <details><summary>Xem thay đổi giữa hai bài</summary><p lang="en" className={styles.diffText}><DiffText diff={comparisonDiff} /></p>
               {!comparisonDiff.detailed && <p lang="en" className={styles.diffText}>{result.originalText}</p>}</details>}
             <button type="button" onClick={() => { comparisonRequest.current?.abort(); setComparison(null); }}>Đóng đối chiếu</button>
@@ -539,35 +596,46 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             <button type="button" disabled={!canReview || !lastDecision || (lastDecision.status === "accepted" && !draftPositionsKnown)} onClick={undoChoice}>Hoàn tác lựa chọn gần nhất</button>
           </section>}
           {review.total > 0 && review.visible.length === 0 && <p className={styles.hint}>Không có gợi ý phù hợp với bộ lọc.</p>}
-          {review.visible.map(item => {
+          {practice.shown.length > 0 && <p className={styles.hint}>Thử tự sửa trước: chọn “Tự sửa tại vị trí”, sửa trong bản nháp rồi chọn “Đã tự sửa”; chỉ xem đáp án khi cần. Gợi ý gắn “Chưa có quy tắc giải thích” có thể đúng hoặc sai — hãy tự cân nhắc trước khi nhận.</p>}
+          {practice.shown.map(item => {
             const suggestion = result.errors[item.suggestionIndex];
             const edit = item.edit;
+            const uncertain = !hideAnswerFirst(item.type);
+            const answerShown = item.status !== "pending" || uncertain || shownAnswers.includes(item.id);
             return <article className={styles.change} key={item.id} data-review-id={item.id}>
             <div className={styles.toolbar}>
               <h3 id={`writing-suggestion-${item.id}`} tabIndex={-1}>Gợi ý {item.number}</h3>
               <span className={styles.pill}>{writingReviewTypes[item.type]}</span>
               <span className={styles.pill}>{writingReviewStatuses[item.status]}</span>
+              {uncertain && <span className={`${styles.pill} ${styles.uncertainPill}`}>Chưa có quy tắc giải thích</span>}
             </div>
             <div className={styles.suggestionPair}>
               <div><h4>Bạn đã viết</h4><p lang="en">{visibleEdit(edit?.before ?? suggestion.original) || "∅"}</p></div>
-              <div><h4>Đề xuất của AI</h4><p lang="en">{visibleEdit(edit?.after ?? suggestion.suggestion) || "∅"}</p></div>
+              <div><h4>Đề xuất của AI</h4>{answerShown
+                ? <p lang="en">{visibleEdit(edit?.after ?? suggestion.suggestion) || "∅"}</p>
+                : <p className={styles.answerHidden}>Đáp án đang ẩn để bạn tự sửa trước.</p>}</div>
             </div>
             {edit && edit.before !== suggestion.original && <details className={styles.suggestionContext}>
               <summary>Xem câu gốc</summary><p lang="en">{suggestion.original}</p>
             </details>}
             <div className={styles.editActions}>
-              {edit && <><button type="button" disabled={!canChooseEdits} onClick={() => { const span = currentEditPosition(edit, editMap.edits, accepted); continueVersion(); requestAnimationFrame(() => locate(span.start, span.end)); }}>Xem vị trí {item.number}</button>
-                <button type="button" disabled={!canChooseEdits || item.status !== "pending"} onClick={() => chooseEdit(item, "accepted")}>Nhận thay đổi {item.number}</button></>}
+              <button type="button" disabled={!canReview} onClick={() => selfFix(item.id, edit, suggestion)}>Tự sửa tại vị trí {item.number}</button>
+              {!answerShown && <button type="button" onClick={() => setShownAnswers(ids => [...ids, item.id])}>Xem đáp án {item.number}</button>}
+              {edit && answerShown && <button type="button" disabled={!canChooseEdits || item.status !== "pending"} onClick={() => chooseEdit(item, "accepted")}>Nhận thay đổi {item.number}</button>}
+              <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "selfFixed")}>Đã tự sửa {item.number}</button>
               <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "skipped")}>Bỏ qua {item.number}</button>
             </div>
             {!edit && <p className={styles.hint}>Vị trí chưa xác định chắc chắn. Bạn có thể tự sửa trong bản nháp.</p>}
+            {selfFixNotice === item.id && <p className={styles.hint} role="status">Không còn tìm thấy câu gốc trong bản nháp — có thể bạn đã sửa câu này. Nếu xong, chọn “Đã tự sửa {item.number}” để sang gợi ý tiếp theo.</p>}
             {item.explanations.map((explanation, explanationIndex) => <div className={styles.explanation} key={explanationIndex}>
               <Icon name="bulb" /><p>{Object.hasOwn(explanationLabels, explanation.category) && <strong>{explanationLabels[explanation.category]}. </strong>}{explanation.message}</p>
             </div>)}
           </article>; })}
-          {review.visible.some(item => item.explanations.length > 0) && <p className={styles.hint}>Hãy kiểm tra ý nghĩa của gợi ý trong ngữ cảnh bài viết.</p>}
+          {practice.shown.some(item => item.explanations.length > 0) && <p className={styles.hint}>Hãy kiểm tra ý nghĩa của gợi ý trong ngữ cảnh bài viết.</p>}
+          {reviewExhausted(result.correctedText !== null, review.pending) && <RevisionChecklistPanel noneReturned={review.total === 0}
+            onContinue={() => { setStatusFilter("all"); continueVersion(); }} disabled={pending || feedbackPending || !draftReady} />}
         </section>
-        <aside className={styles.feedback} aria-busy={feedbackPending} aria-labelledby="writing-feedback-heading">
+        {showFeedbackPanel && <aside className={styles.feedback} aria-busy={feedbackPending} aria-labelledby="writing-feedback-heading">
           <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="sparkles" /></span><h2 id="writing-feedback-heading">Nhận xét & gợi ý cải thiện</h2></div>
           <p className={styles.hint}>Nhận xét tiếng Việt đang thử nghiệm, dùng nội dung bài đã lưu #{result.submissionId}. Không cho điểm số hay chứng nhận trình độ.</p>
           {result.feedback?.status === "ready" ? <>
@@ -588,14 +656,15 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           </>}
           {feedbackPending && <p className={styles.hint} role="status">CEFR và bài viết đã được lưu. Phần nhận xét đang được xử lý riêng.</p>}
           {feedbackNotice && <p className={styles.error} role="alert">{feedbackNotice}</p>}
-        </aside>
+        </aside>}
       </div>
       {continued && form}
     </> : <div className={styles.reviewGrid}>
       {form}
       <aside className={styles.feedback}>
-        <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="sparkles" /></span><h2>Kết quả phân tích</h2></div>
-        <p className={styles.hint}>Nộp bài để xem ước lượng CEFR. Bạn có thể bật gợi ý sửa ngữ pháp trong ô viết.</p>
+        {task ? <SelfCheck requirements={task.requirements} /> : <>
+          <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="sparkles" /></span><h2>Sau khi nộp</h2></div>
+          <p className={styles.hint}>Bạn sẽ nhận ước lượng CEFR và các gợi ý sửa lỗi để tự sửa rồi nộp lại.</p></>}
       </aside>
     </div>}
     {authenticated && result && <WritingFlashcards key={result.submissionId} submissionId={result.submissionId}

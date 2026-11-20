@@ -6,6 +6,8 @@ export type WritingDraft = {
   task?: WritingTask | null;
   checkedRequirements?: number[];
   review?: WritingReviewDecision[];
+  /** Suggestion IDs whose AI answer the learner chose to reveal. */
+  shownAnswers?: string[];
   requestId?: string;
   continued?: boolean;
   topic: string;
@@ -24,11 +26,17 @@ function parseReview(value: unknown): WritingReviewDecision[] {
   const decisions: WritingReviewDecision[] = [];
   for (const entry of value) {
     if (!entry || typeof entry.id !== "string" || !/^\d{1,5}:(?:\d{1,5}|unmapped)$/u.test(entry.id)
-      || (entry.status !== "accepted" && entry.status !== "skipped") || ids.has(entry.id)) return [];
+      || !["accepted", "skipped", "selfFixed"].includes(entry.status) || ids.has(entry.id)) return [];
     ids.add(entry.id);
     decisions.push({ id: entry.id, status: entry.status });
   }
   return decisions;
+}
+
+function parseShownAnswers(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length > 12000) return [];
+  if (value.some(id => typeof id !== "string" || !/^\d{1,5}:(?:\d{1,5}|unmapped)$/u.test(id))) return [];
+  return new Set(value).size === value.length ? [...value] : [];
 }
 
 function validId(value: unknown): value is number {
@@ -59,9 +67,11 @@ function parse(raw: string | null, owner: number | null, base: number | null, ta
         || new Set(value.checkedRequirements).size !== value.checkedRequirements.length
         || value.checkedRequirements.some(i => !Number.isInteger(i) || i < 0 || i >= (value.task?.requirements.length ?? 0))))) return null;
     const review = owner !== null && base !== null ? parseReview(value.review) : [];
+    const shownAnswers = owner !== null && base !== null ? parseShownAnswers(value.shownAnswers) : [];
     return { version: 2, topic: value.topic, text: value.text, corrections: value.corrections,
       task: value.task ?? null, checkedRequirements: value.checkedRequirements ?? [],
       ...(review.length ? { review } : {}),
+      ...(shownAnswers.length ? { shownAnswers } : {}),
       ...(isWritingRequestId(value.requestId) ? { requestId: value.requestId } : {}),
       ...(base !== null && value.continued === true ? { continued: true } : {}),
       baseSubmissionId: base, updatedAt: value.updatedAt };
@@ -130,7 +140,7 @@ export function adoptAnonymousWritingDraft(storage: DraftStorage | null, owner: 
       || old.task?.id !== anonymous.task?.id || old.task?.version !== anonymous.task?.version
       || JSON.stringify(old.checkedRequirements ?? []) !== JSON.stringify(anonymous.checkedRequirements ?? [])
       || old.continued !== anonymous.continued
-      || Boolean(old.review?.length) || Boolean(old.requestId))) {
+      || Boolean(old.review?.length) || Boolean(old.shownAnswers?.length) || Boolean(old.requestId))) {
       storage.setItem(draftKey(owner, base, true, taskId)!, oldRaw!);
     }
     return saveWritingDraft(storage, owner, anonymous, adoptedAt);

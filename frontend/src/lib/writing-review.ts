@@ -5,7 +5,7 @@ import type { WritingExplanation, WritingSuggestion } from "./writing";
 export const writingReviewTypes = {
   grammar: "Ngữ pháp", vocabulary: "Từ vựng", expression: "Cải thiện diễn đạt", unclassified: "Chưa phân loại",
 } as const;
-export const writingReviewStatuses = { pending: "Chưa xử lý", accepted: "Đã nhận", skipped: "Đã bỏ qua" } as const;
+export const writingReviewStatuses = { pending: "Chưa xử lý", accepted: "Đã nhận", selfFixed: "Đã tự sửa", skipped: "Đã bỏ qua" } as const;
 export type WritingReviewType = keyof typeof writingReviewTypes;
 export type WritingReviewStatus = keyof typeof writingReviewStatuses;
 export type WritingReviewDecision = { id: string; status: Exclude<WritingReviewStatus, "pending"> };
@@ -42,10 +42,12 @@ export function writingReviewView(items: WritingReviewItem[], decisions: Writing
   const entries = items.map(item => ({ ...item, status: statuses.get(item.id) ?? "pending" as const }));
   const accepted = entries.filter(item => item.status === "accepted").length;
   const skipped = entries.filter(item => item.status === "skipped").length;
+  const selfFixed = entries.filter(item => item.status === "selfFixed").length;
+  const reviewed = accepted + skipped + selfFixed;
   const total = entries.length;
   const visible = entries.filter(item => (type === "all" || item.type === type) && (status === "all" || item.status === status));
-  return { visible, visibleIds: new Set(visible.map(item => item.id)), total, accepted, skipped, pending: total - accepted - skipped,
-    percent: total ? (accepted + skipped) / total * 100 : null };
+  return { visible, visibleIds: new Set(visible.map(item => item.id)), total, accepted, skipped, selfFixed, reviewed,
+    pending: total - reviewed, percent: total ? reviewed / total * 100 : null };
 }
 
 export function restoreWritingReview(draft: WritingDraft, submissionId: number | undefined, items: WritingReviewItem[]) {
@@ -53,6 +55,6 @@ export function restoreWritingReview(draft: WritingDraft, submissionId: number |
   const itemsById = new Map(items.map(item => [item.id, item]));
   return (draft.review ?? []).filter(decision => {
     const item = itemsById.get(decision.id);
-    return item && (decision.status === "skipped" || item.edit !== null);
+    return item && (decision.status !== "accepted" || item.edit !== null);
   });
 }

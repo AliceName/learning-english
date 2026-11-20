@@ -215,3 +215,32 @@
   .suggestionPair { grid-template-columns: minmax(0, 1fr); }
   .page button:not(.annotation), .secondaryButton, .submit { min-height: 44px; }
 }
+
+/* Practice loop (P0): progressive feedback, revision checklist, version progress, CEFR chart. */
+.progressCard { margin: 0 0 18px; padding: 14px 18px; border-radius: 12px; background: #eefaf3; border: 1px solid #cdebd9; }
+.progressHeadline { margin: 4px 0 8px; font-weight: 700; color: var(--ink); }
+.progressFacts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.revealNotice { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 12px 0 0; padding: 10px 14px; border-radius: 10px; background: var(--tint); }
+.revealNotice p { margin: 0; }
+.answerHidden { color: var(--muted); font-style: italic; }
+.exhausted { margin-top: 16px; padding: 14px 18px; border-radius: 12px; border: 1px dashed #9fb3e6; background: #f8f9ff; }
+.exhausted h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+.exhausted ol { margin: 8px 0 12px; padding-inline-start: 20px; }
+.exhausted li { margin-block: 4px; }
+.cefrChart { margin: 8px 0 14px; }
+.cefrChart figcaption { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.cefrChart svg { display: block; width: 100%; max-width: 420px; height: auto; }
+.chartGrid { stroke: var(--line); stroke-width: 1; }
+.chartLabel { fill: var(--muted); font-size: 10px; }
+.chartLine { stroke: var(--primary); stroke-width: 2; }
+.chartDot { fill: var(--primary); }
+.uncertainPill { background: #fff4e0; color: #8a5300; }
+.promptText ul { margin: 6px 0; padding-inline-start: 22px; }
+.promptText p { margin: 4px 0; }
+.selfCheck { padding: 14px 16px; border-radius: 12px; background: var(--tint); }
+.selfCheck h3 { margin: 0 0 6px; font-size: 15px; font-weight: 800; }
+.selfCheck ul { margin: 6px 0; padding-inline-start: 20px; }
+.summaryList { margin: 6px 0 0; padding-inline-start: 18px; font-size: 12px; color: var(--muted); }
+.filters { margin: 6px 0; }
+.filters summary { cursor: pointer; font-weight: 700; }
+.reviewSingle { grid-template-columns: minmax(0, 1fr); }

@@ -135,3 +135,21 @@ test('session draft restores ordered review decisions only for the owner and mat
   assert.equal(invalid.text, input.text);
   assert.equal(invalid.review, undefined);
 });
+
+test('self-fixed suggestions count as reviewed, filter separately and survive a draft round trip', () => {
+  const items = [{ id: '0:1', type: 'grammar' }, { id: '1:unmapped', type: 'unclassified' }, { id: '2:1', type: 'grammar' }];
+  const decisions = [{ id: '0:1', status: 'selfFixed' }, { id: '1:unmapped', status: 'skipped' }];
+  const view = writingReviewView(items, decisions, 'all', 'all');
+  assert.deepEqual([view.total, view.selfFixed, view.skipped, view.accepted, view.pending, Math.round(view.percent)], [3, 1, 1, 0, 1, 67]);
+  assert.deepEqual(Array.from(writingReviewView(items, decisions, 'all', 'selfFixed').visibleIds), ['0:1']);
+  const values = new Map();
+  const store = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) };
+  const input = { topic: '', text: 'Draft.', corrections: true, baseSubmissionId: 9, review: decisions, shownAnswers: ['2:1'] };
+  assert.equal(saveWritingDraft(store, 5, input), true);
+  const restored = loadWritingDraft(store, 5, 9);
+  assert.equal(JSON.stringify(restored.review), JSON.stringify(decisions));
+  assert.equal(JSON.stringify(restored.shownAnswers), JSON.stringify(['2:1']));
+  const [key, raw] = [...values.entries()][0];
+  values.set(key, JSON.stringify({ ...JSON.parse(raw), shownAnswers: ['bad id', '2:1'] }));
+  assert.equal(loadWritingDraft(store, 5, 9).shownAnswers, undefined);
+});

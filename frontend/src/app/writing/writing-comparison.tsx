@@ -34,7 +34,7 @@ function LinkedEdits({ text, edits, accepted, visibleIds, draft = false, onSelec
     cursor = end;
     parts.push(<Fragment key={edit.id}>{before}<button type="button"
       className={`${styles.annotation} ${draft ? styles.diffAdded : styles.diffRemoved}`}
-      aria-label={`Xem gợi ý ${edit.suggestionIndex + 1}: ${fragment.trim() || visibleEdit(fragment) || (draft ? "đã xóa" : edit.after)}`}
+      aria-label={`Xem gợi ý ${edit.suggestionIndex + 1}: ${fragment.trim() || visibleEdit(fragment) || (draft ? "đã xóa" : "chỗ có thể cần thêm từ")}`}
       data-review-id={edit.id}
       onClick={() => onSelect(edit.id)}>{fragment || (draft ? "−" : "＋")}</button></Fragment>);
   }
@@ -46,7 +46,6 @@ export default function WritingComparison({ result, draft, draftPositionsKnown, 
   edits: WritingEdit[]; accepted: string[]; visibleIds: ReadonlySet<string>;
   showAnnotations: boolean; onSelect: (id: string) => void; onEdit: () => void; editDisabled: boolean;
 }) {
-  const coverage = result.gecCoverage && writingCoverageSummary(result.gecCoverage);
   return <>
     <section aria-label="Đối chiếu bài viết">
       {showAnnotations && edits.some(edit => visibleIds.has(edit.id)) && <p className={styles.annotationHint}>
@@ -77,35 +76,41 @@ export default function WritingComparison({ result, draft, draftPositionsKnown, 
         </article>
       </div>
     </section>
-    <section className={styles.summarySection} aria-labelledby="writing-summary-heading">
-      <div className={styles.sectionHeading}>
-        <span className={`${styles.icon} ${styles.primaryIcon}`}><Icon name="trend" /></span>
-        <h2 id="writing-summary-heading">Đánh giá bài đã nộp</h2>
-      </div>
-      <div className={styles.studioSummary}>
-        <article className={styles.cefrCard}>
-          <h3>CEFR ước lượng</h3>
-          <strong>{result.cefrLevel || "Chưa có"}</strong>
-          <p>Mức ngôn ngữ của bài gốc</p>
-        </article>
-        <article><h3>CEFR mục tiêu khi nộp</h3>
-          <strong>{result.targetRecorded ? result.targetCefr ?? "Chưa đặt" : "Chưa được ghi"}</strong>
-        </article>
-        <article>
-          <h3>Gợi ý chỉnh sửa</h3>
-          <strong>{result.correctedText !== null ? result.errors.length : "Chưa phân tích"}</strong>
-          <p>{result.correctedText !== null ? "Số câu có gợi ý ngữ pháp" : "Lần nộp này chỉ có ước lượng CEFR"}</p>
-        </article>
-        {coverage && result.gecCoverage && <article>
-          <h3>Phạm vi xử lý GEC</h3>
-          <strong>{coverage.completed}/{result.gecCoverage.totalBodySentences} câu</strong>
-          <p>Đã sinh hoàn tất, trong đó {coverage.rejected} câu có gợi ý bị chặn.</p>
-          <p>Chưa xử lý hoặc chưa hoàn tất: {coverage.unprocessed} câu
-            ({result.gecCoverage.inputOverBudget} quá dài, {result.gecCoverage.incomplete} sinh chưa hoàn tất,
-            {" "}{result.gecCoverage.sentenceLimit} ngoài giới hạn 20 câu).</p>
-        </article>}
-      </div>
-      <p className={styles.hint}>CEFR chỉ ước lượng trình độ ngôn ngữ. Độ bám đề cần được tự kiểm tra.</p>
-    </section>
   </>;
+}
+
+/** Result summary shown first: language level, task relevance status and unchecked sentences. */
+export function WritingSummary({ result }: { result: WritingResult }) {
+  const coverage = result.gecCoverage && writingCoverageSummary(result.gecCoverage);
+  const requirements = result.task?.requirements ?? [];
+  return <section className={styles.summarySection} aria-labelledby="writing-summary-heading">
+    <div className={styles.sectionHeading}>
+      <span className={`${styles.icon} ${styles.primaryIcon}`}><Icon name="trend" /></span>
+      <h2 id="writing-summary-heading">Đánh giá bài đã nộp</h2>
+    </div>
+    <div className={styles.studioSummary}>
+      <article className={styles.cefrCard}>
+        <h3>CEFR ước lượng</h3>
+        <strong>{result.cefrLevel || "Chưa có"}</strong>
+        <p>Mức ngôn ngữ của bài viết{result.targetRecorded && result.targetCefr ? ` · mục tiêu khi nộp ${result.targetCefr}` : ""}</p>
+      </article>
+      <article>
+        <h3>Gợi ý chỉnh sửa</h3>
+        <strong>{result.correctedText !== null ? result.errors.length : "Không bật"}</strong>
+        <p>{result.correctedText !== null ? "Số câu có gợi ý ngữ pháp" : "Lần nộp này chỉ có ước lượng CEFR"}</p>
+      </article>
+      <article>
+        <h3>Bám đề</h3>
+        <strong>Chưa đánh giá</strong>
+        <p>LEWA chưa chấm được bài có trả lời đúng đề hay không.{requirements.length > 0 && " Hãy tự đối chiếu:"}</p>
+        {requirements.length > 0 && <ul className={styles.summaryList}>{requirements.map(requirement => <li key={requirement}>{requirement}</li>)}</ul>}
+      </article>
+      {coverage && coverage.unprocessed > 0 && <article>
+        <h3>Câu chưa được kiểm tra</h3>
+        <strong>{coverage.unprocessed} câu</strong>
+        <p>Quá dài hoặc vượt giới hạn 20 câu mỗi lượt. Hãy tự rà soát các câu này.</p>
+      </article>}
+    </div>
+    <p className={styles.hint}>CEFR ước lượng mức ngôn ngữ của bài viết, không phải của bạn, và không xét bài có đúng đề hay không. Đề ngắn, đơn giản có ít chỗ thể hiện cấu trúc phức tạp nên thường khó đạt mức cao.</p>
+  </section>;
 }

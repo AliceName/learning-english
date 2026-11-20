@@ -174,6 +174,7 @@ test("saved feedback renders evidence as text without auto-requesting or changin
     "./writing.module.css": styles,
   });
   let fetchCalls = 0;
+  const practice = loadTs("lib/writing-practice.ts");
   const form = loadTs("app/writing/writing-form.tsx", {
     "react": React, "react/jsx-runtime": require("react/jsx-runtime"), "next/link": {
       default: ({ children, prefetch, ...props }) => { void prefetch; return React.createElement("a", props, children); },
@@ -190,6 +191,11 @@ test("saved feedback renders evidence as text without auto-requesting or changin
     "./writing-flashcards": { default: () => null },
     "./writing-task-library": { default: () => null, taskLevels: { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" } },
     "./writing-comparison": comparison,
+    "@/lib/writing-practice": practice,
+    "./writing-practice-panels": loadTs("app/writing/writing-practice-panels.tsx", {
+      react: React, "react/jsx-runtime": require("react/jsx-runtime"), "@/components/site-icon": icon,
+      "@/lib/writing-practice": practice, "./writing.module.css": styles,
+    }),
     "./writing.module.css": styles,
   }, { fetch: () => { fetchCalls += 1; throw new Error("Unexpected automatic request"); } }).default;
   const html = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false, targetLevel: "B2", initialResult: result }));
@@ -199,23 +205,30 @@ test("saved feedback renders evidence as text without auto-requesting or changin
   assert.ok(html.includes("I learn English every day."));
   assert.ok(html.includes("Nhận xét tiếng Việt đang thử nghiệm"));
   assert.match(html, /Bạn đã viết<\/h4><p lang="en">learn<\/p>/u);
+  // No rule explains this change, so the answer is shown with an uncertainty label
+  // instead of asking the learner to hunt for an error that may not exist.
   assert.match(html, /Đề xuất của AI<\/h4><p lang="en">study<\/p>/u);
+  assert.ok(html.includes("Chưa có quy tắc giải thích"));
+  assert.equal(html.includes("Xem đáp án 1.1"), false);
+  assert.ok(html.includes("Đã tự sửa 1.1"));
+  assert.ok(html.includes("Bám đề</h3><strong>Chưa đánh giá</strong>"));
   assert.ok(html.includes("Bản nháp chỉnh sửa"));
-  assert.match(html, /CEFR mục tiêu khi nộp<\/h3><strong>Chưa được ghi<\/strong>/u);
+  // The submission-time target is folded into the CEFR card and only shown when it was recorded.
+  assert.match(html, /<strong>B1<\/strong><p>Mức ngôn ngữ của bài viết<\/p>/u);
   const recorded = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false,
     targetLevel: "C1", initialResult: { ...result, targetRecorded: true, targetCefr: "B2", versionNumber: 1 } }));
-  assert.match(recorded, /CEFR mục tiêu khi nộp<\/h3><strong>B2<\/strong>/u);
+  assert.ok(recorded.includes("Mức ngôn ngữ của bài viết · mục tiêu khi nộp B2"));
   assert.ok(recorded.includes("Tiếp tục từ phiên bản này"));
   assert.equal(recorded.includes('id="writing-target"'), false);
   const newDraft = renderToStaticMarkup(React.createElement(form, { authenticated: true, custom: true, targetLevel: "B2" }));
-  assert.match(newDraft, /CEFR mục tiêu từ Hồ sơ cá nhân<\/strong> B2/u);
+  assert.ok(newDraft.includes('<span class="pill">Mục tiêu B2</span>'));
   assert.doesNotMatch(newDraft, /id="writing-target"/u);
   const unsetDraft = renderToStaticMarkup(React.createElement(form, { authenticated: true, custom: true }));
-  assert.match(unsetDraft, /Chưa thiết lập. <a href="\/account">Mở Hồ sơ cá nhân<\/a>/u);
+  assert.ok(unsetDraft.includes('<a class="pill" href="/account">Đặt CEFR mục tiêu</a>'));
   assert.match(html, /Bản nháp chỉnh sửa<\/h2>[^]*?<p lang="en">I learn English every day\./u);
-  assert.match(html, /<strong>17\/22 câu<\/strong>/u);
-  assert.ok(html.includes("1 câu có gợi ý bị chặn"));
-  assert.ok(html.includes("Chưa xử lý hoặc chưa hoàn tất: 5 câu"));
+  // Learners only see sentences that were not checked, in plain words.
+  assert.ok(html.includes("Câu chưa được kiểm tra</h3><strong>5 câu</strong>"));
+  assert.equal(html.includes("có gợi ý bị chặn"), false);
   assert.match(html, /aria-label="Xem gợi ý 1: learn"/u);
   const [firstEdit] = revision.writingEdits(result).edits;
   assert.ok(html.includes(`id="writing-suggestion-${firstEdit.id}" tabindex="-1"`));

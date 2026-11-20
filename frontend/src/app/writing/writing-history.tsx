@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { isWritingHistory, isWritingPractices, type WritingHistory, type WritingPractices } from "@/lib/writing-capabilities";
+import { CefrProgressChart } from "./writing-practice-panels";
 import styles from "./writing.module.css";
 
 export default function WritingHistoryPanel({ authenticated, submissionId, practiceRootId, onCompare, onNavigate }: {
@@ -52,6 +53,7 @@ export default function WritingHistoryPanel({ authenticated, submissionId, pract
     <p className={styles.hint}>Mở một phiên bản rồi chọn “Tiếp tục từ phiên bản này” để soạn bản nháp từ bài đã lưu.</p>
     {root && <button type="button" onClick={() => { setSelectedRoot(null); setError(""); }}>Tất cả lượt luyện</button>}
     {error && <p className={styles.error} role="alert">{error} <button type="button" onClick={() => setRefresh(n => n + 1)}>Tải lại</button></p>}
+    {root && <CefrProgressChart items={history.items} />}
     <ul>{root ? history.items.map((i, index) => <li key={i.submissionId} aria-current={i.submissionId === submissionId ? "true" : undefined}>
       <div><strong>{i.versionNumber ? `Phiên bản ${i.versionNumber}` : `Bài #${i.submissionId}`}</strong>
         {index === 0 && <span className={styles.pill}>Mới nhất</span>}
