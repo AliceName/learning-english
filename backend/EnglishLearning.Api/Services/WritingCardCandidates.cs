@@ -27,17 +27,29 @@ public static partial class WritingCardCandidates
                 || suggestion.Suggestion == suggestion.Original) continue;
             foreach (var explanation in suggestion.Explanations ?? [])
             {
-                if (explanation is not { Category: "SPELL", TemplateVersion: "vi-edit-templates-v1" }
+                if (explanation is null || explanation.TemplateVersion is not (V1 or V2)) continue;
+                // Missing or replaced preposition (v2): the learner keeps the verb/adjective + preposition pair.
+                if (explanation is { Category: "PREP", TemplateVersion: V2 } && explanation.Suggestion.Trim().Length > 0)
+                {
+                    if (Collocation(suggestion.Suggestion, explanation.Suggestion) is { } pair)
+                        Add(pair, suggestion.Original, "correction", "Ôn cụm từ đi với giới từ mà AI đề xuất. Hãy kiểm tra ngữ cảnh trước khi lưu.", suggestion.Suggestion);
+                    continue;
+                }
+                var spelling = explanation.Category == "SPELL";
+                if (!(spelling || (explanation.TemplateVersion == V2 && WordChoice.Contains(explanation.Category)))
+                    || explanation.Original.Trim().Length == 0
                     || NormalizeTerm(explanation.Suggestion) == NormalizeTerm(explanation.Original)
                     || !ContainsTerm(suggestion.Original, explanation.Original)
                     || !ContainsTerm(suggestion.Suggestion, explanation.Suggestion)) continue;
-                Add(explanation.Suggestion, suggestion.Original, "correction", "Ôn cách viết từ được đề xuất sửa.");
+                Add(explanation.Suggestion, suggestion.Original, "correction", spelling
+                    ? "Ôn cách viết từ được đề xuất sửa."
+                    : $"Từ AI đề xuất thay cho “{explanation.Original.Trim()}”. Hãy kiểm tra nghĩa trong ngữ cảnh trước khi lưu.", suggestion.Suggestion);
             }
             foreach (Match match in ExpressionPattern.Matches(suggestion.Suggestion))
             {
                 var term = NormalizeTerm(match.Value);
                 if (!ExpressionPattern.Matches(suggestion.Original).Any(old => NormalizeTerm(old.Value) == term))
-                    Add(term, suggestion.Original, "correction", "Ôn cụm từ xuất hiện trong đề xuất chỉnh sửa. Hãy kiểm tra ngữ cảnh trước khi lưu.");
+                    Add(term, suggestion.Original, "correction", "Ôn cụm từ xuất hiện trong đề xuất chỉnh sửa. Hãy kiểm tra ngữ cảnh trước khi lưu.", suggestion.Suggestion);
             }
         }
         var from = 0;
@@ -52,14 +64,27 @@ public static partial class WritingCardCandidates
         void AddExpressions(string context)
         {
             foreach (Match match in ExpressionPattern.Matches(context))
-                Add(match.Value, context, "original", "Ôn một cụm từ bạn đã dùng trong bài.");
+                Add(match.Value, context, "original", "Ôn một cụm từ bạn đã dùng trong bài.", context);
         }
 
-        void Add(string value, string context, string source, string reason)
+        void Add(string value, string context, string source, string reason, string? example = null)
         {
             if (!VocabularyWord.TryNormalize(value, "en-vi", out var term) || context.Trim().Length is < 1 or > 1000) return;
-            candidates.TryAdd(term, new(term, context.Trim(), source, reason));
+            var sentence = example?.Trim();
+            candidates.TryAdd(term, new(term, context.Trim(), source, reason, Example: sentence is { Length: > 0 and <= 1000 } ? sentence : null));
         }
+    }
+
+    private const string V1 = "vi-edit-templates-v1", V2 = "vi-edit-templates-v2";
+    // ERRANT word-choice kinds; grammar-only kinds (tense, agreement, form) do not make vocabulary cards.
+    private static readonly HashSet<string> WordChoice = ["VERB", "NOUN", "ADJ", "ADV"];
+
+    /// <summary>"listen to" from "I listen to music.": the word before the suggested preposition plus it.</summary>
+    private static string? Collocation(string sentence, string preposition)
+    {
+        var match = Regex.Match(sentence.Replace('’', '\''), @"(\p{L}[\p{L}'-]*)[ \t]+(" + Regex.Escape(preposition.Trim())
+            + @")(?![\p{L}\p{M}\p{N}_'-])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        return match.Success ? $"{match.Groups[1].Value} {match.Groups[2].Value}" : null;
     }
 
     public static string NormalizeTerm(string value) =>

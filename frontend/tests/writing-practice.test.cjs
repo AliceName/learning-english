@@ -205,3 +205,15 @@ test('sentences rewritten since the previous version that now have no suggestion
   const improved = JSON.parse(JSON.stringify(improvedSentences(current, previous, shades)));
   assert.deepEqual(improved.map(s => current.slice(s.start, s.end)), ['I went home.', 'We play.']);
 });
+
+const { dictionaryGloss, dictionaryLookupWord } = load('writing-practice');
+
+test('card meanings are prefilled from the first Vietnamese definitions, with the preposition noted for phrases', () => {
+  const response = { entries: [{ meanings: [{ partOfSpeech: 'Tính từ', definitions: [{ definition: 'Đẹp; hay.' }, { definition: 'Tốt, tốt đẹp.' }, { definition: 'Thứ ba.' }] }] }] };
+  assert.equal(dictionaryGloss(response, 'beautiful'), '(Tính từ) Đẹp; hay. / Tốt, tốt đẹp.');
+  const listen = { entries: [{ meanings: [{ partOfSpeech: 'Động từ', definitions: [{ definition: 'Nghe, lắng nghe.' }] }] }] };
+  assert.equal(dictionaryGloss(listen, 'listen to'), '(Động từ) Nghe, lắng nghe. — đi với “to”');
+  assert.equal(dictionaryGloss({ entries: [] }, 'x'), '');
+  assert.equal(dictionaryLookupWord('listen to'), 'listen');
+  assert.equal(dictionaryLookupWord('beautiful'), 'beautiful');
+});

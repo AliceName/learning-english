@@ -201,3 +201,24 @@ export function improvedSentences(current: string, previous: string, shades: rea
   }
   return spans;
 }
+
+type DictionaryLike = { entries?: { meanings?: { partOfSpeech?: string; definitions?: { definition?: string }[] }[] }[] };
+
+/** Phrases such as "listen to" are looked up by their first word; single words as they are. */
+export function dictionaryLookupWord(term: string): string {
+  const words = term.trim().split(/\s+/u);
+  return words.length > 1 ? words[0] : term.trim();
+}
+
+/**
+ * A short, editable card meaning from the app's existing en-vi dictionary: the first two
+ * definitions of the first sense. For a phrase, the remaining words are noted ("đi với “to”").
+ * Empty when the dictionary has nothing, so the learner writes it.
+ */
+export function dictionaryGloss(response: DictionaryLike, term: string): string {
+  const meaning = response.entries?.[0]?.meanings?.find(m => m.definitions?.some(d => d.definition?.trim()));
+  if (!meaning) return "";
+  const definitions = (meaning.definitions ?? []).map(d => d.definition?.trim()).filter(Boolean).slice(0, 2).join(" / ");
+  const rest = term.trim().split(/\s+/u).slice(1).join(" ");
+  return `${meaning.partOfSpeech ? `(${meaning.partOfSpeech}) ` : ""}${definitions}${rest ? ` — đi với “${rest}”` : ""}`;
+}

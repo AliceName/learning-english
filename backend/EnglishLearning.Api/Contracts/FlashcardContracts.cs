@@ -24,7 +24,8 @@ public sealed class SaveWritingCardRequest : SaveCardRequest
     [Required, StringLength(100)] public string SourceTerm { get; init; } = "";
 }
 
-public sealed record WritingCardCandidate(string Term, string Context, string Source, string Reason, int? SimilarCardId = null);
+/// <summary>Example is the corrected sentence for correction cards (the context keeps the learner's original).</summary>
+public sealed record WritingCardCandidate(string Term, string Context, string Source, string Reason, int? SimilarCardId = null, string? Example = null);
 public sealed record WritingCardSuggestions(int SubmissionId, int PracticeRootId, int? VersionNumber, string? TargetCefr,
     WritingCardCandidate[] Items);
 // The source validated for this import request. Durable history requires an approved relation.

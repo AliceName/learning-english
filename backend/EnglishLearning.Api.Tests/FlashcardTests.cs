@@ -40,6 +40,28 @@ public sealed class FlashcardTests
     }
 
     [Fact]
+    public void Writing_candidates_use_typed_v2_corrections_for_spelling_word_choice_and_prepositions()
+    {
+        const string v2 = "vi-edit-templates-v2";
+        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it.";
+        WritingSuggestion Edit(string original, string suggestion, WritingExplanation explanation) =>
+            new(original, suggestion, [explanation], text.IndexOf(original, StringComparison.Ordinal), text.IndexOf(original, StringComparison.Ordinal) + original.Length);
+        var edits = new[]
+        {
+            Edit("It is a beautifull day.", "It is a beautiful day.", new("SPELL", "beautifull", "beautiful", "m", v2)),
+            Edit("It was a big house.", "It was a large house.", new("ADJ", "big", "large", "m", v2)),
+            Edit("I listen music.", "I listen to music.", new("PREP", "", "to", "m", v2)),
+            Edit("She go home.", "She goes home.", new("VERB:SVA", "go", "goes", "m", v2)),
+            Edit("We discussed about it.", "We discussed it.", new("PREP", "about", "", "m", v2)),
+        };
+        var candidates = WritingCardCandidates.Find(text, edits);
+        Assert.Equal(new[] { "beautiful", "large", "listen to" }, candidates.Select(c => c.Term));
+        Assert.All(candidates, c => Assert.Equal("correction", c.Source));
+        Assert.Equal("I listen music.", candidates[2].Context);
+        Assert.Equal("I listen to music.", candidates[2].Example); // the corrected sentence becomes the example
+    }
+
+    [Fact]
     public void Writing_candidates_ignore_malformed_spans_no_op_edits_and_unsubstantiated_explanations()
     {
         const string original = "😀 I wrote freind.";

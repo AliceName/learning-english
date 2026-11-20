@@ -2,11 +2,12 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import type { Deck } from "@/lib/flashcards";
+import { dictionaryGloss, dictionaryLookupWord } from "@/lib/writing-practice";
 import styles from "./writing.module.css";
 
-type Candidate = { term: string; context: string; source: "correction" | "original"; reason: string; similarCardId: number | null };
+type Candidate = { term: string; context: string; source: "correction" | "original"; reason: string; similarCardId: number | null; example?: string | null };
 type DraftCard = Candidate & {
-  selected: boolean; frontText: string; backText: string; exampleSentence: string;
+  selected: boolean; frontText: string; backText: string; exampleSentence: string; meaningFromDictionary?: boolean; meaningChecked?: boolean;
   saved?: string; error?: string;
 };
 
@@ -54,12 +55,32 @@ export default function WritingFlashcards({ submissionId, versionNumber, targetC
       if (suggestions.submissionId !== submissionId) throw new Error("Chưa xác minh được phiên bản nguồn.");
       const owned = available.filter(deck => deck.canEdit);
       setDecks(owned); setDeckId(owned[0]?.deckId ?? null);
-      setCards(suggestions.items.map(item => ({
-        ...item, selected: false, frontText: item.term, backText: "", exampleSentence: item.source === "original" ? item.context : "",
-      })));
+      const drafts = suggestions.items.map(item => ({
+        ...item, selected: false, frontText: item.term, backText: "",
+        // Correction cards use the corrected sentence, never the learner's sentence that still has the error.
+        exampleSentence: item.example ?? (item.source === "original" ? item.context : ""),
+      }));
+      setCards(drafts);
+      void prefillMeanings(drafts.slice(0, 12), controller.signal);
     } catch (problem) {
       if (!controller.signal.aborted) setError(problem instanceof Error ? problem.message : "Chưa tải được gợi ý.");
     } finally { active.current = null; if (!controller.signal.aborted) setBusy(false); }
+  }
+
+  // Meanings come from the app's own en-vi dictionary (only the word is sent, never the essay).
+  // They are a starting point: the learner keeps or edits them before saving.
+  async function prefillMeanings(drafts: DraftCard[], signal: AbortSignal) {
+    await Promise.all(drafts.map(async draft => {
+      const checked = () => { if (!signal.aborted) update(draft.term, { meaningChecked: true }); };
+      try {
+        const response = await fetch(`/api/vocabulary?word=${encodeURIComponent(dictionaryLookupWord(draft.term))}&direction=en-vi`, { cache: "no-store", signal });
+        if (!response.ok) return checked();
+        const gloss = dictionaryGloss(await response.json(), draft.term).slice(0, 1000);
+        if (!gloss || signal.aborted) return checked();
+        setCards(current => current?.map(card => card.term === draft.term && !card.backText.trim()
+          ? { ...card, backText: gloss, meaningFromDictionary: true, meaningChecked: true } : card) ?? null);
+      } catch { checked(); /* No dictionary meaning: the learner writes it. */ }
+    }));
   }
 
   async function save() {
@@ -93,7 +114,7 @@ export default function WritingFlashcards({ submissionId, versionNumber, targetC
       <Link href="/flashcards" prefetch={false}>Mở Flashcards</Link>
     </div>
     <p className={styles.hint}>{versionNumber ? `Phiên bản ${versionNumber}` : `Bài #${submissionId}`}
-      {targetCefr ? ` · CEFR mục tiêu ${targetCefr}` : ""}. Chọn từ muốn ôn và tự điền nghĩa phù hợp với ngữ cảnh.</p>
+      {targetCefr ? ` · CEFR mục tiêu ${targetCefr}` : ""}. Chọn từ muốn ôn. Nghĩa được điền sẵn từ từ điển của LEWA; hãy giữ nghĩa đúng với câu của bạn.</p>
     {cards === null && <button type="button" disabled={busy} onClick={() => void load()}>{busy ? "Đang tìm…" : "Tìm gợi ý từ bài đã lưu"}</button>}
     {error && <p className={styles.error} role="alert">{error}</p>}
     {cards?.length === 0 && <p role="status">Chưa tìm được từ hoặc cụm từ phù hợp trong bài này.</p>}
@@ -113,7 +134,9 @@ export default function WritingFlashcards({ submissionId, versionNumber, targetC
                 <label>Mặt trước<input lang="en" maxLength={500} disabled={busy} value={card.frontText}
                   onChange={event => update(card.term, { frontText: event.target.value })} /></label>
                 <label>Nghĩa hoặc mặt sau<textarea rows={2} maxLength={1000} disabled={busy} value={card.backText}
-                  onChange={event => update(card.term, { backText: event.target.value })} /></label>
+                  onChange={event => update(card.term, { backText: event.target.value, meaningFromDictionary: false })} /></label>
+                {card.meaningFromDictionary && <p className={styles.hint}>Gợi ý từ từ điển — xóa bớt nghĩa không hợp ngữ cảnh.</p>}
+                {!card.backText.trim() && card.meaningChecked && <p className={styles.hint}>Từ điển chưa có nghĩa cho từ này; hãy tự điền.</p>}
                 <label>Câu ví dụ<textarea lang="en" rows={2} maxLength={1000} disabled={busy} value={card.exampleSentence}
                   onChange={event => update(card.term, { exampleSentence: event.target.value })} /></label>
               </div>
