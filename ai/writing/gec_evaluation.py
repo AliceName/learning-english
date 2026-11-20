@@ -18,9 +18,21 @@ def m2_block(annotator, original, corrected):
     return "S " + " ".join(t.text for t in source) + "\n" + "\n".join(annotations) + "\n\n"
 
 
+def _fits(rows, tokenizer, max_length, target_length):
+    return [r for r in rows if len(tokenizer(r["text"])["input_ids"]) <= max_length
+            and len(tokenizer(text_target=r["corrected_text"])["input_ids"]) <= target_length]
+
+
+def full_dev(rows, tokenizer, max_length, target_length):
+    """Every dev row the model can read, in file order, split by whether it needs an edit; plus the skipped count."""
+    valid = _fits(rows, tokenizer, max_length, target_length)
+    groups = {name: [r for r in valid if (r["text"] != r["corrected_text"]) == edited]
+              for name, edited in (("requires_edit", True), ("already_correct", False))}
+    return groups, len(rows) - len(valid)
+
+
 def sample_dev(rows, tokenizer, max_length, target_length, per_group, seed=2026):
-    valid = [r for r in rows if len(tokenizer(r["text"])["input_ids"]) <= max_length
-             and len(tokenizer(text_target=r["corrected_text"])["input_ids"]) <= target_length]
+    valid = _fits(rows, tokenizer, max_length, target_length)
     rng = random.Random(seed)
     groups = {}
     for name, edited in (("requires_edit", True), ("already_correct", False)):

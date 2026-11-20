@@ -7,6 +7,8 @@ import re
 
 
 GEC_LORA_PROFILES = {"qv": ("q", "v"), "qvo": ("q", "v", "o")}
+# Validated GEC adapter ranks; alpha is always 2 * rank (8/16 is the serving default).
+GEC_LORA_RANKS = (8, 32)
 _KEY = re.compile(r"^(.*\.(q|v|o))\.lora_([AB])\.weight$")
 
 
@@ -16,7 +18,7 @@ def gec_profile_modules(profile):
     return list(GEC_LORA_PROFILES[profile])
 
 
-def _inspect(directory, expected_profile=None, expected_model_id=None):
+def _inspect(directory, expected_profile=None, expected_model_id=None, expected_rank=None):
     import torch
     from safetensors.torch import load_file
     directory = Path(directory)
@@ -33,10 +35,13 @@ def _inspect(directory, expected_profile=None, expected_model_id=None):
         raise ValueError("GEC adapter configuration differs from manifest/profile")
     if expected_model_id is not None and config.get("base_model_name_or_path") != expected_model_id:
         raise ValueError("GEC adapter base model differs")
-    required = {"peft_type": "LORA", "task_type": "SEQ_2_SEQ_LM", "r": 8,
-                "lora_alpha": 16, "lora_dropout": 0.05, "bias": "none"}
+    rank = config.get("r")
+    if rank not in GEC_LORA_RANKS or (expected_rank is not None and rank != expected_rank):
+        raise ValueError("GEC adapter rank is unsupported or differs from manifest")
+    required = {"peft_type": "LORA", "task_type": "SEQ_2_SEQ_LM", "r": rank,
+                "lora_alpha": 2 * rank, "lora_dropout": 0.05, "bias": "none"}
     if any(config.get(key) != value for key, value in required.items()):
-        raise ValueError("GEC adapter must keep rank8/alpha16/dropout0.05 and LoRA task/bias")
+        raise ValueError("GEC adapter must keep alpha=2*rank/dropout0.05 and LoRA task/bias")
     unsupported = ("use_dora", "use_rslora", "use_qalora", "lora_bias", "fan_in_fan_out",
                    "rank_pattern", "alpha_pattern", "modules_to_save", "layers_to_transform",
                    "layers_pattern", "layer_replication", "target_parameters", "trainable_token_indices",
@@ -54,18 +59,18 @@ def _inspect(directory, expected_profile=None, expected_model_id=None):
         pairs.setdefault(module, {})[side] = tensor
     if not pairs or actual_modules != set(modules):
         raise ValueError("Adapter tensors do not cover configured GEC modules")
-    if any(set(pair) != {"A", "B"} or pair["A"].shape[0] != 8 or pair["B"].shape[1] != 8
+    if any(set(pair) != {"A", "B"} or pair["A"].shape[0] != rank or pair["B"].shape[1] != rank
            for pair in pairs.values()):
         raise ValueError("Incomplete or wrong-rank GEC LoRA tensor pair")
-    metadata = dict(profile=profile, target_modules=gec_profile_modules(profile),
+    metadata = dict(profile=profile, rank=rank, target_modules=gec_profile_modules(profile),
                     adapter_config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
                     adapter_sha256=hashlib.sha256(state_path.read_bytes()).hexdigest())
     return config, state, metadata
 
 
-def validate_gec_adapter(directory, expected_profile=None, expected_model_id=None):
+def validate_gec_adapter(directory, expected_profile=None, expected_model_id=None, expected_rank=None):
     """Inspect only local adapter config/tensors, before loading a GPU backbone."""
-    return _inspect(directory, expected_profile, expected_model_id)[2]
+    return _inspect(directory, expected_profile, expected_model_id, expected_rank)[2]
 
 
 def _tensor_digest(state, names):

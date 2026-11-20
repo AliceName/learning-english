@@ -18,7 +18,7 @@ from modeling import (DEFAULT_MODELS, DEFAULT_LENGTHS, MODEL_REVISIONS, Completi
 from training_state import (check_holdouts, check_warm_start, check_resume, file_hash, run_kind,
                             adapter_tensor_hash, INTEGRITY_VERSION, ARTIFACT_FILES)
 from tokenization_cache import encode_cached, tokenizer_fingerprint
-from lora_expansion import GEC_LORA_PROFILES, gec_profile_modules, validate_gec_adapter, load_gec_adapter
+from lora_expansion import GEC_LORA_PROFILES, GEC_LORA_RANKS, gec_profile_modules, validate_gec_adapter, load_gec_adapter
 from training_preparation import preparation_provenance
 
 os.environ.setdefault("HF_HOME", str(ROOT / ".cache" / "huggingface"))
@@ -106,6 +106,8 @@ def main():
                         help="Experimental weight on changed target tokens; GEC only")
     parser.add_argument("--gec-lora-profile", choices=tuple(GEC_LORA_PROFILES), default="qv",
                         help="GEC attention LoRA targets; qvo permits explicit qv-parent expansion")
+    parser.add_argument("--gec-lora-rank", type=int, choices=GEC_LORA_RANKS, default=8,
+                        help="GEC LoRA rank (alpha = 2 * rank); 8 is the serving default")
     parser.add_argument("--cefr-class-weighting", choices=("none", "sqrt-inverse"), default="none")
     parser.add_argument("--cefr-class-weight-cap", type=float, default=5.0)
     parser.add_argument("--cefr-input-mode", choices=("essay", "prompt-essay"), default="essay")
@@ -145,8 +147,8 @@ def main():
             args.task != "cefr" or not args.experiment or args.cefr_class_weighting != "none"
             or args.init_run or args.resume_checkpoint):
         parser.error("Boundary weighting requires a fresh CEFR experiment without class weighting or continuation")
-    if args.task != "gec" and args.gec_lora_profile != "qv":
-        parser.error("GEC LoRA profiles apply only to gec")
+    if args.task != "gec" and (args.gec_lora_profile != "qv" or args.gec_lora_rank != 8):
+        parser.error("GEC LoRA profiles and ranks apply only to gec")
     if args.expected_optimizer_steps is not None and args.expected_optimizer_steps <= 0:
         parser.error("Expected optimizer steps must be positive")
     if args.expected_initial_adapter_sha256 and (len(args.expected_initial_adapter_sha256) != 64 or
@@ -194,7 +196,9 @@ def main():
     if parent and args.task == "gec":
         source_profile = parent.get("gec_lora_profile", "qv")
         adapter_source = args.init_run / "best" if args.init_run else args.resume_checkpoint
-        validate_gec_adapter(adapter_source, source_profile, parent["model_id"])
+        validate_gec_adapter(adapter_source, source_profile, parent["model_id"], parent.get("gec_lora_rank", 8))
+        if parent.get("gec_lora_rank", 8) != args.gec_lora_rank:
+            parser.error("GEC LoRA rank differs from the parent run; start a new base run instead")
         if source_profile != args.gec_lora_profile and not (
                 args.init_run and source_profile == "qv" and args.gec_lora_profile == "qvo"):
             parser.error("GEC LoRA profile differs; only a new qv-to-qvo warm start may expand")
@@ -318,6 +322,7 @@ def main():
         manifest["gec_scoring_protocol"] = ERRANT_PROTOCOL
     if args.task == "gec":
         manifest["gec_lora_profile"] = args.gec_lora_profile
+        manifest["gec_lora_rank"] = args.gec_lora_rank
         manifest["gec_lora_target_modules"] = gec_profile_modules(args.gec_lora_profile)
     if args.task == "cefr":
         from cefr_loss import class_weights
@@ -365,7 +370,7 @@ def main():
         model = PeftModel.from_pretrained(base, args.init_run / "best" if args.init_run else args.resume_checkpoint,
                                           is_trainable=True)
     else:
-        model = attach_lora(base, args.task, args.gec_lora_profile)
+        model = attach_lora(base, args.task, args.gec_lora_profile, args.gec_lora_rank)
     loaded_adapter_hash = adapter_tensor_hash(model)
     manifest["initial_adapter_tensor_sha256"] = parent.get("initial_adapter_tensor_sha256", loaded_adapter_hash) if args.resume_checkpoint else loaded_adapter_hash
     if args.expected_initial_adapter_sha256 and manifest["initial_adapter_tensor_sha256"] != args.expected_initial_adapter_sha256:

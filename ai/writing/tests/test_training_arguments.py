@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from gec_evaluation import sample_dev
+from gec_evaluation import full_dev, sample_dev
 from train import build_training_arguments, main
 
 
@@ -42,6 +42,16 @@ class TrainingArgumentTests(unittest.TestCase):
             self.assertEqual(error.exception.code, 2)
             self.assertIn("only to gec", stderr.getvalue())
 
+    def test_gec_lora_rank_is_rejected_for_other_tasks_and_unknown_values(self):
+        for argv, message in ((["cefr", "--gec-lora-rank", "32"], "only to gec"),
+                              (["gec", "--gec-lora-rank", "16"], "invalid choice")):
+            with self.subTest(argv=argv), patch.object(sys, "argv", ["train.py", *argv, "--output", "never-created"]), \
+                    contextlib.redirect_stderr(io.StringIO()) as stderr:
+                with self.assertRaises(SystemExit) as error:
+                    main()
+                self.assertEqual(error.exception.code, 2)
+                self.assertIn(message, stderr.getvalue())
+
     def test_nonfinite_parameters_are_rejected_before_loading_data_or_model(self):
         for flag in ("--epochs", "--learning-rate", "--cefr-class-weight-cap", "--gec-edit-weight"):
             for value in ("nan", "inf", "-inf"):
@@ -64,6 +74,17 @@ class TrainingArgumentTests(unittest.TestCase):
         random.seed(9876)
         self.assertEqual(first, sample_dev(rows, Tokenizer(), 32, 32, 8))
         self.assertNotEqual(first, sample_dev(rows, Tokenizer(), 32, 32, 8, seed=2027))
+
+    def test_full_dev_keeps_every_fitting_row_in_file_order_and_counts_the_rest(self):
+        class Tokenizer:
+            def __call__(self, text=None, text_target=None):
+                return {"input_ids": list(range(len(text or text_target)))}
+        rows = [dict(id="a", text="ok.", corrected_text="ok!"), dict(id="b", text="fine.", corrected_text="fine."),
+                dict(id="c", text="x" * 50, corrected_text="y"), dict(id="d", text="no.", corrected_text="No.")]
+        groups, skipped = full_dev(rows, Tokenizer(), 10, 10)
+        self.assertEqual([r["id"] for r in groups["requires_edit"]], ["a", "d"])
+        self.assertEqual([r["id"] for r in groups["already_correct"]], ["b"])
+        self.assertEqual(skipped, 1)
 
 
 if __name__ == "__main__":

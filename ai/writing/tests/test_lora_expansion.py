@@ -117,6 +117,28 @@ class GecLoraExpansionTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "base model"):
                 validate_gec_adapter(root / "parent", expected_model_id="wrong-model")
 
+    def test_rank32_adapter_validates_and_rank_mismatch_is_rejected(self):
+        from transformers import T5Config, T5ForConditionalGeneration
+        config = T5Config(vocab_size=48, d_model=64, d_ff=32, num_layers=1, num_decoder_layers=1,
+                          num_heads=4, d_kv=16, decoder_start_token_id=0, pad_token_id=0, eos_token_id=1)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            model = attach_lora(T5ForConditionalGeneration(config), "gec", "qvo", 32)
+            self.assertEqual(model.peft_config["default"].r, 32)
+            self.assertEqual(model.peft_config["default"].lora_alpha, 64)
+            model.save_pretrained(root)
+            self.assertEqual(validate_gec_adapter(root, "qvo", expected_rank=32)["rank"], 32)
+            with self.assertRaisesRegex(ValueError, "rank"):
+                validate_gec_adapter(root, expected_rank=8)
+            config_path = root / "adapter_config.json"
+            saved = json.loads(config_path.read_text())
+            config_path.write_text(json.dumps(dict(saved, lora_alpha=16)))
+            with self.assertRaises(ValueError):
+                validate_gec_adapter(root)
+        for task, rank in (("gec", 16), ("cefr", 32)):
+            with self.assertRaises(ValueError):
+                attach_lora(T5ForConditionalGeneration(config), task, "qv", rank)
+
     def test_malformed_config_or_missing_adapter_state_is_rejected(self):
         import torch
         from safetensors.torch import load_file, save_file

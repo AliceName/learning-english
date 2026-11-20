@@ -126,16 +126,19 @@ class CompletionCollator:
         return padded
 
 
-def attach_lora(model, task: str, gec_lora_profile: str = "qv"):
+def attach_lora(model, task: str, gec_lora_profile: str = "qv", gec_lora_rank: int = 8):
     from peft import LoraConfig, TaskType, get_peft_model
-    from lora_expansion import gec_profile_modules
+    from lora_expansion import GEC_LORA_RANKS, gec_profile_modules
+    if gec_lora_rank not in GEC_LORA_RANKS or (task != "gec" and gec_lora_rank != 8):
+        raise ValueError("Unsupported LoRA rank for this task")
+    rank = gec_lora_rank if task == "gec" else 8
     options = {
         "cefr": dict(task_type=TaskType.SEQ_CLS, target_modules=["query_proj", "value_proj"],
                      modules_to_save=["classifier", "pooler"]),
         "gec": dict(task_type=TaskType.SEQ_2_SEQ_LM, target_modules=gec_profile_modules(gec_lora_profile)),
         "feedback": dict(task_type=TaskType.CAUSAL_LM, target_modules=["q_proj", "v_proj"]),
     }
-    return get_peft_model(model, LoraConfig(r=8, lora_alpha=16, lora_dropout=0.05,
+    return get_peft_model(model, LoraConfig(r=rank, lora_alpha=2 * rank, lora_dropout=0.05,
                                            bias="none", **options[task]))
 
 

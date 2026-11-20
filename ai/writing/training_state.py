@@ -66,7 +66,8 @@ def validate_loadable_run(directory, task, *, allow_experiment=False):
             raise ValueError("Experiment completed optimizer steps differ")
         if task == "gec":
             from lora_expansion import validate_gec_adapter
-            validate_gec_adapter(directory / "best", manifest.get("gec_lora_profile", "qv"), manifest["model_id"])
+            validate_gec_adapter(directory / "best", manifest.get("gec_lora_profile", "qv"), manifest["model_id"],
+                                 manifest.get("gec_lora_rank", 8))
     return manifest
 
 
@@ -125,13 +126,13 @@ def check_resume(checkpoint, output, current):
     keys = ("task", "model_id", "kind", "data_sha256", "max_input_length", "max_target_length", "seed",
             "batch_size", "gradient_accumulation", "learning_rate", "gec_edit_weight", "precision",
             "limit_train", "limit_dev", "gec_eval_per_group", "gec_eval_batch_size", "early_stopping_patience",
-            "gec_scoring_protocol", "gec_eval_seed", "gec_lora_profile", "cefr_class_weighting", "cefr_class_weight_cap",
+            "gec_scoring_protocol", "gec_eval_seed", "gec_lora_profile", "gec_lora_rank", "cefr_class_weighting", "cefr_class_weight_cap",
             "expected_optimizer_steps", "required_precision")
     for key in keys:
         default = {"gec_edit_weight": 1.0, "gec_eval_per_group": 0,
                    "gec_eval_batch_size": 4, "early_stopping_patience": 0,
                    "gec_eval_seed": 2026,
-                   "gec_lora_profile": "qv",
+                   "gec_lora_profile": "qv", "gec_lora_rank": 8,
                    "cefr_class_weighting": "none", "cefr_class_weight_cap": 5.0}.get(key)
         if parent.get(key, default) != current.get(key, default):
             raise ValueError(f"Resume configuration differs in {key}; keep data/configuration unchanged")
