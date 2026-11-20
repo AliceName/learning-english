@@ -81,15 +81,19 @@ def _errant_kind(original: str, suggestion: str, old: tuple[int, int], new: tupl
     annotator = _errant()
     if annotator is None:
         return None
+    old_text, new_text = original[old[0]:old[1]], suggestion[new[0]:new[1]]
+    # A change made only of punctuation is punctuation, whatever word it sits next to.
+    if (old_text or new_text) and not any(ch.isalnum() for ch in old_text + new_text):
+        return ("M" if not old_text.strip() else "U" if not new_text.strip() else "R"), "PUNCT"
     try:
-        orig, cor = annotator.parse(original), annotator.parse(suggestion)
+        # tokenise=True: split "time," into "time" + "," so spans map to real tokens.
+        orig, cor = annotator.parse(original, tokenise=True), annotator.parse(suggestion, tokenise=True)
         o_start, o_end = _token_span(orig, *old)
         c_start, c_end = _token_span(cor, *new)
         kind = annotator.import_edit(orig, cor, [o_start, o_end, c_start, c_end], min=False, old_cat=False).type
     except Exception:
         return None
     op, _, category = kind.partition(":")
-    old_text, new_text = original[old[0]:old[1]], suggestion[new[0]:new[1]]
     # "Different word" kinds only when the words really differ; near-identical strings are usually a
     # misspelt or broken suggestion (e.g. learn -> learing), which must not be presented as a word choice.
     if category in _WORD_CHOICE and SequenceMatcher(a=old_text.lower(), b=new_text.lower()).ratio() >= 0.75:

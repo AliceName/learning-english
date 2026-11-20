@@ -49,6 +49,14 @@ class ErrantCategoryTests(unittest.TestCase):
         self.assertEqual(extra["category"], "PREP")
         self.assertIn("thừa", extra["message"])
 
+    def test_punctuation_next_to_a_word_is_typed_as_punctuation_not_as_that_word(self):
+        cats = self.categories("In my free time I listen music.", "In my free time, I listen to music.")
+        self.assertEqual(cats, [("PUNCT", "vi-edit-templates-v2"), ("PREP", "vi-edit-templates-v2")])
+
+    def test_plural_before_a_full_stop_is_typed_as_noun_number(self):
+        self.assertEqual(self.categories("I can learn many new thing.", "I can learn many new things."),
+                         [("NOUN:NUM", "vi-edit-templates-v2")])
+
     def test_word_choice_needs_genuinely_different_words(self):
         self.assertEqual(self.categories("It was a big house.", "It was a large house."), [("ADJ", "vi-edit-templates-v2")])
         # Near-identical or broken suggestions are not presented as a better word choice.
