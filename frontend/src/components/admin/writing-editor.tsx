@@ -26,7 +26,7 @@ export default function WritingEditor({value,onChange,disabled}:{value:Writing;o
     </section>
     <details className={`${styles.panel} ${styles.studioDetails}`} id="writing-rubric">
       <summary>Tiêu chí đánh giá bài viết <span>{value.rubric.length}/8 tiêu chí · {total}%</span></summary>
-      <p className={styles.hint}>Cấu hình trọng số và mô tả yêu cầu để người học tham khảo.</p>
+      <p className={styles.hint}>Tiêu chí và trọng số giúp học viên tự soát bài; trọng số thể hiện mức quan trọng. AI không chấm theo từng tiêu chí mà ước lượng CEFR và gợi ý sửa lỗi.</p>
       {value.rubric.map((item,index)=><div key={index} className={styles.exerciseCard}>
         <div className={styles.exerciseHeading}><span className={styles.exerciseNumber}>{index+1}</span><strong>Tiêu chí {index+1}</strong><button type="button" className={styles.iconButton} aria-label={`Xóa tiêu chí ${index+1}`} disabled={disabled} onClick={()=>onChange(previous=>({...previous,rubric:previous.rubric.filter((_,itemIndex)=>itemIndex!==index)}))}><Icon name="trash"/></button></div>
         <div className={styles.twoColumns}><label className={styles.field}>Tên tiêu chí<input value={item.name} onChange={event=>criterion(index,{name:event.target.value})} maxLength={100} required disabled={disabled}/></label><label className={styles.field}>Trọng số (%)<input type="number" value={item.weight} min={1} max={100} required disabled={disabled} onChange={event=>criterion(index,{weight:Number(event.target.value)})}/></label></div>

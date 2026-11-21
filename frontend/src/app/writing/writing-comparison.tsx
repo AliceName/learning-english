@@ -4,6 +4,7 @@ import { type WritingRelevance, type WritingResult, writingCoverageSummary } fro
 import { type WritingDiff } from "@/lib/writing-diff";
 import { type WritingEdit, currentEditPosition } from "@/lib/writing-revision";
 import type { SentenceShade } from "@/lib/writing-practice";
+import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
 export function visibleEdit(text: string) {
@@ -98,14 +99,14 @@ export default function WritingComparison({ result, draft, draftPositionsKnown, 
 }) {
   return <>
     <section aria-label="Đối chiếu bài viết">
-      {showAnnotations && (shades.length > 0 || improved.length > 0) && <div className={styles.shadeLegend}>
-        <span><span className={styles.shadePending}>Vàng</span> cần xem — bấm <b>?</b> để biết vì sao</span>
-        <span><span className={styles.shadeFixed}>Gạch chéo xanh</span> đã sửa, nộp lại để AI kiểm tra</span>
-        <span><span className={styles.shadeSkipped}>Viền chấm</span> đã bỏ qua</span>
-        {improved.length > 0 && <span><span className={styles.shadeImproved}>Xanh lá</span> đã cải thiện so với bản trước</span>}
-        <span><span className={`${styles.annotation} ${styles.markPending}`}>Từ gạch chân</span> chọn để mở gợi ý</span>
-        <span>Nền trắng: AI không có gợi ý (vẫn có thể còn lỗi)</span>
-      </div>}
+      {showAnnotations && (shades.length > 0 || improved.length > 0) && <p className={styles.shadeLegend}>
+        Cách đọc màu<InfoTip kind="help" label="Chú giải màu và gạch chân">
+          <span><b>Vàng</b>: câu cần xem — bấm <b>?</b> để biết vì sao.</span>
+          <span><b>Gạch chéo xanh</b>: đã sửa, nộp lại để AI kiểm tra.</span>
+          <span><b>Viền chấm</b>: đã bỏ qua.</span>
+          {improved.length > 0 && <span><b>Xanh lá</b>: đã cải thiện so với bản trước.</span>}
+          <span><b>Từ gạch chân</b>: bấm để mở gợi ý.</span>
+          <span><b>Nền trắng</b>: AI không có gợi ý (vẫn có thể còn lỗi).</span></InfoTip></p>}
       {showAnnotations && !draftPositionsKnown && accepted.some(id => visibleIds.has(id))
         && <p className={styles.hint}>Bản nháp có chỉnh sửa riêng nên vị trí gợi ý chỉ được đánh dấu trên bài gốc.</p>}
       <div className={styles.studioCompare}>
@@ -146,7 +147,10 @@ export function WritingSummary({ result }: { result: WritingResult }) {
     </div>
     <div className={styles.studioSummary}>
       <article className={styles.cefrCard}>
-        <h3>CEFR ước lượng</h3>
+        <h3>CEFR ước lượng<InfoTip label="CEFR ước lượng là gì?">
+          <span>Ước lượng trình độ ngôn ngữ của bài viết, không phải của bạn.</span>
+          <span>Không xét bám đề, không phải điểm IELTS. Đang thử nghiệm: A1 và C2 chưa nhận diện chắc chắn.</span>
+          <span>Đề ngắn, đơn giản thường khó đạt mức cao.</span></InfoTip></h3>
         <strong>{result.cefrLevel || "Chưa có"}</strong>
         <p>Mức ngôn ngữ của bài viết{result.targetRecorded && result.targetCefr ? ` · mục tiêu khi nộp ${result.targetCefr}` : ""}</p>
       </article>
@@ -156,7 +160,9 @@ export function WritingSummary({ result }: { result: WritingResult }) {
         <p>{result.correctedText !== null ? "Số câu có gợi ý ngữ pháp" : "Lần nộp này chỉ có ước lượng CEFR"}</p>
       </article>
       {relevance ? <article className={relevance.offTopic ? styles.offTopicCard : undefined}>
-        <h3>Bám đề</h3>
+        <h3>Bám đề<InfoTip label="Điểm bám đề được tính thế nào?">
+          <span>Thử nghiệm: AI so nghĩa giữa bài và đề, thang 0–5.</span>
+          <span>Phát hiện lạc đề đã kiểm trên bài Write &amp; Improve (báo nhầm khoảng 2–3%); phần kiểm từng ý chưa có giáo viên đối chiếu.</span></InfoTip></h3>
         <strong>{relevance.score}/5</strong>
         <ol className={styles.gauge} aria-label={`Điểm bám đề ${relevance.score} trên 5`}>
           {[0, 1, 2, 3, 4, 5].map(n => <li key={n} className={n === relevance.score ? styles.gaugeActive : n < relevance.score ? styles.gaugeFilled : undefined}>{n}</li>)}
@@ -176,7 +182,6 @@ export function WritingSummary({ result }: { result: WritingResult }) {
     </div>
     {relevance?.offTopic && <p className={styles.offTopicNotice} role="status">Bài có vẻ không trả lời đề này. Hãy đọc lại đề và các ý cần viết trước khi sửa ngữ pháp.</p>}
     {relevance && <RelevanceDetails relevance={relevance} />}
-    <p className={styles.hint}>CEFR ước lượng mức ngôn ngữ của bài viết, không phải của bạn, và không xét bài có đúng đề hay không. Đề ngắn, đơn giản có ít chỗ thể hiện cấu trúc phức tạp nên thường khó đạt mức cao.</p>
   </section>;
 }
 
@@ -195,8 +200,7 @@ function RelevanceDetails({ relevance }: { relevance: WritingRelevance }) {
           ? <small>Câu liên quan: <q lang="en">{item.evidence}</q></small>
           : <small>Chưa tìm thấy câu tương ứng — hãy tự kiểm tra bạn đã viết ý này chưa.</small>}
       </li>)}
-    </ul> : <p className={styles.hint}>Đề này không liệt kê từng ý nên chỉ đánh giá mức liên quan chung.</p>}
+    </ul> : <p className={styles.hint}>Đề không liệt kê từng ý.</p>}
     {relevance.keywords.length > 0 && <p className={styles.hint}>Bài có nhắc tới từ của đề: <span lang="en">{relevance.keywords.join(", ")}</span></p>}
-    <p className={styles.hint}>Thử nghiệm: điểm do AI so nghĩa giữa bài và đề. Phát hiện lạc đề rõ ràng đã được kiểm trên bài Write &amp; Improve (báo nhầm khoảng 2–3% bài đúng đề); phần kiểm từng ý chưa có nhãn của giáo viên để đối chiếu.</p>
   </details>;
 }

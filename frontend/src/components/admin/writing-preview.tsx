@@ -25,7 +25,7 @@ export default function WritingPreview({lesson}:{lesson:LessonDraft}) {
       <p className={styles.hint}>Yêu cầu {writing.minWords}–{writing.maxWords} từ. Bài viết thử chỉ dùng để mô phỏng, không lưu thành bài nộp.</p>
       {checked&&<p role="status" className={enough?styles.success:styles.notice}>{enough?"Độ dài bài viết phù hợp.":words<writing.minWords?`Cần viết thêm ít nhất ${writing.minWords-words} từ.`:`Bài viết vượt ${words-writing.maxWords} từ so với giới hạn.`}</p>}
     </div>
-    {!!writing.rubric.length&&<details className={styles.simulatorDetails}><summary>Tiêu chí đánh giá</summary><ul className={styles.previewRubric}>{writing.rubric.map((item,index)=><li key={index}><strong>{item.name} · {item.weight}%</strong><p>{item.description}</p></li>)}</ul></details>}
+    {!!writing.rubric.length&&<details className={styles.simulatorDetails}><summary>Tiêu chí tự soát bài</summary><ul className={styles.previewRubric}>{writing.rubric.map((item,index)=><li key={index}><strong>{item.name} · {item.weight}%</strong><p>{item.description}</p></li>)}</ul></details>}
     {writing.sampleAnswer&&<details className={styles.simulatorDetails}><summary>Xem bài viết mẫu</summary><LessonRichText text={writing.sampleAnswer}/></details>}
     <aside className={styles.aiUnavailable}><Icon name="sparkles"/><div><strong>AI Diagnostics & Vocabulary Uplift</strong><p>Chưa tích hợp dịch vụ chấm điểm, kiểm tra ngữ pháp và gợi ý từ vựng AI.</p></div></aside>
   </div>;

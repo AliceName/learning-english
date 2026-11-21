@@ -5,6 +5,7 @@ import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learnin
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
+import { InfoTip } from "./info-tip";
 import { isCefrLevel, isWritingResult, sameWritingCoverage, writingFeedbackEligible, taskWordGuidance, type WritingResult, type WritingTask } from "@/lib/writing";
 import { diffWritingText } from "@/lib/writing-diff";
 import { applyWritingEdits, currentEditPosition, writingEdits } from "@/lib/writing-revision";
@@ -14,7 +15,7 @@ import { clearWritingDraft, loadPreviousWritingDraft, loadWritingDraft, restoreP
 import { writingAuthHref } from "@/lib/writing-return";
 import { restoreWritingReview, writingCategoryLabels, writingReviewItems, writingReviewStatuses, writingReviewTypes, writingReviewView,
   type WritingReviewDecision, type WritingReviewItem, type WritingReviewStatus, type WritingReviewType } from "@/lib/writing-review";
-import { hideAnswerFirst, locateSentence, practiceOrder, progressiveReview, revealLimit, reviewExhausted, improvedSentences, sentenceShades, targetAboveTask } from "@/lib/writing-practice";
+import { hideAnswerFirst, locateSentence, nextSteps, practiceOrder, progressiveReview, revealLimit, reviewExhausted, improvedSentences, sentenceShades, suggestedMinutes, targetAboveTask } from "@/lib/writing-practice";
 import { checkWritingPreflight, useWritingPreflight } from "./use-writing-preflight";
 import { RevisionChecklistPanel, SelfCheck, TaskPrompt, VersionProgressCard } from "./writing-practice-panels";
 import WritingComparison, { DiffText, visibleEdit, WritingSummary } from "./writing-comparison";
@@ -26,6 +27,8 @@ import styles from "./writing.module.css";
 const criterionLabels = { content: "Nội dung & bám đề", organization: "Tổ chức & mạch lạc",
   vocabulary: "Từ vựng & văn phong", grammar: "Giải thích chỉnh sửa ngữ pháp" };
 const taskBands: Record<string, string> = { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" };
+
+const standingWarning = /^(CEFR là ước lượng thử nghiệm|CEFR không xét độ bám đề|Bản sửa là gợi ý thử nghiệm|Chưa có gợi ý thay đổi không có nghĩa|Một số gợi ý sửa rủi ro)/u;
 
 export default function WritingForm({ authenticated, unavailable, userId = null, targetLevel = null, draftBaseId = null, initialResult = null, initialNotice = "", initialTask = null, draftTaskId = null, custom = false }: {
   authenticated: boolean; unavailable: boolean; userId?: number | null; draftBaseId?: number | null;
@@ -80,6 +83,12 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const editMap = useMemo(() => result ? writingEdits(result) : { edits: [], unmapped: 0 }, [result]);
   const reviewItems = useMemo(() => writingReviewItems(result?.errors ?? [], editMap.edits), [result, editMap]);
   const review = useMemo(() => writingReviewView(reviewItems, decisions, typeFilter, statusFilter), [reviewItems, decisions, typeFilter, statusFilter]);
+  const typeCounts = useMemo(() => reviewItems.reduce((counts, item) => counts.set(item.type, (counts.get(item.type) ?? 0) + 1),
+    new Map<WritingReviewType, number>()), [reviewItems]);
+  const steps = useMemo(() => result ? nextSteps(result) : [], [result]);
+  // Standing caveats go behind a "!" icon; CEFR caveats sit on the CEFR card. Specific warnings stay visible.
+  const generalWarnings = (result?.warnings ?? []).filter(warning => standingWarning.test(warning) && !warning.startsWith("CEFR"));
+  const specificWarnings = (result?.warnings ?? []).filter(warning => !standingWarning.test(warning));
   // Show a few undecided suggestions at a time (Write & Improve-style), in text order.
   const practice = useMemo(() => progressiveReview(practiceOrder(review.visible), revealLimit((result?.task ?? task)?.level), showAllSuggestions),
     [review.visible, result?.task, task, showAllSuggestions]);
@@ -450,7 +459,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           {previousDraft && <button type="button" onClick={recoverPreviousDraft}>Khôi phục nháp trước đăng nhập</button>}</div>
       </div>
       {composing && text.trim() && preflightProblem && <section className={styles.preflight} aria-labelledby="writing-preflight-heading">
-        <h3 id="writing-preflight-heading">Cần xem trước khi nộp</h3>
+        <h3 id="writing-preflight-heading">Cần xem trước khi nộp<InfoTip label="Kiểm tra này làm gì?">Chỉ kiểm tra giới hạn xử lý; không xác nhận bài đúng tiếng Anh, đúng đề hay có chất lượng tốt.</InfoTip></h3>
         {!authenticated ? <p>Đăng nhập để kiểm tra khả năng xử lý bằng mô hình. Bản nháp của bạn được giữ trong phiên.</p>
           : !preflight.current ? <p role="status">Đang kiểm tra giới hạn của bài hiện tại…</p>
           : preflight.current.error ? <p className={styles.error}>{preflight.current.error} <button type="button" onClick={preflight.retry}>Kiểm tra lại</button></p>
@@ -458,7 +467,6 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             {!checked.canAnalyze && <p>Bài quá dài để chấm CEFR. Hãy rút ngắn bài trước khi nộp.</p>}
             {inputIssue && <p className={styles.error} role="status">{inputIssue}</p>}
             {checked.inputAssessment?.warnings.map(warning => <p key={warning} className={styles.hint}>{warning}</p>)}
-            <p className={styles.hint}>Kiểm tra đầu vào không xác nhận bài đúng tiếng Anh, đúng đề hoặc có chất lượng tốt.</p>
             {checked.canAnalyze && corrections && !checked.correctionsEnabled && <p>Gợi ý sửa lỗi chưa được bật. Hãy bỏ chọn sửa lỗi nếu bạn muốn chấm CEFR.</p>}
             {checked.canAnalyze && corrections && checked.correctionsEnabled && partialSentences.length > 0 && <p>Có thể sửa {checked.sentences.filter(sentence => sentence.status === "ready").length}/{checked.sentences.length} câu thân bài. Tối đa {checked.gecSentenceLimit} câu mỗi lượt.</p>}
             {partialSentences.length > 0 && <>
@@ -495,6 +503,8 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         <Link className={`${styles.secondaryButton} ${styles.backLink}`} href="/writing" prefetch={false} onClick={persistBeforeNavigation}><Icon name="arrow" /> Về thư viện đề</Link>
         {displayedTask && <span className={`${styles.pill} ${styles.taskLevel}`}>{taskLevels[displayedTask.level]}</span>}
         {displayedTask && <span className={styles.pill}>{taskWordGuidance(displayedTask)}</span>}
+        {displayedTask && <span className={styles.pill} title="Gồm lập ý, viết và tự soát lại; chỉ là gợi ý, không giới hạn thời gian.">
+          <Icon name="clock" /> Gợi ý khoảng {suggestedMinutes(displayedTask)} phút</span>}
         {result && <span className={`${styles.pill} ${styles.savedPill}`}><Icon name="check" /> {result.versionNumber ? `Đang xem phiên bản ${result.versionNumber}` : `Đã lưu bài #${result.submissionId}`}</span>}
         {result && continued && <span className={styles.pill}>Bản nháp từ {result.versionNumber ? `phiên bản ${result.versionNumber}` : `bài #${result.submissionId}`}</span>}
         {authenticated && (isCefrLevel(targetLevel)
@@ -542,28 +552,35 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     {pending && <div className={styles.pending} role="status"><strong>{phase === "checking" ? "Đang kiểm tra giới hạn" : "Đang phân tích bài viết"} · {elapsed} giây</strong><p>Máy chủ sẽ xác nhận khi lưu bài thành công.</p></div>}
     {result ? <>
       <WritingSummary result={result} />
+      {steps.length > 0 && <section className={styles.nextSteps} aria-labelledby="writing-next-steps-heading">
+        <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="bulb" /></span><h2 id="writing-next-steps-heading">Nên làm tiếp<InfoTip label="Các bước này dựa trên gì?">Dựa trên loại lỗi, độ bám đề và độ dài bài. Không phải điểm số.</InfoTip></h2></div>
+        <ol>{steps.map(step => <li key={step.key}>
+          <h3>{step.title}{step.count ? <span className={styles.pill}>{step.count} {step.key === "points" ? "ý" : "chỗ"}</span> : null}</h3>
+          <p>{step.detail}</p>
+        </li>)}</ol>
+      </section>}
       {comparison && comparison.submissionId === result.parentSubmissionId && <VersionProgressCard previous={comparison} current={result} />}
       {review.total > 0 && <section className={styles.reviewControls} aria-labelledby="writing-review-heading">
-        <h2 id="writing-review-heading">Xem xét gợi ý</h2>
-        <p className={styles.hint}>AI có thể sai hoặc bỏ sót lỗi; bạn quyết định từng gợi ý.</p>
-        <details className={styles.filters} open={typeFilter !== "all" || statusFilter !== "all"}><summary>Bộ lọc</summary>
+        <h2 id="writing-review-heading">Xem xét gợi ý<InfoTip label="Lưu ý về gợi ý của AI">AI có thể sai hoặc bỏ sót lỗi — bạn quyết định từng gợi ý.</InfoTip></h2>
+        <div className={styles.typeChips} role="group" aria-label="Lọc gợi ý theo loại lỗi">
+          <button type="button" aria-pressed={typeFilter === "all"} onClick={() => setTypeFilter("all")}>Tất cả <span>{reviewItems.length}</span></button>
+          {(Object.keys(writingReviewTypes) as WritingReviewType[]).filter(type => typeCounts.has(type)).map(type =>
+            <button type="button" key={type} className={styles[`chip_${type}`]} aria-pressed={typeFilter === type}
+              onClick={() => setTypeFilter(value => value === type ? "all" : type)}>
+              {writingReviewTypes[type]} <span>{typeCounts.get(type)}</span></button>)}
+        </div>
+        <details className={styles.filters} open={statusFilter !== "all"}><summary>Lọc theo trạng thái</summary>
         <div className={styles.toolbar}>
-          <label>Loại gợi ý
-            <select value={typeFilter} onChange={event => setTypeFilter(event.target.value as typeof typeFilter)}>
-              <option value="all">Tất cả loại</option>
-              {Object.entries(writingReviewTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-            </select>
-          </label>
           <label>Trạng thái
             <select id="writing-review-status" value={statusFilter} onChange={event => setStatusFilter(event.target.value as typeof statusFilter)}>
               <option value="all">Tất cả trạng thái</option>
               {Object.entries(writingReviewStatuses).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
-          {(typeFilter !== "all" || statusFilter !== "all") && <button type="button" onClick={() => {
-            setTypeFilter("all"); setStatusFilter("all");
+          {statusFilter !== "all" && <button type="button" onClick={() => {
+            setStatusFilter("all");
             document.getElementById("writing-review-status")?.focus();
-          }}>Xóa bộ lọc</button>}
+          }}>Xóa bộ lọc trạng thái</button>}
         </div>
         </details>
         <div className={styles.reviewStats}>
@@ -584,7 +601,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         showAnnotations={showAnnotations} onSelect={openSuggestion}
         onEdit={continueVersion} continued={continued} editDisabled={pending || feedbackPending || !draftReady} />
       {sentenceFocus !== null && result.errors[sentenceFocus] && <section className={styles.sentencePanel} aria-labelledby="writing-sentence-why">
-        <h3 id="writing-sentence-why" tabIndex={-1}>Vì sao câu này cần xem?</h3>
+        <h3 id="writing-sentence-why" tabIndex={-1}>Vì sao câu này cần xem?<InfoTip label="Lưu ý">Đây là loại lỗi AI nghĩ có trong câu, chưa phải đáp án. AI có thể nhầm.</InfoTip></h3>
         <p lang="en"><q>{result.errors[sentenceFocus].original}</q></p>
         <ul>{allEntries.filter(item => item.suggestionIndex === sentenceFocus).map(item => {
           const evidence = item.explanations[0];
@@ -596,13 +613,18 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               : shown ? <button type="button" onClick={() => openSuggestion(item.id)}>Mở gợi ý {item.number}</button>
               : <em>(gợi ý chi tiết sẽ hiện ở lượt sau — hãy thử tự tìm trước)</em>}
           </li>; })}</ul>
-        <p className={styles.hint}>Đây là loại lỗi AI nghĩ có trong câu, chưa phải đáp án. AI có thể nhầm.</p>
         <button type="button" onClick={() => setSentenceFocus(null)}>Đóng</button>
       </section>}
       <div className={`${styles.reviewGrid} ${showFeedbackPanel ? "" : styles.reviewSingle}`}>
         <section className={styles.review} aria-labelledby="writing-suggestions-heading">
-          <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="writing" /></span><h2 id="writing-suggestions-heading">Chi tiết gợi ý sửa bài</h2></div>
-          {result.warnings.length > 0 && <div className={styles.limits}>{result.warnings.map(warning => <p key={warning}>{warning}</p>)}</div>}
+          <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="writing" /></span><h2 id="writing-suggestions-heading">Chi tiết gợi ý sửa bài
+            {practice.shown.length > 0 && <InfoTip kind="help" label="Cách xử lý gợi ý">
+              <span>Nên tự sửa trước: bấm “Tự sửa tại vị trí”, sửa trong bản nháp rồi chọn “Đã tự sửa”. Chỉ xem đáp án khi cần.</span>
+              <span>Nhãn “Chưa có quy tắc giải thích”: gợi ý có thể đúng hoặc sai, hãy cân nhắc trước khi nhận.</span>
+              <span>Lựa chọn được lưu cùng bản nháp trong trình duyệt.</span></InfoTip>}
+            {generalWarnings.length > 0 && <InfoTip kind="warn" label="Lưu ý về kết quả AI">
+              {generalWarnings.map(warning => <span key={warning}>{warning}</span>)}</InfoTip>}</h2></div>
+          {specificWarnings.length > 0 && <div className={styles.limits}>{specificWarnings.map(warning => <p key={warning}>{warning}</p>)}</div>}
           {result.errors.length === 0 && <p className={styles.hint}>{result.correctedText === null ? "Chưa có phân tích ngữ pháp cho bài này." : "Không có gợi ý được trả về. Hãy tự kiểm tra lại bài gốc."}</p>}
           {result.correctedText !== null && result.correctedText !== result.originalText && review.pending === 0 &&
             <details className={styles.proposal}><summary>Xem toàn bộ bản AI đề xuất đã lưu</summary><p lang="en">{result.correctedText}</p>
@@ -611,22 +633,20 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
                 .map((explanation, index) => <p className={styles.hint} key={index}>{explanation.message}</p>)}
             </details>}
           {comparison && comparison.submissionId !== result.submissionId && <section className={styles.comparison} aria-label="Đối chiếu hai bài đã lưu">
-            <h3>Đối chiếu với bài #{comparison.submissionId}</h3>
-            {comparison.submissionId === result.parentSubmissionId ? <p className={styles.hint}>Tóm tắt CEFR và số gợi ý nằm ở thẻ “So với phiên bản trước” phía trên.</p> : <>
-              <p>CEFR: <strong>{comparison.cefrLevel} → {result.cefrLevel}</strong>. Số câu có gợi ý: <strong>{comparison.errors.length} → {result.errors.length}</strong>.</p>
-              <p className={styles.hint}>Số gợi ý không phải điểm chất lượng. Sửa vài lỗi có thể không làm đổi mức CEFR. Hai bài có thể khác đề; hãy tự kiểm tra nội dung.</p></>}
+            <h3>Đối chiếu với bài #{comparison.submissionId}<InfoTip label="Đọc kết quả đối chiếu thế nào?">{comparison.submissionId === result.parentSubmissionId
+              ? "Tóm tắt CEFR và số gợi ý nằm ở thẻ “So với phiên bản trước” phía trên."
+              : "Số gợi ý không phải điểm chất lượng; sửa vài lỗi có thể không đổi mức CEFR. Hai bài có thể khác đề."}</InfoTip></h3>
+            {comparison.submissionId !== result.parentSubmissionId && <p>CEFR: <strong>{comparison.cefrLevel} → {result.cefrLevel}</strong>. Số câu có gợi ý: <strong>{comparison.errors.length} → {result.errors.length}</strong>.</p>}
             {comparisonDiff && <details><summary>Xem thay đổi giữa hai bài</summary><p lang="en" className={styles.diffText}><DiffText diff={comparisonDiff} /></p>
               {!comparisonDiff.detailed && <p lang="en" className={styles.diffText}>{result.originalText}</p>}</details>}
             <button type="button" onClick={() => { comparisonRequest.current?.abort(); setComparison(null); }}>Đóng đối chiếu</button>
           </section>}
           {compareNotice && <p className={styles.error} role="alert">{compareNotice}</p>}
           {review.total > 0 && <section className={styles.reviewChoices} aria-label="Lựa chọn chỉnh sửa">
-            <p className={styles.hint}>Lựa chọn được lưu cùng bản nháp trong phiên trình duyệt.</p>
             {!draftPositionsKnown && <p className={styles.notice}>Bản nháp đã được sửa riêng. Bạn vẫn có thể bỏ qua gợi ý. Áp dụng hoặc hoàn tác thay đổi đã nhận cần bản nháp khớp với các lựa chọn.</p>}
             <button type="button" disabled={!canReview || !lastDecision || (lastDecision.status === "accepted" && !draftPositionsKnown)} onClick={undoChoice}>Hoàn tác lựa chọn gần nhất</button>
           </section>}
           {review.total > 0 && review.visible.length === 0 && <p className={styles.hint}>Không có gợi ý phù hợp với bộ lọc.</p>}
-          {practice.shown.length > 0 && <p className={styles.hint}>Thử tự sửa trước: chọn “Tự sửa tại vị trí”, sửa trong bản nháp rồi chọn “Đã tự sửa”; chỉ xem đáp án khi cần. Gợi ý gắn “Chưa có quy tắc giải thích” có thể đúng hoặc sai — hãy tự cân nhắc trước khi nhận.</p>}
           {practice.shown.map((item, position) => {
             const next = practice.shown.slice(position + 1).find(other => other.status === "pending")
               ?? practice.shown.slice(0, position).find(other => other.status === "pending");
@@ -664,13 +684,11 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               <Icon name="bulb" /><p>{Object.hasOwn(writingCategoryLabels, explanation.category) && <strong>{writingCategoryLabels[explanation.category]}. </strong>}{explanation.message}</p>
             </div>)}
           </article>; })}
-          {practice.shown.some(item => item.explanations.length > 0) && <p className={styles.hint}>Hãy kiểm tra ý nghĩa của gợi ý trong ngữ cảnh bài viết.</p>}
           {reviewExhausted(result.correctedText !== null, review.pending) && <RevisionChecklistPanel noneReturned={review.total === 0}
             onContinue={() => { setStatusFilter("all"); continueVersion(); }} disabled={pending || feedbackPending || !draftReady} />}
         </section>
         {showFeedbackPanel && <aside className={styles.feedback} aria-busy={feedbackPending} aria-labelledby="writing-feedback-heading">
-          <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="sparkles" /></span><h2 id="writing-feedback-heading">Nhận xét & gợi ý cải thiện</h2></div>
-          <p className={styles.hint}>Nhận xét tiếng Việt đang thử nghiệm, dùng nội dung bài đã lưu #{result.submissionId}. Không cho điểm số hay chứng nhận trình độ.</p>
+          <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="sparkles" /></span><h2 id="writing-feedback-heading">Nhận xét & gợi ý cải thiện<InfoTip label="Về phần nhận xét">Nhận xét tiếng Việt đang thử nghiệm, dùng bài đã lưu #{result.submissionId}. Không cho điểm hay chứng nhận trình độ.</InfoTip></h2></div>
           {result.feedback?.status === "ready" ? <>
             <p className={styles.feedbackMessage}>{result.feedback.message}</p>
             {result.feedback.items.map(item => <div className={styles.feedbackItem} key={item.criterion}>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import type { Deck } from "@/lib/flashcards";
 import { dictionaryGloss, dictionaryLookupWord } from "@/lib/writing-practice";
+import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
 type Candidate = { term: string; context: string; source: "correction" | "original"; reason: string; similarCardId: number | null; example?: string | null };
@@ -110,11 +111,13 @@ export default function WritingFlashcards({ submissionId, versionNumber, targetC
   return <section className={`${styles.feedback} ${styles.writingCards}`} aria-labelledby="writing-cards-heading" aria-busy={busy}>
     <div className={styles.toolbar}>
       <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="cards" /></span>
-        <h2 id="writing-cards-heading">Từ vựng đáng học từ bài viết</h2></div>
+        <h2 id="writing-cards-heading">Từ vựng đáng học từ bài viết<InfoTip kind="help" label="Từ được chọn thế nào?">
+          <span>Lấy từ các chỗ AI sửa chính tả, từ, giới từ và các cụm từ thông dụng có trong bài.</span>
+          <span>Nghĩa được điền sẵn từ từ điển của LEWA; hãy giữ nghĩa đúng với câu của bạn.</span></InfoTip></h2></div>
       <Link href="/flashcards" prefetch={false}>Mở Flashcards</Link>
     </div>
     <p className={styles.hint}>{versionNumber ? `Phiên bản ${versionNumber}` : `Bài #${submissionId}`}
-      {targetCefr ? ` · CEFR mục tiêu ${targetCefr}` : ""}. Chọn từ muốn ôn. Nghĩa được điền sẵn từ từ điển của LEWA; hãy giữ nghĩa đúng với câu của bạn.</p>
+      {targetCefr ? ` · CEFR mục tiêu ${targetCefr}` : ""}</p>
     {cards === null && <button type="button" disabled={busy} onClick={() => void load()}>{busy ? "Đang tìm…" : "Tìm gợi ý từ bài đã lưu"}</button>}
     {error && <p className={styles.error} role="alert">{error}</p>}
     {cards?.length === 0 && <p role="status">Chưa tìm được từ hoặc cụm từ phù hợp trong bài này.</p>}

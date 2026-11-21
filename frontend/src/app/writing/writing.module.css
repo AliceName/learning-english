@@ -281,3 +281,34 @@
 .confirmDelete { flex-basis: 100%; margin-top: 8px; padding: 10px 14px; border: 1px solid #f2b8b5; border-radius: 10px; background: #fff1f0; }
 .confirmDelete p { margin: 0 0 8px; }
 .history li { flex-wrap: wrap; }
+.typeChips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 6px; }
+.page .typeChips button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 4px 12px; border-radius: 999px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; font-size: 13px; }
+.typeChips button span { padding: 0 7px; border-radius: 999px; background: var(--chip); color: var(--muted); font-size: 12px; }
+.page .typeChips button[aria-pressed="true"] { border-color: var(--primary); background: var(--primary); color: #fff; }
+.page .typeChips button[aria-pressed="true"] span { background: rgba(255, 255, 255, .22); color: #fff; }
+.chip_grammar::before, .chip_vocabulary::before, .chip_mechanics::before, .chip_expression::before, .chip_unclassified::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; }
+.chip_grammar::before { background: #ba1a1a; }
+.chip_vocabulary::before { background: #b06000; }
+.chip_mechanics::before { background: #006a6a; }
+.chip_expression::before { background: #6a3fb5; }
+.chip_unclassified::before { background: #747886; }
+.nextSteps { margin: 0 0 24px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+.nextSteps ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; margin: 10px 0 0; padding: 0; list-style: none; counter-reset: step; }
+.nextSteps li { counter-increment: step; padding: 12px 14px; border-radius: 12px; background: var(--tint); }
+.nextSteps h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 4px; font-size: 15px; font-weight: 800; }
+.nextSteps h3::before { content: counter(step); display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 12px; }
+.nextSteps p { margin: 0; color: var(--muted); }
+.pill svg { width: 14px; height: 14px; flex: 0 0 auto; }
+.tip { position: relative; display: inline-flex; vertical-align: middle; margin-inline-start: 6px; }
+.page .tip button.tipButton { display: inline-grid; place-items: center; width: 20px; min-width: 20px; height: 20px; min-height: 20px; padding: 0;
+  border-radius: 50%; border: 1px solid #c3c8dc; background: #fff; color: var(--muted); font: 800 12px/1 var(--font-jakarta), Arial, sans-serif; cursor: help; }
+.page .tip button.tip_warn { border-color: #e9b949; background: #fff6dc; color: #7a4a00; }
+.page .tip button.tip_help { border-color: #aebcf0; color: var(--primary); }
+.tipBubble { position: fixed; z-index: 60; width: max-content; max-width: min(320px, calc(100vw - 24px));
+  padding: 10px 12px; border-radius: 10px; background: #1d2333; color: #f2f4fb; font-size: 13px; font-weight: 500; line-height: 1.5;
+  text-align: left; white-space: normal; box-shadow: 0 8px 24px rgba(19, 27, 46, .22); }
+.tipBubble > span { display: block; }
+.tipBubble > span + span { margin-top: 6px; }
+.shadeLegend { align-items: center; }

@@ -1,6 +1,7 @@
 import Icon from "@/components/site-icon";
 import { cefrLevels, cefrSeries, revisionChecklist, taskPromptParts, versionProgress } from "@/lib/writing-practice";
 import type { WritingResult } from "@/lib/writing";
+import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
 export function VersionProgressCard({ previous, current }: { previous: WritingResult; current: WritingResult }) {
@@ -8,14 +9,14 @@ export function VersionProgressCard({ previous, current }: { previous: WritingRe
   const from = previous.versionNumber ? `phiên bản ${previous.versionNumber}` : `bài #${previous.submissionId}`;
   return <section className={styles.progressCard} aria-labelledby="writing-progress-heading">
     <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="trend" /></span>
-      <h2 id="writing-progress-heading">So với {from}</h2></div>
+      <h2 id="writing-progress-heading">So với {from}{progress.caveats.length > 0 && <InfoTip label="Lưu ý khi so sánh">
+        {progress.caveats.map(caveat => <span key={caveat}>{caveat}</span>)}</InfoTip>}</h2></div>
     <p className={styles.progressHeadline}>{progress.headline}</p>
     <ul className={styles.progressFacts}>
       <li>CEFR: <strong>{progress.cefr === "unknown" ? "không so trực tiếp" : `${progress.from} → ${progress.to}`}</strong></li>
       <li>Số câu AI còn gợi ý: <strong>{progress.suggestions ? `${progress.suggestions.before} → ${progress.suggestions.after}` : "không so được"}</strong></li>
       <li>Độ dài: <strong>{progress.wordsBefore} → {progress.wordsAfter} từ</strong></li>
     </ul>
-    {progress.caveats.map(caveat => <p className={styles.hint} key={caveat}>{caveat}</p>)}
   </section>;
 }
 
@@ -38,7 +39,7 @@ export function CefrProgressChart({ items }: { items: readonly { submissionId: n
   const y = (level: number) => chart.top + plotH - level * plotH / (cefrLevels.length - 1);
   const summary = points.map(p => `${p.label}: ${p.level}`).join(", ");
   return <figure className={styles.cefrChart}>
-    <figcaption>CEFR ước lượng qua các lần nộp của lượt này (tối đa 10 lần gần nhất)</figcaption>
+    <figcaption>CEFR ước lượng qua các lần nộp của lượt này (tối đa 10 lần gần nhất)<InfoTip label="Đọc biểu đồ thế nào?">Chỉ hiện bậc CEFR đo được, không phải điểm liên tục. Bậc giữ nguyên không có nghĩa là không tiến bộ.</InfoTip></figcaption>
     <svg viewBox={`0 0 ${chart.width} ${chart.height}`} role="img" aria-label={`Biểu đồ CEFR: ${summary}`}>
       {cefrLevels.map((level, i) => <g key={level}>
         <line x1={chart.left} x2={chart.width - chart.right} y1={y(i)} y2={y(i)} className={styles.chartGrid} />
@@ -50,7 +51,6 @@ export function CefrProgressChart({ items }: { items: readonly { submissionId: n
         <text x={x(i)} y={chart.height - 8} textAnchor="middle" className={styles.chartLabel}>{p.label}</text>
       </g>)}
     </svg>
-    <p className={styles.hint}>Chỉ hiện bậc CEFR đo được, không phải điểm liên tục. Bậc giữ nguyên không có nghĩa là không tiến bộ.</p>
   </figure>;
 }
 
@@ -68,8 +68,7 @@ export function TaskPrompt({ prompt }: { prompt: string }) {
 export function SelfCheck({ requirements }: { requirements: readonly string[] }) {
   if (!requirements.length) return null;
   return <section className={styles.selfCheck} aria-labelledby="writing-self-check-heading">
-    <h3 id="writing-self-check-heading">Trước khi nộp, tự hỏi</h3>
+    <h3 id="writing-self-check-heading">Trước khi nộp, tự hỏi<InfoTip label="Vì sao phải tự kiểm?">LEWA chưa tự kiểm tra được bài có trả lời đủ các ý này hay không.</InfoTip></h3>
     <ul>{requirements.map(requirement => <li key={requirement}>{requirement}</li>)}</ul>
-    <p className={styles.hint}>LEWA chưa tự kiểm tra được bài có đúng đề hay không, nên hãy tự đối chiếu các ý này.</p>
   </section>;
 }

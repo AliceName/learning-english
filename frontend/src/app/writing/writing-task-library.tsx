@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { isWritingTaskCatalogue, taskWordGuidance, type WritingTaskCatalogue } from "@/lib/writing";
+import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
 export const taskLevels = { Beginner: "Beginner · A1–A2", Intermediate: "Intermediate · B1–B2", Advanced: "Advanced · C1–C2" };
@@ -27,10 +28,11 @@ export default function WritingTaskLibrary() {
     && fold(`${t.title} ${t.topic}`).includes(fold(search.trim())));
   return <section className={styles.taskLibrary} aria-labelledby="task-library-heading">
     <div className={styles.toolbar}>
-      <h2 id="task-library-heading">Đề luyện viết</h2>
+      <h2 id="task-library-heading">Đề luyện viết<InfoTip kind="help" label="Chọn đề thế nào?">
+        <span>Chưa rõ trình độ? Bắt đầu từ nhóm Beginner và chọn đề bạn hiểu. Nhóm đề chỉ gợi ý độ khó.</span>
+        <span>Đề lấy từ Write &amp; Improve, dùng cục bộ cho nghiên cứu. Danh sách ý cần viết do máy diễn giải, chưa được chuyên gia kiểm định.</span></InfoTip></h2>
       <Link className={styles.submit} href="/writing?custom=1" prefetch={false}>Dùng đề riêng hoặc tiếp tục nháp đề riêng</Link>
     </div>
-    <p className={styles.hint}>Chưa rõ trình độ? Hãy xem nhóm Beginner và chọn nhiệm vụ bạn hiểu. Nhóm đề gợi ý độ khó; CEFR vẫn đang thử nghiệm, đặc biệt chưa đáng tin cậy ở A1/C2.</p>
     <div className={styles.taskFilters}>
       <label>Nhóm trình độ<select value={level} onChange={e => setLevel(e.target.value)}><option value="">Tất cả trình độ</option>{Object.entries(taskLevels).map(([v, label]) => <option key={v} value={v}>{label}</option>)}</select></label>
       <label>Dạng bài<select value={genre} onChange={e => setGenre(e.target.value)}><option value="">Tất cả dạng bài</option>{[...new Set(items.map(t => t.genre))].sort().map(v => <option key={v}>{v}</option>)}</select></label>
@@ -45,6 +47,5 @@ export default function WritingTaskLibrary() {
         <p>{taskWordGuidance(t)}</p><p className={styles.hint}>{t.requirements[0]}</p>
         <Link href={`/writing?taskId=${t.id}`} prefetch={false}>Xem đề & viết bài</Link>
       </article>)}</div>{filtered.length === 0 && <p>Không có đề phù hợp. Hãy đổi hoặc xóa bộ lọc.</p>}</>}
-    <p className={styles.hint}>Nội dung W&I dùng cục bộ cho nghiên cứu. Checklist do agent diễn giải từ đề, chưa được chuyên gia kiểm định.</p>
   </section>;
 }

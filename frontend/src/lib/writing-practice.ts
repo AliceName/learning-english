@@ -222,3 +222,71 @@ export function dictionaryGloss(response: DictionaryLike, term: string): string 
   const rest = term.trim().split(/\s+/u).slice(1).join(" ");
   return `${meaning.partOfSpeech ? `(${meaning.partOfSpeech}) ` : ""}${definitions}${rest ? ` — đi với “${rest}”` : ""}`;
 }
+
+/** Rough planning + writing + checking time for a task (about 10 words a minute while drafting). */
+export function suggestedMinutes(task: { wordMode: string; minWords: number; maxWords: number }): number {
+  const words = task.wordMode === "about" || task.wordMode === "minimum" ? task.minWords : (task.minWords + task.maxWords) / 2;
+  return Math.min(45, Math.max(10, Math.round((10 + words / 10) / 5) * 5));
+}
+
+export type NextStep = { key: string; title: string; detail: string; count?: number };
+
+// Each group turns error kinds into one concrete practice step. Kinds come from the explanation templates.
+const stepGroups: { key: string; categories: string[]; title: string; detail: string }[] = [
+  { key: "sva", categories: ["VERB:SVA"], title: "Ôn hòa hợp chủ ngữ – động từ",
+    detail: "Gạch chân chủ ngữ của từng câu ở hiện tại đơn. Chủ ngữ số ít (he, she, it, my friend) thì động từ thêm -s/-es; chủ ngữ số nhiều thì không." },
+  { key: "tense", categories: ["VERB:TENSE", "VERB:INFL"], title: "Ôn thì và động từ bất quy tắc",
+    detail: "Tìm mốc thời gian (yesterday, last week, every day) rồi đọc lại các động từ trong câu đó; tra bảng động từ bất quy tắc cho dạng quá khứ." },
+  { key: "form", categories: ["VERB:FORM"], title: "Ôn dạng động từ sau từ đặc biệt",
+    detail: "Sau can/must/should dùng động từ nguyên mẫu; sau enjoy, thank you for dùng V-ing; sau want, decide dùng to + V." },
+  { key: "number", categories: ["NOUN:NUM", "NOUN:INFL"], title: "Ôn danh từ số ít / số nhiều",
+    detail: "Tìm từ chỉ số lượng (many, two, some, a lot of) và kiểm tra danh từ theo sau; nhớ các danh từ không đếm được như homework, advice, information." },
+  { key: "article", categories: ["ARTICLE", "DET"], title: "Ôn mạo từ a/an/the",
+    detail: "Danh từ đếm được số ít cần a/an/the hoặc một từ như my, this; dùng the khi người đọc đã biết vật bạn nói tới." },
+  { key: "prep", categories: ["PREP", "PART"], title: "Ôn cụm động từ + giới từ",
+    detail: "Ghi các cụm đã sai (listen to, depend on, good at) vào thẻ từ vựng bên dưới và ôn lại trước lần viết sau." },
+  { key: "spell", categories: ["SPELL"], title: "Luyện chính tả các từ đã sai",
+    detail: "Lưu các từ sai chính tả vào thẻ từ vựng; tự viết lại mỗi từ trong một câu mới." },
+  { key: "mechanics", categories: ["PUNCT", "ORTH", "CONTR"], title: "Soát dấu câu và viết hoa",
+    detail: "Đọc to từng câu: mỗi câu một ý và kết thúc bằng dấu chấm; viết hoa đầu câu, tên riêng, ngày và tháng." },
+  { key: "words", categories: ["VERB", "NOUN", "ADJ", "ADV", "MORPH", "WO", "PRON", "CONJ", "ADJ:FORM", "NOUN:POSS"],
+    title: "Kiểm tra cách dùng từ",
+    detail: "Với mỗi từ AI đề xuất thay, tra nghĩa và câu ví dụ trong từ điển trước khi dùng; chỉ nhận khi đúng ý bạn." },
+];
+
+/**
+ * Up to three concrete next steps, built only from what LEWA measured: error kinds, prompt
+ * relevance and word count. It is a practice plan, not a score.
+ */
+export function nextSteps(result: {
+  errors: { explanations?: { category: string }[] | null }[];
+  correctedText: string | null; originalText: string;
+  relevance?: { offTopic: boolean; points: { point: string; covered: boolean }[] } | null;
+  task?: { wordMode: string; minWords: number; maxWords: number } | null;
+}): NextStep[] {
+  const steps: NextStep[] = [];
+  const relevance = result.relevance;
+  if (relevance?.offTopic) steps.push({ key: "topic", title: "Bám sát đề bài",
+    detail: "Bài có vẻ chưa trả lời đúng đề. Đọc lại đề, gạch chân câu hỏi chính và viết ít nhất một câu trả lời trực tiếp cho từng ý." });
+  else {
+    const missing = relevance?.points.filter(point => !point.covered) ?? [];
+    if (missing.length) steps.push({ key: "points", title: "Trả lời đủ các ý của đề", count: missing.length,
+      detail: `Chưa thấy rõ trong bài: ${missing.map(point => `“${point.point}”`).join("; ")}. Viết thêm một câu cho mỗi ý.` });
+  }
+  const task = result.task, words = wordCount(result.originalText);
+  if (task && task.wordMode !== "metadata" && words < task.minWords) steps.push({ key: "length", title: "Viết đủ độ dài",
+    detail: `Bài có ${words} từ, đề yêu cầu ${task.wordMode === "range" ? `${task.minWords}–${task.maxWords}` : task.wordMode === "minimum" ? `ít nhất ${task.minWords}` : `khoảng ${task.minWords}`} từ. Thêm một ví dụ hoặc lý do cụ thể cho ý chính.` });
+  else if (task && task.wordMode === "range" && words > task.maxWords) steps.push({ key: "length", title: "Rút gọn bài",
+    detail: `Bài có ${words} từ, vượt giới hạn ${task.maxWords} từ. Bỏ câu lặp ý và giữ mỗi đoạn một ý chính.` });
+  const counts = new Map<string, number>();
+  for (const error of result.errors) for (const explanation of error.explanations ?? []) {
+    const group = stepGroups.find(item => item.categories.includes(explanation.category));
+    if (group) counts.set(group.key, (counts.get(group.key) ?? 0) + 1);
+  }
+  const ranked = stepGroups.filter(group => counts.has(group.key))
+    .sort((a, b) => counts.get(b.key)! - counts.get(a.key)!);
+  for (const group of ranked) steps.push({ key: group.key, title: group.title, detail: group.detail, count: counts.get(group.key) });
+  if (!steps.length && result.correctedText !== null) steps.push({ key: "stretch", title: "Thử mở rộng bài",
+    detail: "AI không trả về gợi ý sửa, nhưng điều đó không có nghĩa bài không còn lỗi. Hãy tự đọc lại một lượt, rồi thêm từ nối (however, as a result) và một ví dụ cụ thể cho mỗi ý trước khi nộp lại." });
+  return steps.slice(0, 3);
+}

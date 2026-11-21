@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { isWritingHistory, isWritingPractices, type WritingHistory, type WritingPractices } from "@/lib/writing-capabilities";
 import { CefrProgressChart } from "./writing-practice-panels";
+import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
 export default function WritingHistoryPanel({ authenticated, submissionId, practiceRootId, taskId = null, taskTitle = null, onCompare, onNavigate }: {
@@ -69,11 +70,10 @@ export default function WritingHistoryPanel({ authenticated, submissionId, pract
   if (!authenticated) return null;
   // Reopen from the server even if an earlier URL is still cached in the client router.
   return <section className={styles.history} aria-labelledby="writing-history-heading">
-    <h2 id="writing-history-heading">{root ? "Các phiên bản của lượt #" + root : filtered ? "Lượt luyện của đề này" : "Lượt luyện đã lưu"}</h2>
+    <h2 id="writing-history-heading">{root ? "Các phiên bản của lượt #" + root : filtered ? "Lượt luyện của đề này" : "Lượt luyện đã lưu"}<InfoTip kind="help" label="Cách viết tiếp từ bài cũ">Mở một phiên bản rồi chọn “Tiếp tục từ phiên bản này” để soạn bản nháp từ bài đã lưu.</InfoTip></h2>
     {!root && taskId && <p className={styles.hint}>{filtered ? `Chỉ hiện các lượt của đề “${taskTitle ?? "này"}”.` : "Đang hiện lượt luyện của mọi đề."}{" "}
       <button type="button" onClick={() => { setOnlyThisTask(value => !value); setError(""); setNotice(""); }}>{filtered ? "Xem tất cả lượt luyện" : "Chỉ đề này"}</button></p>}
     {notice && <p className={styles.hint} role="status">{notice}</p>}
-    <p className={styles.hint}>Mở một phiên bản rồi chọn “Tiếp tục từ phiên bản này” để soạn bản nháp từ bài đã lưu.</p>
     {root && <button type="button" onClick={() => { setSelectedRoot(null); setError(""); }}>Tất cả lượt luyện</button>}
     {error && <p className={styles.error} role="alert">{error} <button type="button" onClick={() => setRefresh(n => n + 1)}>Tải lại</button></p>}
     {root && <CefrProgressChart items={history.items} />}
