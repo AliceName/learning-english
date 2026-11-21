@@ -84,7 +84,9 @@ public sealed record WritingCapabilities(
     [property: JsonRequired] int? CefrLimit,
     [property: JsonRequired] int? GecInputLimit,
     [property: JsonRequired] int? GecSentenceLimit,
-    [property: JsonRequired] bool Busy);
+    [property: JsonRequired] bool Busy,
+    // Sent by AI services that load the relevance model; older services omit it.
+    bool? RelevanceEnabled = null);
 public sealed record WritingPreflightSentence(
     [property: JsonRequired] int Index, [property: JsonRequired] int Start,
     [property: JsonRequired] int End, [property: JsonRequired] int Tokens, [property: JsonRequired] string Status);

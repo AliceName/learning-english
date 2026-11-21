@@ -53,6 +53,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const [previousDraft, setPreviousDraft] = useState(false);
   const [capabilities, setCapabilities] = useState<WritingCapabilities | null>(null);
   const [capabilityRetry, setCapabilityRetry] = useState(0);
+  const [capabilityCheck, setCapabilityCheck] = useState<"idle" | "checking" | "done">("idle");
   const [decisions, setDecisions] = useState<WritingReviewDecision[]>([]);
   const [typeFilter, setTypeFilter] = useState<WritingReviewType | "all">("all");
   const [statusFilter, setStatusFilter] = useState<WritingReviewStatus | "all">("all");
@@ -174,7 +175,8 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
         const value: unknown = await response.json();
         if (!response.ok || !isWritingCapabilities(value)) throw new Error("Invalid capabilities");
         if (!controller.signal.aborted) setCapabilities(value);
-      }).catch(() => { if (!controller.signal.aborted) setCapabilities(null); });
+      }).catch(() => { if (!controller.signal.aborted) setCapabilities(null); })
+      .finally(() => { if (!controller.signal.aborted) setCapabilityCheck(state => state === "checking" ? "done" : state); });
     return () => controller.abort();
   }, [authenticated, capabilityRetry]);
 
@@ -682,7 +684,10 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               disabled={!authenticated || pending || feedbackPending || changed || !writingFeedbackEligible(result)}>
               {feedbackPending ? "Đang nhận xét · tối đa 30 giây…" : result.feedback ? "Thử nhận xét lại" : "Nhận xét & gợi ý cải thiện"}
             </button> : <p className={styles.feedbackMessage}>{capabilities?.feedbackStatus === "disabled" ? "Nhận xét mở rộng chưa được bật. Bạn vẫn dùng được gợi ý và giải thích đang hiển thị." : "Chưa xác nhận được khả năng nhận xét. Bài đã lưu vẫn được giữ."}
-              {capabilities?.feedbackStatus !== "disabled" && <button type="button" onClick={() => setCapabilityRetry(n => n + 1)}>Kiểm tra trạng thái nhận xét</button>}</p>}
+              {capabilities?.feedbackStatus !== "disabled" && <button type="button" disabled={capabilityCheck === "checking"}
+                onClick={() => { setCapabilityCheck("checking"); setCapabilityRetry(n => n + 1); }}>
+                {capabilityCheck === "checking" ? "Đang kiểm tra…" : "Kiểm tra trạng thái nhận xét"}</button>}
+              {capabilityCheck === "done" && capabilities?.feedbackStatus !== "disabled" && <span role="status"> Đã kiểm tra lại: dịch vụ AI vẫn chưa phản hồi. Hãy chắc rằng dịch vụ AI (cổng 8000) đang chạy.</span>}</p>}
             {changed && capabilities?.feedbackEnabled && <p className={styles.hint}>Hãy nộp bản nháp mới trước khi yêu cầu nhận xét, để tránh nhận xét nhầm bài cũ.</p>}
           </>}
           {feedbackPending && <p className={styles.hint} role="status">CEFR và bài viết đã được lưu. Phần nhận xét đang được xử lý riêng.</p>}
@@ -701,7 +706,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     {authenticated && result && <WritingFlashcards key={result.submissionId} submissionId={result.submissionId}
       versionNumber={result.versionNumber} targetCefr={result.targetCefr} />}
     <WritingHistoryPanel authenticated={authenticated} submissionId={result?.submissionId ?? null} practiceRootId={result?.practiceRootId ?? result?.submissionId}
+      taskId={displayedTask?.id ?? null} taskTitle={displayedTask?.title ?? null}
       onCompare={compareSubmission} onNavigate={persistBeforeNavigation} />
   </main>;
 }
-      taskId={displayedTask?.id ?? null} taskTitle={displayedTask?.title ?? null}
