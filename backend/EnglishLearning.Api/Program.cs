@@ -172,7 +172,8 @@ builder.Services.AddScoped<CourseReadingGrading>();
 builder.Services.AddScoped<CourseTextLessonService>();
 builder.Services.AddScoped<CourseVocabularyService>();
 builder.Services.AddScoped<SpeakingLessonService>();
-builder.Services.AddSingleton<SpeakingStorage>();
+builder.Services.AddSingleton(services => new SpeakingStorage(services.GetRequiredService<IConfiguration>(), services.GetRequiredService<IWebHostEnvironment>(),
+    services.GetRequiredService<IOptions<CloudinarySettings>>(), () => services.GetRequiredService<ICloudMediaStore>(), services.GetRequiredService<ILogger<SpeakingStorage>>()));
 builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services, client) =>
 {
     var configuration = services.GetRequiredService<IConfiguration>();

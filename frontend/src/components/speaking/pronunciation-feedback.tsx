@@ -23,7 +23,7 @@ export function PronunciationLegend() {
 }
 
 export default function PronunciationFeedback({ attempt, disabled, canRetry, rate, onBeforePlay, onListenRecording, onRetry }: {
-  attempt: Pick<SpeakingAttempt, "referenceText" | "assessment" | "scope"> & { attemptId: string | number };
+  attempt: Pick<SpeakingAttempt, "referenceText" | "assessment" | "scope"> & Partial<Pick<SpeakingAttempt, "audioUrl">> & { attemptId: string | number };
   disabled: boolean; canRetry: boolean; rate: number;
   onBeforePlay: () => void; onListenRecording: (word: SpeakingWord) => void; onRetry: () => void;
 }) {
@@ -71,7 +71,7 @@ export default function PronunciationFeedback({ attempt, disabled, canRetry, rat
         <li><strong>Luyện tập:</strong> Nghe từ mẫu, đọc lại “{word.text}” vài lần, sau đó ghi âm lại {unit} để so sánh.</li>
       </ul>
       <button type="button" disabled={disabled} onClick={() => listen(word.text)}>▷ Nghe từ “{word.text}”</button>
-      {wordAudioRange(word, attempt.assessment.durationSeconds) && <button type="button" disabled={disabled} onClick={() => onListenRecording(word)}>▷ Nghe bạn đọc “{word.text}”</button>}
+      {attempt.audioUrl !== "" && wordAudioRange(word, attempt.assessment.durationSeconds) && <button type="button" disabled={disabled} onClick={() => onListenRecording(word)}>▷ Nghe bạn đọc “{word.text}”</button>}
     </article>)}
     <button type="button" disabled={disabled} onClick={() => listen(attempt.referenceText)}>▷ Nghe lại {unit} mẫu</button>
     <button type="button" disabled={disabled || !canRetry} onClick={onRetry}>● Ghi âm lại {unit} này</button>

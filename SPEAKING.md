@@ -133,7 +133,7 @@ Nhập lại cùng tệp bằng `./backend/scripts/Import-SpeakingPractice.ps1 -
 Nhập trên môi trường được phê duyệt bằng `./backend/scripts/Import-SpeakingPractice.ps1 -CourseFile backend/speaking-ai/training-practice-courses.json -Apply`. Script bỏ qua tên khóa đã tồn tại. Nguồn: https://github.com/jimbozhang/speechocean762 và README cục bộ trong thư mục train.
 
 - .NET: `SpeakingAi:BaseUrl`, mặc định `http://127.0.0.1:8001`; có thể ghi đè bằng `SpeakingAi__BaseUrl`.
-- .NET: `SpeakingStorage:RootPath`, mặc định `backend/EnglishLearning.Api/App_Data/speaking`; không nằm trong wwwroot.
+- .NET: `SpeakingStorage:RootPath`, mặc định `backend/EnglishLearning.Api/App_Data/speaking`; không nằm trong wwwroot. Chỉ dùng khi `Cloudinary:Enabled=false` (máy dev chưa cấu hình Cloudinary).
 - Python: `SPEAKING_TRAINING_ROOT`, mặc định tìm thư mục train bên cạnh repository theo bố cục hiện tại.
 - Frontend: dùng `API_BASE_URL` server-only hiện có; JWT ở cookie HttpOnly. Trình duyệt không gọi trực tiếp dịch vụ mô hình.
 
@@ -163,6 +163,19 @@ Preview có thể bật Vercel Authentication. Khi thử bằng HTTP client, dù
 Frontend proxy tương ứng qua `/api/speaking/...`, kiểm tra same-origin khi gửi bài, giới hạn dung lượng thực khi đọc request và giữ token ở server. Khóa học upload chỉ được học bởi chủ sở hữu theo cùng quy tắc catalog; khóa chưa xuất bản hoặc bài bị tắt không mở được để luyện.
 
 Sử dụng đúng bảng `SpeakingAttempts` và các cột đã có. `PhonemeScores` lưu JSON version 1 gồm câu mẫu snapshot, chỉ số câu, điểm, danh sách âm, coverage và phiên bản model; `Feedback`, `OverallScore`, `DurationSeconds`, `AudioUrl`, `CreatedAt` lưu theo schema hiện tại. Không có migration, bảng hoặc cột mới. Audio chỉ được ghi sau khi chấm thành công; nếu lưu database thất bại thì file mới được dọn.
+
+### Lưu bản ghi trên Cloudinary — 2026-11-21
+
+Khi `Cloudinary:Enabled=true`, bản ghi đã chấm được lưu tại `{EnvironmentPrefix}/speaking/recordings/{guid}` (resource `video`, chế độ `authenticated`), kèm manifest `{EnvironmentPrefix}/speaking/references/{guid}.json`. Tên trên Cloudinary không chứa UserId, email, bài học hay câu mẫu; chỉ SQL liên kết bản ghi với người học. Trình duyệt không nhận URL Cloudinary: `GET /api/v1/speaking/recordings/{guid}.wav` vẫn kiểm tra chủ sở hữu rồi stream qua API, có Range/206/416. `AudioUrl` giữ nguyên định dạng `/api/speaking/recordings/{guid}.wav`.
+
+- Chỉ nhận WAV tối đa 2 MB. Khi ghi không kiểm tra tồn tại trước (GUID luôn mới) để không tốn hạn mức Admin API.
+- Upload lỗi (quota, mạng, timeout): vẫn lưu kết quả chấm, `AudioUrl` để trống và giao diện báo không có bản ghi để nghe lại. Không ghi tạm xuống đĩa.
+- Lưu database lỗi: xóa bản ghi vừa upload. Xóa lỗi chỉ ghi log để đối soát.
+- Mỗi người học × bài giữ audio của 20 lần luyện gần nhất. Lần cũ hơn giữ điểm, audio bị xóa và `AudioUrl` để trống.
+- Chỉ bản ghi Speaking được phép xóa qua adapter; audio khóa học và từ điển không bị đụng tới.
+- `Cloudinary:AllowLegacyReads=true` cho phép đọc file cũ trên đĩa khi cloud không có.
+
+Giao diện có thông báo bản ghi được lưu riêng tư trên dịch vụ đám mây. Khi deploy, audio đi tới hai bên ngoài: bộ chấm (Vercel) và Cloudinary.
 
 ## Ý nghĩa và giới hạn kết quả
 

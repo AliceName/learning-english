@@ -5,6 +5,7 @@ using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Services;
+using EnglishLearning.Api.Services.CloudinaryMedia;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -40,13 +41,17 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
             text = segment.Text;
         }
         var (wav, assessment) = await AssessAsync(request.File, text, ct, scope);
-        var url = await storage.SaveAsync(wav, ct);
+        // Keep the score even when the recording cannot be stored: the learner should not have to be re-scored.
+        var url = "";
+        try { url = await storage.SaveAsync(wav, ct); }
+        catch (CloudMediaException error) { logger.LogWarning("Speaking recording not stored for user {UserId} ({Code}).", uid, error.Code); }
         var attempt = new SpeakingAttempt { UserId = uid, LessonId = lesson.LessonId, AudioUrl = url,
             OverallScore = (decimal)assessment.OverallScore, DurationSeconds = (int)Math.Ceiling(assessment.DurationSeconds),
             Feedback = assessment.Feedback, CreatedAt = time.GetUtcNow().UtcDateTime,
             PhonemeScores = JsonSerializer.Serialize(new StoredSpeakingResult(1, request.SentenceIndex, text, assessment, scope), SpeakingLessonService.JsonOptions) };
         try { db.SpeakingAttempts.Add(attempt); await db.SaveChangesAsync(ct); }
-        catch { storage.Delete(url); throw; }
+        catch { await storage.DeleteAsync(url, CancellationToken.None); throw; }
+        await PruneRecordingsAsync(uid, lesson.LessonId);
         return Created($"/api/v1/speaking/attempts/{attempt.AttemptId}", ToResponse(attempt));
     }, ct);
 
@@ -89,11 +94,39 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
         if (!SpeakingStorage.IsFileName(fileName)) return NotFound();
         var url = "/api/speaking/recordings/" + fileName;
         if (!await db.SpeakingAttempts.AnyAsync(a => a.UserId == uid && a.AudioUrl == url, ct)) return NotFound();
-        var path = storage.Resolve(url);
-        if (path is null || !System.IO.File.Exists(path)) return NotFound();
+        var read = await storage.OpenAsync(url, Request.Headers.Range.ToString(), ct);
+        if (read is null) return NotFound();
         Response.Headers.XContentTypeOptions = "nosniff";
-        return PhysicalFile(path, "audio/wav", enableRangeProcessing: true);
+        if (read.EnableRangeProcessing) return File(read.Body, read.ContentType, enableRangeProcessing: true);
+        Response.Headers.AcceptRanges = "bytes";
+        Response.StatusCode = read.Status; Response.ContentLength = read.Length;
+        if (read.ContentRange is not null) Response.Headers.ContentRange = read.ContentRange;
+        // EmptyResult: StatusCode(416) would add a ProblemDetails body that breaks the declared Content-Length: 0.
+        if (read.Status == 416) { await read.DisposeAsync(); return new EmptyResult(); }
+        return File(read.Body, read.ContentType, enableRangeProcessing: false);
     }, ct);
+
+    /// <summary>
+    /// Keeps the recordings of the newest <see cref="KeptRecordings"/> attempts per user and lesson (the history
+    /// the page shows). Older attempts keep their scores; their audio is deleted and AudioUrl cleared. Best effort.
+    /// </summary>
+    private async Task PruneRecordingsAsync(int uid, int lessonId)
+    {
+        try
+        {
+            var old = await db.SpeakingAttempts.Where(a => a.UserId == uid && a.LessonId == lessonId)
+                .OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.AttemptId).Skip(KeptRecordings)
+                .Where(a => a.AudioUrl != "").ToListAsync(CancellationToken.None);
+            foreach (var attempt in old)
+                if (await storage.DeleteAsync(attempt.AudioUrl, CancellationToken.None)) attempt.AudioUrl = "";
+            if (old.Count > 0) await db.SaveChangesAsync(CancellationToken.None);
+        }
+        catch (Exception error) when (error is SqlException or DbUpdateException or InvalidOperationException)
+        {
+            logger.LogWarning(error, "Pruning old speaking recordings failed for user {UserId}.", uid);
+        }
+    }
+    private const int KeptRecordings = 20;
 
     private static SpeakingAttemptResponse? ToResponse(SpeakingAttempt attempt)
     {
@@ -115,6 +148,11 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
             return await action(uid);
         }
         catch (SpeakingException e) { return Problem(statusCode: e.Status, title: e.Message); }
+        catch (CloudMediaException e) when (!ct.IsCancellationRequested)
+        {
+            logger.LogWarning("Speaking recording storage failed for user {UserId} ({Code}).", uid, e.Code);
+            return Problem(statusCode: 503, title: "Chưa tải được bản ghi. Vui lòng thử lại sau.");
+        }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
         catch (Exception e) when (e is SqlException or DbUpdateException or IOException or OperationCanceledException)
         {
