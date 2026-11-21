@@ -704,3 +704,4 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
       onCompare={compareSubmission} onNavigate={persistBeforeNavigation} />
   </main>;
 }
+      taskId={displayedTask?.id ?? null} taskTitle={displayedTask?.title ?? null}

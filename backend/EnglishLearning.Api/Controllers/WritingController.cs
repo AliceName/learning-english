@@ -221,9 +221,11 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
 
     [HttpGet("/api/v1/writing/practices")]
     public Task<ActionResult<WritingPractices>> Practices([FromQuery] int? beforeId = null, [FromQuery] int limit = 10,
-        CancellationToken cancellationToken = default) => WithUser<WritingPractices>(async userId =>
+        [FromQuery] string? taskId = null, CancellationToken cancellationToken = default) => WithUser<WritingPractices>(async userId =>
     {
-        if (beforeId is <= 0 || limit is < 1 or > 20) return BadRequest();
+        if (beforeId is <= 0 || limit is < 1 or > 20 || (taskId is not null && !Guid.TryParse(taskId, out _))) return BadRequest();
+        // Empty string = all rounds; otherwise only rounds whose latest version is for this library task.
+        var task = taskId ?? "";
         // shortcut: JSON grouping scans this learner's rows; revisit with an approved index at larger scale.
         var rows = await db.Database.SqlQuery<WritingPracticeItem>($"""
             SELECT g.PracticeRootId, g.LatestSubmissionId, g.SubmissionCount, w.Topic,
@@ -236,11 +238,42 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
                     '$.practice.rootSubmissionId')), SubmissionId)) g
             JOIN dbo.WritingSubmissions w ON w.SubmissionId = g.LatestSubmissionId AND w.UserId = {userId}
             WHERE g.LatestSubmissionId < {beforeId ?? int.MaxValue}
+                AND ({task} = N'' OR JSON_VALUE(CASE WHEN ISJSON(w.ErrorsJson)=1 THEN w.ErrorsJson ELSE N'[]' END, '$.task.id') = {task})
             ORDER BY g.LatestSubmissionId DESC OFFSET 0 ROWS FETCH NEXT {limit + 1} ROWS ONLY
             """).ToListAsync(cancellationToken);
         var page = rows.Take(limit).ToArray();
         return Ok(new WritingPractices(page, rows.Count > limit ? page[^1].LatestSubmissionId : null));
     }, cancellationToken);
+
+    /// <summary>Deletes one practice round (every saved version) owned by the learner. Saved flashcards stay.</summary>
+    [HttpDelete("/api/v1/writing/practices/{rootId:int:min(1)}")]
+    public Task<ActionResult<WritingPracticeDeleted>> DeletePractice(int rootId, CancellationToken cancellationToken) =>
+        WithUser<WritingPracticeDeleted>(async userId =>
+        {
+            var root = await db.WritingSubmissions.AsNoTracking()
+                .SingleOrDefaultAsync(s => s.SubmissionId == rootId && s.UserId == userId, cancellationToken);
+            if (root is null) return NotFound();
+            if (PracticeRoot(root) != rootId)
+                return BadRequest(new { detail = "Chỉ xóa được cả lượt luyện từ bài đầu tiên của lượt." });
+            int deleted;
+            if (db.Database.IsSqlServer())
+            {
+                deleted = await db.Database.ExecuteSqlInterpolatedAsync($"""
+                    DELETE FROM dbo.WritingSubmissions
+                    WHERE UserId = {userId} AND (SubmissionId = {rootId}
+                        OR TRY_CONVERT(int, JSON_VALUE(CASE WHEN ISJSON(ErrorsJson)=1 THEN ErrorsJson ELSE N'[]' END,
+                            '$.practice.rootSubmissionId')) = {rootId})
+                    """, cancellationToken);
+            }
+            else
+            {
+                var rows = (await db.WritingSubmissions.Where(s => s.UserId == userId).ToListAsync(cancellationToken))
+                    .Where(row => PracticeRoot(row) == rootId).ToList();
+                db.WritingSubmissions.RemoveRange(rows);
+                deleted = await db.SaveChangesAsync(cancellationToken);
+            }
+            return Ok(new WritingPracticeDeleted(rootId, deleted));
+        }, cancellationToken);
 
     private static string HistoryPreview(string text)
     {

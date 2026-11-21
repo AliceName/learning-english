@@ -4,9 +4,15 @@ import { isWritingHistory, isWritingPractices, type WritingHistory, type Writing
 import { CefrProgressChart } from "./writing-practice-panels";
 import styles from "./writing.module.css";
 
-export default function WritingHistoryPanel({ authenticated, submissionId, practiceRootId, onCompare, onNavigate }: {
+export default function WritingHistoryPanel({ authenticated, submissionId, practiceRootId, taskId = null, taskTitle = null, onCompare, onNavigate }: {
   authenticated: boolean; submissionId: number | null; practiceRootId?: number; onCompare: (id: number) => void; onNavigate: () => void;
+  /** On a task page, list only this task's rounds by default. */
+  taskId?: string | null; taskTitle?: string | null;
 }) {
+  const [onlyThisTask, setOnlyThisTask] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [notice, setNotice] = useState("");
   const [practices, setPractices] = useState<WritingPractices>({ items: [], nextBeforeId: null });
   const [history, setHistory] = useState<WritingHistory>({ items: [], nextBeforeId: null });
   const [selectedRoot, setSelectedRoot] = useState<number | null | undefined>();
@@ -16,7 +22,9 @@ export default function WritingHistoryPanel({ authenticated, submissionId, pract
   const [refresh, setRefresh] = useState(0);
   const generation = useRef(0);
   const paging = useRef<AbortController | null>(null);
-  const url = root ? "/api/writing/submissions?limit=10&practiceRootId=" + root : "/api/writing/practices?limit=10";
+  const filtered = Boolean(taskId) && onlyThisTask;
+  const url = root ? "/api/writing/submissions?limit=10&practiceRootId=" + root
+    : "/api/writing/practices?limit=10" + (filtered ? "&taskId=" + taskId : "");
   useEffect(() => {
     if (!authenticated) return;
     const version = ++generation.current;
@@ -46,10 +54,25 @@ export default function WritingHistoryPanel({ authenticated, submissionId, pract
     } catch { if (!controller.signal.aborted && version === generation.current) setError("Chưa tải được các bài tiếp theo. Hãy thử lại."); }
     finally { if (!controller.signal.aborted && version === generation.current) setLoading(false); }
   }
+  async function removePractice(rootId: number) {
+    setDeleting(true); setError(""); setNotice("");
+    try {
+      const response = await fetch(`/api/writing/practices/${rootId}`, { method: "DELETE", cache: "no-store" });
+      const value = await response.json().catch(() => null) as { deletedSubmissions?: number; title?: string; detail?: string } | null;
+      if (!response.ok) throw new Error(value?.detail || value?.title || "Chưa xóa được lượt luyện.");
+      setPractices(old => ({ ...old, items: old.items.filter(item => item.practiceRootId !== rootId) }));
+      setNotice(`Đã xóa lượt #${rootId} (${value?.deletedSubmissions ?? 0} bài).`);
+      setConfirmDelete(null);
+    } catch (problem) { setError(problem instanceof Error ? problem.message : "Chưa xóa được lượt luyện."); }
+    finally { setDeleting(false); }
+  }
   if (!authenticated) return null;
   // Reopen from the server even if an earlier URL is still cached in the client router.
   return <section className={styles.history} aria-labelledby="writing-history-heading">
-    <h2 id="writing-history-heading">{root ? "Các phiên bản của lượt #" + root : "Lượt luyện đã lưu"}</h2>
+    <h2 id="writing-history-heading">{root ? "Các phiên bản của lượt #" + root : filtered ? "Lượt luyện của đề này" : "Lượt luyện đã lưu"}</h2>
+    {!root && taskId && <p className={styles.hint}>{filtered ? `Chỉ hiện các lượt của đề “${taskTitle ?? "này"}”.` : "Đang hiện lượt luyện của mọi đề."}{" "}
+      <button type="button" onClick={() => { setOnlyThisTask(value => !value); setError(""); setNotice(""); }}>{filtered ? "Xem tất cả lượt luyện" : "Chỉ đề này"}</button></p>}
+    {notice && <p className={styles.hint} role="status">{notice}</p>}
     <p className={styles.hint}>Mở một phiên bản rồi chọn “Tiếp tục từ phiên bản này” để soạn bản nháp từ bài đã lưu.</p>
     {root && <button type="button" onClick={() => { setSelectedRoot(null); setError(""); }}>Tất cả lượt luyện</button>}
     {error && <p className={styles.error} role="alert">{error} <button type="button" onClick={() => setRefresh(n => n + 1)}>Tải lại</button></p>}
@@ -65,7 +88,14 @@ export default function WritingHistoryPanel({ authenticated, submissionId, pract
       <div className={styles.editActions}><a href={"/writing?submissionId=" + i.submissionId} onClick={onNavigate}>{i.versionNumber ? `Mở phiên bản ${i.versionNumber}` : `Mở bài #${i.submissionId}`}</a>
         {submissionId !== null && submissionId !== i.submissionId && <button type="button" onClick={() => onCompare(i.submissionId)}>Đối chiếu</button>}</div>
     </li>) : practices.items.map(i => <li key={i.practiceRootId}><div><strong>Lượt #{i.practiceRootId} · {i.submissionCount} lần nộp</strong><p>{i.topic || "Đề riêng"}</p><small>Mới nhất: {i.cefrLevel} · {new Date(i.createdAt).toLocaleString("vi-VN")}</small></div>
-      <div className={styles.editActions}><a href={"/writing?submissionId=" + i.latestSubmissionId} onClick={onNavigate}>Tiếp tục lượt #{i.practiceRootId}</a><button type="button" onClick={() => { setHistory({ items: [], nextBeforeId: null }); setSelectedRoot(i.practiceRootId); setError(""); }}>Xem các phiên bản</button></div></li>)}</ul>
+      <div className={styles.editActions}><a href={"/writing?submissionId=" + i.latestSubmissionId} onClick={onNavigate}>Tiếp tục lượt #{i.practiceRootId}</a><button type="button" onClick={() => { setHistory({ items: [], nextBeforeId: null }); setSelectedRoot(i.practiceRootId); setError(""); }}>Xem các phiên bản</button>
+        {i.practiceRootId !== practiceRootId && <button type="button" className={styles.dangerButton} disabled={deleting}
+          aria-expanded={confirmDelete === i.practiceRootId} onClick={() => setConfirmDelete(i.practiceRootId)}>Xóa lượt #{i.practiceRootId}</button>}</div>
+      {confirmDelete === i.practiceRootId && <div className={styles.confirmDelete} role="alertdialog" aria-label={`Xác nhận xóa lượt #${i.practiceRootId}`}>
+        <p>Xóa vĩnh viễn lượt #{i.practiceRootId} và cả {i.submissionCount} bài đã nộp trong lượt? Không thể hoàn tác. Thẻ từ vựng đã lưu vẫn được giữ.</p>
+        <div className={styles.editActions}><button type="button" className={styles.dangerButton} disabled={deleting} onClick={() => void removePractice(i.practiceRootId)}>{deleting ? "Đang xóa…" : "Xóa vĩnh viễn"}</button>
+          <button type="button" disabled={deleting} onClick={() => setConfirmDelete(null)}>Hủy</button></div>
+      </div>}</li>)}</ul>
     {!error && (root ? history.items.length : practices.items.length) === 0 && <p className={styles.hint}>Chưa có bài trong danh sách này.</p>}
     {cursor && <button type="button" disabled={loading} onClick={more}>{loading ? "Đang tải…" : "Xem thêm"}</button>}
   </section>;

@@ -65,6 +65,7 @@ public sealed record WritingPractice(int? RootSubmissionId, int? ParentSubmissio
 public sealed record WritingPracticeItem(int PracticeRootId, int LatestSubmissionId, int SubmissionCount,
     string? Topic, string CefrLevel, DateTime CreatedAt);
 public sealed record WritingPractices(WritingPracticeItem[] Items, int? NextBeforeId);
+public sealed record WritingPracticeDeleted(int PracticeRootId, int DeletedSubmissions);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed class WritingPreflightRequest
