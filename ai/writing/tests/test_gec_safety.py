@@ -69,6 +69,24 @@ class CorrectionSafetyTests(unittest.TestCase):
             with self.subTest(original=original):
                 self.assertEqual(correction_rejection_reason(original, proposed), reason)
 
+    def test_suggestions_that_invent_words_are_blocked(self):
+        # Real outputs from the 50-prompt end-to-end run.
+        for original, proposed in (("His father try to find him.", "His father trys to find him."),
+                                   ("Volunteering teach students.", "Volunteering teachs students."),
+                                   ("I can now understand it.", "I cannow understand it.")):
+            with self.subTest(proposed=proposed):
+                self.assertEqual(correction_rejection_reason(original, proposed), "nonword")
+
+    def test_real_words_and_american_spellings_are_not_blocked_as_nonwords(self):
+        for original, proposed in (("His father try to find him.", "His father tries to find him."),
+                                   ("I like the colours.", "I like the colors."),
+                                   ("We was traveling.", "We were traveling."),
+                                   ("I practice every day.", "I am practicing every day."),
+                                   ("My favorite film.", "My favorite film is Frozen."),
+                                   ("I like youtube.", "I like YouTube.")):
+            with self.subTest(proposed=proposed):
+                self.assertNotEqual(correction_rejection_reason(original, proposed), "nonword")
+
     def test_empty_layout_changes_and_large_deletion_are_blocked(self):
         self.assertEqual(correction_rejection_reason("I like books.", " "), "empty")
         self.assertEqual(correction_rejection_reason("I like books.", "I like\nbooks."), "layout")

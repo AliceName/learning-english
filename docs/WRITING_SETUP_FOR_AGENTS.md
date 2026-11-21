@@ -12,7 +12,7 @@ Trang `/writing` là một vòng luyện viết theo kiểu Cambridge Write & Im
 |---|---|---|
 | Thư viện 50 đề | Lọc theo trình độ, dạng bài, chủ đề; đề hiển thị thành danh sách ý; khung "Trước khi nộp, tự hỏi" | `build_prompt_catalogue.py` dựng `ai/writing/data/prompt-catalogue.v1.json` (không có trong Git) |
 | Ước lượng CEFR | Mức A1–C2 của bài viết | Adapter DeBERTa `cefr-my-first-run` |
-| Gợi ý sửa lỗi (bật mặc định) | Câu tô **vàng**, từ gạch chân, mỗi lượt chỉ hiện 3 (Beginner) hoặc 5 gợi ý | Adapter ByT5 `gec-viet-full-18ep-bs2-ga8-20261111` + lớp an toàn gec-safety-v2 |
+| Gợi ý sửa lỗi (bật mặc định) | Câu tô **vàng**, từ gạch chân, mỗi lượt chỉ hiện 3 (Beginner) hoặc 5 gợi ý | Adapter ByT5 `gec-viet-full-18ep-bs2-ga8-20261111` + lớp an toàn gec-safety-v3 |
 | Giải thích "vì sao" | Nút **?** ở mỗi câu tô màu; loại lỗi bằng tiếng Việt, không lộ đáp án; gợi ý ngữ pháp và chính tả/dấu câu ẩn đáp án để người học tự sửa trước | `writing_explanations.py` (luật v1 + ERRANT v2, cần `errant` và `en_core_web_sm`) |
 | Trạng thái câu | Vàng = cần xem · gạch chéo xanh = đã sửa, chờ nộp lại · viền chấm = bỏ qua · **xanh lá = đã cải thiện** sau khi nộp lại | Frontend `writing-practice.ts` |
 | Điểm bám đề 0–5 | Thang 0–5, cảnh báo khi lạc đề, ✓/? cho từng ý của đề kèm câu bằng chứng | `relevance.py` + MiniLM + ngưỡng `ai/writing/config/relevance-minilm-v1.json` (tự tạo, không có trong Git) |

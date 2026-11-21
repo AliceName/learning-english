@@ -200,7 +200,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(result["errors"]), 1)
         self.assertEqual(result["errors"][0]["suggestion"], "She goes home.")
         self.assertEqual(result["correctedText"], original.replace("She go home.", "She goes home.", 1))
-        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v2")
+        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v3")
 
     def test_coverage_for_twenty_twenty_one_and_twenty_two_repeated_sentences(self):
         for count in (20, 21, 22):
@@ -322,6 +322,31 @@ class EngineTests(unittest.TestCase):
                 result = engine.analyze("Thanks.\n" + body, True)
                 self.assertEqual(received, [body])
                 self.assertEqual(len(result["errors"]), 1)
+
+    def test_informal_sign_offs_titles_and_headings_are_not_sent_to_model(self):
+        received = []
+        def correct(text):
+            received.append(text)
+            return text.replace("I likes", "I like") + ("" if text.endswith((".", "!", "?")) else ".")
+        engine, _ = self.engine(correct)
+        original = ("My Plans and Goals\n\nIntroduction\nI likes books.\n\nWhat I liked\nI likes films.\n\n"
+                    "Can You Imagine Life Without Music?\nI likes songs.\nLove,\nMinh")
+        result = engine.analyze(original, True)
+        self.assertEqual(received, ["I likes books.", "I likes films.", "I likes songs."])
+        self.assertEqual(result["correctedText"], original.replace("I likes", "I like"))
+        for closing in ("See you soon,", "Write back soon,", "Thanks a lot,", "Take care!", "Bye,"):
+            with self.subTest(closing=closing):
+                received.clear()
+                engine.analyze("Hi Sam,\nI likes books.\n" + closing + "\nAn", True)
+                self.assertEqual(received, ["I likes books."])
+
+    def test_prose_line_missing_its_full_stop_is_still_corrected(self):
+        received = []
+        engine, _ = self.engine(lambda text: received.append(text) or text)
+        engine.analyze("I like Hue.\nLast year I went to Hue\nIt was nice.", True)
+        engine.analyze("Sometimes I play games\nI also read.", True)
+        self.assertIn("Last year I went to Hue", received)
+        self.assertIn("Sometimes I play games", received)
 
     def test_name_role_and_contact_signature_tail_is_protected(self):
         for tail in ("Catherine", "Linh Nguyen\nsoftware developer\nEmail: linh@example.com",

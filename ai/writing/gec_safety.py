@@ -7,9 +7,11 @@ from __future__ import annotations
 
 from collections import Counter
 from difflib import SequenceMatcher
+from functools import lru_cache
+from importlib import resources
 import re
 
-GUARD_VERSION = "gec-safety-v2"
+GUARD_VERSION = "gec-safety-v3"
 
 
 _WORDS = re.compile(r"[^\W_]+(?:['’][^\W_]+)*", re.UNICODE)
@@ -17,8 +19,12 @@ _NUMBERS = re.compile(r"(?<!\w)\d+(?:[.,:/-]\d+)*(?:%|\b)")
 _GREETING = re.compile(r"(?:dear|hi|hello)\b[^!?\r\n]{0,100}[,:]\s*", re.IGNORECASE)
 _CLOSING = re.compile(
     r"(?:yours?(?:\s+(?:sincerely|faithfully|truly))?|sincerely(?:\s+yours)?|"
-    r"best(?:\s+(?:wishes|regards))?|kind\s+regards|warm\s+regards|regards|"
-    r"thanks|thank\s+you|respectfully)[,.!]?", re.IGNORECASE)
+    r"best(?:\s+(?:wishes|regards))?|kind\s+regards|warm\s+regards|regards|all\s+the\s+best|"
+    r"(?:many\s+)?thanks(?:\s+(?:a\s+lot|again|so\s+much))?|thank\s+you|respectfully|"
+    r"(?:lots\s+of\s+)?love(?:\s+from)?|see\s+you(?:\s+(?:soon|later|tomorrow|then|there))?|"
+    r"take\s+care|bye(?:\s+for\s+now)?|cheers|write\s+(?:back\s+)?soon|talk\s+soon)[,.!]?", re.IGNORECASE)
+_SUBJECT_START = re.compile(r"(?:I|we|you|he|she|it|they|this|that|there)\b", re.IGNORECASE)
+_MINOR_WORDS = {"a", "an", "the", "and", "or", "but", "of", "to", "in", "on", "at", "for", "with", "by", "from", "as"}
 _NEGATIVE = re.compile(r"\b(?:cannot|not|never|no|neither|nor|without|nothing|nobody|nowhere)\b|n['’]t\b", re.IGNORECASE)
 _NAME_PARTICLES = {"de", "van", "von", "da", "del", "la", "of"}
 _ROLE_WORDS = {
@@ -34,6 +40,26 @@ _ROLE_NOUNS = {"student", "teacher", "engineer", "developer", "manager", "direct
 
 def _words(text: str) -> list[str]:
     return [word.casefold().replace("’", "'") for word in _WORDS.findall(text)]
+
+
+@lru_cache(maxsize=1)
+def _dictionary() -> frozenset[str] | None:
+    """ERRANT's bundled British word list (a service dependency); None disables the check."""
+    try:
+        source = resources.files("errant").joinpath("en/resources/en_GB-large.txt")
+        return frozenset(line.strip().casefold() for line in source.read_text(encoding="utf-8").splitlines() if line.strip())
+    except (ModuleNotFoundError, FileNotFoundError, OSError):
+        return None
+
+
+def _unknown_word(word: str) -> bool:
+    words = _dictionary()
+    if words is None or not word.isalpha() or len(word) < 3:
+        return False  # Contractions, numbers and very short tokens are not judged.
+    # The list is British; accept common American spellings of known words.
+    variants = {word, word.replace("or", "our"), word.replace("iz", "is"), word.replace("yz", "ys"),
+                re.sub(r"er(s?)$", r"re\1", word), re.sub(r"og$", "ogue", word), re.sub(r"ic(e|es|ed|ing)$", r"is\1", word), re.sub(r"([aeiou])l(ed|ing|er)$", r"\1ll\2", word)}
+    return not any(variant in words for variant in variants)
 
 
 def _signature_line(text: str) -> bool:
@@ -60,6 +86,29 @@ def _signature_line(text: str) -> bool:
     return False
 
 
+def _heading_line(text: str, set_apart: bool) -> bool:
+    """A title or section heading on its own line ("What I liked", "My Plans and Goals").
+
+    Only called for lines followed by more text, so an unpunctuated final clause
+    is still corrected. Title Case lines count anywhere; other short unpunctuated
+    lines count only when set apart by a blank line, so a prose line that merely
+    lacks its full stop ("Last year I went to Hue") is still corrected.
+    """
+    text = text.strip().lstrip("#*").strip().rstrip("*").strip()
+    words = _WORDS.findall(text)
+    if not words or len(words) > 10 or len(text) > 80 or not text[0].isupper():
+        return False
+    significant = [word for word in words if word.casefold() not in _MINOR_WORDS]
+    if len(words) >= 3 and all(word[0].isupper() for word in significant):
+        return not re.search(r"[.;,]", text)  # Title Case, even when it ends with ? or !
+    return (set_apart and len(words) <= 6 and not _SUBJECT_START.match(text)
+            and not re.search(r"[.!?;,]", text))
+
+
+def _blank_gap(gap: str) -> bool:
+    return len(re.findall(r"\r\n|\r|\n", gap)) >= 2
+
+
 def body_sentence_spans(text: str, nlp):
     """Yield original body spans without passing layout/signatures to the model.
 
@@ -78,6 +127,14 @@ def body_sentence_spans(text: str, nlp):
             tail = lines[index + 1:]
             if len(tail) <= 3 and all(_signature_line(value) for _, value in tail):
                 protected.update(range(index + 1, len(lines)))
+        if index + 1 < len(lines):
+            offset = lines[index][0]
+            before = text[lines[index - 1][0] + len(lines[index - 1][1]):offset] if index else None
+            after = text[offset + len(line):lines[index + 1][0]]
+            # Set apart: a blank line before it; the first line also needs one after it.
+            set_apart = (_blank_gap(after) if before is None else _blank_gap(before))
+            if _heading_line(stripped, set_apart):
+                protected.add(index)
     for index, (offset, line) in enumerate(lines):
         if index not in protected:
             for sentence in nlp(line).sents:
@@ -114,6 +171,9 @@ def correction_rejection_reason(source: str, proposed: str) -> str | None:
                 return "repetition"
     if Counter(_NUMBERS.findall(source)) != Counter(_NUMBERS.findall(proposed)):
         return "numbers"
+    # A suggestion must not teach a word that does not exist ("trys", "teachs", "cannow").
+    if any(_unknown_word(word) for word in set(corrected) - set(original)):
+        return "nonword"
     if bool(_NEGATIVE.search(source)) != bool(_NEGATIVE.search(proposed)):
         return "negation"
     # Protect capitalised anchors inside a sentence (names, places, acronyms).
