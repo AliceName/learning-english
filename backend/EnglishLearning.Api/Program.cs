@@ -135,6 +135,12 @@ builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
 builder.Services.AddScoped<AdminUserService>();
 builder.Services.AddSingleton<AdminAuditLog>();
+builder.Services.AddSingleton<AdminLearnerFilter>();
+builder.Services.AddScoped<AdminOverviewService>();
+builder.Services.AddScoped<AdminContentStatsService>();
+builder.Services.AddSingleton<AdminServiceHealth>();
+builder.Services.AddHttpClient(AdminServiceHealth.SpeakingClient, client => client.Timeout = TimeSpan.FromSeconds(10))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
 builder.Services.AddSingleton<AiCourseStore>();
 builder.Services.AddSingleton<AiApiGateway>();
 builder.Services.AddHttpClient<GeminiCourseClient>(client =>
