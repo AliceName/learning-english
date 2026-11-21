@@ -9,7 +9,7 @@ import styles from "./flashcards.module.css";
 
 const pageSize = 8;
 const tabs = [
-  ["all", "Tất cả"], ["learning", "Đang học"], ["complete", "Đã hoàn thành"], ["favorites", "Yêu thích"],
+  ["all", "Tất cả"], ["due", "Có thẻ đến hạn"], ["recall", "Mọi thẻ có chuỗi nhớ"], ["favorites", "Yêu thích"],
 ] as const;
 type Filter = typeof tabs[number][0];
 type Sort = "recent" | "title" | "count";
@@ -47,19 +47,18 @@ export function FlashcardHeading({ title, description, icon, crumb, onBack }: {
   </header>;
 }
 
-function Stat({ label, icon, value, tone, ratio }: {
-  label: string; icon: SiteIconName; value: ReactNode; tone?: string; ratio?: number;
+function Stat({ label, icon, value, tone }: {
+  label: string; icon: SiteIconName; value: ReactNode; tone?: string;
 }) {
   return <div className={styles.stat}>
-    {ratio === undefined ? <span className={styles.statIcon} data-tone={tone}><Icon name={icon} /></span> :
-      <span className={styles.ring} style={{ background: `conic-gradient(#086df2 ${ratio}%, #e1eafe 0)` }} aria-hidden="true" />}
+    <span className={styles.statIcon} data-tone={tone}><Icon name={icon} /></span>
     <div><dt>{label}</dt><dd>{value}</dd></div>
   </div>;
 }
 
-export default function FlashcardLibrary({ decks, learned, favorites, favoriteReady, progressUnavailable, busy, onRefresh, onCreate, onOpen, onAdd, onFavorite, onEdit, onDelete }: {
-  decks: Deck[] | null; learned: Record<number, number>; favorites: number[]; favoriteReady: boolean; progressUnavailable: boolean; busy: boolean;
-  onRefresh: () => void; onCreate: () => void; onOpen: (deck: Deck) => void; onAdd: (deck: Deck) => void;
+export default function FlashcardLibrary({ decks, favorites, favoriteReady, busy, onRefresh, onStartToday, onCreate, onOpen, onAdd, onFavorite, onEdit, onDelete }: {
+  decks: Deck[] | null; favorites: number[]; favoriteReady: boolean; busy: boolean;
+  onRefresh: () => void; onStartToday: () => void; onCreate: () => void; onOpen: (deck: Deck) => void; onAdd: (deck: Deck) => void;
   onFavorite: (deck: Deck) => void; onEdit: (deck: Deck) => void; onDelete: (deck: Deck) => void;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
@@ -69,15 +68,14 @@ export default function FlashcardLibrary({ decks, learned, favorites, favoriteRe
   const list = decks ?? [];
   const favoriteIds = new Set(favorites);
   const owned = list.filter(deck => deck.canEdit && deck.cardCount > 0);
-  const complete = owned.filter(deck => learned[deck.deckId] === deck.cardCount);
-  const learning = owned.filter(deck => learned[deck.deckId] !== undefined && learned[deck.deckId] < deck.cardCount);
+  const due = owned.filter(deck => deck.dueCount > 0);
+  const recalled = owned.filter(deck => deck.recallCount === deck.cardCount);
   const favorite = list.filter(deck => favoriteIds.has(deck.deckId));
-  const groups = { all: list, learning, complete, favorites: favorite };
+  const groups = { all: list, due, recall: recalled, favorites: favorite };
   const totalWords = list.reduce((total, deck) => total + deck.cardCount, 0);
-  const ownWords = owned.reduce((total, deck) => total + deck.cardCount, 0);
-  const remembered = decks && owned.every(deck => learned[deck.deckId] !== undefined)
-    ? owned.reduce((total, deck) => total + learned[deck.deckId], 0) : null;
-  const ratio = remembered === null || !ownWords ? 0 : Math.round(remembered / ownWords * 100);
+  const dueCount = due.reduce((total, deck) => total + deck.dueCount, 0);
+  const progressUnavailable = owned.some(deck => deck.recallCount === undefined);
+  const recallCount = decks && !progressUnavailable ? owned.reduce((total, deck) => total + (deck.recallCount ?? 0), 0) : null;
   const items = [...groups[filter]];
   if (sort === "title") items.sort((a, b) => a.title.localeCompare(b.title, "vi"));
   if (sort === "count") items.sort((a, b) => b.cardCount - a.cardCount);
@@ -92,17 +90,21 @@ export default function FlashcardLibrary({ decks, learned, favorites, favoriteRe
       <dl className={styles.stats} aria-label="Thống kê Flashcards">
         <Stat icon="cards" value={decks ? list.length : "—"} label="Bộ thẻ" />
         <Stat icon="book" value={decks ? totalWords : "—"} label="Từ vựng" tone="purple" />
-        <Stat icon="check" value={remembered ?? "—"} label="Đã ghi nhớ" tone="green" />
-        <Stat icon="trend" value={remembered === null ? "—" : `${ratio}%`} label="Tỷ lệ ghi nhớ" ratio={ratio} />
+        <Stat icon="clock" value={decks ? dueCount : "—"} label="Thẻ đến hạn" />
+        <Stat icon="check" value={recallCount ?? "—"} label="Thẻ có chuỗi nhớ" tone="green" />
       </dl>
       <div className={styles.createTile}><button type="button" className={styles.primary} disabled={busy} onClick={onCreate}><Icon name="plus" /> Tạo bộ thẻ mới</button></div>
+    </div>
+    <div className={styles.dailyReview}>
+      <p>Ôn tối đa 10 thẻ từ các bộ của bạn, ưu tiên thẻ quá hạn.</p>
+      <button type="button" className={styles.primary} disabled={busy || !decks} onClick={onStartToday}><Icon name="play" /> Ôn hôm nay</button>
     </div>
 
     <section className={styles.library} aria-label="Thư viện bộ thẻ">
       <div className={styles.toolbar}>
         <div className={styles.tabs} aria-label="Lọc bộ thẻ">{tabs.map(([id, label]) =>
           <button type="button" key={id} aria-pressed={filter === id} onClick={() => { setFilter(id); setPage(1); }}>
-            {label} ({(id === "learning" || id === "complete") && remembered === null ? "—" : groups[id].length})
+            {label} ({!decks || (id === "recall" && progressUnavailable) ? "—" : groups[id].length})
           </button>)}</div>
         <div className={styles.controls}>
           <select aria-label="Sắp xếp bộ thẻ" value={sort} onChange={event => { setSort(event.target.value as Sort); setPage(1); }}>
@@ -120,8 +122,7 @@ export default function FlashcardLibrary({ decks, learned, favorites, favoriteRe
         <Icon name="replay" /><h2>Chưa tải được bộ thẻ</h2><button type="button" disabled={busy} onClick={onRefresh}>Tải lại</button>
       </div> : !items.length ? <div className={styles.empty}>
         <Icon name={filter === "favorites" ? "star" : "cards"} />
-        <h2>{(filter === "learning" || filter === "complete") && remembered === null && !progressUnavailable
-          ? "Đang tải tiến độ…" : list.length ? "Chưa có bộ thẻ trong mục này" : "Tạo bộ thẻ đầu tiên"}</h2>
+        <h2>{list.length ? "Chưa có bộ thẻ trong mục này" : "Tạo bộ thẻ đầu tiên"}</h2>
         <p>{list.length ? filter === "favorites" ? "Bấm ngôi sao trên bộ thẻ để lưu vào mục Yêu thích." : "Các bộ thẻ sẽ xuất hiện ở đây theo tiến độ ôn của bạn." : "Tập hợp từ vựng theo chủ đề để tiện ôn mỗi ngày."}</p>
         {list.length ? <button type="button" onClick={() => { setFilter("all"); setPage(1); }}>Xem tất cả</button> :
           <button type="button" className={styles.primary} disabled={busy} onClick={onCreate}><Icon name="plus" /> Tạo bộ thẻ mới</button>}
@@ -129,18 +130,16 @@ export default function FlashcardLibrary({ decks, learned, favorites, favoriteRe
         <ul className={styles.decks} data-layout={layout}>{items.slice(start, start + pageSize).map(deck => {
           const art = deckArt(deck);
           const selected = favoriteIds.has(deck.deckId);
-          const count = learned[deck.deckId];
-          const percent = !deck.cardCount ? 0 : count === undefined ? null : Math.round(count / deck.cardCount * 100);
+          const count = deck.recallCount;
           return <li key={deck.deckId} className={styles.deckTile} data-tone={art.tone}>
             <button type="button" className={styles.deckOpen} disabled={busy} onClick={() => onOpen(deck)}>
               <span className={styles.deckIcon}><Icon name={art.icon} /></span>
               <strong>{deck.title}</strong>
-              <span className={styles.deckMeta}><Icon name="cards" /> {deck.cardCount} từ{!deck.canEdit && " · Chỉ đọc"}</span>
-              {deck.courseTitle && <span className={styles.deckMeta}>Khóa học: {deck.courseTitle}</span>}
-              {deck.canEdit && <span className={styles.deckProgress}>
-                {percent === null ? <i className={styles.meterTrack} aria-hidden="true" /> :
-                  <progress max={100} value={percent} aria-label={`Tiến độ ${deck.title}`} />}
-                <b>{percent === null ? "—" : `${percent}%`}</b>
+              <span className={styles.deckMeta}><Icon name="cards" /> {deck.cardCount} từ · {deck.canEdit ? `${deck.dueCount} thẻ đến hạn` : "Chỉ đọc"}</span>
+              {deck.courseTitle && <span className={styles.deckMeta}>Khóa học {deck.courseTitle}</span>}
+              {deck.canEdit && deck.cardCount > 0 && count !== undefined && <span className={styles.deckProgress}>
+                <span><b>{count}/{deck.cardCount}</b> thẻ có chuỗi nhớ</span>
+                <progress max={deck.cardCount} value={count} aria-label={`Thẻ có chuỗi nhớ trong ${deck.title}`} />
               </span>}
             </button>
             <button type="button" className={styles.favorite} aria-label={`Yêu thích ${deck.title}`} title={selected ? "Bỏ yêu thích" : "Yêu thích"}

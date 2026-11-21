@@ -16,6 +16,8 @@
 .tag { display: inline-block; padding: 2px 9px; background: #ffead6; color: #a64600; border-radius: 18px; font-size: 12px; }
 .listenTag { display: inline-block; padding: 2px 9px; background: #f4efdb; color: #796732; border-radius: 18px; font-size: 12px; }
 .qualityNote { padding: 12px; border-radius: 9px; background: #f4f0e6; color: #6e6246; font-size: 13px; }
+.qualityNote p { margin: 0; }
+.qualityNote p + p { margin-top: 5px; }
 .target { margin-block: 10px; padding: 12px; border: 1px solid #dce7fa; border-radius: 12px; background: #f1f6ff; }
 .target ul { margin: 10px 0; padding-left: 23px; font-size: 14px; }
 .target li { margin: 6px 0; }

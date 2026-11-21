@@ -22,7 +22,7 @@ const links: { label: string; icon: SiteIconName; href?: string }[] = [
   { label: "Tạo khóa học AI", icon: "sparkles", href: "/courses/create-ai" },
   { label: "Flashcards", icon: "cards", href: "/flashcards" },
   { label: "Ôn tập lỗi sai", icon: "replay" },
-  { label: "Bookmark", icon: "bookmark" },
+  { label: "Dấu trang", icon: "bookmark", href: "/bookmarks" },
   { label: "Tiến độ", icon: "trend" },
   { label: "Hồ sơ", icon: "person", href: "/account#profile" },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
@@ -154,7 +155,9 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
     <div className={styles.breadcrumb}><nav aria-label="Đường dẫn"><Link href="/courses"><Icon name="book" />Khóa học</Link><span>/</span><Link href={`/courses/${lesson.courseId}`}>{lesson.courseTitle}</Link><span>/</span><span>{lesson.title}</span></nav>
       <div className={styles.badges}>{lesson.difficultyLevel && <span>CEFR {lesson.difficultyLevel}</span>}<span><Icon name="headphones" />Listening Lab</span></div></div>
     <section className={`${styles.card} ${styles.hero}`}>
-      <div><h1>{lesson.title}</h1><p><Icon name="shield" />Nghe kỹ audio và hoàn thành {lesson.questions.length} câu hỏi{lesson.estimatedMinutes ? ` · Khoảng ${lesson.estimatedMinutes} phút` : ""}.</p></div>
+      <div><h1>{lesson.title}</h1><p><Icon name="shield" />Nghe kỹ audio và hoàn thành {lesson.questions.length} câu hỏi{lesson.estimatedMinutes ? ` · Khoảng ${lesson.estimatedMinutes} phút` : ""}.</p>
+        <BookmarkButton targetType="lesson" targetId={lesson.lessonId} title={lesson.title} />
+      </div>
       <div className={styles.answerProgress}><div><span>Đã trả lời</span><strong>{answered}/{lesson.questions.length}</strong></div><progress value={answered} max={lesson.questions.length} aria-label="Tiến độ trả lời" /></div>
     </section>
     {error && <div className={styles.error} role="alert">{error}{sessionInvalid ? <Link href={listeningLoginHref(lesson.courseId, lesson.lessonId)}>Đăng nhập</Link> : <button type="button" onClick={() => setError("")}>Đóng thông báo</button>}</div>}

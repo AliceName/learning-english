@@ -179,6 +179,7 @@ test("saved feedback renders evidence as text without auto-requesting or changin
       default: ({ children, prefetch, ...props }) => { void prefetch; return React.createElement("a", props, children); },
     },
     "@/components/site-icon": icon, "@/lib/writing": writing,
+    "@/components/bookmarks/bookmark-button": { default: () => null },
     "@/lib/writing-diff": writingDiff,
     "@/lib/writing-revision": revision,
     "@/lib/writing-capabilities": loadTs("lib/writing-capabilities.ts", { "./writing": writing }),

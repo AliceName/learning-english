@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import type { SpeakingAttempt, SpeakingLesson, SpeakingWord } from "@/lib/speaking";
@@ -260,6 +261,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       <div className={styles.headerCopy}>
         <h1>Speaking<span className={styles.titleDoodle} aria-hidden="true"><i /><i /><i /></span></h1>
         <SpeakingAssignment goals={lesson.goals} />
+        <BookmarkButton targetType="lesson" targetId={lesson.lessonId} title={lesson.title} />
       </div>
       <Image className={styles.heroArt} src="/illustrations/translation-cat.svg" width={348} height={190}
         sizes="(max-width: 600px) 120px, (max-width: 1000px) 220px, 320px" alt="" priority />

@@ -85,4 +85,7 @@ async function main() {
 }
 
 try { await main(); }
-catch (error) { console.error(`[Speaking] ${error.message}`); process.exitCode = 1; }
+catch (error) {
+  console.warn(`[Speaking] ${error.message}`);
+  console.warn("[Speaking] Starting frontend. Speaking scoring is unavailable until the service is ready.");
+}

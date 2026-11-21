@@ -58,7 +58,9 @@ class ScoreCalibration:
 
 def build_feedback(words, coverage, interpretation):
     if interpretation['feedbackMode'] == 'record_again':
-        return 'Bản ghi có dấu hiệu chưa khớp rõ câu mẫu hoặc âm thanh bị quá lớn. Hãy nghe lại và ghi âm lại trước khi kết luận về phát âm.'
+        if any(word.get('feedbackEligible') for word in words):
+            return 'Xem điểm ở những từ có đủ tín hiệu. Hãy ghi âm lại để đánh giá cả câu.'
+        return 'Bản ghi cần rõ hơn để đánh giá phát âm. Hãy nghe lại và ghi âm lại.'
     threshold = interpretation['practiceThreshold']
     targets = sorted((w for w in words if w['phones'] and min(p['score'] for p in w['phones']) < threshold),
                      key=lambda w: min(p['score'] for p in w['phones']))[:3]

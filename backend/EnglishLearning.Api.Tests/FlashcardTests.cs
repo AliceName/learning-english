@@ -234,6 +234,70 @@ public sealed class FlashcardTests
         using (var scope = factory.Services.CreateScope()) { var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>(); (await db.Users.SingleAsync(u => u.UserId == owner.UserId)).IsActive = false; await db.SaveChangesAsync(); }
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/v1/flashcards/decks")).StatusCode);
     }
+    [Fact]
+    public async Task Daily_review_limits_owned_cards_and_serves_overdue_before_new_cards_across_decks()
+    {
+        var database = Guid.NewGuid().ToString();
+        var clock = new StudyClock();
+        await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder.UseEnvironment("Development")
+            .ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?> {
+                ["Jwt:SigningKey"] = TestJwt.SigningKey, ["ConnectionStrings:DefaultConnection"] = "test-only" }))
+            .ConfigureServices(services => {
+                services.RemoveAll<EnglishLearningDbContext>();
+                services.AddScoped(_ => new EnglishLearningDbContext(new DbContextOptionsBuilder<EnglishLearningDbContext>().UseInMemoryDatabase(database).Options));
+                services.RemoveAll<TimeProvider>(); services.AddSingleton<TimeProvider>(clock);
+            }));
+        using var client = factory.CreateClient();
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
+        var learner = new User { Email = "learner@example.com", FullName = "Learner", PasswordHash = "test" };
+        var admin = new User { Email = "admin@example.com", FullName = "Admin", PasswordHash = "test", Role = "admin" };
+        var other = new User { Email = "owner@example.com", FullName = "Other", PasswordHash = "test" };
+        db.Users.AddRange(learner, admin, other);
+        await db.SaveChangesAsync();
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        var basic = new FlashcardDeck { UserId = learner.UserId, Title = "Basic", CreatedAt = now, UpdatedAt = now };
+        var travel = new FlashcardDeck { UserId = learner.UserId, Title = "Travel", CreatedAt = now, UpdatedAt = now };
+        var shared = new FlashcardDeck { UserId = admin.UserId, Title = "Shared", CreatedAt = now, UpdatedAt = now };
+        var privateDeck = new FlashcardDeck { UserId = other.UserId, Title = "Private", CreatedAt = now, UpdatedAt = now };
+        db.FlashcardDecks.AddRange(basic, travel, shared, privateDeck);
+        await db.SaveChangesAsync();
+
+        Flashcard AddCard(FlashcardDeck deck, string word, DateTime? nextReviewAt = null, int repetition = 0)
+        {
+            var card = new Flashcard { DeckId = deck.DeckId, FrontText = word, BackText = "Nghĩa", CreatedAt = now,
+                UpdatedAt = now, NextReviewAt = nextReviewAt, Repetition = repetition };
+            db.Flashcards.Add(card);
+            return card;
+        }
+
+        var newCards = Enumerable.Range(1, 10).Select(index => AddCard(basic, $"new {index}")).ToArray();
+        var dueNow = AddCard(basic, "due now", now, 1);
+        var oldest = AddCard(travel, "overdue", now.AddDays(-2), 2);
+        var latest = AddCard(travel, "future", now.AddHours(1), 3);
+        AddCard(shared, "shared due", now.AddDays(-3), 4);
+        AddCard(privateDeck, "private due", now.AddDays(-4), 5);
+        await db.SaveChangesAsync();
+
+        const string dueUrl = "/api/v1/flashcards/review/due";
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync(dueUrl)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+            factory.Services.GetRequiredService<JwtTokenService>().CreateToken(learner).AccessToken);
+        var batch = (await client.GetFromJsonAsync<DueFlashcard[]>(dueUrl))!;
+        Assert.Equal(new[] { oldest.CardId, dueNow.CardId }.Concat(newCards.Take(8).Select(card => card.CardId)),
+            batch.Select(item => item.Card.CardId));
+        Assert.Equal(travel.Title, batch[0].DeckTitle);
+        Assert.Equal(basic.Title, batch[1].DeckTitle);
+        Assert.All(batch, item => Assert.True(item.Card.IsDue));
+        Assert.DoesNotContain(batch, item => item.Card.CardId == latest.CardId);
+
+        var decks = (await client.GetFromJsonAsync<DeckSummary[]>("/api/v1/flashcards/decks"))!;
+        Assert.Equal(11, decks.Single(deck => deck.DeckId == basic.DeckId).DueCount);
+        Assert.Equal(2, decks.Single(deck => deck.DeckId == travel.DeckId).RecallCount);
+        Assert.Equal(0, decks.Single(deck => deck.DeckId == shared.DeckId).RecallCount);
+    }
+
     private sealed class StudyClock : TimeProvider
     {
         private DateTimeOffset now = DateTimeOffset.UtcNow;

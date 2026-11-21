@@ -36,7 +36,8 @@ public sealed class ReviewCardRequest
     [Required] public DateTime? ExpectedUpdatedAt { get; init; }
 }
 public sealed record DeckSummary(int DeckId, string Title, string? Description, int CardCount, int DueCount, bool CanEdit = true, bool IsAdminDeck = false,
-    int? CourseId = null, string? CourseTitle = null);
+    int? CourseId = null, string? CourseTitle = null, int RecallCount = 0);
 public sealed record FlashcardResponse(int CardId, int DeckId, string FrontText, string BackText, string? ExampleSentence,
     int IntervalDays, int Repetition, DateTime? NextReviewAt, DateTime UpdatedAt, bool IsDue);
 public sealed record DeckDetail(DeckSummary Deck, FlashcardResponse[] Cards);
+public sealed record DueFlashcard(FlashcardResponse Card, string DeckTitle);

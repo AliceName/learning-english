@@ -19,7 +19,7 @@
     "test:writing": "node --test tests/writing-capabilities.test.cjs tests/writing-diff.test.cjs tests/writing-draft.test.cjs tests/writing-feedback.test.cjs tests/writing-flow.test.cjs tests/writing-revision.test.cjs tests/writing-tasks.test.cjs"
   },
   "dependencies": {
-    "next": "16.4.2",
+    "next": "16.4.6",
     "page-mascot": "^0.1.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -30,7 +30,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.4.2",
+    "eslint-config-next": "16.4.6",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

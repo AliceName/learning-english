@@ -7,11 +7,24 @@ export type PracticeSentence = {
   text: string;
   updatedAt: number;
   saved: boolean;
+  bookmarkNote?: string | null;
   result?: PracticeResult;
 };
 
 export function sentenceKey(text: string) {
   return text.toLowerCase().replaceAll("’", "'").replace(/\s+/g, " ");
+}
+
+const sentenceFragment = "#cau-";
+
+export function practiceSentenceHref(id: string) {
+  return "/speaking" + sentenceFragment + encodeURIComponent(id);
+}
+
+export function linkedPracticeSentence(hash: string) {
+  if (!hash.startsWith(sentenceFragment)) return null;
+  try { return decodeURIComponent(hash.slice(sentenceFragment.length)) || null; }
+  catch { return null; }
 }
 
 function openHistory(): Promise<IDBDatabase> {
@@ -37,20 +50,34 @@ export async function loadSentences(account: string): Promise<PracticeSentence[]
   } finally { db.close(); }
 }
 
-export async function saveSentence(sentence: PracticeSentence, changes: Partial<Pick<PracticeSentence, "saved" | "result" | "updatedAt">> = {}): Promise<PracticeSentence> {
+async function writeSentence<T extends PracticeSentence | undefined>(
+  account: string, id: string, update: (current: PracticeSentence | undefined) => T,
+): Promise<T> {
   const db = await openHistory();
   try {
     return await new Promise((resolve, reject) => {
       const transaction = db.transaction("sentences", "readwrite");
       const store = transaction.objectStore("sentences");
-      const request = store.get([sentence.account, sentence.id]);
-      let updated: PracticeSentence;
+      const request = store.get([account, id]);
+      let updated: T;
       request.onsuccess = () => {
-        updated = { ...(request.result ?? sentence), ...changes };
-        store.put(updated);
+        updated = update(request.result);
+        if (updated) store.put(updated);
       };
       transaction.oncomplete = () => resolve(updated);
       transaction.onabort = () => reject(transaction.error);
     });
   } finally { db.close(); }
+}
+
+export function saveSentence(sentence: PracticeSentence, changes: Partial<Pick<PracticeSentence, "saved" | "bookmarkNote" | "result" | "updatedAt">> = {}) {
+  return writeSentence(sentence.account, sentence.id, current => ({ ...(current ?? sentence), ...changes }));
+}
+
+export function changeSentenceBookmark(account: string, id: string, { saved, bookmarkNote }: { saved?: boolean; bookmarkNote: string | null }) {
+  return writeSentence(account, id, current => {
+    if (!current || (saved === undefined && !current.saved)) return undefined;
+    if (saved && current.saved) return current;
+    return { ...current, saved: saved ?? current.saved, bookmarkNote };
+  });
 }

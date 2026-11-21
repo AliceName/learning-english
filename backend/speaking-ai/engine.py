@@ -4,6 +4,7 @@ No dataset labels or dataset lookup are used at inference. CMUdict supplies
 candidate canonical phones; only unambiguous text-G2P matches receive scores.
 """
 import io
+import logging
 import math
 import os
 from pathlib import Path
@@ -19,6 +20,7 @@ from read_pronunciation import WORD_PATTERN, phonetic_spellings
 
 MAX_BYTES = 2 * 1024 * 1024
 MAX_SECONDS = 12
+MAJORITY_LOG_POSTERIOR = math.log(.5)
 
 
 class RecordingError(ValueError):
@@ -48,13 +50,12 @@ def decode_audio(data):
     rms = float(np.sqrt(np.mean(audio.astype(np.float64) ** 2)))
     if rms < 1e-4 or float(np.std(audio)) < 1e-5:
         raise RecordingError('Bản ghi im lặng hoặc quá nhỏ. Hãy kiểm tra microphone và ghi lại.')
-    warnings = []
-    if float(np.mean(np.abs(audio) >= .999)) > .01:
-        warnings.append('Âm thanh có dấu hiệu quá lớn; nên đặt microphone xa hơn.')
+    clipped_at = np.flatnonzero(np.abs(audio) >= .999) / sample_rate
+    has_clipping = len(clipped_at) > .01 * len(audio)
     if sample_rate != 16000:
         divisor = math.gcd(sample_rate, 16000)
         audio = resample_poly(audio, 16000 // divisor, sample_rate // divisor).astype(np.float32)
-    return audio, duration, warnings
+    return audio, duration, clipped_at, has_clipping
 
 
 def reference_words(text):
@@ -74,6 +75,48 @@ def edit_ratio(expected, decoded):
             current.append(min(current[-1] + 1, previous[j] + 1, previous[j - 1] + (x != y)))
         previous = current
     return previous[-1] / max(1, len(expected), len(decoded))
+
+
+def mark_words_with_recording_evidence(words, aligned_phones, log_probs, clipped_at):
+    # Forced alignment can assign a high GOP score even to a weak match. During
+    # a recording warning, require independent acoustic evidence for every phone.
+    uncertain_words = set()
+    for phone in aligned_phones:
+        values = log_probs[phone['start_frame']:phone['end_frame_exclusive'], phone['token_id']]
+        if values.max() <= MAJORITY_LOG_POSTERIOR:
+            uncertain_words.add(phone['word_index'])
+    for i, word in enumerate(words):
+        if not word['phones'] or word['reason'] or i in uncertain_words:
+            continue
+        start = min(phone['startSeconds'] for phone in word['phones'])
+        end = max(phone['endSeconds'] for phone in word['phones'])
+        before, after = np.searchsorted(clipped_at, [start, end])
+        if before == after:
+            word['feedbackEligible'] = True
+
+
+def load_model_for_device(load_model, torch, preference):
+    if preference not in ('auto', 'cpu', 'cuda'):
+        raise ValueError('SPEAKING_DEVICE must be auto, cpu, or cuda.')
+    device = preference
+    if preference == 'auto':
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    model = load_model()
+    if device == 'cpu':
+        return model, device
+    try:
+        model.to(device)
+        return model, device
+    except torch.cuda.OutOfMemoryError:
+        if preference != 'auto' or device != 'cuda':
+            raise
+        logging.getLogger(__name__).warning('Speaking ran out of CUDA memory while loading the model. Switching to CPU.')
+
+    # Drop partially transferred weights before reloading. Moving them back
+    # would allocate new CPU storage while the failed GPU load is still resident.
+    del model
+    torch.cuda.empty_cache()
+    return load_model(), 'cpu'
 
 
 class SpeakingEngine:
@@ -106,11 +149,15 @@ class SpeakingEngine:
         for field in ('id', 'revision'):
             if self.package['acoustic_model'][field] != cfg['acoustic_model'][field]:
                 raise RuntimeError('Scorer and acoustic checkpoint differ')
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         torch.set_num_threads(2)
-        self.model = Wav2Vec2ForCTC.from_pretrained(str(snapshot), local_files_only=True,
-            dtype=torch.float32, low_cpu_mem_usage=True, use_safetensors=False,
-            attn_implementation='eager').to(self.device)
+
+        def load_acoustic_model():
+            return Wav2Vec2ForCTC.from_pretrained(str(snapshot), local_files_only=True,
+                dtype=torch.float32, low_cpu_mem_usage=True, use_safetensors=False,
+                attn_implementation='eager')
+
+        self.model, self.device = load_model_for_device(
+            load_acoustic_model, torch, os.environ.get('SPEAKING_DEVICE', 'auto').strip().lower())
         self.model.eval(); self.model.requires_grad_(False)
         self.lexicon = cmudict.dict()
         self.base_phones = BASE_PHONES
@@ -124,6 +171,7 @@ class SpeakingEngine:
             reference_mapping_sha256=file_digest(Path(__file__).with_name('reference_mapping.py')))
         self.model_version += '-' + self.calibration.document['calibration_id']
         self.model_version += '-readctx1-' + file_digest(Path(__file__).with_name('read_pronunciation.py'))[:12]
+        self.model_version += '-word-evidence1'
         self.lock = threading.Lock()
         self.stride, self.receptive = 1, 1
         for kernel, stride in zip(self.model.config.conv_kernel, self.model.config.conv_stride):
@@ -185,8 +233,9 @@ class SpeakingEngine:
     def _score(self, data, text, sentence_text=None, start_word_index=0):
         from gop_ctc import viterbi_align, phoneme_features
         from scorer_model import predict_package
-        audio, duration, warnings = decode_audio(data)
-        recording_issue = bool(warnings)
+        audio, duration, clipped_at, has_clipping = decode_audio(data)
+        warnings = ['Âm thanh có dấu hiệu quá lớn; nên đặt microphone xa hơn.'] if has_clipping else []
+        recording_issue = has_clipping
         tokens, targets, labelled, words = self.build_reference(text, sentence_text, start_word_index)
         inputs = self.processor(audio, sampling_rate=16000, return_tensors='pt')
         with self.torch.inference_mode():
@@ -218,6 +267,8 @@ class SpeakingEngine:
         for word in words:
             if word['phones']:
                 word['score'] = round(float(np.mean([p['score'] for p in word['phones']])), 4)
+        if recording_issue:
+            mark_words_with_recording_evidence(words, metadata, lp, clipped_at)
         coverage = len(prediction) / len(targets)
         if coverage < 1:
             warnings.append('Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá.')

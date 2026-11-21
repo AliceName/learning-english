@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import Icon from "@/components/site-icon";
-import type { Deck, DeckDetail, Flashcard } from "@/lib/flashcards";
+import type { Deck, DeckDetail, DueFlashcard, Flashcard } from "@/lib/flashcards";
 import FlashcardEditor, { type CardFields } from "./card-editor";
 import FlashcardLibrary, { FlashcardHeading } from "./library";
 import { deckPreferencePrefix, emptyPreferences, favoritePrefix, readFavorites, readPreference, removePreferences, writePreference, type CardPreferences } from "./preferences";
-import StudyCard from "./study-card";
+import FlashcardReview, { type ReviewSession } from "./review-session";
 import styles from "./flashcards.module.css";
 
 async function api<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
   const timeout = AbortSignal.timeout(120_000);
   const response = await fetch("/api/flashcards/" + path, {
     method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined,
-    signal: signal ? AbortSignal.any([timeout, signal]) : timeout, cache: "no-store",
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout, cache: "no-store",
   });
   const data = response.status === 204 ? null : await response.json().catch(() => null);
   if (!response.ok) {
@@ -28,34 +30,29 @@ const dateLabel = (date: string | null) => date ? dateFormat.format(new Date(dat
 type DeckForm = { original?: Deck; title: string; description: string };
 type Editor = { card?: Flashcard; preferences: CardPreferences };
 
-export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, course, initialDeckId, createOnOpen, onReturn }: {
-  initialDecks: Deck[] | null; account?: string; isAdmin: boolean;
+export default function FlashcardsWorkspace({ initialDecks, initialDetail, linkedCardId, account, isAdmin,
+  course, initialDeckId, createOnOpen, onReturn }: {
+  initialDecks: Deck[] | null; initialDetail: DeckDetail | null; linkedCardId: number | null; account?: string; isAdmin: boolean;
   course?: { courseId: number; title: string }; initialDeckId?: number; createOnOpen?: boolean; onReturn?: () => void;
 }) {
+  const router = useRouter();
   const [decks, setDecks] = useState(initialDecks);
-  const [detail, setDetail] = useState<DeckDetail | null>(null);
-  const [learned, setLearned] = useState<Record<number, number>>({});
-  const [progressUnavailable, setProgressUnavailable] = useState(false);
+  const [detail, setDetail] = useState(initialDetail);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [favoriteReady, setFavoriteReady] = useState(false);
   const [deckForm, setDeckForm] = useState<DeckForm | null>(createOnOpen ? { title: "", description: "" } : null);
-  const [initialLoading, setInitialLoading] = useState(!!initialDeckId);
+  const [initialLoading, setInitialLoading] = useState(Boolean(initialDeckId));
   const [editor, setEditor] = useState<Editor | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(() => linkedCardId === null ? "" : !initialDetail
+    ? "Chưa mở được bộ thẻ. Hãy tải lại trang hoặc chọn bộ thẻ khác."
+    : initialDetail.cards.some(card => card.cardId === linkedCardId) ? "" : "Thẻ này không còn trong bộ thẻ.");
   const [notice, setNotice] = useState("");
-  const [study, setStudy] = useState<Flashcard[] | null>(null);
-  const [studyIndex, setStudyIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [reviewed, setReviewed] = useState(0);
-  const [total, setTotal] = useState(0);
+  const [study, setStudy] = useState<ReviewSession | null>(null);
+  const nextSessionId = useRef(0);
   const pending = useRef(false);
   const deckDialog = useRef<HTMLDialogElement>(null);
-  const centerReview = useRef(false);
-  const studyCard = useRef<HTMLButtonElement>(null);
-  const studyHeading = useRef<HTMLHeadingElement>(null);
-  const current = study?.[studyIndex];
-  const view = editor ? "editor" : detail ? "detail" : "library";
+  const view = study ? "study" : editor ? "editor" : detail ? "detail" : "library";
   const deckDialogOpen = deckForm !== null;
   const listPath = course ? `decks?courseId=${course.courseId}` : "decks";
 
@@ -65,7 +62,10 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
     void api<DeckDetail>("decks/" + initialDeckId, "GET", undefined, controller.signal).then(value => {
       if (!controller.signal.aborted) { setDetail(value); setInitialLoading(false); }
     }, failure => {
-      if (!controller.signal.aborted) { setError(failure instanceof Error ? failure.message : "Chưa tải được bộ thẻ."); setInitialLoading(false); }
+      if (!controller.signal.aborted) {
+        setError(failure instanceof Error ? failure.message : "Chưa tải được bộ thẻ.");
+        setInitialLoading(false);
+      }
     });
     return () => controller.abort();
   }, [initialDeckId]);
@@ -79,15 +79,14 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
   }, [view]);
 
   useEffect(() => {
-    if (!study || !centerReview.current) return;
-    centerReview.current = false;
-    const target = studyCard.current ?? studyHeading.current;
-    target?.focus({ preventScroll: true });
-    target?.scrollIntoView({
-      block: "center",
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    if (linkedCardId === null || !initialDetail) return;
+    const frame = requestAnimationFrame(() => {
+      const row = document.getElementById("flashcard-" + linkedCardId);
+      row?.focus({ preventScroll: true });
+      row?.scrollIntoView({ block: "center" });
     });
-  }, [study]);
+    return () => cancelAnimationFrame(frame);
+  }, [linkedCardId, initialDetail]);
 
   useEffect(() => {
     if (!account) return;
@@ -97,29 +96,6 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
     }, () => {}).finally(() => { if (active) setFavoriteReady(true); });
     return () => { active = false; };
   }, [account]);
-
-  useEffect(() => {
-    if (!decks || view !== "library") return;
-    const controller = new AbortController();
-    const owned = decks.filter(deck => deck.canEdit && deck.cardCount > 0);
-    async function loadProgress() {
-      const counts: Record<number, number> = {};
-      for (let offset = 0; offset < owned.length && !controller.signal.aborted; offset += 5) {
-        await Promise.all(owned.slice(offset, offset + 5).map(async deck => {
-          try {
-            const result = await api<DeckDetail>("decks/" + deck.deckId, "GET", undefined, controller.signal);
-            counts[deck.deckId] = Math.min(deck.cardCount, result.cards.filter(card => card.repetition > 0).length);
-          } catch { /* A failed detail request leaves this deck's progress unknown. */ }
-        }));
-      }
-      if (!controller.signal.aborted) {
-        setLearned(counts);
-        setProgressUnavailable(Object.keys(counts).length !== owned.length);
-      }
-    }
-    void loadProgress();
-    return () => controller.abort();
-  }, [decks, view]);
 
   async function perform(action: () => Promise<void>) {
     if (pending.current) return false;
@@ -144,18 +120,23 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
   }
 
   function applyCards(currentDetail: DeckDetail, cards: Flashcard[], promote = false) {
-    const deck = { ...currentDetail.deck, cardCount: cards.length, dueCount: cards.filter(card => card.isDue).length };
+    const deck = { ...currentDetail.deck, cardCount: cards.length,
+      dueCount: cards.filter(card => card.isDue).length, recallCount: cards.filter(card => card.repetition > 0).length };
     setDetail({ deck, cards });
     updateDeck(deck, promote);
-    setLearned(previous => ({ ...previous, [deck.deckId]: cards.filter(card => card.repetition > 0).length }));
   }
 
   function openDeck(deck: Deck, add = false) {
     void perform(async () => {
       const next = await api<DeckDetail>("decks/" + deck.deckId);
+      updateDeck(next.deck);
       setDetail(next); setStudy(null);
       setEditor(add && next.deck.canEdit ? { preferences: emptyPreferences } : null);
     });
+  }
+
+  function refreshLibrary() {
+    void perform(async () => setDecks(await api<Deck[]>(listPath)));
   }
 
   function showLibrary() {
@@ -163,6 +144,8 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
     window.speechSynthesis?.cancel();
     if (onReturn) { onReturn(); return; }
     setEditor(null); setDetail(null); setStudy(null); setError(""); setNotice("");
+    if (linkedCardId !== null) router.replace("/flashcards", { scroll: false });
+    if (study?.mode === "today" || study?.mode === "deck") refreshLibrary();
   }
 
   function closeEditor() {
@@ -302,100 +285,119 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
     });
   }
 
-  function startStudy() {
-    if (!detail?.deck.canEdit) return;
+  function startStudy(mode: ReviewSession["mode"]) {
     void perform(async () => {
-      const fresh = await api<DeckDetail>("decks/" + detail.deck.deckId);
-      if (!fresh.deck.canEdit) throw new Error("Bạn cần tạo bản sao riêng để lưu lịch ôn.");
-      setDetail(fresh); updateDeck(fresh.deck);
-      const queue = fresh.cards.filter(card => card.isDue).sort((a, b) =>
-        (a.nextReviewAt ?? "").localeCompare(b.nextReviewAt ?? "") || a.cardId - b.cardId);
-      centerReview.current = true;
-      setStudy(queue); setStudyIndex(0); setTotal(queue.length); setReviewed(0); setFlipped(false);
+      let cards: DueFlashcard[];
+      if (mode === "today") {
+        cards = await api<DueFlashcard[]>("review/due");
+      } else {
+        if (!detail) return;
+        const fresh = await api<DeckDetail>("decks/" + detail.deck.deckId);
+        if (mode !== "preview" && !fresh.deck.canEdit) throw new Error("Bạn cần tạo bản sao riêng để lưu lịch ôn.");
+        if (mode === "preview" && (fresh.deck.canEdit || !fresh.deck.isAdminDeck)) throw new Error("Bộ thẻ chia sẻ đã thay đổi. Hãy mở lại bộ thẻ.");
+        setDetail(fresh); updateDeck(fresh.deck);
+        const selected = mode === "deck" ? fresh.cards.filter(card => card.isDue).sort((a, b) =>
+          (a.nextReviewAt ?? "").localeCompare(b.nextReviewAt ?? "") || a.cardId - b.cardId) : fresh.cards;
+        cards = selected.map(card => ({ card, deckTitle: fresh.deck.title }));
+      }
+      setStudy({ id: ++nextSessionId.current, mode, cards, currentIndex: cards.length ? 0 : -1, ratings: {} });
     });
   }
 
-  function moveStudy(change: number) {
-    if (busy || !study?.length) return;
-    window.speechSynthesis?.cancel();
-    setStudyIndex(value => Math.max(0, Math.min(study.length - 1, value + change))); setFlipped(false);
+  function moveStudy(step: -1 | 1) {
+    if (!study || study.currentIndex < 0 || pending.current) return;
+    const currentIndex = study.currentIndex + step;
+    if (!study.cards[currentIndex]) return;
+    setStudy({ ...study, currentIndex });
+    setError("");
   }
 
   function rate(rating: number) {
-    if (!current || !detail || !flipped) return;
+    if (!study) return;
+    const current = study.cards[study.currentIndex]?.card;
+    if (!current || study.ratings[current.cardId] !== undefined) return;
     void perform(async () => {
-      const result = await api<Flashcard>("cards/" + current.cardId + "/review", "POST", { rating, expectedUpdatedAt: current.updatedAt });
-      setStudy(previous => previous?.filter(card => card.cardId !== current.cardId) ?? null);
-      setStudyIndex(Math.min(studyIndex, Math.max(0, (study?.length ?? 0) - 2)));
-      setFlipped(false); setReviewed(previous => previous + 1);
-      applyCards(detail, detail.cards.map(item => item.cardId === result.cardId ? result : item));
+      if (study.mode === "today" || study.mode === "deck") {
+        const result = await api<Flashcard>("cards/" + current.cardId + "/review", "POST", { rating, expectedUpdatedAt: current.updatedAt });
+        if (detail?.deck.deckId === current.deckId) {
+          applyCards(detail, detail.cards.map(item => item.cardId === result.cardId ? result : item));
+        }
+      }
+      const ratings = { ...study.ratings, [current.cardId]: rating };
+      const next = study.cards.findIndex(({ card }, index) => index > study.currentIndex && ratings[card.cardId] === undefined);
+      const currentIndex = next >= 0 ? next : study.cards.findIndex(({ card }) => ratings[card.cardId] === undefined);
+      setStudy({ ...study, currentIndex, ratings });
     });
   }
 
+  function closeStudy() {
+    if (study?.mode === "today") showLibrary();
+    else if (!busy) {
+      setStudy(null); setError("");
+      if (study?.mode === "deck" && detail) openDeck(detail.deck);
+    }
+  }
+
   return <main id="main-content" tabIndex={-1} className={styles.page}>
-    {course && <div className={styles.actions}><button type="button" disabled={busy} onClick={showLibrary}>← Bộ thẻ khóa học: {course.title}</button></div>}
+    {course && <div className={styles.actions}><button type="button" disabled={busy} onClick={showLibrary}>← Bộ thẻ khóa học {course.title}</button></div>}
     {initialLoading && <p role="status">Đang tải bộ thẻ…</p>}
     {notice && <p role="status" className={styles.notice}>{notice}</p>}
-    {error && !deckDialogOpen && <p role="alert" className={styles.error}>{error}</p>}
-    {initialLoading ? null : !detail && course ? <section className={styles.panel}><h2>Bộ thẻ từ vựng khóa học</h2><p>Chọn bộ thẻ trong khóa học để tiếp tục.</p><button type="button" onClick={showLibrary}>Về danh sách bộ thẻ</button></section> : !detail ? <FlashcardLibrary decks={decks} learned={learned} favorites={favorites} favoriteReady={favoriteReady} progressUnavailable={progressUnavailable} busy={busy}
-      onRefresh={() => void perform(async () => setDecks(await api<Deck[]>(listPath)))}
+    {error && !deckDialogOpen && !study && <p role="alert" className={styles.error}>{error}</p>}
+    {initialLoading ? null : study ? <>
+      <FlashcardHeading title={study.mode === "today" ? "Ôn hôm nay" : detail?.deck.title ?? "Ôn tập"}
+        description={study.mode === "today" ? "Ôn thẻ đến hạn từ các bộ thẻ của bạn." : detail?.deck.description || "Bộ từ vựng"}
+        icon={study.mode === "today" ? "clock" : "cards"} crumb="Ôn tập" onBack={showLibrary} />
+      <FlashcardReview session={study} account={account} busy={busy} error={error} onRate={rate} onMove={moveStudy}
+        onClose={closeStudy} onRestart={() => startStudy(study.mode)}
+        onOpenAll={study.mode === "deck" && detail?.cards.some(card => !card.isDue) ? () => startStudy("practice") : undefined} />
+    </> : !detail ? <FlashcardLibrary decks={decks} favorites={favorites} favoriteReady={favoriteReady} busy={busy}
+      onRefresh={refreshLibrary} onStartToday={() => startStudy("today")}
       onCreate={() => openDeckForm()} onOpen={openDeck} onAdd={deck => openDeck(deck, true)} onFavorite={toggleFavorite}
       onEdit={openDeckForm} onDelete={deleteDeck} /> : editor ? <FlashcardEditor
       key={editor.card?.cardId ?? "create"} detail={detail} decks={decks ?? [detail.deck]} card={editor.card} initialPreferences={editor.preferences}
       busy={busy} onLibrary={showLibrary} onClose={closeEditor} onChooseDeck={chooseDeck} onSave={saveCard} /> : <>
-      <FlashcardHeading title={detail.deck.title} description={detail.deck.description || "Bộ từ vựng"} icon="cards" crumb={study !== null ? "Ôn tập" : "Bộ thẻ"} onBack={showLibrary} />
+      <FlashcardHeading title={detail.deck.title} description={detail.deck.description || "Bộ từ vựng"} icon="cards" crumb="Bộ thẻ" onBack={showLibrary} />
       <section className={styles.panel}>
         <div className={styles.top}>
           <div><span className={styles.sourceBadge}>{detail.deck.isAdminDeck ? "Bộ thẻ admin" : "Bộ thẻ của bạn"}{!detail.deck.canEdit && " · Chỉ đọc"}</span>
-            <p>{detail.deck.cardCount} từ{detail.deck.canEdit && " · " + detail.deck.dueCount + " thẻ đến lịch"}</p></div>
+            <p>{detail.deck.cardCount} từ{detail.deck.canEdit && " · " + detail.deck.dueCount + " thẻ đến hạn"}</p></div>
           {detail.deck.canEdit && <div className={styles.actions}>
             <button type="button" disabled={busy} onClick={() => openDeckForm(detail.deck)}><Icon name="writing" /> Sửa bộ</button>
             <button type="button" disabled={busy} className={styles.danger} onClick={() => deleteDeck(detail.deck)}><Icon name="trash" /> Xóa bộ</button>
           </div>}
         </div>
-        {!detail.deck.canEdit && <p>Bộ gốc do admin quản lý. Tạo bản sao riêng để thêm thẻ và lưu lịch ôn của bạn.</p>}
+        {!detail.deck.canEdit && <p>Tạo bản sao riêng để chỉnh sửa thẻ và lưu lịch ôn của bạn.</p>}
         <div className={styles.actions}>
           {detail.deck.canEdit ? <>
             <button className={styles.primary} type="button" disabled={busy} onClick={() => {
               setStudy(null); setError(""); setNotice(""); setEditor({ preferences: emptyPreferences });
             }}><Icon name="plus" /> Tạo thẻ mới</button>
-            <button type="button" disabled={busy || !detail.cards.length} onClick={startStudy}><Icon name="play" /> Ôn thẻ đến lịch</button>
-          </> : <button type="button" className={styles.primary} disabled={busy || !detail.cards.length} onClick={copyForStudy}><Icon name="plus" /> Tạo bản sao để ôn</button>}
-          {study !== null && <button type="button" disabled={busy} onClick={() => setStudy(null)}>Quản lý thẻ</button>}
+            <button type="button" disabled={busy || !detail.cards.length} onClick={() => startStudy("deck")}><Icon name="play" /> Ôn thẻ đến hạn</button>
+            <button type="button" disabled={busy || !detail.cards.length} onClick={() => startStudy("practice")}><Icon name="cards" /> Ôn tất cả thẻ</button>
+          </> : <>
+            <button type="button" className={styles.primary} disabled={busy || !detail.cards.length} onClick={() => startStudy("preview")}><Icon name="play" /> Ôn thử</button>
+            <button type="button" disabled={busy || !detail.cards.length} onClick={copyForStudy}><Icon name="plus" /> Tạo bản sao để ôn</button>
+          </>}
         </div>
       </section>
-      {study !== null ? <section className={`${styles.panel} ${styles.studyPanel}`} aria-label="Ôn tập thẻ">
-        <div className={styles.top}><h2 ref={studyHeading} tabIndex={-1}>Phiên ôn tập</h2><span>{current && <>Thẻ {studyIndex + 1}/{study?.length} · </>}Đã ôn {reviewed} / {total} thẻ</span></div>
-        <progress className={styles.progress} value={reviewed} max={Math.max(total, 1)} aria-label="Tiến độ phiên ôn" />
-        {current ? <>
-          <StudyCard key={current.cardId} account={account} card={current} flipped={flipped} busy={busy} flipRef={studyCard} onFlip={setFlipped}
-            onPrevious={studyIndex > 0 ? () => moveStudy(-1) : undefined} onNext={studyIndex < study!.length - 1 ? () => moveStudy(1) : undefined} />
-          {flipped ? <div className={styles.ratings} aria-label="Tự đánh giá mức ghi nhớ">
-            {["Quên", "Khó", "Nhớ", "Dễ"].map((label, rating) => <button type="button" key={label} disabled={busy} onClick={() => rate(rating)}>
-              <strong>{label}</strong><small>{rating === 0 ? "Ôn lại sau 5 phút" : "Lên lịch lần tới"}</small>
-            </button>)}
-          </div> : null}
-          <p className={styles.studyHelp}><Icon name="bulb" /> Hãy tự nhớ nghĩa trước khi lật. Lật thẻ để chọn mức độ ghi nhớ.</p>
-        </> : <div className={styles.complete}>
-          <h3>{total ? "Bạn đã hoàn thành phiên ôn!" : "Chưa có thẻ đến lịch"}</h3>
-          <p>{total ? "Đã lưu đánh giá cho " + reviewed + " thẻ." : "Bạn có thể thêm thẻ mới hoặc quay lại khi đến lịch ôn."}</p>
-          <button type="button" disabled={busy} onClick={startStudy}>Kiểm tra lịch mới</button>
-          <button type="button" disabled={busy} onClick={() => setStudy(null)}>Về quản lý thẻ</button>
-        </div>}
-      </section> : <section className={styles.panel}>
+      <section className={styles.panel}>
         <h2>Danh sách từ ({detail.cards.length})</h2>
         {!detail.cards.length ? <p>{detail.deck.canEdit ? "Chưa có từ nào. Tạo thẻ đầu tiên để bắt đầu ôn." : "Admin chưa thêm từ vào bộ thẻ này."}</p> :
-          <ul className={styles.cardList}>{detail.cards.map(card => <li key={card.cardId}>
+          <ul className={styles.cardList}>{detail.cards.map(card => <li key={card.cardId} id={"flashcard-" + card.cardId}
+            tabIndex={card.cardId === linkedCardId ? -1 : undefined} data-highlighted={card.cardId === linkedCardId || undefined}>
             <div><strong lang="en">{card.frontText}</strong><p>{card.backText}</p>
               {card.exampleSentence && <blockquote lang="en">{card.exampleSentence}</blockquote>}
-              {detail.deck.canEdit && <small>{card.isDue ? "Đến lịch ôn" : "Ôn tiếp: " + dateLabel(card.nextReviewAt)} · {card.repetition} lần nhớ liên tiếp</small>}
+              {detail.deck.canEdit && <small>{card.isDue ? "Đến hạn ôn" : "Ôn tiếp: " + dateLabel(card.nextReviewAt)} · {card.repetition} lần nhớ liên tiếp</small>}
             </div>
-            {detail.deck.canEdit && <div className={styles.actions}>
-              <button type="button" disabled={busy} onClick={() => editCard(card)}>Sửa</button>
-              <button type="button" className={styles.danger} disabled={busy} onClick={() => deleteCard(card)}>Xóa</button>
-            </div>}
+            <div className={styles.actions}>
+              <BookmarkButton targetType="flashcard" targetId={card.cardId} title={card.frontText} />
+              {detail.deck.canEdit && <>
+                <button type="button" disabled={busy} onClick={() => editCard(card)}>Sửa</button>
+                <button type="button" className={styles.danger} disabled={busy} onClick={() => deleteCard(card)}>Xóa</button>
+              </>}
+            </div>
           </li>)}</ul>}
-      </section>}
+      </section>
     </>}
     {deckForm && <dialog ref={deckDialog} className={styles.dialog} aria-labelledby="flashcards-deck-title"
       onClose={() => { setDeckForm(null); setError(""); }} onCancel={event => { if (busy) event.preventDefault(); }}>
@@ -403,7 +405,7 @@ export default function FlashcardsWorkspace({ initialDecks, account, isAdmin, co
         <div className={styles.top}><h2 id="flashcards-deck-title">{deckForm.original ? "Sửa bộ thẻ" : "Tạo bộ thẻ mới"}</h2>
           <button type="button" aria-label="Đóng" disabled={busy} onClick={() => deckDialog.current?.close()}><Icon name="close" /></button>
         </div>
-        {isAdmin && <p>{course ? "Bộ thẻ này thuộc khóa học “" + course.title + "”. Học viên xem bộ gốc và tạo bản sao riêng để lưu lịch ôn." : "Bộ thẻ do admin tạo được chia sẻ ở chế độ chỉ đọc."}</p>}
+        {isAdmin && <p>{course ? "Bộ thẻ thuộc khóa học “" + course.title + "”. Học viên có thể tạo bản sao để lưu lịch ôn riêng." : "Bộ thẻ do admin tạo được chia sẻ ở chế độ chỉ đọc."}</p>}
         <form onSubmit={saveDeck}><fieldset disabled={busy} className={styles.form}>
           <label>Tên bộ thẻ<input autoFocus required maxLength={255} value={deckForm.title} placeholder="Ví dụ: Từ vựng giao tiếp"
             onChange={event => setDeckForm({ ...deckForm, title: event.target.value })} /></label>

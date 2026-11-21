@@ -15,14 +15,20 @@ function Example({ sentence, word }: { sentence: string; word: string }) {
   return <>{sentence.slice(0, position)}<mark>{sentence.slice(position, position + word.length)}</mark>{sentence.slice(position + word.length)}</>;
 }
 
-export default function StudyCard({ account, card, flipped, busy, flipRef, onFlip, difficultyLevel, onPrevious, onNext }: {
-  account?: string; card: Pick<Flashcard, "frontText" | "backText" | "exampleSentence"> & Partial<Pick<Flashcard, "cardId" | "deckId">>; flipped: boolean; busy: boolean; difficultyLevel?: string | null;
+export type StudyDirection = "en-vi" | "vi-en";
+
+export default function StudyCard({ account, card, direction = "en-vi", flipped, busy, flipRef, onFlip, onPrevious, onNext,
+  difficultyLevel, flipOnDoubleClick = false }: {
+  account?: string; card: Pick<Flashcard, "frontText" | "backText" | "exampleSentence"> & Partial<Pick<Flashcard, "cardId" | "deckId">>;
+  direction?: StudyDirection; flipped: boolean; busy: boolean; difficultyLevel?: string | null; flipOnDoubleClick?: boolean;
   flipRef: RefObject<HTMLButtonElement | null>; onFlip: (flipped: boolean) => void;
   onPrevious?: () => void; onNext?: () => void;
 }) {
   const [preferences, setPreferences] = useState<CardPreferences | null>(null);
   const [issue, setIssue] = useState("");
-  const phonetic = useFlashcardPhonetic(!account || preferences ? card.frontText : "", preferences?.phonetic);
+  const reverse = direction === "vi-en";
+  const showWord = flipped === reverse;
+  const phonetic = useFlashcardPhonetic(showWord && (!account || preferences) ? card.frontText : "", preferences?.phonetic);
   const level = levels.find(level => level === (preferences?.level || difficultyLevel)) ?? "Chưa chọn";
   const [meaning, ...description] = card.backText.split(/\r?\n/);
 
@@ -35,33 +41,40 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
 
   useEffect(() => () => window.speechSynthesis?.cancel(), [flipped]);
 
+  const front = reverse ? "Nghĩa tiếng Việt" : "Từ vựng";
+  const back = reverse ? "Từ vựng & Ví dụ" : "Nghĩa & Ví dụ";
+  const flipInstruction = flipOnDoubleClick ? "Nhấn đúp" : "Bấm";
+  const flipLabel = reverse
+    ? flipped ? `Đang xem từ tiếng Anh. ${flipInstruction} để xem nghĩa.` : `${flipInstruction} để lật thẻ và xem từ tiếng Anh.`
+    : flipped ? `Đang xem nghĩa. ${flipInstruction} để xem từ.` : `${flipInstruction} để lật thẻ và xem nghĩa.`;
+
   return <>
     <div className={styles.studyScene}>
       <Image src="/illustrations/speaking-reading-books.webp" alt="" width={320} height={320} className={styles.studyBooks} />
-      <button className={styles.cardArrow} type="button" aria-label="Thẻ trước" disabled={busy || !onPrevious} onClick={onPrevious}><Icon name="chevron" /></button>
+      <button className={styles.cardArrow} type="button" aria-label="Thẻ trước" title="Thẻ trước" disabled={busy || !onPrevious} onClick={onPrevious}><Icon name="chevron" /></button>
       <div className={styles.studyStack}>
         <span className={styles.binderRings} aria-hidden="true"><i /><i /></span>
         <div className={styles.studyPaper} data-flipped={flipped}>
           <button ref={flipRef} type="button" className={styles.flipCard} disabled={busy}
-            onClick={event => { if (event.detail === 0) onFlip(!flipped); }} onDoubleClick={() => onFlip(!flipped)}
-            aria-label={flipped ? "Đang xem nghĩa. Nhấn đúp để xem từ." : "Nhấn đúp để lật thẻ và xem nghĩa."} aria-pressed={flipped} />
+            onClick={event => { if (!flipOnDoubleClick || event.detail === 0) onFlip(!flipped); }}
+            onDoubleClick={flipOnDoubleClick ? () => onFlip(!flipped) : undefined}
+            aria-label={flipLabel} aria-pressed={flipped} />
           <div className={styles.studyContent}>
-            <span className={styles.studyRibbon}>{flipped ? "Mặt sau · Nghĩa & Ví dụ" : "Mặt trước · Từ vựng"}</span>
+            <span className={styles.studyRibbon}>{flipped ? `Mặt sau · ${back}` : `Mặt trước · ${front}`}</span>
             <span className={styles.studyStar} aria-hidden="true"><Icon name="star" /></span>
-            {!flipped ? <>
+            {showWord ? <>
               <div className={styles.studyWord}>
                 <strong lang="en">{card.frontText}</strong>
                 <button className={styles.sound} type="button" disabled={busy} aria-label="Nghe từ vựng" onClick={() => pronounceFlashcard(card.frontText, "en-US", setIssue)}><Icon name="volume" /></button>
               </div>
               {phonetic && <span className={styles.studyPhonetic} lang="en-fonipa">{phonetic}</span>}
-              <Image src={preferences?.image || "/illustrations/speaking-reading-cat.webp"} width={640} height={440}
-                alt={preferences?.image ? "Ảnh minh họa từ vựng" : ""} className={preferences?.image ? styles.studyCustomImage : styles.studyCat} unoptimized={!!preferences?.image} />
-              <span className={styles.studyFlipHint}>Nhấn đúp hoặc nhấn Enter để lật thẻ</span>
-            </> : <>
-              <div className={styles.studyMeaning}>
-                <Icon name="book" /><div lang="vi"><strong>{meaning}</strong>{description.length > 0 && <p>{description.join("\n")}</p>}</div>
-                {preferences?.image && <Image src={preferences.image} width={180} height={120} alt="Ảnh minh họa từ vựng" unoptimized />}
-              </div>
+              {!flipped && <Image src={preferences?.image || "/illustrations/speaking-reading-cat.webp"} width={640} height={440}
+                alt={preferences?.image ? "Ảnh minh họa từ vựng" : ""} className={preferences?.image ? styles.studyCustomImage : styles.studyCat} unoptimized={!!preferences?.image} />}
+            </> : <div className={styles.studyMeaning}>
+              <Icon name="book" /><div lang="vi"><strong>{meaning}</strong>{description.length > 0 && <p>{description.join("\n")}</p>}</div>
+              {flipped && preferences?.image && <Image src={preferences.image} width={180} height={120} alt="Ảnh minh họa từ vựng" unoptimized />}
+            </div>}
+            {!flipped ? <span className={styles.studyFlipHint}>{flipInstruction} hoặc nhấn Enter để lật thẻ</span> : <>
               {card.exampleSentence ? <div className={styles.studyExample}>
                 <span aria-hidden="true">“</span>
                 <p lang="en"><Example sentence={card.exampleSentence} word={card.frontText} /></p>
@@ -72,12 +85,12 @@ export default function StudyCard({ account, card, flipped, busy, flipRef, onFli
           </div>
         </div>
       </div>
-      <button className={styles.cardArrow} type="button" aria-label="Thẻ tiếp" disabled={busy || !onNext} onClick={onNext}><Icon name="chevron" /></button>
+      <button className={styles.cardArrow} type="button" aria-label="Thẻ tiếp" title="Thẻ tiếp" disabled={busy || !onNext} onClick={onNext}><Icon name="chevron" /></button>
       <Image src="/illustrations/speaking-reading-books.webp" alt="" width={320} height={320} className={`${styles.studyBooks} ${styles.studyBooksRight}`} />
     </div>
-    <div className={styles.studyDots} aria-label="Mặt thẻ đang xem">
-      <button type="button" aria-label="Mặt trước" aria-pressed={!flipped} disabled={busy} onClick={() => onFlip(false)} />
-      <button type="button" aria-label="Mặt sau" aria-pressed={flipped} disabled={busy} onClick={() => onFlip(true)} />
+    <div className={styles.studyFaces} role="group" aria-label="Mặt thẻ đang xem">
+      <button type="button" aria-label="Xem mặt trước" aria-pressed={!flipped} disabled={busy} onClick={() => onFlip(false)}>Mặt trước</button>
+      <button type="button" aria-label="Xem mặt sau" aria-pressed={flipped} disabled={busy} onClick={() => onFlip(true)}>Mặt sau</button>
     </div>
     {issue && <p className={styles.error} role="status">{issue}</p>}
   </>;

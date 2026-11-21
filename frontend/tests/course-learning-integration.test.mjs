@@ -34,6 +34,9 @@ function load(file, imports = {}) {
     };
     if (name.endsWith(".module.css")) return { default: styles };
     if (name === "@/components/site-icon") return { default: empty };
+    if (name === "@/components/bookmarks/bookmark-button") return {
+      default: ({ targetType, targetId }) => React.createElement("button", { "data-target": targetType + "/" + targetId }),
+    };
     if (name === "@/components/navigation/member-shell") return { default: ({ children }) => children };
     if (name === "@/components/courses/course-cover") return { default: empty };
     if (name === "@/components/courses/course-card") return { default: empty };
@@ -48,6 +51,10 @@ function load(file, imports = {}) {
 
 const catalog = load("src/lib/course-catalog.ts");
 const listening = load("src/lib/listening.ts");
+const grammar = load("src/lib/grammar.ts");
+const courseFlashcards = load("src/components/courses/course-flashcards-entry.tsx", {
+  "@/lib/course-flashcards": load("src/lib/course-flashcards.ts"),
+});
 const speakingLevels = load("src/components/speaking/speaking-levels.tsx", { "@/lib/course-catalog": catalog });
 const course = {
   courseId: 23, title: "Khóa học nhiều kỹ năng", description: null, sourceType: "system", coverImageUrl: null,
@@ -57,7 +64,8 @@ const course = {
 
 async function renderPage(file, props, data) {
   const page = load(file, {
-    "@/lib/course-catalog": catalog, "@/lib/listening": listening,
+    "@/lib/course-catalog": catalog, "@/lib/listening": listening, "@/lib/grammar": grammar,
+    "@/components/courses/course-flashcards-entry": { default: courseFlashcards.default },
     "@/components/speaking/speaking-levels": speakingLevels,
     "@/lib/server-courses": { getCourse: async () => ({ status: "ok", data }), getCourses: async () => ({ status: "ok", data }) },
   });
@@ -81,6 +89,9 @@ test("a mixed course keeps distinct Speaking and Listening actions and listening
   assert.match(html, /Gần nhất 85\/100 điểm/);
   assert.match(html, />Làm lại</);
   assert.match(html, />Luyện nói →</);
+  assert.match(html, /data-target="course\/23"/);
+  assert.match(html, /data-target="lesson\/29"/);
+  assert.match(html, /data-target="lesson\/30"/);
   assert.doesNotMatch(html, /href="\/courses\/23\/speaking\/29"/);
   assert.doesNotMatch(html, /href="\/courses\/23\/lessons\/30\/listening"/);
 });

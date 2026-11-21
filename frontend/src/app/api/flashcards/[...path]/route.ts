@@ -7,7 +7,7 @@ type Context = { params: Promise<{ path: string[] }> };
 const headers = { "Cache-Control": "private, no-store", "Content-Type": "application/json" };
 async function proxy(request: Request, context: Context) {
   const route = (await context.params).path.join("/");
-  const allowed = request.method === "GET" ? /^(decks(?:\/[1-9][0-9]*)?|writing\/[1-9][0-9]*)$/ : request.method === "POST" ? /^(decks|decks\/[1-9][0-9]*\/(cards|copy|writing\/[1-9][0-9]*)|cards\/[1-9][0-9]*\/review)$/ : /^(decks|cards)\/[1-9][0-9]*$/;
+  const allowed = request.method === "GET" ? /^(decks(?:\/[1-9][0-9]*)?|writing\/[1-9][0-9]*|review\/due)$/ : request.method === "POST" ? /^(decks|decks\/[1-9][0-9]*\/(cards|copy|writing\/[1-9][0-9]*)|cards\/[1-9][0-9]*\/review)$/ : /^(decks|cards)\/[1-9][0-9]*$/;
   if (!allowed.test(route)) return new NextResponse(null, { status: 404 });
   const courseId = new URL(request.url).searchParams.get("courseId");
   if (courseId !== null && (request.method !== "GET" || route !== "decks" || !/^[1-9]\d*$/.test(courseId) || Number(courseId) > 2147483647))

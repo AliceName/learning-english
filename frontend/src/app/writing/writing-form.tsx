@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Icon from "@/components/site-icon";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import { isCefrLevel, isWritingResult, sameWritingCoverage, writingFeedbackEligible, taskWordGuidance, type WritingResult, type WritingTask } from "@/lib/writing";
 import { diffWritingText } from "@/lib/writing-diff";
 import { applyWritingEdits, currentEditPosition, writingEdits } from "@/lib/writing-revision";
@@ -454,6 +455,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             {" · "}<Link href={`/writing?submissionId=${result.submissionId}`} target="_blank" rel="noopener noreferrer" prefetch={false}>Mở lại bài đã lưu</Link></p>}
         </div>
         {result && <div className={styles.headingActions}>
+          <BookmarkButton targetType="writing" targetId={result.submissionId} title={"Bài viết #" + result.submissionId} />
           {hasAnnotations && <button type="button" className={styles.secondaryButton} aria-pressed={showAnnotations} onClick={() => setShowAnnotations(value => !value)}><Icon name="eye" /> Chú thích</button>}
           <button type="button" className={styles.submit} disabled={pending || feedbackPending || !draftReady} aria-expanded={restart} aria-controls="writing-restart" onClick={() => { setNotice(""); setRestart(value => !value); }}><Icon name="replay" /> Luyện lại từ đầu</button>
         </div>}

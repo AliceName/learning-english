@@ -20,7 +20,7 @@ async function Practice({ params }: { params: Promise<{ courseId: string; lesson
   const user = session.status === "authenticated" ? session.user : undefined;
   if (!result || result.status !== "ok") return <MemberShell user={user}><main id="main-content" style={{ padding: 32 }}><h1>Chưa tải được bài luyện nói</h1><p>Vui lòng thử lại khi máy chủ sẵn sàng.</p><Link href={`/courses/${courseId}`}>Quay lại khóa học</Link></main></MemberShell>;
   const history = await getSpeakingHistory(Number(lessonId));
-  return <MemberShell user={user} variant="catalog" contentClassName={styles.workspaceContent}>
+  return <MemberShell user={user} variant="catalog" contentClassName={styles.workspaceContent} bookmarks>
     <SpeakingPractice key={result.data.lessonId} lesson={result.data}
       initialHistory={history.status === "ok" ? history.data : []} historyUnavailable={history.status !== "ok"} />
   </MemberShell>;

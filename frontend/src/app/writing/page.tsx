@@ -31,7 +31,7 @@ async function Workspace({ searchParams }: { searchParams: SearchParams }) {
     targetLevel={session.status === "authenticated" ? session.user.targetLevel : null}
     draftBaseId={writingSubmissionId(query.submissionId)} initialResult={initialResult} initialNotice={initialNotice}
     initialTask={initialTask} draftTaskId={taskId} custom={query.custom === "1"} />;
-  return session.status === "authenticated" ? <MemberShell user={session.user}>{form}</MemberShell>
+  return session.status === "authenticated" ? <MemberShell user={session.user} bookmarks>{form}</MemberShell>
     : <><PublicNavbar />{form}</>;
 }
 

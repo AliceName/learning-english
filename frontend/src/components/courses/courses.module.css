@@ -127,6 +127,7 @@
 .lessonSection { padding: 28px; background: white; border: 1px solid #eeedf6; border-radius: 16px; }
 .lessons { padding: 0; margin: 0; list-style: none; }
 .lessons li { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-top: 1px solid #eff0f7; }
+.lessons li:target { scroll-margin-top: 100px; background: #f4f8ff; }
 .lessonIndex { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px; background: #eef3ff; color: #527ac0; font-size: 12px; font-weight: 700; }
 .lessons h3 { font-size: 14px; font-weight: 650; color: #42506c; margin: 0 0 5px; overflow-wrap: anywhere; }
 .lessons li > div { min-width: 0; }
@@ -138,6 +139,7 @@
 .lessonButton:hover { background: #0043c4; border-color: #0043c4; box-shadow: 0 3px 7px #0754e524; }
 .lessonRetry { border-color: #9db7ff; background: linear-gradient(180deg, #fff, #f1f5ff); color: #0754e5; box-shadow: none; }
 .lessonRetry:hover { border-color: #6f96ff; background: #eaf1ff; box-shadow: none; }
+@media (min-width: 601px) { .lessonAction { max-width: 55%; } }
 .listeningStatus { color: #64829b; font-size: 11px; margin: 7px 0 0; }
 @media(max-width:600px) { .lessons li { flex-wrap: wrap; } .lessonAction { width: 100%; padding-left: 46px; justify-content: space-between; } .lessonAction small { margin-left: 0; } }
 @media(min-width:1700px) { .grid { gap: 26px; } .cover { height: 210px; } .coverBadges { gap: 137px; } .levelBadge { top: 162px; } }

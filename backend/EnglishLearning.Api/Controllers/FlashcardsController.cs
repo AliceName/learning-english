@@ -18,21 +18,20 @@ namespace EnglishLearning.Api.Controllers;
 [RequestSizeLimit(16 * 1024)]
 public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvider clock, ILogger<FlashcardsController> logger) : ControllerBase
 {
+    private const int DailyReviewLimit = 10;
     private static readonly SemaphoreSlim InMemoryWritingImport = new(1);
     private DateTime Now => clock.GetUtcNow().UtcDateTime;
     private static DateTime Utc(DateTime value) => DateTime.SpecifyKind(value, DateTimeKind.Utc);
     private static FlashcardResponse Card(Flashcard c, DateTime now) => new(c.CardId, c.DeckId, c.FrontText, c.BackText, c.ExampleSentence,
         c.IntervalDays, c.Repetition, c.NextReviewAt is { } date ? Utc(date) : null, Utc(c.UpdatedAt), c.NextReviewAt is null || c.NextReviewAt <= now);
     private IQueryable<FlashcardDeck> Owned(int owner) => db.FlashcardDecks.Where(d => d.UserId == owner);
-    private IQueryable<FlashcardDeck> Visible(int owner) => db.FlashcardDecks.Where(d => d.UserId == owner ||
-        db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin") &&
-        (d.CourseId == null || db.Courses.Any(c => c.CourseId == d.CourseId && c.IsPublished && (c.SourceType == "system" || c.CreatedBy == owner))));
     private IQueryable<Flashcard> OwnedCards(int owner) => db.Flashcards.Where(c => db.FlashcardDecks.Any(d => d.UserId == owner && d.DeckId == c.DeckId));
-    private IQueryable<DeckSummary> Summaries(int owner, DateTime now, int? deckId = null, int? courseId = null) => Visible(owner)
+    private IQueryable<DeckSummary> Summaries(int owner, DateTime now, int? deckId = null, int? courseId = null) => db.VisibleFlashcardDecks(owner)
         .Where(d => (deckId == null || d.DeckId == deckId) && (courseId == null || d.CourseId == courseId)).OrderByDescending(d => d.UpdatedAt).ThenByDescending(d => d.DeckId)
         .Select(d => new DeckSummary(d.DeckId, d.Title, d.Description, db.Flashcards.Count(c => c.DeckId == d.DeckId), d.UserId == owner ? db.Flashcards.Count(c => c.DeckId == d.DeckId && (c.NextReviewAt == null || c.NextReviewAt <= now)) : 0,
             d.UserId == owner, db.Users.Any(u => u.UserId == d.UserId && u.IsActive && u.Role == "admin"), d.CourseId,
-            db.Courses.Where(c => c.CourseId == d.CourseId).Select(c => c.Title).FirstOrDefault()));
+            db.Courses.Where(c => c.CourseId == d.CourseId).Select(c => c.Title).FirstOrDefault(),
+            d.UserId == owner ? db.Flashcards.Count(c => c.DeckId == d.DeckId && c.Repetition > 0) : 0));
     private async Task<IActionResult> Run(Func<int, Task<IActionResult>> action, CancellationToken ct)
     {
         Response.Headers.CacheControl = "private, no-store";
@@ -53,6 +52,19 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
             (c.IsPublished && (c.SourceType == "system" || c.CreatedBy == owner) ||
              c.SourceType == "system" && db.Users.Any(u => u.UserId == owner && u.Role == "admin")), ct)) return NotFound();
         return Ok(await Summaries(owner, Now, courseId: courseId).ToArrayAsync(ct));
+    }, ct);
+
+    [HttpGet("review/due")]
+    public Task<IActionResult> GetDueReview(CancellationToken ct) => Run(async owner =>
+    {
+        var now = Now;
+        var due = from card in db.Flashcards.AsNoTracking()
+                  join deck in Owned(owner) on card.DeckId equals deck.DeckId
+                  where card.NextReviewAt == null || card.NextReviewAt <= now
+                  orderby card.NextReviewAt == null, card.NextReviewAt, card.CardId
+                  select new { Card = card, DeckTitle = deck.Title };
+        var batch = await due.Take(DailyReviewLimit).ToArrayAsync(ct);
+        return Ok(batch.Select(item => new DueFlashcard(Card(item.Card, now), item.DeckTitle)).ToArray());
     }, ct);
 
     [HttpPost("decks")]
@@ -78,7 +90,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
     [HttpPost("decks/{id:int:min(1)}/copy")]
     public Task<IActionResult> Copy(int id, CancellationToken ct) => Run(async owner => {
         await using var transaction = db.Database.IsRelational() ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct) : null;
-        var source = await Visible(owner).AsNoTracking().SingleOrDefaultAsync(d => d.DeckId == id, ct);
+        var source = await db.VisibleFlashcardDecks(owner).SingleOrDefaultAsync(d => d.DeckId == id, ct);
         if (source is null) return NotFound();
         if (source.UserId == owner) return Problem(statusCode: 400, title: "Bộ thẻ này đã thuộc tài khoản của bạn.");
         if (await Owned(owner).CountAsync(ct) >= 100) return Problem(statusCode: 400, title: "Mỗi tài khoản tối đa 100 bộ thẻ riêng.");
