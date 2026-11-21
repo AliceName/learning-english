@@ -160,5 +160,6 @@ public sealed record AdminLessonResponse(int LessonId, string Title, string Skil
 public sealed record AdminCourseResponse(int CourseId, string Title, string? Description, string? CoverImageUrl,
     bool IsPublished, DateTime UpdatedAt, IReadOnlyList<AdminLessonResponse> Lessons);
 public sealed record AdminCourseListItem(int CourseId, string Title, string? CoverImageUrl, bool IsPublished, int LessonCount, DateTime UpdatedAt);
+public sealed record AdminCourseDeleted(int CourseId, string Title);
 public sealed record AdminCourseListResponse(IReadOnlyList<AdminCourseListItem> Items, int TotalCount, int Page, int PageSize, int TotalPages);
 public sealed record UploadedMediaResponse(string Url, string FileName, long Size, string ContentType);

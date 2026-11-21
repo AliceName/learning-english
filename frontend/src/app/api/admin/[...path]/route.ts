@@ -29,7 +29,7 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
   const path = (await context.params).path.join("/");
   const method = request.method;
   const questionImport = /^courses\/[1-9]\d*\/question-import\/preview$/.test(path) && method === "POST";
-  const valid = path === "courses" && ["GET","POST"].includes(method) || /^courses\/[1-9]\d*$/.test(path) && ["GET","PUT"].includes(method)
+  const valid = path === "courses" && ["GET","POST"].includes(method) || /^courses\/[1-9]\d*$/.test(path) && ["GET","PUT","DELETE"].includes(method)
     || /^courses\/[1-9]\d*\/lessons$/.test(path) && method === "POST" || /^courses\/[1-9]\d*\/lessons\/[1-9]\d*$/.test(path) && method === "PUT"
     || /^courses\/[1-9]\d*\/(publish|hide)$/.test(path) && method === "POST" || path === "uploads" && method === "POST"
     || path === "pronunciation/ipa" && method === "POST" || questionImport
@@ -86,3 +86,4 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
 export const GET = proxy;
 export const POST = proxy;
 export const PUT = proxy;
+export const DELETE = proxy;

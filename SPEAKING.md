@@ -172,6 +172,7 @@ Khi `Cloudinary:Enabled=true`, bản ghi đã chấm được lưu tại `{Envir
 - Upload lỗi (quota, mạng, timeout): vẫn lưu kết quả chấm, `AudioUrl` để trống và giao diện báo không có bản ghi để nghe lại. Không ghi tạm xuống đĩa.
 - Lưu database lỗi: xóa bản ghi vừa upload. Xóa lỗi chỉ ghi log để đối soát.
 - Mỗi người học × bài giữ audio của 20 lần luyện gần nhất. Lần cũ hơn giữ điểm, audio bị xóa và `AudioUrl` để trống.
+- Xóa khóa học sẽ xóa audio của các lần luyện thuộc khóa đó.
 - Chỉ bản ghi Speaking được phép xóa qua adapter; audio khóa học và từ điển không bị đụng tới.
 - `Cloudinary:AllowLegacyReads=true` cho phép đọc file cũ trên đĩa khi cloud không có.
 
