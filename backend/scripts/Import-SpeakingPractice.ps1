@@ -1,7 +1,8 @@
 param([switch]$Apply, [string]$CourseFile = (Join-Path $PSScriptRoot '../speaking-ai/training-practice-courses.json'))
 $ErrorActionPreference = 'Stop'
 $apiRoot = Join-Path $PSScriptRoot '../EnglishLearning.Api'
-$courses = @(Get-Content $CourseFile -Raw -Encoding UTF8 | ConvertFrom-Json)
+# Windows PowerShell 5.1 emits a JSON array as one object; enumerate it explicitly.
+$courses = @(Get-Content $CourseFile -Raw -Encoding UTF8 | ConvertFrom-Json | ForEach-Object { $_ })
 if ($courses.Count -eq 0 -or @($courses | Where-Object { $_.level -notin @('A1','A2','B1','B2','C1','C2') }).Count -gt 0) { throw 'Expected courses with valid CEFR content levels.' }
 foreach ($course in $courses) {
     if ($course.lessons.Count -lt 1 -or $course.lessons.Count -gt 30) { throw 'Expected one to thirty lessons per course.' }
