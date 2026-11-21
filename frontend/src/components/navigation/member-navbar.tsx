@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { DAY_MS, LEARNING_ACTIVITY_CHANGED, VIETNAM_OFFSET } from "@/lib/learning-activity";
 import type { PublicUser } from "@/lib/server-auth";
 import Icon, { type SiteIconName } from "@/components/site-icon";
+import { useCloseWhenHidden } from "@/lib/use-close-when-hidden";
 import Brand from "./brand";
 import NavbarShell from "./navbar-shell";
 import LogoutButton from "./logout-button";
@@ -15,7 +16,7 @@ import publicStyles from "./navbar.module.css";
 import styles from "./member-navbar.module.css";
 
 const links: { label: string; icon: SiteIconName; href?: string }[] = [
-  { label: "Tổng quan", icon: "dashboard", href: "/account" },
+  { label: "Tổng quan", icon: "dashboard", href: "/dashboard" },
   { label: "Khóa học", icon: "book", href: "/courses" },
   { label: "Luyện nói", icon: "mic", href: "/speaking" },
   { label: "Luyện phiên dịch", icon: "translate", href: "/translation-practice" },
@@ -31,6 +32,7 @@ const links: { label: string; icon: SiteIconName; href?: string }[] = [
 export default function MemberNavbar({ user, variant = "workspace" }: { user?: PublicUser; variant?: "workspace" | "compact" }) {
   const pathname = usePathname();
   const drawer = useRef<HTMLDialogElement>(null);
+  useCloseWhenHidden(drawer);
   const userId = user?.userId;
   const [latest, setLatest] = useState<{ userId: number; streak: number }>();
   const streak = latest && latest.userId === userId ? latest.streak : user?.currentStreak;

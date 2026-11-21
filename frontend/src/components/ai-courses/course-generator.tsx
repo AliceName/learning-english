@@ -141,7 +141,7 @@ export default function CourseGenerator({ fullName, targetLevel }: { fullName?: 
 
   return <main id="main-content" tabIndex={-1} className={styles.page}>
     <div className={styles.hero}>
-      <nav className={styles.breadcrumb} aria-label="Đường dẫn"><Link href="/account" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" /><Link href="/courses">Khóa học</Link><Icon name="chevron" /><span>Tạo khóa học AI</span></nav>
+      <nav className={styles.breadcrumb} aria-label="Đường dẫn"><Link href="/dashboard" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" /><Link href="/courses">Khóa học</Link><Icon name="chevron" /><span>Tạo khóa học AI</span></nav>
       <header className={styles.intro}>
         <div className={styles.introCopy}>
           <p className={styles.greeting}>Chào {firstName}, cùng tạo một lộ trình mới.</p>

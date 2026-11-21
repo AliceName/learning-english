@@ -148,7 +148,7 @@ export default function TranslationPractice() {
     <TranslationScenery />
     <header className={styles.hero}>
       <nav aria-label="Vị trí trang" className={styles.breadcrumb}>
-        <Link href="/account" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" />
+        <Link href="/dashboard" aria-label="Tổng quan"><Icon name="home" /></Link><Icon name="chevron" />
         <span aria-current="page">Luyện phiên dịch</span>
       </nav>
       <div className={styles.heroTitle}>
