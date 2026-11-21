@@ -200,7 +200,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(result["errors"]), 1)
         self.assertEqual(result["errors"][0]["suggestion"], "She goes home.")
         self.assertEqual(result["correctedText"], original.replace("She go home.", "She goes home.", 1))
-        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v3")
+        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v4")
 
     def test_coverage_for_twenty_twenty_one_and_twenty_two_repeated_sentences(self):
         for count in (20, 21, 22):
@@ -339,6 +339,19 @@ class EngineTests(unittest.TestCase):
                 received.clear()
                 engine.analyze("Hi Sam,\nI likes books.\n" + closing + "\nAn", True)
                 self.assertEqual(received, ["I likes books."])
+
+    def test_rule_fix_is_suggested_when_the_model_changes_nothing(self):
+        engine, _ = self.engine(lambda text: text)
+        result = engine.analyze("After that we drinked some juice.", True)
+        self.assertEqual(result["correctedText"], "After that we drank some juice.")
+        self.assertEqual(result["gecCoverage"]["changed"], 1)
+
+    def test_invented_word_is_dropped_but_other_edits_in_the_sentence_stay(self):
+        engine, _ = self.engine(lambda text: text.replace("a animation", "an animation").replace("try", "trys"))
+        result = engine.analyze("It is a animation film and his father try hard.", True)
+        self.assertEqual(result["correctedText"], "It is an animation film and his father try hard.")
+        self.assertEqual(result["gecCoverage"]["rejected"], 0)
+        self.assertTrue(any("rủi ro" in warning for warning in result["warnings"]))
 
     def test_prose_line_missing_its_full_stop_is_still_corrected(self):
         received = []

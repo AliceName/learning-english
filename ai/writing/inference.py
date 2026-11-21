@@ -10,6 +10,7 @@ from pathlib import Path
 
 from data import ROOT, LEVELS
 from gec_safety import GUARD_VERSION, body_sentence_spans, correction_rejection_reason
+from gec_postedit import add_rule_fixes, keep_safe_edits
 from writing_explanations import TEMPLATE_VERSION, explain_accepted_change
 from cefr_input import POLICY_VERSION, assess_input, assessment_message
 
@@ -157,6 +158,14 @@ class WritingEngine:
                             r"\1n\2t", core, flags=re.IGNORECASE)
                         if not core:
                             raise IncompleteGenerationError("Mô hình trả về bản sửa rỗng.")
+                        # Whole-sentence corruption (layout, numbers, negation, lost segments) is
+                        # rejected as before; single risky edits are dropped and the rest kept.
+                        reason = correction_rejection_reason(original.strip(), core)
+                        if reason in (None, "nonword"):
+                            core, dropped = keep_safe_edits(original.strip(), core)
+                            core = add_rule_fixes(core)
+                            if dropped:
+                                warnings.append("Một số gợi ý sửa rủi ro (từ không tồn tại, xóa “the”, xóa nội dung…) đã được bỏ; các gợi ý khác trong câu vẫn được giữ.")
                         if correction_rejection_reason(original.strip(), core):
                             coverage["rejected"] += 1
                             pieces.append(original)
