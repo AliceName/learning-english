@@ -40,10 +40,23 @@ public sealed class FlashcardTests
     }
 
     [Fact]
+    public void Writing_candidates_find_phrases_in_a_clean_essay_with_verb_forms_and_one_inserted_word()
+    {
+        const string text = "Last year, I made good progress in English. I feel nervous in front of my classmates.\n"
+            + "I want to improve my time management and manage my time better. I took notes. As a result of this, I passed.";
+        var candidates = WritingCardCandidates.Find(text, []);
+        Assert.Equal(new[] { "make progress", "in front of", "time management", "manage time", "take notes", "as a result of" },
+            candidates.Select(c => c.Term));
+        Assert.Contains("made good progress", candidates[0].Reason);
+        Assert.Equal("Last year, I made good progress in English.", candidates[0].Context);
+        Assert.Empty(WritingCardCandidates.Find("I made a cake and took the bus. The progress bar moved.", []));
+    }
+
+    [Fact]
     public void Writing_candidates_use_typed_v2_corrections_for_spelling_word_choice_and_prepositions()
     {
         const string v2 = "vi-edit-templates-v2";
-        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it.";
+        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it. I listen english songs. At weddings, we dance.";
         WritingSuggestion Edit(string original, string suggestion, WritingExplanation explanation) =>
             new(original, suggestion, [explanation], text.IndexOf(original, StringComparison.Ordinal), text.IndexOf(original, StringComparison.Ordinal) + original.Length);
         var edits = new[]
@@ -53,6 +66,9 @@ public sealed class FlashcardTests
             Edit("I listen music.", "I listen to music.", new("PREP", "", "to", "m", v2)),
             Edit("She go home.", "She goes home.", new("VERB:SVA", "go", "goes", "m", v2)),
             Edit("We discussed about it.", "We discussed it.", new("PREP", "about", "", "m", v2)),
+            // Real outputs from the 50-essay run: the span carries the next word, or no preposition at all.
+            Edit("I listen english songs.", "I listen to English songs.", new("PREP", "english", "to English", "m", v2)),
+            Edit("At weddings, we dance.", "Weddings, we dance.", new("PREP", "At weddings", "Weddings,", "m", v2)),
         };
         var candidates = WritingCardCandidates.Find(text, edits);
         Assert.Equal(new[] { "beautiful", "large", "listen to" }, candidates.Select(c => c.Term));
