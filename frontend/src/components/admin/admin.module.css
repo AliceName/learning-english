@@ -485,3 +485,27 @@
 .confirmDelete { display: grid; gap: 8px; max-width: 280px; padding: 10px 12px; border: 1px solid #f2b8b5; border-radius: 10px; background: #fff1f0; text-align: left; }
 .confirmDelete p { margin: 0; font-size: 12px; line-height: 1.5; }
 .confirmDelete > div { display: flex; flex-wrap: wrap; gap: 6px; }
+/* User management */
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.panelTitle { margin: 0 0 12px; color: #293952; font-size: 15px; font-weight: 750; }
+.panel + .panel { margin-top: 18px; }
+.roleAdmin, .lockedBadge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 10px; border-radius: 20px; font-size: 11px; white-space: nowrap; }
+.roleAdmin { color: #5b3ea8; background: #f1ecff; }
+.lockedBadge { color: #a92542; background: #fff2f5; }
+.badgeRow { display: flex; flex-wrap: wrap; gap: 8px; }
+.userFilters { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(3, minmax(130px, 1fr)) auto; gap: 12px; align-items: end; margin-bottom: 18px; }
+.filterActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.auditList { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.auditList li { display: grid; gap: 3px; padding: 10px 12px; border-radius: 10px; background: #f8f9ff; color: #45516c; font-size: 12px; overflow-wrap: anywhere; }
+.auditList small { color: #8a93a8; font-size: 11px; }
+.userStats, .userFacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0 0; }
+.userStats div, .userFacts div { padding: 12px 14px; border-radius: 10px; background: #f8f9ff; }
+.userStats dt, .userFacts dt { color: #8a93a8; font-size: 11px; }
+.userStats dd { margin: 4px 0 0; color: #293952; font-size: 20px; font-weight: 800; }
+.userFacts dd { margin: 4px 0 0; color: #45516c; font-size: 13px; font-weight: 650; }
+.userActions { display: grid; gap: 10px; }
+.userActions .confirmDelete { max-width: 520px; }
+.userActions textarea { min-height: 70px; }
+@media (max-width: 900px) { .userFilters { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .userFilters { grid-template-columns: 1fr; } }
+.tableWrap { position: relative; } /* keeps visually hidden labels inside the scroll area on narrow screens */

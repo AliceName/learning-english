@@ -133,6 +133,8 @@ builder.Services.AddScoped<LearningActivityService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddScoped<AdminUserService>();
+builder.Services.AddSingleton<AdminAuditLog>();
 builder.Services.AddSingleton<AiCourseStore>();
 builder.Services.AddSingleton<AiApiGateway>();
 builder.Services.AddHttpClient<GeminiCourseClient>(client =>

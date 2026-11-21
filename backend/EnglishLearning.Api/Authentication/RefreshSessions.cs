@@ -88,6 +88,20 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
         }
     }
 
+    /// <summary>
+    /// Ends every session of a user (used when an admin locks the account). Access tokens carry the
+    /// session id and are checked on each request, so they stop working at once too.
+    /// </summary>
+    public int RevokeUser(int userId)
+    {
+        lock (gate)
+        {
+            var ids = sessions.Where(item => item.Value.UserId == userId).Select(item => item.Key).ToArray();
+            foreach (var id in ids) sessions.Remove(id);
+            return ids.Length;
+        }
+    }
+
     public void Revoke(string token)
     {
         if (!TryRead(token, out var id, out var secret)) return;

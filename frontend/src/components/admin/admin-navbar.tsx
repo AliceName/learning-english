@@ -6,13 +6,15 @@ import type { PublicUser } from "@/lib/server-auth";
 import Icon, {type SiteIconName} from "@/components/site-icon";
 import LogoutButton from "@/components/navigation/logout-button";
 import Brand from "@/components/navigation/brand";
+import { useCloseWhenHidden } from "@/lib/use-close-when-hidden";
 import styles from "./admin.module.css";
 const items: {name:string;icon:SiteIconName;href?:string}[] = [
-  {name:"Tổng quan",icon:"dashboard",href:"/account"},{name:"Quản lý khóa học",icon:"book",href:"/admin/courses"},
-  {name:"Quản lý người dùng",icon:"users"},{name:"Quản lý API AI",icon:"brain",href:"/admin/ai-usage"}
+  {name:"Quản lý khóa học",icon:"book",href:"/admin/courses"},
+  {name:"Quản lý người dùng",icon:"users",href:"/admin/users"},{name:"Quản lý API AI",icon:"brain",href:"/admin/ai-usage"}
 ];
 export default function AdminNavbar({user}:{user:PublicUser}) {
   const path = usePathname(); const drawer = useRef<HTMLDialogElement>(null);
+  useCloseWhenHidden(drawer);
   const nav = <><Brand href="/admin/courses" compact className={styles.brand} />
     <div className={styles.sidebarNav}><span className={styles.navCaption}>CHỨC NĂNG CHÍNH</span><nav aria-label="Điều hướng Admin">{items.map(item=>item.href?<Link key={item.name} href={item.href} aria-current={path.startsWith(item.href)?"page":undefined} onClick={()=>drawer.current?.close()}><Icon name={item.icon}/>{item.name}</Link>:<span key={item.name} aria-disabled="true"><Icon name={item.icon}/>{item.name}<small>Sắp có</small></span>)}</nav></div>
     <div className={styles.sidebarFooter}><div className={styles.adminCard}><span>Quản trị viên</span><strong>{user.fullName}</strong><small>{user.email}</small></div><LogoutButton/><Link href="/courses">← Không gian học tập</Link></div></>;

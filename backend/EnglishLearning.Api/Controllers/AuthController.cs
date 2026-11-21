@@ -103,6 +103,11 @@ public sealed class AuthController(
             if (request.PreviousRefreshToken is not null) refreshSessions.Revoke(request.PreviousRefreshToken);
             return Ok(tokenService.CreateToken(user, session));
         }
+        catch (AccountLockedException)
+        {
+            return Problem(statusCode: StatusCodes.Status403Forbidden,
+                title: "Tài khoản đã bị khóa.", detail: "Vui lòng liên hệ quản trị viên để được hỗ trợ.");
+        }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             return StatusCode(StatusCodes.Status499ClientClosedRequest);

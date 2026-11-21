@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
 using EnglishLearning.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,7 @@ namespace EnglishLearning.Api.Controllers;
 [ApiController, Authorize, Route("api/v1/translation-practice"), Tags("Translation practice")]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None), RequestSizeLimit(8192)]
 public sealed class TranslationPracticeController(TranslationPracticeService practice, TranslationRequestReplay replay,
-    LearningActivityService activity, ILogger<TranslationPracticeController> logger) : ControllerBase
+    LearningActivityService activity, EnglishLearningDbContext db, ILogger<TranslationPracticeController> logger) : ControllerBase
 {
     [HttpPost("prompts/next"), EnableRateLimiting("TranslationNext")]
     public Task<IActionResult> Next(TranslationNextRequest request, CancellationToken ct) => ExecuteAsync((userId) =>
@@ -36,7 +37,12 @@ public sealed class TranslationPracticeController(TranslationPracticeService pra
     private async Task<IActionResult> ExecuteAsync<T>(Func<int, Task<T>> run)
     {
         if (!int.TryParse(User.FindFirstValue(JwtRegisteredClaimNames.Sub), out var userId) || userId <= 0) return Unauthorized();
-        try { return Ok(await run(userId)); }
+        try
+        {
+            // A locked account keeps no access, even with a token issued before it was locked.
+            if (!await db.Users.AnyAsync(item => item.UserId == userId && item.IsActive, HttpContext.RequestAborted)) return Unauthorized();
+            return Ok(await run(userId));
+        }
         catch (TranslationPracticeException error)
         {
             if (error.RetryAfter is { } seconds)
