@@ -53,6 +53,25 @@ _IRREGULAR = {
     "weared": ("wore", "worn"), "winned": ("won", "won"), "writed": ("wrote", "written"),
 }
 _IRREGULAR = {key: value for key, value in _IRREGULAR.items() if value}
+# Grammar words: swapping these is a grammar edit (article, preposition, auxiliary...), not a change of content.
+_FUNCTION = {
+    "a", "an", "the", "this", "that", "these", "those", "some", "any", "no", "every", "each", "all", "both",
+    "either", "neither", "another", "other", "such", "what", "which", "who", "whom", "whose", "where", "when",
+    "why", "how", "i", "me", "my", "mine", "you", "your", "yours", "he", "him", "his", "she", "her", "hers",
+    "it", "its", "we", "us", "our", "ours", "they", "them", "their", "theirs", "myself", "yourself", "himself",
+    "herself", "itself", "ourselves", "themselves", "one", "ones", "there", "here", "at", "in", "on", "for",
+    "to", "with", "about", "from", "of", "by", "during", "after", "before", "into", "onto", "over", "under",
+    "since", "until", "till", "through", "between", "among", "against", "without", "within", "towards",
+    "toward", "upon", "around", "across", "behind", "like", "as", "than", "and", "or", "but", "so", "because",
+    "although", "though", "if", "unless", "while", "whether", "nor", "yet", "then", "be", "am", "is", "are",
+    "was", "were", "been", "being", "have", "has", "had", "having", "do", "does", "did", "done", "doing", "will",
+    "would", "shall", "should", "can", "could", "may", "might", "must", "not", "much", "many", "more", "most",
+    "less", "least", "few", "fewer", "little", "lot", "lots", "very", "too", "also", "only", "just", "even",
+    "still", "already", "ever", "never", "always", "often", "really", "quite", "rather", "enough", "up",
+    "down", "out", "off", "away", "back", "again",
+}
+# Rule fixes switched on in add_rule_fixes; offline ablations may narrow this set.
+RULE_FIXES = frozenset({"irregular_past", "much_less"})
 _PERFECT = {"have", "has", "had", "having", "'ve", "’ve", "be", "been", "being", "is", "are", "was", "were", "am", "'s", "’s"}
 
 
@@ -95,7 +114,7 @@ def _plural_subject(doc, char_start: int) -> bool:
 
 
 def _risk(old: list[str], new: list[str], position: int, doc, char_start: int,
-          previous: str = "", following: str = "") -> str | None:
+          previous: str = "", following: str = "", old_lemmas=None, new_lemmas=None) -> str | None:
     """Why one change must not be shown, or None when it can stay."""
     old_lower, new_lower = [word.casefold() for word in old], [word.casefold() for word in new]
     old_words = [word for word in old_lower if word[0].isalnum()]
@@ -106,6 +125,9 @@ def _risk(old: list[str], new: list[str], position: int, doc, char_start: int,
         return "article_deletion"  # "afraid of the dark" -> "afraid of dark"
     if len(old_words) - len(new_words) >= 2:
         return "content_deletion"  # "create meeting rooms and common area" -> "create a common area"
+    if (len(new_words) - len(old_words) >= 2
+            and sum(word.isalpha() and word not in _FUNCTION and word not in old_words for word in new_words) >= 2):
+        return "content_insertion"  # "I sometimes a little bit" -> "I sometimes a little bit scared because ... a little bit"
     if not new_words and len(old_words) == 1 and old_words[0] in _PRONOUNS:
         return "pronoun_deletion"  # "reasons for learning it." -> "reasons for learning."
     if (not old_words and new_words and new_words[0] in ("a", "an", "the") and previous == "by"
@@ -116,7 +138,26 @@ def _risk(old: list[str], new: list[str], position: int, doc, char_start: int,
     if (doc is not None and len(old_words) == len(new_words) == 1 and len(old) == 1
             and new_words[0] == _third_person(old_words[0]) and _plural_subject(doc, char_start)):
         return "plural_subject"  # "flowers, which only bloom" -> "blooms"
+    if _swapped_content(old_words, new_words, old_lemmas, new_lemmas) and _swapped_content(
+            new_words, old_words, new_lemmas, old_lemmas):
+        return "word_substitution"  # "the main reason" -> "the real reason"
     return None
+
+
+def _swapped_content(words: list[str], others: list[str], lemmas, other_lemmas) -> bool:
+    """True when `words` has a content word with no spelling, inflection or lemma match in `others`."""
+    other_lemmas = set(other_lemmas or ())
+    for word, lemma in zip(words, lemmas or [None] * len(words)):
+        if not word.isalpha() or word in _FUNCTION or word in others or (lemma and lemma in other_lemmas):
+            continue
+        if not any(SequenceMatcher(a=word, b=other, autojunk=False).ratio() >= 0.6 for other in others):
+            return True
+    return False
+
+
+def _lemmas(doc) -> dict:
+    """Character offset -> lower-case lemma, for tokens of a parsed sentence."""
+    return {token.idx: token.lemma_.casefold() for token in doc} if doc is not None else {}
 
 
 def keep_safe_edits(original: str, proposed: str) -> tuple[str, list[str]]:
@@ -131,6 +172,7 @@ def keep_safe_edits(original: str, proposed: str) -> tuple[str, list[str]]:
         return proposed, []
     nlp = _nlp()
     doc = nlp(original) if nlp is not None else None
+    old_lemma, new_lemma = _lemmas(doc), _lemmas(nlp(proposed) if nlp is not None else None)
     pieces, dropped = [], []
     for tag, i1, i2, j1, j2 in opcodes:
         if tag == "equal":
@@ -139,7 +181,11 @@ def keep_safe_edits(original: str, proposed: str) -> tuple[str, list[str]]:
         char_start = source[i1].start() if i1 < len(source) else len(original)
         previous = old_tokens[i1 - 1].casefold() if i1 else ""
         following = old_tokens[i2].casefold() if i2 < len(old_tokens) else ""
-        reason = _risk(old_tokens[i1:i2], new_tokens[j1:j2], i1, doc, char_start, previous, following)
+        old_words = [m for m in source[i1:i2] if m.group()[0].isalnum()]
+        new_words = [m for m in target[j1:j2] if m.group()[0].isalnum()]
+        reason = _risk(old_tokens[i1:i2], new_tokens[j1:j2], i1, doc, char_start, previous, following,
+                       [old_lemma.get(m.start()) for m in old_words] if old_lemma else None,
+                       [new_lemma.get(m.start()) for m in new_words] if new_lemma else None)
         if reason:
             dropped.append(reason)
             pieces.extend(old_segments[i1:i2])
@@ -157,12 +203,12 @@ def add_rule_fixes(text: str) -> str:
     lowered = [match.group().casefold() for match in tokens]
     for index, match in enumerate(tokens):
         word = lowered[index]
-        if word in _IRREGULAR:
+        if word in _IRREGULAR and "irregular_past" in RULE_FIXES:
             past, participle = _IRREGULAR[word]
             perfect = any(previous in _PERFECT for previous in lowered[max(0, index - 3):index])
             replacements.append((match, participle if perfect else past))
     nlp = _nlp()
-    if nlp is not None and re.search(r"\b(?:much|less)\b", text, re.IGNORECASE):
+    if nlp is not None and "much_less" in RULE_FIXES and re.search(r"\b(?:much|less)\b", text, re.IGNORECASE):
         doc = nlp(text)
         for token in doc[:-1]:
             following = doc[token.i + 1]

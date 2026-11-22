@@ -38,6 +38,35 @@ class KeepSafeEditsTests(unittest.TestCase):
             with self.subTest(original=original):
                 self.assertEqual(keep_safe_edits(original, proposed), (proposed, []))
 
+    def test_content_swaps_and_inserted_phrases_are_dropped(self):
+        # Fictional sentences modelled on dev-set patterns: a content word replaced by an unrelated one,
+        # and a phrase from the same sentence inserted a second time.
+        cases = (
+            ("The main reason is money.", "The real reason is money.", "word_substitution"),
+            ("But I sometimes a little bit worried.",
+             "But I sometimes a little bit worried because this website is a little bit worried.", "content_insertion"),
+        )
+        for original, proposed, reason in cases:
+            with self.subTest(reason=reason):
+                self.assertEqual(keep_safe_edits(original, proposed), (original, [reason]))
+
+    def test_spelling_inflection_and_grammar_word_swaps_are_not_content_swaps(self):
+        for original, proposed in (("She is very beautifull.", "She is very beautiful."),
+                                   ("I am interesting in music.", "I am interested in music."),
+                                   ("My dream job is a docter.", "My dream job is a doctor."),
+                                   ("He have two book.", "He has two books."),
+                                   ("I am good in English.", "I am good at English."),
+                                   ("It is a important day.", "It is an important day.")):
+            with self.subTest(original=original):
+                self.assertEqual(keep_safe_edits(original, proposed), (proposed, []))
+
+    @unittest.skipUnless(errant_available(), "needs ERRANT and en_core_web_sm")
+    def test_irregular_tense_changes_share_a_lemma(self):
+        for original, proposed in (("Last month I make a cake.", "Last month I made a cake."),
+                                   ("I go to school yesterday.", "I went to school yesterday.")):
+            with self.subTest(original=original):
+                self.assertEqual(keep_safe_edits(original, proposed), (proposed, []))
+
     def test_whitespace_of_the_learner_text_is_preserved_around_kept_edits(self):
         original = "I   like the dark  and she go home."
         proposed = "I like dark and she goes home."

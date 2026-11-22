@@ -200,7 +200,7 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(result["errors"]), 1)
         self.assertEqual(result["errors"][0]["suggestion"], "She goes home.")
         self.assertEqual(result["correctedText"], original.replace("She go home.", "She goes home.", 1))
-        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v4")
+        self.assertEqual(result["provenance"]["guardVersion"], "gec-safety-v5")
 
     def test_coverage_for_twenty_twenty_one_and_twenty_two_repeated_sentences(self):
         for count in (20, 21, 22):

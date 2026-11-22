@@ -11,7 +11,7 @@ from functools import lru_cache
 from importlib import resources
 import re
 
-GUARD_VERSION = "gec-safety-v4"
+GUARD_VERSION = "gec-safety-v5"
 
 
 _WORDS = re.compile(r"[^\W_]+(?:['’][^\W_]+)*", re.UNICODE)

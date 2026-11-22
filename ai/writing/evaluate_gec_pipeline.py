@@ -53,6 +53,23 @@ def build_engine(run: Path, device: str, num_beams: int):
     return engine
 
 
+def record_raw(adapter) -> dict:
+    """Wrap ``adapter.correct`` so every raw model output (None = incomplete) is kept for offline re-scoring."""
+    from inference import IncompleteGenerationError
+    raw, generate = {}, adapter.correct
+
+    def correct(text):
+        try:
+            raw[text] = generate(text)
+        except IncompleteGenerationError:
+            raw[text] = None
+            raise
+        return raw[text]
+
+    adapter.correct = correct
+    return raw
+
+
 def run_pipeline(engine, text: str, passes: int):
     """Return (prediction, coverage Counter, status) for one input, applying the pipeline `passes` times."""
     from inference import InputBudgetError
@@ -120,9 +137,13 @@ def main(argv=None):
     parser.add_argument("--num-beams", type=int, default=1)
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--full-dev", action="store_true", help="Score every dev row that fits, not a balanced sample")
+    parser.add_argument("--save-raw", action="store_true",
+                        help="Also write raw-outputs.jsonl (private) so post-processing can be re-scored without the model")
     args = parser.parse_args(argv)
     if args.per_group < 1 or args.passes < 1 or args.num_beams < 1:
         parser.error("Sample count, passes and beams must be positive")
+    if args.save_raw and args.passes != 1:
+        parser.error("--save-raw supports one pass only")
     if args.output.exists():
         parser.error("Output directory already exists")
     dev = read_jsonl(args.dev_file)
@@ -137,7 +158,12 @@ def main(argv=None):
     else:
         groups = sample_dev(dev, engine.gec.tokenizer, manifest["max_input_length"], manifest["max_target_length"],
                             args.per_group, args.seed)
+    raw = record_raw(engine.gec) if args.save_raw else None
     report = score(groups, engine, args.passes, args.output)
+    if raw is not None:
+        with (args.output / "raw-outputs.jsonl").open("w", encoding="utf-8") as handle:
+            for source, output in raw.items():
+                handle.write(json.dumps({"input": source, "output": output}, ensure_ascii=False) + "\n")
     report.update({"kind": "served_pipeline_full_dev_not_test" if args.full_dev
                    else "served_pipeline_balanced_dev_diagnostic_not_full_dev_or_test",
                    "run": args.run.name, "adapter_sha256": engine.gec.adapter_sha256,
