@@ -119,7 +119,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
         var submission = await FindWriting(owner, submissionId, ct);
         if (submission is null) return NotFound();
         var analysis = WritingController.ReadAnalysis(submission);
-        var candidates = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors);
+        var candidates = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors, analysis.Upgrades);
         if (candidates.Length > 0)
         {
             var cards = await OwnedCards(owner).AsNoTracking().OrderBy(c => c.CardId)
@@ -137,7 +137,7 @@ public sealed class FlashcardsController(EnglishLearningDbContext db, TimeProvid
         var submission = await FindWriting(owner, submissionId, ct);
         if (submission is null) return NotFound();
         var analysis = WritingController.ReadAnalysis(submission);
-        var candidate = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors)
+        var candidate = WritingCardCandidates.Find(submission.OriginalText, analysis.Errors, analysis.Upgrades)
             .FirstOrDefault(candidate => candidate.Term == request.SourceTerm);
         if (candidate is null)
             return BadRequest(new { detail = "Gợi ý không thuộc phiên bản Writing này." });

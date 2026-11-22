@@ -54,6 +54,22 @@ test("optional input policy provenance accepts legacy absence but rejects malfor
     assert.equal(writing.isWritingResult({ ...result, provenance: { ...result.provenance, inputPolicyVersion } }), false);
 });
 
+test("optional provider provenance accepts legacy absence and Gemini but rejects malformed values", () => {
+  for (const provider of [undefined, null, "gemini"])
+    assert.equal(writing.isWritingResult({ ...result, provenance: { ...result.provenance, provider } }), true);
+  for (const provider of ["", " ", 1, {}, "p".repeat(41)])
+    assert.equal(writing.isWritingResult({ ...result, provenance: { ...result.provenance, provider } }), false);
+});
+
+test("plan-B upgrades must quote the essay and use known kinds and levels", () => {
+  const text = result.originalText;
+  const good = { original: text.slice(0, 9), suggestion: "A better start", kind: "vocabulary", level: "B2", term: "better", message: "Hay hơn.", sourceStart: 0, sourceEnd: 9 };
+  for (const upgrades of [undefined, null, [], [good], [{ ...good, level: null, term: null }]])
+    assert.equal(writing.isWritingResult({ ...result, upgrades }), true);
+  for (const bad of [{ ...good, original: "Not quoted" }, { ...good, kind: "style" }, { ...good, level: "A1" }, { ...good, message: "" }, { ...good, sourceEnd: 8 }])
+    assert.equal(writing.isWritingResult({ ...result, upgrades: [bad] }), false);
+});
+
 test("feedback cannot introduce absent quotes, duplicate criteria, unsupported grammar or topic judgments", () => {
   for (const item of [
     { ...feedback.items[0], quote: "This sentence never existed." },
@@ -166,12 +182,13 @@ test("saved feedback renders evidence as text without auto-requesting or changin
   const React = require("react"), { renderToStaticMarkup } = require("react-dom/server");
   const styles = { default: new Proxy({}, { get: (_, key) => key }) };
   const icon = { default: () => null };
+  const infoTip = { InfoTip: ({ children }) => React.createElement("span", null, children) };
   const revision = loadTs("lib/writing-revision.ts", { "./writing-diff": writingDiff, "./writing": writing });
   const review = loadTs("lib/writing-review.ts");
   const comparison = loadTs("app/writing/writing-comparison.tsx", {
     react: React, "react/jsx-runtime": require("react/jsx-runtime"),
     "@/components/site-icon": icon, "@/lib/writing": writing, "@/lib/writing-revision": revision,
-    "./writing.module.css": styles,
+    "./info-tip": infoTip, "./writing.module.css": styles,
   });
   let fetchCalls = 0;
   const practice = loadTs("lib/writing-practice.ts");
@@ -193,14 +210,15 @@ test("saved feedback renders evidence as text without auto-requesting or changin
     "./use-writing-preflight": { useWritingPreflight: () => ({ current: null, retry() {}, remember() {} }) },
     "./writing-history": { default: () => null },
     "./writing-flashcards": { default: () => null },
+    "./writing-upgrades": { default: () => null },
     "./writing-task-library": { default: () => null, taskLevels: { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" } },
     "./writing-comparison": comparison,
     "@/lib/writing-practice": practice,
     "./writing-practice-panels": loadTs("app/writing/writing-practice-panels.tsx", {
       react: React, "react/jsx-runtime": require("react/jsx-runtime"), "@/components/site-icon": icon,
-      "@/lib/writing-practice": practice, "./writing.module.css": styles,
+      "@/lib/writing-practice": practice, "./info-tip": infoTip, "./writing.module.css": styles,
     }),
-    "./writing.module.css": styles,
+    "./info-tip": infoTip, "./writing.module.css": styles,
   }, { fetch: () => { fetchCalls += 1; throw new Error("Unexpected automatic request"); } }).default;
   const html = renderToStaticMarkup(React.createElement(form, { authenticated: true, unavailable: false, targetLevel: "B2", initialResult: result }));
   assert.equal(fetchCalls, 0);

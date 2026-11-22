@@ -8,7 +8,7 @@ import Icon from "@/components/site-icon";
 import { InfoTip } from "./info-tip";
 import { isCefrLevel, isWritingResult, sameWritingCoverage, writingFeedbackEligible, taskWordGuidance, type WritingResult, type WritingTask } from "@/lib/writing";
 import { diffWritingText } from "@/lib/writing-diff";
-import { applyWritingEdits, currentEditPosition, writingEdits } from "@/lib/writing-revision";
+import { applyWritingEdits, currentEditPosition, editInDraft, writingEdits } from "@/lib/writing-revision";
 import { isWritingCapabilities, writingInputIssue, type WritingCapabilities } from "@/lib/writing-capabilities";
 import { clearWritingDraft, loadPreviousWritingDraft, loadWritingDraft, restorePreviousWritingDraft,
   saveWritingDraft, writingDraftStorage } from "@/lib/writing-draft";
@@ -21,6 +21,7 @@ import { RevisionChecklistPanel, SelfCheck, TaskPrompt, VersionProgressCard } fr
 import WritingComparison, { DiffText, visibleEdit, WritingSummary } from "./writing-comparison";
 import WritingHistoryPanel from "./writing-history";
 import WritingFlashcards from "./writing-flashcards";
+import WritingUpgrades from "./writing-upgrades";
 import WritingTaskLibrary, { taskLevels } from "./writing-task-library";
 import styles from "./writing.module.css";
 
@@ -28,7 +29,7 @@ const criterionLabels = { content: "Nội dung & bám đề", organization: "T�
   vocabulary: "Từ vựng & văn phong", grammar: "Giải thích chỉnh sửa ngữ pháp" };
 const taskBands: Record<string, string> = { Beginner: "A1–A2", Intermediate: "B1–B2", Advanced: "C1–C2" };
 
-const standingWarning = /^(CEFR là ước lượng thử nghiệm|CEFR không xét độ bám đề|Bản sửa là gợi ý thử nghiệm|Chưa có gợi ý thay đổi không có nghĩa|Một số gợi ý sửa rủi ro)/u;
+const standingWarning = /^(CEFR là ước lượng thử nghiệm|CEFR không xét độ bám đề|Bản sửa là gợi ý thử nghiệm|Chưa có gợi ý thay đổi không có nghĩa|Một số gợi ý sửa rủi ro|Gợi ý sửa do AI bên ngoài)/u;
 
 export default function WritingForm({ authenticated, unavailable, userId = null, targetLevel = null, draftBaseId = null, initialResult = null, initialNotice = "", initialTask = null, draftTaskId = null, custom = false }: {
   authenticated: boolean; unavailable: boolean; userId?: number | null; draftBaseId?: number | null;
@@ -103,6 +104,11 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   const draftPositionsKnown = text === managedText;
   const canReview = draftReady && !pending && !feedbackPending;
   const canChooseEdits = canReview && draftPositionsKnown;
+  // After hand edits the exact positions are gone, but an edit can still be applied where the learner did not touch it.
+  // One word diff per draft change, shared by every suggestion card.
+  const draftDiff = useMemo(() => text === managedText ? undefined : diffWritingText(managedText, text), [managedText, text]);
+  const draftEdit = (edit: WritingReviewItem["edit"]) =>
+    result && edit && canReview ? editInDraft(result.originalText, text, edit, editMap.edits, accepted, draftDiff) : null;
   const lastDecision = decisions.at(-1);
   const comparisonDiff = useMemo(() => comparison && result ? diffWritingText(comparison.originalText, result.originalText) : null, [comparison, result]);
   const checked = preflight.current?.value;
@@ -251,8 +257,10 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   function chooseEdit(item: WritingReviewItem, status: WritingReviewDecision["status"]) {
     if (!result || !canReview || decisions.some(decision => decision.id === item.id)) return;
     if (status === "accepted") {
-      if (!item.edit || !canChooseEdits) return;
-      const nextText = applyWritingEdits(result.originalText, editMap.edits, [...accepted, item.id]);
+      const span = draftEdit(item.edit);
+      if (!item.edit || !span) return;
+      const nextText = canChooseEdits ? applyWritingEdits(result.originalText, editMap.edits, [...accepted, item.id])
+        : text.slice(0, span.start) + item.edit.after + text.slice(span.end);
       if (nextText.length > 12000) { setNotice("Bản sửa vượt giới hạn ký tự. Hãy chỉnh sửa thủ công."); return; }
       setRequestId(undefined);
       setContinued(true);
@@ -267,9 +275,12 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
   function undoChoice() {
     if (!result || !canReview || !lastDecision) return;
     if (lastDecision.status === "accepted") {
-      if (!canChooseEdits) return;
+      const edit = editMap.edits.find(item => item.id === lastDecision.id);
+      const span = edit ? draftEdit(edit) : null;
+      if (!edit || !span) { setNotice("Bạn đã sửa tay đúng chỗ này nên không hoàn tác tự động được. Hãy sửa lại trong bản nháp."); return; }
       setRequestId(undefined);
-      setText(applyWritingEdits(result.originalText, editMap.edits, accepted.filter(id => id !== lastDecision.id)));
+      setText(canChooseEdits ? applyWritingEdits(result.originalText, editMap.edits, accepted.filter(id => id !== lastDecision.id))
+        : text.slice(0, span.start) + edit.before + text.slice(span.end));
     }
     setDecisions(decisions.slice(0, -1));
   }
@@ -281,11 +292,11 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
     editor.current?.scrollIntoView({ behavior: "auto", block: "center" });
   }
 
-  // Exact edit span while the draft still matches the saved result; otherwise the
+  // Exact edit span while it is still untouched in the draft; otherwise the
   // suggestion's original sentence, found again in the hand-edited draft.
   function selfFix(id: string, edit: WritingReviewItem["edit"], suggestion: WritingResult["errors"][number]) {
-    const span = edit && draftPositionsKnown ? currentEditPosition(edit, editMap.edits, accepted)
-      : locateSentence(text, suggestion.original, suggestion.sourceStart ?? edit?.start ?? 0);
+    const span = (edit && draftPositionsKnown ? currentEditPosition(edit, editMap.edits, accepted) : draftEdit(edit))
+      ?? locateSentence(text, suggestion.original, suggestion.sourceStart ?? edit?.start ?? 0);
     setSelfFixNotice(span ? "" : id);
     if (!span) return;
     continueVersion();
@@ -623,7 +634,8 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
               <span>Nhãn “Chưa có quy tắc giải thích”: gợi ý có thể đúng hoặc sai, hãy cân nhắc trước khi nhận.</span>
               <span>Lựa chọn được lưu cùng bản nháp trong trình duyệt.</span></InfoTip>}
             {generalWarnings.length > 0 && <InfoTip kind="warn" label="Lưu ý về kết quả AI">
-              {generalWarnings.map(warning => <span key={warning}>{warning}</span>)}</InfoTip>}</h2></div>
+              {generalWarnings.map(warning => <span key={warning}>{warning}</span>)}</InfoTip>}</h2>
+            {result.provenance?.provider === "gemini" && <span className={styles.pill}>Gợi ý sửa: Gemini</span>}</div>
           {specificWarnings.length > 0 && <div className={styles.limits}>{specificWarnings.map(warning => <p key={warning}>{warning}</p>)}</div>}
           {result.errors.length === 0 && <p className={styles.hint}>{result.correctedText === null ? "Chưa có phân tích ngữ pháp cho bài này." : "Không có gợi ý được trả về. Hãy tự kiểm tra lại bài gốc."}</p>}
           {result.correctedText !== null && result.correctedText !== result.originalText && review.pending === 0 &&
@@ -643,8 +655,8 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           </section>}
           {compareNotice && <p className={styles.error} role="alert">{compareNotice}</p>}
           {review.total > 0 && <section className={styles.reviewChoices} aria-label="Lựa chọn chỉnh sửa">
-            {!draftPositionsKnown && <p className={styles.notice}>Bản nháp đã được sửa riêng. Bạn vẫn có thể bỏ qua gợi ý. Áp dụng hoặc hoàn tác thay đổi đã nhận cần bản nháp khớp với các lựa chọn.</p>}
-            <button type="button" disabled={!canReview || !lastDecision || (lastDecision.status === "accepted" && !draftPositionsKnown)} onClick={undoChoice}>Hoàn tác lựa chọn gần nhất</button>
+            {!draftPositionsKnown && <p className={styles.notice}>Bản nháp đã được sửa riêng. Những chỗ bạn chưa sửa tay vẫn nhận hoặc hoàn tác thay đổi được; chỗ đã sửa tay thì chọn “Đã tự sửa”.</p>}
+            <button type="button" disabled={!canReview || !lastDecision || (lastDecision.status === "accepted" && !draftEdit(editMap.edits.find(edit => edit.id === lastDecision.id) ?? null))} onClick={undoChoice}>Hoàn tác lựa chọn gần nhất</button>
           </section>}
           {review.total > 0 && review.visible.length === 0 && <p className={styles.hint}>Không có gợi ý phù hợp với bộ lọc.</p>}
           {practice.shown.map((item, position) => {
@@ -654,6 +666,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             const edit = item.edit;
             const uncertain = !hideAnswerFirst(item.type);
             const answerShown = item.status !== "pending" || uncertain || shownAnswers.includes(item.id);
+            const editable = item.status === "pending" && draftEdit(edit) !== null;
             return <article className={styles.change} key={item.id} data-review-id={item.id}>
             <div className={styles.toolbar}>
               <h3 id={`writing-suggestion-${item.id}`} tabIndex={-1}>Gợi ý {item.number}</h3>
@@ -673,12 +686,13 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
             <div className={styles.editActions}>
               <button type="button" disabled={!canReview} onClick={() => selfFix(item.id, edit, suggestion)}>Tự sửa tại vị trí {item.number}</button>
               {!answerShown && <button type="button" onClick={() => setShownAnswers(ids => [...ids, item.id])}>Xem đáp án {item.number}</button>}
-              {edit && answerShown && <button type="button" disabled={!canChooseEdits || item.status !== "pending"} onClick={() => chooseEdit(item, "accepted")}>Nhận thay đổi {item.number}</button>}
+              {edit && answerShown && <button type="button" disabled={!editable || item.status !== "pending"} onClick={() => chooseEdit(item, "accepted")}>Nhận thay đổi {item.number}</button>}
               <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "selfFixed")}>Đã tự sửa {item.number}</button>
               <button type="button" disabled={!canReview || item.status !== "pending"} onClick={() => chooseEdit(item, "skipped")}>Bỏ qua {item.number}</button>
               {next && <button type="button" className={styles.nextSuggestion} onClick={() => openSuggestion(next.id)}>Gợi ý tiếp ({next.number}) →</button>}
             </div>
             {!edit && <p className={styles.hint}>Vị trí chưa xác định chắc chắn. Bạn có thể tự sửa trong bản nháp.</p>}
+            {edit && answerShown && item.status === "pending" && canReview && !editable && <p className={styles.hint}>Bạn đã sửa tay chỗ này trong bản nháp nên không nhận thay đổi tự động được. Nếu đã sửa xong, chọn “Đã tự sửa {item.number}”.</p>}
             {selfFixNotice === item.id && <p className={styles.hint} role="status">Không còn tìm thấy câu gốc trong bản nháp — có thể bạn đã sửa câu này. Nếu xong, chọn “Đã tự sửa {item.number}” để sang gợi ý tiếp theo.</p>}
             {item.explanations.map((explanation, explanationIndex) => <div className={styles.explanation} key={explanationIndex}>
               <Icon name="bulb" /><p>{Object.hasOwn(writingCategoryLabels, explanation.category) && <strong>{writingCategoryLabels[explanation.category]}. </strong>}{explanation.message}</p>
@@ -721,6 +735,7 @@ export default function WritingForm({ authenticated, unavailable, userId = null,
           <p className={styles.hint}>Bạn sẽ nhận ước lượng CEFR và các gợi ý sửa lỗi để tự sửa rồi nộp lại.</p></>}
       </aside>
     </div>}
+    {!!result?.upgrades?.length && <WritingUpgrades upgrades={result.upgrades} />}
     {authenticated && result && <WritingFlashcards key={result.submissionId} submissionId={result.submissionId}
       versionNumber={result.versionNumber} targetCefr={result.targetCefr} />}
     <WritingHistoryPanel authenticated={authenticated} submissionId={result?.submissionId ?? null} practiceRootId={result?.practiceRootId ?? result?.submissionId}

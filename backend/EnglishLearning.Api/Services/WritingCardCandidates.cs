@@ -42,7 +42,7 @@ public static partial class WritingCardCandidates
         return kept.OrderBy(found => found.Match.Index);
     }
 
-    public static WritingCardCandidate[] Find(string text, WritingSuggestion[] suggestions)
+    public static WritingCardCandidate[] Find(string text, WritingSuggestion[] suggestions, WritingUpgrade[]? upgrades = null)
     {
         var candidates = new Dictionary<string, WritingCardCandidate>(StringComparer.Ordinal);
         foreach (var suggestion in suggestions)
@@ -51,9 +51,10 @@ public static partial class WritingCardCandidates
                 || suggestion.Suggestion == suggestion.Original) continue;
             foreach (var explanation in suggestion.Explanations ?? [])
             {
-                if (explanation is null || explanation.TemplateVersion is not (V1 or V2)) continue;
+                if (explanation is null || explanation.TemplateVersion is not (V1 or V2 or WritingApiClient.TemplateVersion)) continue;
+                var typed = explanation.TemplateVersion is V2 or WritingApiClient.TemplateVersion;
                 // Missing or replaced preposition (v2): the learner keeps the verb/adjective + preposition pair.
-                if (explanation is { Category: "PREP", TemplateVersion: V2 } && explanation.Suggestion.Trim().Length > 0)
+                if (typed && explanation.Category == "PREP" && explanation.Suggestion.Trim().Length > 0)
                 {
                     // The edit span can carry the next word ("english" → "to English"); keep only a real preposition.
                     var preposition = explanation.Suggestion.Trim().Split(' ', 2)[0];
@@ -63,7 +64,7 @@ public static partial class WritingCardCandidates
                     continue;
                 }
                 var spelling = explanation.Category == "SPELL";
-                if (!(spelling || (explanation.TemplateVersion == V2 && WordChoice.Contains(explanation.Category)))
+                if (!(spelling || (typed && WordChoice.Contains(explanation.Category)))
                     || explanation.Original.Trim().Length == 0
                     || NormalizeTerm(explanation.Suggestion) == NormalizeTerm(explanation.Original)
                     || !ContainsTerm(suggestion.Original, explanation.Original)
@@ -75,6 +76,17 @@ public static partial class WritingCardCandidates
             foreach (var (term, _) in MatchExpressions(suggestion.Suggestion))
                 if (!MatchExpressions(suggestion.Original).Any(old => old.Term == term))
                     Add(term, suggestion.Original, "correction", "Ôn cụm từ xuất hiện trong đề xuất chỉnh sửa. Hãy kiểm tra ngữ cảnh trước khi lưu.", suggestion.Suggestion);
+        }
+        // Plan B: a vocabulary upgrade names the new word or phrase worth learning.
+        foreach (var upgrade in upgrades ?? [])
+        {
+            if (upgrade is not { Kind: "vocabulary", Term: { Length: > 0 } term } || upgrade.SourceStart < 0
+                || upgrade.SourceEnd > text.Length || upgrade.SourceStart >= upgrade.SourceEnd
+                || text[upgrade.SourceStart..upgrade.SourceEnd] != upgrade.Original
+                || !upgrade.Suggestion.Contains(term, StringComparison.OrdinalIgnoreCase)) continue;
+            Add(term, SentenceAt(text, upgrade.SourceStart), "upgrade", upgrade.Level is { } level
+                ? $"Từ AI gợi ý để viết hay hơn (hướng tới {level}). Hãy kiểm tra nghĩa trước khi lưu."
+                : "Từ AI gợi ý để viết hay hơn. Hãy kiểm tra nghĩa trước khi lưu.", upgrade.Suggestion);
         }
         var from = 0;
         foreach (Match boundary in SentenceBoundary().Matches(text))
@@ -101,8 +113,11 @@ public static partial class WritingCardCandidates
     }
 
     private const string V1 = "vi-edit-templates-v1", V2 = "vi-edit-templates-v2";
-    // ERRANT word-choice kinds; grammar-only kinds (tense, agreement, form) do not make vocabulary cards.
+    // ERRANT word-choice kinds (v2 templates and Gemini corrections share these keys); grammar-only kinds (tense, agreement, form) do not make vocabulary cards.
     private static readonly HashSet<string> WordChoice = ["VERB", "NOUN", "ADJ", "ADV"];
+    private static readonly HashSet<string> FunctionWords = ["there", "here", "then", "now", "it", "this", "that", "these", "those",
+        "them", "him", "her", "me", "us", "you", "i", "we", "they", "he", "she", "and", "or", "but", "so", "also", "very",
+        "not", "too", "a", "an", "the"];
     private static readonly HashSet<string> Prepositions = ["about", "at", "by", "for", "from", "in", "into", "of", "on", "to", "with"];
 
     /// <summary>"listen to" from "I listen to music.": the word before the suggested preposition plus it.</summary>
@@ -110,7 +125,21 @@ public static partial class WritingCardCandidates
     {
         var match = Regex.Match(sentence.Replace('’', '\''), @"(\p{L}[\p{L}'-]*)[ \t]+(" + Regex.Escape(preposition.Trim())
             + @")(?![\p{L}\p{M}\p{N}_'-])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-        return match.Success ? $"{match.Groups[1].Value} {match.Groups[2].Value}" : null;
+        // "lived there for three years": a function word before the preposition is not a collocation to learn.
+        return match.Success && !FunctionWords.Contains(match.Groups[1].Value.ToLowerInvariant())
+            ? $"{match.Groups[1].Value} {match.Groups[2].Value}" : null;
+    }
+
+    /// <summary>The sentence of <paramref name="text"/> that contains <paramref name="index"/>.</summary>
+    private static string SentenceAt(string text, int index)
+    {
+        var from = 0;
+        foreach (Match boundary in SentenceBoundary().Matches(text))
+        {
+            if (boundary.Index >= index) return text[from..boundary.Index];
+            from = boundary.Index + boundary.Length;
+        }
+        return text[from..];
     }
 
     public static string NormalizeTerm(string value) =>

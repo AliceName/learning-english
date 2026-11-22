@@ -177,6 +177,27 @@ Tạo bài Listening cần **cả Gemini TTS và Cloudinary đã bật** để s
 
 Nếu chưa có key, bạn vẫn chạy ứng dụng, học khóa có sẵn và dùng các chức năng không gọi Gemini. Trang tạo khóa học AI sẽ báo chưa khả dụng.
 
+### Chấm Writing bằng Gemini — phương án B (tùy chọn)
+
+Mặc định, trang Luyện viết dùng model của LEWA (phương án A). Có thể chuyển phần **sửa lỗi** sang Gemini. Gemini còn trả thêm **gợi ý nâng cấp** cho những phần đã đúng. CEFR vẫn do model LEWA chấm, nên **dịch vụ AI Writing Python (cổng 8000) vẫn phải chạy** ở cả hai phương án.
+
+```powershell
+# local (mặc định): chỉ model LEWA · api: sửa lỗi bằng Gemini · auto: thử Gemini, lỗi thì dùng model LEWA
+dotnet user-secrets set 'WritingAi:Provider' 'auto' --project backend/EnglishLearning.Api
+# Key riêng cho Writing (không bắt buộc); nếu bỏ trống sẽ lần lượt dùng TranslationAi:ApiKey, CourseGenerationAi:ApiKey, GEMINI_API_KEY
+dotnet user-secrets set 'WritingAi:Api:ApiKey' 'THAY_BANG_GEMINI_API_KEY_CUA_BAN' --project backend/EnglishLearning.Api
+```
+
+- **Quay lại phương án A:** `dotnet user-secrets remove 'WritingAi:Provider' --project backend/EnglishLearning.Api`.
+- **Áp dụng thay đổi:** đổi `WritingAi:Provider` có hiệu lực ngay, không cần khởi động lại backend. Đổi model hoặc hạn mức thì phải khởi động lại.
+- **Tùy chọn khác:**
+  - `WritingAi:Api:Model`: mặc định dùng model Gemini của phần Dịch.
+  - `WritingAi:Api:CallsPerDay`: mặc định 200 lượt mỗi ngày, đếm trong bộ nhớ của backend.
+  - `WritingAi:Api:TimeoutSeconds`: mặc định 45.
+- **Dữ liệu và chi phí:** bài viết của học viên được gửi tới Gemini và tốn hạn mức của API key. Mỗi lần nộp bài có bật sửa lỗi là một lượt gọi.
+- **Kiểm tra cấu hình:** trang Admin → Tổng quan có dòng "AI sửa bài viết (Gemini)", cho biết đã có key chưa và đang ở chế độ nào. Dòng này không gọi API.
+- **Khi chạy test:** project test luôn ép `WritingAi:Provider=local`, nên chạy test không bao giờ gọi Gemini thật.
+
 ## 7. Chạy ứng dụng local
 
 Chạy `.\Start-Dev.cmd` từ thư mục gốc để khởi động frontend, backend và AI Writing. Launcher đợi cả ba dịch vụ sẵn sàng. Nhấn Ctrl+C trong terminal của launcher để dừng các tiến trình do nó khởi tạo. Nếu muốn chạy frontend và backend ở hai terminal riêng, làm theo phần dưới.

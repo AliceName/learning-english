@@ -18,8 +18,8 @@ namespace EnglishLearning.Api.Controllers;
 [Authorize]
 [Route("api/v1/writing/submissions")]
 [Tags("Writing")]
-public sealed class WritingController(EnglishLearningDbContext db, WritingAiClient ai, WritingTaskLibrary tasks,
-    ILogger<WritingController> logger) : ControllerBase
+public sealed class WritingController(EnglishLearningDbContext db, WritingAiClient ai, WritingAnalysisRouter analyzer,
+    WritingTaskLibrary tasks, ILogger<WritingController> logger) : ControllerBase
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private static readonly ConcurrentDictionary<(int UserId, int SubmissionId), byte> FeedbackRequests = new();
@@ -69,7 +69,7 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
             }
             else if (request.TaskVersion is not null)
                 return BadRequest(new { detail = "Thiếu mã đề thư viện." });
-            var analysis = await ai.AnalyzeAsync(request, cancellationToken);
+            var analysis = await analyzer.AnalyzeAsync(request, cancellationToken);
             // Relevance is calibrated on the library prompts only; custom topics are not scored.
             var relevance = task is null ? null : await ai.RelevanceAsync(request.OriginalText, task.Prompt, cancellationToken);
             var sqlServer = db.Database.IsSqlServer();
@@ -376,7 +376,8 @@ public sealed class WritingController(EnglishLearningDbContext db, WritingAiClie
             analysis?.Errors ?? [], analysis?.Warnings ?? [], item.CreatedAt, analysis?.Provenance, analysis?.Feedback,
             analysis?.GecCoverage, analysis?.Task, analysis?.Practice?.RootSubmissionId ?? item.SubmissionId,
             analysis?.Practice?.ParentSubmissionId, analysis?.Practice?.VersionNumber, analysis?.Practice?.ParentVersionNumber,
-            analysis?.Practice?.TargetCefr, targetRecorded ?? (analysis?.Practice?.VersionNumber is not null), analysis?.Relevance);
+            analysis?.Practice?.TargetCefr, targetRecorded ?? (analysis?.Practice?.VersionNumber is not null), analysis?.Relevance,
+            analysis?.Upgrades);
 
     private async Task<ActionResult<T>> WithUser<T>(
         Func<int, Task<ActionResult<T>>> action, CancellationToken cancellationToken)

@@ -1,4 +1,4 @@
-import { diffWritingText } from "./writing-diff";
+import { diffWritingText, type WritingDiff } from "./writing-diff";
 import { writingBoundary, type WritingResult } from "./writing";
 
 export type WritingEdit = {
@@ -60,6 +60,35 @@ export function applyWritingEdits(original: string, edits: WritingEdit[], accept
     || (index > 0 && e.start <= selected[index - 1].start)
     || (index > 0 && e.start < selected[index - 1].end))) throw new Error("Invalid writing edit span");
   return [...selected].reverse().reduce((text, edit) => text.slice(0, edit.start) + edit.after + text.slice(edit.end), original);
+}
+
+/**
+ * Maps a span of the managed text (original + accepted edits) into the learner's hand-edited draft, using the
+ * word diff between the two. Returns null when the learner changed that spot or the texts are too different to align.
+ */
+export function draftSpan(managed: string, draft: string, start: number, end: number,
+  diff: WritingDiff = diffWritingText(managed, draft)): { start: number; end: number } | null {
+  if (managed === draft) return { start, end };
+  if (!diff.detailed) return null;
+  let from = 0, to = 0;
+  for (const part of diff.parts) {
+    if (part.kind === "equal") {
+      if (start >= from && end <= from + part.text.length) return { start: to + start - from, end: to + end - from };
+      from += part.text.length; to += part.text.length;
+    } else { from += part.before.length; to += part.after.length; }
+  }
+  return null;
+}
+
+/** Where a suggestion's edit sits in the current draft (before it is accepted, or after when it already was). */
+/** Pass `diff` (managed → draft) when checking many edits against the same draft, so it is computed once. */
+export function editInDraft(original: string, draft: string, edit: WritingEdit, edits: WritingEdit[], accepted: readonly string[],
+  diff?: WritingDiff) {
+  const managed = applyWritingEdits(original, edits, accepted);
+  const at = currentEditPosition(edit, edits, accepted);
+  const span = managed === draft ? at : draftSpan(managed, draft, at.start, at.end, diff ?? diffWritingText(managed, draft));
+  const expected = accepted.includes(edit.id) ? edit.after : edit.before;
+  return span && draft.slice(span.start, span.end) === expected ? span : null;
 }
 
 export function currentEditPosition(edit: WritingEdit, edits: WritingEdit[], accepted: readonly string[]) {

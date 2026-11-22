@@ -101,10 +101,33 @@ export type WritingResult = {
     explanationVersion: string | null;
     guardVersion?: string | null;
     inputPolicyVersion?: string | null;
+    /** "gemini" when corrections came from the outside API (plan B); absent or null means the LEWA model. */
+    provider?: string | null;
   } | null;
   feedback?: WritingFeedback | null;
   relevance?: WritingRelevance | null;
+  /** Plan B (Gemini): better ways to write already-correct parts. Advice only, never applied or counted as errors. */
+  upgrades?: WritingUpgrade[] | null;
 };
+
+export type WritingUpgrade = {
+  original: string; suggestion: string; kind: "grammar" | "vocabulary" | "cohesion";
+  level: string | null; term: string | null; message: string; sourceStart: number; sourceEnd: number;
+};
+
+function validUpgrades(value: unknown, text: string): boolean {
+  if (value == null) return true;
+  return Array.isArray(value) && value.length <= 10 && value.every(raw => {
+    if (!raw || typeof raw !== "object") return false;
+    const item = raw as Record<string, unknown>;
+    return boundedText(item.original, 400) && boundedText(item.suggestion, 400)
+      && (item.kind === "grammar" || item.kind === "vocabulary" || item.kind === "cohesion")
+      && (item.level == null || (typeof item.level === "string" && ["B1", "B2", "C1", "C2"].includes(item.level)))
+      && (item.term == null || boundedText(item.term, 60)) && boundedText(item.message, 600)
+      && Number.isInteger(item.sourceStart) && Number.isInteger(item.sourceEnd)
+      && text.slice(item.sourceStart as number, item.sourceEnd as number) === item.original;
+  });
+}
 
 /** Prompt relevance from the local embedding model (library tasks only). */
 export type WritingRelevance = {
@@ -282,7 +305,10 @@ export function isWritingResult(value: unknown): value is WritingResult {
       && ((item.provenance as Record<string, unknown>).guardVersion == null
         || boundedText((item.provenance as Record<string, unknown>).guardVersion, 100))
       && ((item.provenance as Record<string, unknown>).inputPolicyVersion == null
-        || boundedText((item.provenance as Record<string, unknown>).inputPolicyVersion, 100))))
+        || boundedText((item.provenance as Record<string, unknown>).inputPolicyVersion, 100))
+      && ((item.provenance as Record<string, unknown>).provider == null
+        || boundedText((item.provenance as Record<string, unknown>).provider, 40))))
+    && validUpgrades(item.upgrades, item.originalText as string)
     && validFeedback(item.feedback, item.originalText as string, item.topic, item.errors as WritingSuggestion[])
     && validRelevance(item.relevance, item.originalText as string);
 }

@@ -156,6 +156,9 @@
 .suggestionPair h4 { margin: 0 0 4px; color: #93000a; font-size: 12px; font-weight: 800; }
 .suggestionPair > div + div h4 { color: var(--primary); }
 .suggestionPair p, .explanation p { margin: 0; }
+/* Upgrades quote correct text, so it is not tinted like an error. */
+.upgradePair > div:first-child { background: var(--chip); }
+.upgradePair > div:first-child h4 { color: var(--muted); }
 .editActions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 8px; }
 .explanation { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: 13px; }
 .explanation svg { flex: 0 0 17px; height: 17px; color: var(--primary); margin-top: 2px; }

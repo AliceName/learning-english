@@ -14,7 +14,8 @@ export type WritingReviewItem = {
   type: WritingReviewType; explanations: WritingExplanation[];
 };
 
-const templateVersions = new Set(["vi-edit-templates-v1", "vi-edit-templates-v2"]);
+// gemini-writing-v1: plan-B corrections from Gemini, using the same category keys.
+const templateVersions = new Set(["vi-edit-templates-v1", "vi-edit-templates-v2", "gemini-writing-v1"]);
 // v1 whitelist categories plus the ERRANT kinds used by vi-edit-templates-v2.
 const reviewTypeByCategory: Record<string, WritingReviewType> = {
   ARTICLE: "grammar", "NOUN:NUM": "grammar", "VERB:FORM": "grammar", "VERB:SVA": "grammar", "VERB:TENSE": "grammar",

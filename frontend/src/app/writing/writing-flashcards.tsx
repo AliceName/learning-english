@@ -6,7 +6,7 @@ import { dictionaryGloss, dictionaryLookupWord } from "@/lib/writing-practice";
 import { InfoTip } from "./info-tip";
 import styles from "./writing.module.css";
 
-type Candidate = { term: string; context: string; source: "correction" | "original"; reason: string; similarCardId: number | null; example?: string | null };
+type Candidate = { term: string; context: string; source: "correction" | "original" | "upgrade"; reason: string; similarCardId: number | null; example?: string | null };
 type DraftCard = Candidate & {
   selected: boolean; frontText: string; backText: string; exampleSentence: string; meaningFromDictionary?: boolean; meaningChecked?: boolean;
   saved?: string; error?: string;
@@ -112,7 +112,7 @@ export default function WritingFlashcards({ submissionId, versionNumber, targetC
     <div className={styles.toolbar}>
       <div className={styles.sectionHeading}><span className={styles.icon}><Icon name="cards" /></span>
         <h2 id="writing-cards-heading">Từ vựng đáng học từ bài viết<InfoTip kind="help" label="Từ được chọn thế nào?">
-          <span>Lấy từ các chỗ AI sửa chính tả, từ, giới từ và các cụm từ thông dụng có trong bài.</span>
+          <span>Lấy từ các chỗ AI sửa chính tả, từ, giới từ, các cụm từ thông dụng có trong bài và từ trong gợi ý nâng cấp.</span>
           <span>Nghĩa được điền sẵn từ từ điển của LEWA; hãy giữ nghĩa đúng với câu của bạn.</span></InfoTip></h2></div>
       <Link href="/flashcards" prefetch={false}>Mở Flashcards</Link>
     </div>

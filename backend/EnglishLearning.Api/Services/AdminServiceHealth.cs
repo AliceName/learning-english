@@ -42,7 +42,7 @@ public sealed class AdminServiceHealth(IServiceScopeFactory scopes, IHttpClientF
                 CheckAsync("speaking_ai", "Speaking AI", () => SpeakingAsync(ct)));
             // A caller that went away must not leave "down" results in the cache.
             ct.ThrowIfCancellationRequested();
-            cached = new(now, [.. checks, CourseAi(), TranslationAi(), Media()]);
+            cached = new(now, [.. checks, WritingApi(), CourseAi(), TranslationAi(), Media()]);
             return cached;
         }
         finally { gate.Release(); }
@@ -106,6 +106,19 @@ public sealed class AdminServiceHealth(IServiceScopeFactory scopes, IHttpClientF
     private AdminServiceStatus CourseAi() => GeminiCourseClient.IsConfigured(configuration)
         ? new("course_ai", "AI tạo khóa học", "configured", null, "Đã có key; không gọi thử để tránh tốn lượt. Xem lượt gọi ở trang Quản lý API AI.")
         : new("course_ai", "AI tạo khóa học", "unconfigured", null, "Chưa cấu hình key nên học viên không tạo khóa học AI được.");
+
+    private AdminServiceStatus WritingApi()
+    {
+        var use = WritingAnalysisRouter.ReadMode(configuration) switch
+        {
+            "api" => "Đang dùng để sửa lỗi Writing.",
+            "auto" => "Đang dùng để sửa lỗi Writing; lỗi thì chuyển về bộ sửa của LEWA.",
+            _ => "Đang tắt (WritingAi:Provider = local), Writing dùng bộ sửa của LEWA.",
+        };
+        return WritingApiClient.IsConfigured(configuration)
+            ? new("writing_api", "AI sửa bài viết (Gemini)", "configured", null, $"Đã có key; không gọi thử. {use}")
+            : new("writing_api", "AI sửa bài viết (Gemini)", "unconfigured", null, $"Chưa cấu hình key. {use}");
+    }
 
     private AdminServiceStatus TranslationAi() => !string.IsNullOrWhiteSpace(translation.Value.ApiKey)
         ? new("translation_ai", "AI chấm phiên dịch", "configured", null, "Đã có key; không gọi thử để tránh tốn lượt.")

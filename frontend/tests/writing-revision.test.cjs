@@ -11,7 +11,7 @@ function load(file) {
     {module:mod,exports:mod.exports,Uint32Array,require:name=>load(name.replace('./',''))},{filename});
   return mod.exports;
 }
-const {writingEdits,applyWritingEdits,currentEditPosition}=load('writing-revision');
+const {writingEdits,applyWritingEdits,currentEditPosition,editInDraft}=load('writing-revision');
 const {writingReviewItems,writingReviewView,restoreWritingReview}=load('writing-review');
 const {loadWritingDraft,saveWritingDraft}=load('writing-draft');
 test('accepts a verb without accepting the incorrect name capitalization',()=>{
@@ -92,8 +92,8 @@ test('review types require exact, versioned evidence for the individual change',
   assert.equal(writingReviewItems(result.errors, edits)[0].type, 'unclassified');
 });
 
-test('ERRANT-typed (v2) explanations map to grammar, vocabulary or mechanics', () => {
-  const v2 = 'vi-edit-templates-v2';
+for (const [name, v2] of [['ERRANT-typed (v2)', 'vi-edit-templates-v2'], ['Gemini (plan B)', 'gemini-writing-v1']])
+test(`${name} explanations map to grammar, vocabulary or mechanics`, () => {
   const result = { originalText: 'They was here. It is funny. Hi Ken.', correctedText: null, errors: [
     { original: 'They was here.', suggestion: 'They were here.', explanations: [{ original: 'was', suggestion: 'were', category: 'VERB:SVA', templateVersion: v2 }] },
     { original: 'It is funny.', suggestion: 'It is fun.', explanations: [{ original: 'funny', suggestion: 'fun', category: 'ADJ', templateVersion: v2 }] },
@@ -163,4 +163,25 @@ test('self-fixed suggestions count as reviewed, filter separately and survive a 
   const [key, raw] = [...values.entries()][0];
   values.set(key, JSON.stringify({ ...JSON.parse(raw), shownAnswers: ['bad id', '2:1'] }));
   assert.equal(loadWritingDraft(store, 5, 9).shownAnswers, undefined);
+});
+
+test('hand edits elsewhere keep untouched suggestions acceptable and undoable; a hand-fixed spot is not',()=>{
+  const originalText='She go home. We eats rice. They plays well.';
+  const r={originalText,correctedText:'She goes home. We eat rice. They play well.',errors:[
+    {original:'She go home.',suggestion:'She goes home.',sourceStart:0,sourceEnd:12},
+    {original:'We eats rice.',suggestion:'We eat rice.',sourceStart:13,sourceEnd:26},
+    {original:'They plays well.',suggestion:'They play well.',sourceStart:27,sourceEnd:43}]};
+  const {edits}=writingEdits(r);
+  const [go,eats,plays]=edits;
+  // The learner fixed "go" by hand and added a word at the end: exact positions are gone.
+  const draft='She goes home. We eats rice. They plays very well.';
+  assert.equal(editInDraft(originalText,draft,go,edits,[]),null);
+  const span=editInDraft(originalText,draft,eats,edits,[]);
+  assert.deepEqual({...span},{start:18,end:22});
+  const accepted=draft.slice(0,span.start)+eats.after+draft.slice(span.end);
+  assert.equal(accepted,'She goes home. We eat rice. They plays very well.');
+  // Undo finds the accepted text in the same hand-edited draft.
+  const back=editInDraft(originalText,accepted,eats,edits,[eats.id]);
+  assert.equal(accepted.slice(back.start,back.end),'eat');
+  assert.ok(editInDraft(originalText,accepted,plays,edits,[eats.id]));
 });

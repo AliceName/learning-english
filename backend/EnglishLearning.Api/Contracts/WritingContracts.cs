@@ -26,7 +26,7 @@ public sealed record WritingSuggestion(string Original, string Suggestion, Writi
     int? SourceStart = null, int? SourceEnd = null);
 public sealed record WritingProvenance(string? CefrRun = null, string? CefrAdapterSha256 = null,
     string? GecRun = null, string? GecAdapterSha256 = null, string? ExplanationVersion = null,
-    string? GuardVersion = null, string? InputPolicyVersion = null);
+    string? GuardVersion = null, string? InputPolicyVersion = null, string? Provider = null);
 public sealed record WritingGecCoverage(
     [property: JsonRequired] int TotalBodySentences,
     [property: JsonRequired] int Changed,
@@ -46,14 +46,21 @@ public sealed record WritingRelevance(int Score, bool OffTopic, double TopicSimi
 public sealed record WritingAnalysis(string Cefr, string? CorrectedText,
     WritingSuggestion[] Errors, string[] Warnings, WritingProvenance? Provenance = null,
     WritingFeedback? Feedback = null, WritingGecCoverage? GecCoverage = null,
-    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null, WritingRelevance? Relevance = null);
+    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null, WritingRelevance? Relevance = null,
+    WritingUpgrade[]? Upgrades = null);
+/// <summary>
+/// Plan B: a way to write an already-correct part better (grammar range, vocabulary, cohesion). Advice only — never
+/// applied to the essay and never counted as an error. <c>Term</c> is the word or phrase worth learning (vocabulary only).
+/// </summary>
+public sealed record WritingUpgrade(string Original, string Suggestion, string Kind, string? Level, string? Term,
+    string Message, int SourceStart, int SourceEnd);
 public sealed record WritingSubmissionResponse(int SubmissionId, string? Topic, string OriginalText,
     string CefrLevel, string? CorrectedText, WritingSuggestion[] Errors, string[] Warnings, DateTime CreatedAt,
     WritingProvenance? Provenance = null, WritingFeedback? Feedback = null,
     WritingGecCoverage? GecCoverage = null, WritingTaskSnapshot? Task = null,
     int? PracticeRootId = null, int? ParentSubmissionId = null, int? VersionNumber = null,
     int? ParentVersionNumber = null, string? TargetCefr = null, bool TargetRecorded = false,
-    WritingRelevance? Relevance = null);
+    WritingRelevance? Relevance = null, WritingUpgrade[]? Upgrades = null);
 
 public sealed record WritingTaskSnapshot(string Id, string Version, string Title, string Prompt,
     string Level, string Genre, string Topic, int MinWords, int MaxWords, string WordMode,

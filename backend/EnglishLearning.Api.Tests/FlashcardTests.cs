@@ -52,11 +52,12 @@ public sealed class FlashcardTests
         Assert.Empty(WritingCardCandidates.Find("I made a cake and took the bus. The progress bar moved.", []));
     }
 
-    [Fact]
-    public void Writing_candidates_use_typed_v2_corrections_for_spelling_word_choice_and_prepositions()
+    [Theory]
+    [InlineData("vi-edit-templates-v2")]
+    [InlineData(WritingApiClient.TemplateVersion)] // plan B: Gemini corrections use the same category keys
+    public void Writing_candidates_use_typed_v2_corrections_for_spelling_word_choice_and_prepositions(string v2)
     {
-        const string v2 = "vi-edit-templates-v2";
-        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it. I listen english songs. At weddings, we dance.";
+        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it. I listen english songs. At weddings, we dance. We lived there since May.";
         WritingSuggestion Edit(string original, string suggestion, WritingExplanation explanation) =>
             new(original, suggestion, [explanation], text.IndexOf(original, StringComparison.Ordinal), text.IndexOf(original, StringComparison.Ordinal) + original.Length);
         var edits = new[]
@@ -69,12 +70,30 @@ public sealed class FlashcardTests
             // Real outputs from the 50-essay run: the span carries the next word, or no preposition at all.
             Edit("I listen english songs.", "I listen to English songs.", new("PREP", "english", "to English", "m", v2)),
             Edit("At weddings, we dance.", "Weddings, we dance.", new("PREP", "At weddings", "Weddings,", "m", v2)),
+            // Plan-B run (#211): a duration fix puts a function word before the preposition — not a collocation.
+            Edit("We lived there since May.", "We lived there for May.", new("PREP", "since", "for", "m", v2)),
         };
         var candidates = WritingCardCandidates.Find(text, edits);
         Assert.Equal(new[] { "beautiful", "large", "listen to" }, candidates.Select(c => c.Term));
         Assert.All(candidates, c => Assert.Equal("correction", c.Source));
         Assert.Equal("I listen music.", candidates[2].Context);
         Assert.Equal("I listen to music.", candidates[2].Example); // the corrected sentence becomes the example
+    }
+
+    [Fact]
+    public void Writing_candidates_include_vocabulary_upgrades_with_their_sentence_and_suggestion()
+    {
+        const string text = "I like this city. It has a big park.";
+        var upgrades = new[]
+        {
+            new WritingUpgrade("a big park", "a spacious park", "vocabulary", "B2", "spacious", "m", 25, 35),
+            new WritingUpgrade("I like this city.", "I am fond of this city.", "grammar", "B2", null, "m", 0, 17),
+            new WritingUpgrade("a big park", "a vast park", "vocabulary", "C1", "huge", "m", 25, 35), // term absent from suggestion
+            new WritingUpgrade("a small park", "a tiny park", "vocabulary", "B2", "tiny", "m", 25, 35), // stale span
+        };
+        var card = Assert.Single(WritingCardCandidates.Find(text, [], upgrades));
+        Assert.Equal(("spacious", "upgrade", "It has a big park.", "a spacious park"), (card.Term, card.Source, card.Context, card.Example));
+        Assert.Contains("B2", card.Reason);
     }
 
     [Fact]
