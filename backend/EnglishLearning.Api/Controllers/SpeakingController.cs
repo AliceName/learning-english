@@ -53,7 +53,9 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
     [HttpPost("free/score"), RequestSizeLimit(SpeakingStorage.MaxBytes + 65536), RequestFormLimits(MultipartBodyLengthLimit = SpeakingStorage.MaxBytes)]
     public Task<IActionResult> ScoreFree([FromForm] ScoreFreeSpeakingRequest request, CancellationToken ct) => Execute(async _ =>
     {
-        var (_, assessment) = await AssessAsync(request.File, request.Text.Trim(), ct);
+        var text = request.Text.Trim();
+        var scope = SpeakingReviewContext.CreateScope(text, request.SentenceText, request.StartWordIndex);
+        var (_, assessment) = await AssessAsync(request.File, text, ct, scope);
         return Ok(assessment);
     }, ct);
 
@@ -114,7 +116,11 @@ public sealed class SpeakingController(EnglishLearningDbContext db, SpeakingLess
             if (!await db.Users.AsNoTracking().AnyAsync(u => u.UserId == uid && u.IsActive, ct)) return Unauthorized();
             return await action(uid);
         }
-        catch (SpeakingException e) { return Problem(statusCode: e.Status, title: e.Message); }
+        catch (SpeakingException e)
+        {
+            return Problem(statusCode: e.Status, title: e.Message, extensions: e.RecordingIssue is null ? null
+                : new Dictionary<string, object?> { ["recordingIssue"] = e.RecordingIssue });
+        }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
         catch (Exception e) when (e is SqlException or DbUpdateException or IOException or OperationCanceledException)
         {

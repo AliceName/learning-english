@@ -1,4 +1,4 @@
-import type { SpeakingAttempt, SpeakingAttemptScope, SpeakingLesson, SpeakingSegment, SpeakingWord } from "./speaking";
+import type { SpeakingAssessment, SpeakingAttempt, SpeakingAttemptScope, SpeakingLesson, SpeakingSegment, SpeakingWord } from "./speaking";
 import { feedbackMode } from "./pronunciation-feedback";
 
 const referenceKey = (text: string) => text.replaceAll("’", "'").replace(/\s+/g, " ").trim().toLowerCase();
@@ -84,16 +84,20 @@ export function compareAttempts(current: SpeakingAttempt, history: SpeakingAttem
     (Date.parse(attempt.createdAt) < Date.parse(current.createdAt) ||
       Date.parse(attempt.createdAt) === Date.parse(current.createdAt) && attempt.attemptId < current.attemptId));
   if (!previous) return null;
-  if (feedbackMode(current.assessment) === "record_again" || feedbackMode(previous.assessment) === "record_again")
-    return { previous, delta: null, reason: "Một bản ghi cần thu lại nên chưa so sánh điểm." };
-  if (previous.assessment.modelVersion !== current.assessment.modelVersion)
-    return { previous, delta: null, reason: "Hai lần luyện dùng phiên bản bộ chấm khác nhau nên chưa so sánh điểm." };
-  const signature = (attempt: SpeakingAttempt) => JSON.stringify([attempt.assessment.referenceTokenCount,
-    attempt.assessment.words.map(word => [word.index, word.phones.map(phone => [phone.sourcePhone, phone.symbol])])]);
+  return { previous, ...compareAssessments(current.assessment, previous.assessment) };
+}
+
+export function compareAssessments(current: SpeakingAssessment, previous: SpeakingAssessment) {
+  if (feedbackMode(current) === "record_again" || feedbackMode(previous) === "record_again")
+    return { delta: null, reason: "Một bản ghi cần thu lại nên chưa so sánh điểm." };
+  if (previous.modelVersion !== current.modelVersion)
+    return { delta: null, reason: "Hai lần luyện dùng phiên bản bộ chấm khác nhau nên chưa so sánh điểm." };
+  const signature = (assessment: SpeakingAssessment) => JSON.stringify([assessment.referenceTokenCount,
+    assessment.words.map(word => [word.index, referenceKey(word.text ?? ""), word.phones.map(phone => [phone.sourcePhone, phone.symbol])])]);
   if (signature(previous) !== signature(current))
-    return { previous, delta: null, reason: "Phần âm được chấm khác nhau nên chưa so sánh điểm." };
-  const delta = Math.round((current.assessment.overallScore - previous.assessment.overallScore) * 10) / 10;
-  return { previous, delta, reason: null };
+    return { delta: null, reason: "Phần âm được chấm khác nhau nên chưa so sánh điểm." };
+  const delta = Math.round((current.overallScore - previous.overallScore) * 10) / 10;
+  return { delta, reason: null };
 }
 
 export function wordAudioRange(word: SpeakingWord, duration: number) {

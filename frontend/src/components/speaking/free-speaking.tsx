@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Icon, { type SiteIconName } from "@/components/site-icon";
-import { linkedPracticeSentence, loadSentences, saveSentence, sentenceKey, type PracticeResult, type PracticeSentence } from "@/lib/free-speaking-history";
-import { feedbackMode, sentenceFeedback, wordFeedback } from "@/lib/pronunciation-feedback";
+import { appendPracticeResult, linkedPracticeSentence, loadSentences, practiceAttempts, practiceSentenceKey, savePracticeResult, saveSentence, type PracticeContext, type PracticeResult, type PracticeSentence } from "@/lib/free-speaking-history";
+import { sentenceFeedback, wordFeedback } from "@/lib/pronunciation-feedback";
+import { practiceBand as bandOf, practiceScore as scoreOf } from "@/lib/free-speaking-practice";
 import FreeSpeakingDialog, { playSample } from "./free-speaking-dialog";
 import { PronunciationLegend, pronunciationToneClasses } from "./pronunciation-feedback";
 import styles from "./free-speaking.module.css";
@@ -16,10 +17,12 @@ const bands = {
   good: { label: "Đạt chuẩn", icon: "check" },
   excellent: { label: "Xuất sắc", icon: "star" },
   pending: { label: "Chưa chấm", icon: "clock" },
+  record_again: { label: "Cần ghi âm lại", icon: "mic" },
 } as const;
 const filters = [
   { id: "all", label: "Tất cả", icon: "dashboard" },
   { id: "priority", label: "Cần luyện lại", icon: "replay" },
+  { id: "record_again", label: "Cần ghi âm lại", icon: "mic" },
   { id: "review", label: "Nên nghe lại", icon: "wave" },
   { id: "good", label: "Đạt chuẩn", icon: "check" },
   { id: "excellent", label: "Xuất sắc", icon: "star" },
@@ -31,20 +34,6 @@ type Dialog = { sentence?: PracticeSentence; showResult?: boolean };
 const pageSize = 5;
 const dateTime = new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" });
 const number = new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 });
-
-function scoreOf(sentence: PracticeSentence) {
-  const assessment = sentence.result?.assessment;
-  return assessment && feedbackMode(assessment) !== "record_again" ? assessment.overallScore : null;
-}
-
-function bandOf(sentence: PracticeSentence): keyof typeof bands {
-  const score = scoreOf(sentence);
-  if (score === null) return sentence.result ? "priority" : "pending";
-  if (score < 60) return "priority";
-  if (score < 80) return "review";
-  if (score < 90) return "good";
-  return "excellent";
-}
 
 function Stat({ icon, label, children, tone }: { icon: SiteIconName; label: string; children: React.ReactNode; tone?: string }) {
   return <div className={styles.stat} data-tone={tone}>
@@ -106,7 +95,7 @@ export default function FreeSpeaking({ account }: { account: string }) {
     }
   }
   const goodPercent = assessedWords ? Math.round(goodWords / assessedWords * 100) : null;
-  const counts = { all: items.length, priority: 0, review: 0, good: 0, excellent: 0, pending: 0, saved: 0 };
+  const counts = { all: items.length, priority: 0, review: 0, good: 0, excellent: 0, pending: 0, record_again: 0, saved: 0 };
   for (const item of items) {
     counts[bandOf(item)]++;
     if (item.saved) counts.saved++;
@@ -168,16 +157,23 @@ export default function FreeSpeaking({ account }: { account: string }) {
     setHistory(previous => [updated, ...(previous ?? []).filter(item => item.id !== updated.id)]);
   }
 
-  function create(text: string) {
-    const id = sentenceKey(text);
+  function create(text: string, context?: PracticeContext) {
+    const id = practiceSentenceKey(text, context);
     const existing = items.find(item => item.id === id);
     setFilter("all"); setQuery(""); setSort("newest"); setPage(1);
-    return existing ?? persist({ account, id, text, saved: false, updatedAt: Date.now() });
+    return existing ?? persist({ account, id, text, saved: false, updatedAt: Date.now(), ...(context ? { context } : {}) });
   }
 
   async function saveResult(sentence: PracticeSentence, result: PracticeResult) {
     setPage(1);
-    return persist(sentence, { result, updatedAt: Date.now() });
+    let updated: PracticeSentence;
+    try { updated = await savePracticeResult(sentence, result); }
+    catch {
+      setNotice("Chưa lưu được vào trình duyệt. Lần chấm này chỉ có trong phiên hiện tại.");
+      updated = appendPracticeResult(sentence, result);
+    }
+    updateHistory(updated);
+    return updated;
   }
 
   async function toggleSaved(sentence: PracticeSentence) {
@@ -272,19 +268,21 @@ export default function FreeSpeaking({ account }: { account: string }) {
             <p className={styles.sentence} lang="en">“{assessment ? sentenceFeedback(sentence.text, assessment).map((part, index) =>
               part.feedback ? <mark className={pronunciationToneClasses[part.feedback.tone]} data-tone={part.feedback.tone}
                 title={part.feedback.label} key={index}>{part.text}</mark> : part.text) : sentence.text}”</p>
-            {assessment && band === "priority" && <p className={styles.priorityNote}><Icon name="bulb" /> {assessment.feedback}</p>}
+            {sentence.context && <p className={styles.contextNote}>Trích từ câu: <span lang="en">{sentence.context.sentenceText}</span></p>}
+            {assessment && (band === "priority" || band === "record_again") && <p className={styles.priorityNote} data-retry={band === "record_again"}><Icon name="bulb" />
+              {band === "record_again" ? assessment.warnings.join(" ") || "Bản thu chưa đủ rõ để đánh giá cả câu. Hãy nghe lại, kiểm tra microphone và ghi âm lại." : assessment.feedback}</p>}
             <div className={styles.entryActions}>
               {assessment && <button onClick={() => void listenRecording(sentence)} aria-pressed={playing === sentence.id}>
                 <Icon name={playing === sentence.id ? "pause" : "play"} /> {playing === sentence.id ? "Dừng nghe" : `Nghe bản ghi (${number.format(assessment.durationSeconds)}s)`}
               </button>}
               <button onClick={() => { stopAudio(); playSample(sentence.text, setNotice); }}><Icon name="wave" /> Nghe giọng mẫu</button>
-              {assessment && <button onClick={() => openDialog({ sentence, showResult: true })}><Icon name="sparkles" /> Xem chi tiết</button>}
+              {assessment && <button onClick={() => openDialog({ sentence, showResult: true })}><Icon name="sparkles" /> Xem chi tiết · {practiceAttempts(sentence).length} lần chấm</button>}
               <button type="button" className={styles.bookmark} aria-label={"Đánh dấu câu " + sentence.text} aria-pressed={sentence.saved}
                 title={sentence.saved ? "Bỏ dấu trang" : "Đánh dấu"} disabled={saving !== null} onClick={() => void toggleSaved(sentence)}>
                 <Icon name="bookmark" /> {sentence.saved ? "Đã đánh dấu" : "Đánh dấu"}
               </button>
               <button className={styles.primary} onClick={() => openDialog({ sentence })}><Icon name="mic" />
-                {band === "priority" ? "Luyện lại ngay" : assessment ? "Luyện lại" : "Bắt đầu luyện"}
+                {band === "record_again" ? "Ghi âm lại" : band === "priority" ? "Luyện lại ngay" : assessment ? "Luyện lại" : "Bắt đầu luyện"}
               </button>
             </div>
           </li>;
@@ -297,7 +295,7 @@ export default function FreeSpeaking({ account }: { account: string }) {
           <button disabled={currentPage >= totalPages} aria-label="Trang sau" onClick={() => { stopAudio(); setPage(currentPage + 1); }}>›</button>
         </nav>
       </div>}
-      <p className={styles.storageNote}>Mỗi câu lưu lần chấm gần nhất. Bạn có thể mở các câu đã đánh dấu trong Dấu trang trên trình duyệt này.</p>
+      <p className={styles.storageNote}>Mỗi câu giữ tối đa 10 lần chấm gần nhất cùng bản ghi trên trình duyệt này. Mở chi tiết để nghe lại và so sánh. Các câu đã đánh dấu cũng có trong Dấu trang.</p>
     </section>
     {dialog && <FreeSpeakingDialog initialSentence={dialog.sentence} showResult={dialog.showResult} onCreate={create}
       onScore={saveResult} onClose={() => setDialog(null)} />}

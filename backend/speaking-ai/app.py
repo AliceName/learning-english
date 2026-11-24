@@ -71,7 +71,10 @@ def create_app(engine=None, *, api_token=None, engine_factory=SpeakingEngine):
             result = await run_in_threadpool(request.app.state.engine.score, data, text, sentence_text, start_word_index)
             return JSONResponse(result, headers={'Cache-Control': 'no-store'})
         except RecordingError as exc:
-            return JSONResponse({'title': str(exc)}, status_code=422)
+            problem = {'title': str(exc)}
+            if exc.recording_issue is not None:
+                problem['recordingIssue'] = exc.recording_issue
+            return JSONResponse(problem, status_code=422, headers={'Cache-Control': 'no-store'})
         except EngineBusyError as exc:
             return JSONResponse({'title': str(exc)}, status_code=429, headers={'Retry-After': '3'})
         except Exception:

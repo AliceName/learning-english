@@ -95,6 +95,9 @@
 .badge[data-band="priority"] { color: #ad1039; background: #ffe4eb; }
 .badge[data-band="review"] { color: #00618e; background: #dcf1fd; }
 .badge[data-band="pending"] { color: #465c7d; background: #eaf0fa; }
+.badge[data-band="record_again"] { color: #5b5277; background: #ece8f5; }
+.entry[data-band="record_again"] { border-left: 4px solid #8a7aa7; }
+.priorityNote[data-retry="true"] { color: #5b5277; background: #f0edf6; }
 .sentence { margin: 7px 0 13px; font-size: clamp(1rem, 2.35cqw, 1.18rem); font-weight: 750; line-height: 1.55; overflow-wrap: anywhere; }
 .sentence mark { padding: .06em .15em; border-radius: 4px; box-decoration-break: clone; }
 .priorityNote { display: flex; gap: 7px; margin: 0 0 10px; padding: 9px 11px; border-radius: 10px; color: #841734; background: #ffedf2; font-size: .8rem; }
@@ -282,6 +285,17 @@
 .resultDialog .resultSummary small { color: #45658f; font-size: .8rem; line-height: 1.4; }
 .resultDialog .resultSummary strong { font-size: 1.7rem; line-height: 1.3; overflow-wrap: anywhere; }
 .scoreScope { margin: -6px 0 0; color: #557096; font-size: .78rem; line-height: 1.5; }
+.attemptHistory, .reviewPlan { position: relative; z-index: 1; display: grid; gap: 10px; min-width: 0; padding: 15px; border: 1px solid #bed3f4; border-radius: 12px; background: #f8fbff; color: #274b7c; }
+.attemptHistory label { display: grid; gap: 7px; font-weight: 700; }
+.attemptHistory select { width: 100%; min-width: 0; padding: 10px; border: 1px solid #a9c5f0; border-radius: 8px; background: white; color: #173e78; font: inherit; }
+.attemptHistory p, .reviewPlan p { margin: 0; line-height: 1.6; }
+.attemptHistory small, .reviewPlan small { color: #526b8c; line-height: 1.6; }
+.contextNote { position: relative; z-index: 1; margin: 0 0 12px; color: #526b8c; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.reviewPlan { margin-bottom: 18px; }
+.reviewPlan nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.reviewPlan button { padding: 9px 12px; border: 1px solid #a9c5f0; border-radius: 8px; background: #fff; color: #164784; font: inherit; cursor: pointer; }
+.reviewPlan button[aria-current="step"] { border-color: #0755d3; background: #0755d3; color: #fff; }
+.reviewPlan button:disabled { cursor: wait; opacity: .55; }
 .resultDialog .modelFeedback { padding: 14px 16px; border: 1px solid #c8dcfb; border-radius: 12px; background: #e7f1ff; color: #284e81; line-height: 1.6; }
 .playbackCard { display: grid; gap: 10px; padding: 16px; border: 1px solid #b9d3fb; border-radius: 13px; background: #fbfdff; }
 .playbackCard h3 { display: flex; align-items: center; gap: 9px; margin: 0; color: #173e78; font-size: 1rem; }

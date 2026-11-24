@@ -12,12 +12,15 @@ import PronunciationFeedback from "./pronunciation-feedback";
 import SpeakingAssignment from "./speaking-assignment";
 import SpeakingScenery from "./speaking-artwork";
 import { feedbackMode } from "@/lib/pronunciation-feedback";
+import { speakingReviewPlan, type SpeakingReviewPlan } from "@/lib/free-speaking-practice";
+import { recordingIssueAdvice } from "@/lib/speaking-recording-issue";
+import SpeakingReviewDialog from "./speaking-review-dialog";
 import styles from "./speaking.module.css";
 
 type Phase = "idle" | "starting" | "recording" | "encoding" | "submitting";
 type Clip = { blob: Blob; url: string; submitted: boolean; name: string };
 const waveform = [9, 14, 21, 34, 50, 38, 57, 31, 45, 22, 35, 49, 28, 18, 31, 44, 23, 13, 19, 11, 8];
-export default function SpeakingPractice({ lesson, initialHistory, historyUnavailable }: { lesson: SpeakingLesson; initialHistory: SpeakingAttempt[]; historyUnavailable: boolean }) {
+export default function SpeakingPractice({ lesson, initialHistory, historyUnavailable, account }: { lesson: SpeakingLesson; initialHistory: SpeakingAttempt[]; historyUnavailable: boolean; account?: string }) {
   const [index, setIndex] = useState(0);
   const [mode, setMode] = useState<SpeakingPracticeMode>("sentence");
   const [segmentIndex, setSegmentIndex] = useState(0);
@@ -36,6 +39,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
   const [audioNotice, setAudioNotice] = useState("");
   const [playingWord, setPlayingWord] = useState("");
   const [rate, setRate] = useState(.75);
+  const [reviewPlan, setReviewPlan] = useState<SpeakingReviewPlan | null>(null);
   const recorder = useRef<PcmRecorder | null>(null);
   const recorderStartup = useRef<AbortController | null>(null);
   const mounted = useRef(true);
@@ -178,7 +182,8 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       if (target.segmentIndex !== null) body.append("segmentIndex", String(target.segmentIndex));
       const response = await fetch("/api/speaking/attempts", { method: "POST", body, signal: controller.signal });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại trước khi gửi." : data.title || "Chưa chấm được bản ghi. Vui lòng thử lại.");
+      if (!response.ok) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại trước khi gửi." :
+        recordingIssueAdvice(data.recordingIssue) || data.title || "Chưa chấm được bản ghi. Vui lòng thử lại.");
       if (mounted.current) {
         const attempt = data as SpeakingAttempt;
         saveClip(target.key, { ...clip, submitted: true });
@@ -363,7 +368,9 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           <div><dt>Thời lượng</dt><dd>{result.assessment.durationSeconds.toFixed(1)} giây</dd></div>
         </dl>
         {comparison && <div className={styles.comparison}><b>So với lần luyện trước cùng {result.scope?.kind === "segment" ? "cụm" : "câu"}</b>{comparison.delta === null ? <p>{comparison.reason}</p> : <p>{comparison.previous.assessment.overallScore.toFixed(1)} → {result.assessment.overallScore.toFixed(1)} /100 <strong>{comparison.delta > 0 ? "+" : ""}{comparison.delta.toFixed(1)} điểm</strong><small>Cùng bộ chấm và cùng phần âm được hỗ trợ. Chênh lệch chỉ mang tính tham khảo.</small></p>}</div>}
-        <PronunciationFeedback key={result.attemptId} attempt={result} disabled={busy} canRetry={canRetry} rate={rate} onBeforePlay={() => stopPlayback()} onListenRecording={word => void playWord(word)} onRetry={() => void start()} />
+        <PronunciationFeedback key={result.attemptId} attempt={result} disabled={busy} canRetry={canRetry} rate={rate} onBeforePlay={() => stopPlayback()} onListenRecording={word => void playWord(word)} onRetry={() => void start()}
+          onPracticeWord={account ? word => { stopPlayback(); setReviewPlan(speakingReviewPlan(result.scope?.sentenceText ?? result.referenceText,
+            word.index + (result.scope?.startWordIndex ?? 0))); } : undefined} />
         {playingWord && <p className={styles.notice} role="status">Đang nghe đoạn ghi âm quanh từ “{playingWord}”… <button className={styles.secondary} onClick={() => stopPlayback()}>Dừng đoạn ghi âm</button></p>}
         {audioNotice && <p className={styles.error} role="status">{audioNotice}</p>}
         <audio ref={wordAudio} hidden key={`segment-${result.attemptId}`} src={result.audioUrl} preload="metadata" onTimeUpdate={event => { if (segmentEnd.current !== null && event.currentTarget.currentTime >= segmentEnd.current) event.currentTarget.pause(); }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onPause={event => { if (event.currentTarget.paused) { segmentEnd.current = null; setPlayingWord(""); } }} onEnded={() => { segmentEnd.current = null; setPlayingWord(""); }} onError={() => setAudioNotice("Chưa tải được bản ghi đã lưu. Bạn có thể thử lại từ lịch sử.")} />
@@ -385,5 +392,6 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       {historyError && <p className={styles.historyError} role="status">{historyError}</p>}
       {history.length === 0 ? <div className={styles.empty}>Kết quả sẽ xuất hiện ở đây sau khi gửi chấm thành công.</div> : <ol>{history.map(attempt => <li key={attempt.attemptId}><button disabled={busy || !lesson.sentences[attempt.sentenceIndex]} aria-pressed={result?.attemptId === attempt.attemptId} onClick={() => selectSentence(attempt.sentenceIndex, attempt)}><span>Câu {attempt.sentenceIndex + 1} · {attempt.scope?.kind === "segment" ? `cụm ${attempt.scope.segmentIndex + 1}` : "cả câu"}<small>{new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: "Asia/Bangkok" }).format(new Date(attempt.createdAt))}</small>{feedbackMode(attempt.assessment) === "record_again" && <small>Cần thu lại</small>}</span><strong>{attempt.assessment.overallScore.toFixed(1)}<small>/100</small></strong></button></li>)}</ol>}
     </section></aside></div></div>
+    {account && reviewPlan && <SpeakingReviewDialog account={account} plan={reviewPlan} onClose={() => setReviewPlan(null)} />}
   </main>;
 }

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="vi"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiểm chứng Speaking với giọng Việt</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fc;color:#172b4d;font:16px/1.6 system-ui,sans-serif}main{max-width:920px;margin:auto;padding:28px 20px 60px}h1{font-size:1.9rem;line-height:1.3}h2{font-size:1.3rem}section{padding:22px;margin:20px 0;background:white;border:1px solid #d7e2f2;border-radius:16px}label{display:grid;gap:5px;margin:12px 0}select,input,textarea,button{font:inherit}select,textarea{padding:10px;border:1px solid #a9bdd9;border-radius:9px;background:white;color:inherit;max-width:100%}button{padding:10px 16px;border:1px solid #1659b8;background:#1659b8;color:white;border-radius:9px;cursor:pointer;margin:6px 5px 6px 0}button:disabled{opacity:.5;cursor:default}button[aria-pressed=true]{background:#ad2345}audio{width:100%;margin:10px 0}.row{display:flex;gap:18px;flex-wrap:wrap}.row>label{flex:1;min-width:210px}.muted,small{color:#536b88}#sentence{font-size:1.6rem;font-weight:650;line-height:1.5}#message{white-space:pre-line}#message[data-error=true]{color:#a21f35}#words{display:flex;flex-wrap:wrap;gap:12px}#words label{min-width:105px}a{color:#0756bc}[hidden]{display:none!important}:focus-visible{outline:3px solid #f0b94d;outline-offset:3px}
+</style>
+<main>
+<h1>Kiểm chứng Speaking với giọng Việt</h1>
+<p class="muted">Thu âm thật và đánh giá độc lập để đo lỗi chấm phát âm. Phiếu chấm không hiển thị điểm AI.</p>
+<section aria-label="Chọn công việc">
+<div class="row"><label>Công việc<select id="mode"><option value="collect">Thu thập bản ghi</option><option value="review">Chấm độc lập</option></select></label>
+<label id="speaker-label">Mã người nói<select id="speaker"></select></label>
+<label id="reviewer-label" hidden>Người đánh giá<select id="reviewer"><option value="1">Người đánh giá 1</option><option value="2">Người đánh giá 2</option></select></label></div>
+<label>Bản ghi<select id="case"></select></label><small id="progress"></small>
+</section>
+<section>
+<h2>Câu tham chiếu</h2><p id="sentence" lang="en"></p>
+<p id="instruction"></p>
+<div id="collect">
+<p>Đọc bằng giọng tự nhiên. Mỗi bản ghi dài 0,3–12 giây. Cả bản thu chưa rõ cũng được giữ để người đánh giá xem xét.</p>
+<button id="record" type="button">Bắt đầu ghi âm</button><button id="stop" type="button" disabled>Dừng ghi âm</button>
+<span id="timer" role="status"></span>
+<label>Hoặc chọn WAV đã thu<input id="upload" type="file" accept=".wav,audio/wav"></label>
+<button id="save-audio" type="button" disabled>Lưu bản thu</button>
+<p><small>Bản đã lưu được giữ nguyên để nhãn luôn gắn với đúng âm thanh. Cần một lượt thu khác thì tạo bộ thu thập mới.</small></p>
+</div>
+<audio id="audio" controls preload="metadata" aria-label="Nghe bản ghi" hidden></audio>
+<form id="review" hidden>
+<p>Nghe bản ghi trước khi đánh giá. Hai người đánh giá làm việc độc lập và dùng chung tiêu chí đã thống nhất.</p>
+<div class="row"><label>Có đọc đúng nội dung câu tham chiếu?<select id="read-match" required><option value="">Chưa chọn</option><option value="yes">Đúng nội dung</option><option value="no">Thiếu, thừa hoặc khác từ</option><option value="uncertain">Chưa xác định được</option></select></label>
+<label>Âm thanh có đủ rõ để đánh giá?<select id="quality" required><option value="">Chưa chọn</option><option value="yes">Đủ rõ</option><option value="no">Không đủ rõ</option><option value="uncertain">Chưa chắc</option></select></label></div>
+<label>Nội dung thực tế nghe được (nếu cần)<textarea id="actual-text" rows="2" maxlength="1000"></textarea></label>
+<h2>Điểm từng từ</h2><p>Thang thử nghiệm 0–2: 0 = rất khó nhận ra; 1 = nhận ra nhưng có vấn đề phát âm rõ; 2 = rõ và dễ hiểu theo tiêu chí chung. Để trống phần chưa thể đánh giá. Giọng Việt tự nó không phải là lỗi.</p>
+<div id="words"></div><button id="save-review" type="submit">Lưu đánh giá độc lập</button>
+</form>
+</section>
+<p id="message" role="status" aria-live="polite"></p>
+<p class="muted">Dữ liệu được lưu trong bộ thu thập trên máy này. Không có dữ liệu thật thì chưa có kết luận về độ chính xác. Các câu ở đây được soạn để thử phát âm và nội dung; chưa được gán cấp độ CEFR.</p>
+</main><script type="module" src="/lab.js"></script></html>

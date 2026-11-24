@@ -5,9 +5,10 @@ using EnglishLearning.Api.Contracts;
 
 namespace EnglishLearning.Api.Services;
 
-public sealed class SpeakingException(int status, string message) : Exception(message)
+public sealed class SpeakingException(int status, string message, SpeakingRecordingIssue? recordingIssue = null) : Exception(message)
 {
     public int Status { get; } = status;
+    public SpeakingRecordingIssue? RecordingIssue { get; } = recordingIssue;
 }
 public interface ISpeakingScorer
 {
@@ -33,10 +34,21 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
             {
                 var status = (int)response.StatusCode;
                 string? title = null;
-                try { using var problem = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct)); title = problem.RootElement.TryGetProperty("title", out var value) ? value.GetString() : null; }
+                SpeakingRecordingIssue? issue = null;
+                try
+                {
+                    using var problem = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+                    title = problem.RootElement.ValueKind == JsonValueKind.Object && problem.RootElement.TryGetProperty("title", out var value)
+                        && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
+                    if (problem.RootElement.ValueKind == JsonValueKind.Object && problem.RootElement.TryGetProperty("recordingIssue", out var diagnostic))
+                    {
+                        var candidate = diagnostic.Deserialize<SpeakingRecordingIssue>(new JsonSerializerOptions(JsonSerializerDefaults.Web));
+                        if (candidate is not null && IsValidRecordingIssue(candidate)) issue = candidate;
+                    }
+                }
                 catch (JsonException) { }
                 if (status is 400 or 413 or 422 or 429)
-                    throw new SpeakingException(status == 422 ? 400 : status, title is { Length: > 0 and <= 400 } ? title : "Bản ghi chưa phù hợp. Vui lòng ghi lại.");
+                    throw new SpeakingException(status == 422 ? 400 : status, title is { Length: > 0 and <= 400 } ? title : "Bản ghi chưa phù hợp. Vui lòng ghi lại.", issue);
                 throw new SpeakingException(503, "Bộ chấm Speaking chưa sẵn sàng. Vui lòng thử lại sau.");
             }
             var result = await response.Content.ReadFromJsonAsync<SpeakingAssessment>(cancellationToken: ct);
@@ -52,6 +64,12 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
         { throw new SpeakingException(502, "Không đọc được kết quả từ bộ chấm Speaking."); }
     }
 
+    public static bool IsValidRecordingIssue(SpeakingRecordingIssue issue) =>
+        issue.Code is "too_quiet" or "phoneme_mismatch" or "no_speech_tokens" or "alignment_failed" or "clipping"
+        && (issue.DurationSeconds is not { } seconds || double.IsFinite(seconds) && seconds is >= 0 and <= 12.03)
+        && (issue.PhonemeEditRatio is not { } ratio || double.IsFinite(ratio) && ratio is >= 0 and <= 1)
+        && (issue.Code != "clipping" || issue.HasClipping is true);
+
     public static bool IsValid(SpeakingAssessment result, string text)
     {
         var words = SpeakingReferenceText.Words.Matches(text.Replace('’', '\'')).Select(m => m.Value).ToArray();
@@ -63,6 +81,9 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
             || result.Warnings is null || result.Warnings.Length > 10 || result.Warnings.Any(w => w is null || w.Length > 500)
             || string.IsNullOrWhiteSpace(result.Feedback) || result.Feedback.Length > 2000) return false;
         var scores = new List<double>();
+        if (result.RecordingIssue is { } issue && (!IsValidRecordingIssue(issue)
+            || issue.Code is not ("clipping" or "phoneme_mismatch") || result.Interpretation?.FeedbackMode != "record_again"
+            || issue.DurationSeconds is { } seconds && Math.Abs(seconds - result.DurationSeconds) > .01)) return false;
         if (result.Interpretation is { } info && (string.IsNullOrWhiteSpace(info.CalibrationVersion) || info.CalibrationVersion.Length > 100
             || info.CalibrationMethod is not ("identity" or "affine" or "isotonic")
             || !double.IsFinite(info.PracticeThreshold) || info.PracticeThreshold is < .25 or > 1.95

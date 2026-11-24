@@ -60,6 +60,24 @@ public sealed class SpeakingContractTests
     }
 
     [Fact]
+    public void Recording_diagnostics_are_optional_and_bounded_and_require_warning_mode()
+    {
+        var original = Result();
+        var info = new SpeakingInterpretation("cal1-test", "identity", 1.1, 1.5, true, .8, "record_again", "speechocean762-supported-subset");
+        var issue = new SpeakingRecordingIssue("phoneme_mismatch", 1, false, .6);
+        var result = original with { Interpretation = info, RecordingIssue = issue };
+        Assert.True(SpeakingScorerClient.IsValid(result, "We"));
+        Assert.False(SpeakingScorerClient.IsValid(result with { Interpretation = info with { FeedbackMode = "normal" } }, "We"));
+        Assert.False(SpeakingScorerClient.IsValid(result with { RecordingIssue = issue with { DurationSeconds = 2 } }, "We"));
+        Assert.False(SpeakingScorerClient.IsValidRecordingIssue(issue with { Code = "claimed_transcript" }));
+        Assert.False(SpeakingScorerClient.IsValidRecordingIssue(issue with { PhonemeEditRatio = double.NaN }));
+        Assert.False(SpeakingScorerClient.IsValidRecordingIssue(issue with { PhonemeEditRatio = 1.01 }));
+        Assert.False(SpeakingScorerClient.IsValidRecordingIssue(issue with { Code = "clipping", HasClipping = false }));
+        Assert.True(SpeakingScorerClient.IsValidRecordingIssue(issue with { Code = "clipping", HasClipping = true }));
+        Assert.False(SpeakingScorerClient.IsValid(result with { RecordingIssue = issue with { Code = "too_quiet" } }, "We"));
+    }
+
+    [Fact]
     public void Legacy_or_invalid_lesson_content_is_not_exposed_as_practice()
     {
         Assert.Null(SpeakingLessonService.ReadContent("not-json"));
@@ -87,14 +105,24 @@ public sealed class SpeakingContractTests
         handler.Reject = true;
         var error = await Assert.ThrowsAsync<SpeakingException>(() => scorer.ScoreAsync([1], "We", default));
         Assert.Equal(400, error.Status);
+        Assert.Equal("phoneme_mismatch", error.RecordingIssue?.Code);
+        Assert.Equal(.8, error.RecordingIssue?.PhonemeEditRatio);
+        handler.RejectionBody = "{\"title\":\"Ghi lại\",\"recordingIssue\":{\"code\":\"phoneme_mismatch\",\"phonemeEditRatio\":8}}";
+        error = await Assert.ThrowsAsync<SpeakingException>(() => scorer.ScoreAsync([1], "We", default));
+        Assert.Null(error.RecordingIssue);
+        Assert.Equal("Ghi lại", error.Message);
+        handler.RejectionBody = "null";
+        error = await Assert.ThrowsAsync<SpeakingException>(() => scorer.ScoreAsync([1], "We", default));
+        Assert.Equal(400, error.Status);
     }
     private sealed class Handler : HttpMessageHandler
     {
         public bool Reject; public string Body = "";
+        public string RejectionBody = "{\"title\":\"Ghi lại\",\"recordingIssue\":{\"code\":\"phoneme_mismatch\",\"durationSeconds\":1,\"hasClipping\":false,\"phonemeEditRatio\":0.8}}";
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             Body = await request.Content!.ReadAsStringAsync(ct);
-            return Reject ? new(HttpStatusCode.UnprocessableEntity) { Content = new StringContent("{\"title\":\"Ghi lại\"}", Encoding.UTF8, "application/json") }
+            return Reject ? new(HttpStatusCode.UnprocessableEntity) { Content = new StringContent(RejectionBody, Encoding.UTF8, "application/json") }
                 : new(HttpStatusCode.OK) { Content = JsonContent.Create(Result()) };
         }
     }

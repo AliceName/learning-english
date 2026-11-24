@@ -3,7 +3,9 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Icon from "@/components/site-icon";
-import type { PracticeResult, PracticeSentence } from "@/lib/free-speaking-history";
+import { practiceAttempts, type PracticeContext, type PracticeResult, type PracticeSentence } from "@/lib/free-speaking-history";
+import { comparePracticeAttempts, speakingReviewPlan, type SpeakingReviewPlan } from "@/lib/free-speaking-practice";
+import { recordingIssueAdvice } from "@/lib/speaking-recording-issue";
 import { PcmRecorder, type RecordingStopReason } from "@/lib/pcm-recorder";
 import { feedbackMode } from "@/lib/pronunciation-feedback";
 import type { SpeakingAssessment, SpeakingWord } from "@/lib/speaking";
@@ -26,10 +28,12 @@ export function playSample(text: string, reportError: (message: string) => void)
   window.speechSynthesis.speak(utterance);
 }
 
-export default function FreeSpeakingDialog({ initialSentence, showResult, onCreate, onScore, onClose }: {
+export default function FreeSpeakingDialog({ initialSentence, showResult, initialReview, storageNotice, onCreate, onScore, onClose }: {
   initialSentence?: PracticeSentence;
   showResult?: boolean;
-  onCreate: (text: string) => PracticeSentence | Promise<PracticeSentence>;
+  initialReview?: SpeakingReviewPlan;
+  storageNotice?: string;
+  onCreate: (text: string, context?: PracticeContext) => PracticeSentence | Promise<PracticeSentence>;
   onScore: (sentence: PracticeSentence, result: PracticeResult) => Promise<PracticeSentence>;
   onClose: () => void;
 }) {
@@ -43,6 +47,9 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [result, setResult] = useState(initialSentence?.result);
+  const [selectedAttempt, setSelectedAttempt] = useState(initialSentence ? practiceAttempts(initialSentence)[0]?.id : undefined);
+  const [review, setReview] = useState(initialReview);
+  const [reviewIndex, setReviewIndex] = useState(0);
   const modal = useRef<HTMLDialogElement>(null);
   const audio = useRef<HTMLAudioElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -58,6 +65,9 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
   const recording = showingResult ? result?.recording : clip;
   const busy = phase !== "idle";
   const resultVisible = showingResult && !!result;
+  const attempts = sentence ? practiceAttempts(sentence) : [];
+  const selected = attempts.find(attempt => attempt.id === selectedAttempt);
+  const comparison = selected ? comparePracticeAttempts(selected, attempts) : null;
 
   useEffect(() => {
     mounted.current = true;
@@ -113,6 +123,7 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
     if (!mounted.current) return;
     setSentence(saved);
     setResult(saved.result);
+    setSelectedAttempt(practiceAttempts(saved)[0]?.id);
     setPhase("idle");
   }
 
@@ -169,15 +180,22 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
     try {
       const body = new FormData();
       body.append("text", sentence.text);
+      if (sentence.context) {
+        body.append("sentenceText", sentence.context.sentenceText);
+        body.append("startWordIndex", String(sentence.context.startWordIndex));
+      }
       body.append("file", audioToScore, "recording.wav");
       const response = await fetch("/api/speaking/free/score", { method: "POST", body, signal: controller.signal });
       const data = await response.json().catch(() => null);
-      if (!response.ok || !data) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." :
-        data?.title || "Chưa chấm được bản ghi. Hãy thử lại.");
+      if (!response.ok || !data) {
+        const diagnostic = recordingIssueAdvice(data?.recordingIssue);
+        throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." :
+          diagnostic || data?.title || "Chưa chấm được bản ghi. Hãy thử lại.");
+      }
       const next = { assessment: data as SpeakingAssessment, recording: audioToScore };
       const saved = await onScore(sentence, next);
       if (!controller.signal.aborted) {
-        setSentence(saved); setResult(next); setShowingResult(true); setClip(null);
+        setSentence(saved); setResult(saved.result ?? next); setSelectedAttempt(practiceAttempts(saved)[0]?.id); setShowingResult(true); setClip(null);
       }
     } catch (error) {
       if (!controller.signal.aborted) setError(error instanceof Error ? error.message : "Chưa gửi được bản ghi. Hãy thử lại.");
@@ -205,6 +223,31 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
 
   function retry() {
     stopPlayback(); setError(""); setMessage(""); setElapsed(0); setShowingResult(false);
+  }
+
+  function selectAttempt(id: string) {
+    const attempt = attempts.find(item => item.id === id);
+    if (!attempt || busy) return;
+    stopPlayback(); setResult(attempt); setSelectedAttempt(id); setShowingResult(true); setError(""); setMessage("");
+  }
+
+  async function reviewStep(plan: SpeakingReviewPlan, index: number) {
+    if (busy || !plan.steps[index]) return;
+    stopPlayback(); setPhase("creating"); setError(""); setMessage("");
+    try {
+      const next = await onCreate(plan.steps[index].text, plan.steps[index].context);
+      if (!mounted.current) return;
+      setReview(plan); setReviewIndex(index); setSentence(next); setResult(next.result);
+      setSelectedAttempt(practiceAttempts(next)[0]?.id); setShowingResult(false); setClip(null); setElapsed(0);
+    } catch {
+      if (mounted.current) setError("Chưa mở được phần luyện này. Hãy thử lại.");
+    } finally { if (mounted.current) setPhase("idle"); }
+  }
+
+  function practiceWord(word: SpeakingWord) {
+    if (!sentence) return;
+    const plan = speakingReviewPlan(sentence.context?.sentenceText ?? sentence.text, word.index + (sentence.context?.startWordIndex ?? 0));
+    if (plan) void reviewStep(plan, 0);
   }
 
   return <dialog ref={modal} className={`${styles.dialog} ${styles.noteDialog}${sentence ? ` ${styles.readingDialog}` : ""}${resultVisible ? ` ${styles.resultDialog}` : ""}`}
@@ -243,7 +286,7 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
           {sentence && <div className={styles.readingEyebrow}>
             <button type="button" aria-label="Nghe câu mẫu" title="Nghe câu mẫu" disabled={busy}
               onClick={() => { stopPlayback(); setError(""); playSample(sentence.text, setError); }}><Icon name="volume" /></button>
-            <span id={stageId}>{resultVisible ? "Kết quả phát âm" : "Đọc cả câu"}</span>
+            <span id={stageId}>{resultVisible ? "Kết quả phát âm" : review ? review.steps[reviewIndex].label : "Đọc cả câu"}</span>
           </div>}
           <h2 id={titleId} ref={heading} tabIndex={-1} lang={sentence ? "en" : undefined}>
             {!sentence ? <>Tạo câu <span className={styles.titleHighlight}>luyện nói</span></> : <span className={styles.readSentence}>{sentence.text}</span>}
@@ -251,6 +294,14 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
         </div>
         <button type="button" className={styles.close} aria-label="Đóng" onClick={() => modal.current?.close()}><Icon name="close" /></button>
       </div>
+      {sentence?.context && !review && <p className={styles.contextNote}>Trích từ câu: <span lang="en">{sentence.context.sentenceText}</span></p>}
+      {review && <section className={styles.reviewPlan} aria-label="Luyện từ đến câu">
+        <strong>Luyện tập từ “{review.word}”</strong>
+        <p lang="en">Câu gốc: {review.sentenceText}</p>
+        <nav aria-label="Các bước luyện phát âm">{review.steps.map((step, i) => <button key={step.kind} type="button" disabled={busy}
+          aria-current={reviewIndex === i ? "step" : undefined} onClick={() => void reviewStep(review, i)}>{i + 1}. {step.label}</button>)}</nav>
+        <small>Mỗi phần được chấm riêng. Chọn bước tiếp theo khi bạn sẵn sàng; câu dài vẫn giới hạn 12 giây mỗi bản thu.</small>
+      </section>}
       {!sentence ? <form className={styles.editor} onSubmit={event => void createSentence(event)}>
         <label htmlFor={textId}><Icon name="writing" /> Câu tiếng Anh bạn muốn luyện</label>
         <div className={styles.sentenceInput}>
@@ -274,6 +325,17 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
         </button>
       </form> : <>
         {resultVisible && result ? <div className={styles.resultContent}>
+          {attempts.length > 0 && <section className={styles.attemptHistory} aria-label="Lịch sử chấm câu này">
+            <label>Lần chấm đang xem<select aria-label="Chọn lần chấm" value={selectedAttempt ?? attempts[0].id} disabled={busy}
+              onChange={event => selectAttempt(event.target.value)}>{attempts.map((attempt, i) => <option key={attempt.id} value={attempt.id}>
+                {i === 0 ? "Mới nhất · " : ""}{new Date(attempt.createdAt).toLocaleString("vi-VN")} · {feedbackMode(attempt.assessment) === "record_again" ? "Cần ghi âm lại" : `${attempt.assessment.overallScore.toFixed(1)}/100`}
+              </option>)}</select></label>
+            {comparison && <p role="status">{comparison.delta === null ? comparison.reason : <>
+              So với lần chấm ngay trước: {comparison.previous.assessment.overallScore.toFixed(1)} → {result.assessment.overallScore.toFixed(1)} /100
+              <strong> ({comparison.delta > 0 ? "+" : ""}{comparison.delta.toFixed(1)} điểm)</strong>. Chênh lệch chỉ mang tính tham khảo.
+            </>}</p>}
+            <small>Giữ tối đa 10 lần chấm cùng bản ghi trên trình duyệt này.</small>
+          </section>}
           <div className={styles.resultSummary} aria-label="Tóm tắt kết quả phát âm">
             <div><small>Điểm phát âm</small><strong>{feedbackMode(result.assessment) === "record_again" ? "Cần ghi lại" :
               <>{result.assessment.overallScore.toLocaleString("vi-VN", { maximumFractionDigits: 1 })}<small>/100</small></>}</strong></div>
@@ -296,9 +358,12 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
             </button>}
           </section>
           <div className={styles.feedbackWrap}>
-            <PronunciationFeedback attempt={{ attemptId: titleId, assessment: result.assessment, referenceText: sentence.text }}
-              disabled={busy} canRetry rate={.85} onBeforePlay={stopPlayback} onListenRecording={word => void playWord(word)} onRetry={retry} />
+            <PronunciationFeedback key={selectedAttempt} attempt={{ attemptId: titleId, assessment: result.assessment, referenceText: sentence.text }}
+              disabled={busy} canRetry rate={.85} onBeforePlay={stopPlayback} onListenRecording={word => void playWord(word)} onRetry={retry}
+              onPracticeWord={review ? undefined : practiceWord} />
           </div>
+          {review && reviewIndex + 1 < review.steps.length && <button type="button" className={styles.primary} disabled={busy}
+            onClick={() => void reviewStep(review, reviewIndex + 1)}>Tiếp: {review.steps[reviewIndex + 1].label} →</button>}
         </div> : <div className={styles.recorder} data-recording={phase === "recording"}>
           <svg className={styles.recordingFrame} viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">
             <path d="M18 3H982L997 18V582L982 597H18L3 582V18Z" fill="#f9fcff" stroke="#7aa9f7" strokeWidth="2" vectorEffect="non-scaling-stroke" />
@@ -331,6 +396,7 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
         </div>}
       </>}
       {message && <p className={styles.dialogMessage} role="status">{message}</p>}
+      {storageNotice && <p className={styles.dialogMessage} role="status">{storageNotice}</p>}
       {error && <p className={styles.dialogError} role="alert">{error}</p>}
     </div>
   </dialog>;

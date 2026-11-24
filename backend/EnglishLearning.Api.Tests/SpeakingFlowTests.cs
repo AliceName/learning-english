@@ -63,7 +63,25 @@ public sealed class SpeakingFlowTests
                 Assert.Equal(HttpStatusCode.OK, scored.StatusCode);
                 Assert.Equal(75, (await scored.Content.ReadFromJsonAsync<SpeakingAssessment>())!.OverallScore);
                 Assert.Equal("We.", scorer.LastText);
+                Assert.Null(scorer.LastScope);
                 Assert.False(Directory.Exists(root));
+            }
+            using (var contextual = FreeForm("We."))
+            {
+                contextual.Add(new StringContent("Yesterday we read a book."), "sentenceText");
+                contextual.Add(new StringContent("1"), "startWordIndex");
+                Assert.Equal(HttpStatusCode.OK, (await client.PostAsync("/api/v1/speaking/free/score", contextual)).StatusCode);
+                Assert.Equal("Yesterday we read a book.", scorer.LastScope?.SentenceText);
+                Assert.Equal(1, scorer.LastScope?.StartWordIndex);
+                Assert.False(Directory.Exists(root));
+            }
+            foreach (var (source, start) in new (string?, string?)[] {
+                ("Yesterday we read a book.", "0"), ("We.", "7"), ("We.", null), (null, "0") })
+            {
+                using var invalidContext = FreeForm("We.");
+                if (source is not null) invalidContext.Add(new StringContent(source), "sentenceText");
+                if (start is not null) invalidContext.Add(new StringContent(start), "startWordIndex");
+                Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/api/v1/speaking/free/score", invalidContext)).StatusCode);
             }
             Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/speaking/lessons/{draft.LessonId}")).StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/v1/speaking/lessons/{personal.LessonId}")).StatusCode);
@@ -116,10 +134,11 @@ public sealed class SpeakingFlowTests
     }
     private sealed class FakeScorer : ISpeakingScorer
     {
-        public bool Fail; public string? LastText;
+        public bool Fail; public string? LastText; public SpeakingAttemptScope? LastScope;
         public Task<SpeakingAssessment> ScoreAsync(byte[] wav, string text, CancellationToken ct, SpeakingAttemptScope? scope = null)
         {
             LastText = text;
+            LastScope = scope;
             if (Fail) throw new SpeakingException(503, "Test service unavailable");
             return Task.FromResult(new SpeakingAssessment("scored", "test-model", 1, 75, 1, 2,
                 [new(0, "We", "scored", 1.5, [new("W", "w", 1, .1, .2), new("IY1", "iː", 2, .3, .4)], null)], [], "Nghe lại bản ghi."));

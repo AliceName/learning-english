@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { SpeakingAttempt, SpeakingWord } from "@/lib/speaking";
 import { wordAudioRange } from "@/lib/speaking-practice";
 import { practiceTargets, phoneGuidance, feedbackMode, feedbackThresholds, sentenceFeedback } from "@/lib/pronunciation-feedback";
+import { recordingIssueAdvice } from "@/lib/speaking-recording-issue";
 import styles from "./pronunciation-feedback.module.css";
 
 export const pronunciationToneClasses = {
@@ -22,10 +23,11 @@ export function PronunciationLegend() {
   </ul>;
 }
 
-export default function PronunciationFeedback({ attempt, disabled, canRetry, rate, onBeforePlay, onListenRecording, onRetry }: {
+export default function PronunciationFeedback({ attempt, disabled, canRetry, rate, onBeforePlay, onListenRecording, onRetry, onPracticeWord }: {
   attempt: Pick<SpeakingAttempt, "referenceText" | "assessment" | "scope"> & { attemptId: string | number };
   disabled: boolean; canRetry: boolean; rate: number;
   onBeforePlay: () => void; onListenRecording: (word: SpeakingWord) => void; onRetry: () => void;
+  onPracticeWord?: (word: SpeakingWord) => void;
 }) {
   const [notice, setNotice] = useState("");
   const unit = attempt.scope?.kind === "segment" ? "cụm" : "câu";
@@ -52,6 +54,7 @@ export default function PronunciationFeedback({ attempt, disabled, canRetry, rat
   return <section className={styles.panel} aria-labelledby={`feedback-${attempt.attemptId}`}>
     <h3 id={`feedback-${attempt.attemptId}`}>Chi tiết từng từ</h3>
     {needsRetry && <div className={styles.qualityNote}>
+      {recordingIssueAdvice(attempt.assessment.recordingIssue) && <p><strong>Lý do cần thu lại:</strong> {recordingIssueAdvice(attempt.assessment.recordingIssue)}</p>}
       <p>{hasWordColors ? `Đã tô màu các từ có đủ tín hiệu. Hãy ghi âm lại để đánh giá cả ${unit}.`
         : "Chưa đủ tín hiệu để tô màu từng từ. Hãy nghe lại và ghi âm lại."}</p>
       {attempt.assessment.warnings.map((warning, index) => <p key={index}>{warning}</p>)}
@@ -79,6 +82,7 @@ export default function PronunciationFeedback({ attempt, disabled, canRetry, rat
       </ul>
       <button type="button" disabled={disabled} onClick={() => listen(word.text)}>▷ Nghe từ “{word.text}”</button>
       {wordAudioRange(word, attempt.assessment.durationSeconds) && <button type="button" disabled={disabled} onClick={() => onListenRecording(word)}>▷ Nghe bạn đọc “{word.text}”</button>}
+      {onPracticeWord && !needsRetry && <button type="button" disabled={disabled} onClick={() => onPracticeWord(word)}>Luyện “{word.text}” theo từ → cụm → câu</button>}
     </article>)}
     <button type="button" disabled={disabled} onClick={() => listen(attempt.referenceText)}>▷ Nghe lại {unit} mẫu</button>
     <button type="button" disabled={disabled || !canRetry} onClick={onRetry}>● Ghi âm lại {unit} này</button>

@@ -14,13 +14,17 @@ public sealed class SubmitSpeakingRequest
 public sealed class ScoreFreeSpeakingRequest
 {
     [Required, StringLength(300)] public string Text { get; init; } = null!;
+    [StringLength(300)] public string? SentenceText { get; init; }
+    [Range(0, 34)] public int? StartWordIndex { get; init; }
     [Required] public IFormFile File { get; init; } = null!;
 }
 public sealed record SpeakingPhoneResult(string SourcePhone, string Symbol, double Score, double StartSeconds, double EndSeconds, double? RawScore = null);
 public sealed record SpeakingWordResult(int Index, string Text, string Status, double? Score, SpeakingPhoneResult[] Phones, string? Reason,
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? FeedbackEligible = null);
 public sealed record SpeakingAssessment(string Status, string ModelVersion, double DurationSeconds, double OverallScore,
-    double Coverage, int ReferenceTokenCount, SpeakingWordResult[] Words, string[] Warnings, string Feedback, SpeakingInterpretation? Interpretation = null);
+    double Coverage, int ReferenceTokenCount, SpeakingWordResult[] Words, string[] Warnings, string Feedback, SpeakingInterpretation? Interpretation = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] SpeakingRecordingIssue? RecordingIssue = null);
+public sealed record SpeakingRecordingIssue(string Code, double? DurationSeconds = null, bool? HasClipping = null, double? PhonemeEditRatio = null);
 public sealed record SpeakingInterpretation(string CalibrationVersion, string CalibrationMethod, double PracticeThreshold,
     double ReviewThreshold, bool ThresholdFitted, double MinimumCoverage, string FeedbackMode, string EvidenceScope);
 public sealed record SpeakingLessonResponse(int LessonId, int CourseId, string Title, string CourseTitle, string Goals,

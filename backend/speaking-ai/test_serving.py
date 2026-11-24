@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from app import create_app
 from engine import (MAX_BYTES, RecordingError, decode_audio, edit_ratio, load_model_for_device,
-                    mark_words_with_recording_evidence, reference_words)
+                    mark_words_with_recording_evidence, reference_words, assess_recording_match)
 from read_pronunciation import phonetic_spellings
 
 
@@ -81,6 +81,29 @@ class ServingTests(unittest.TestCase):
             with self.assertRaises(RecordingError):
                 decode_audio(data)
 
+    def test_quiet_recording_has_actionable_diagnostic(self):
+        with self.assertRaises(RecordingError) as error:
+            decode_audio(wav(silent=True))
+        self.assertEqual(error.exception.recording_issue, {'code': 'too_quiet', 'durationSeconds': 1})
+
+    def test_match_diagnostics_keep_heuristic_thresholds_without_claiming_transcript(self):
+        expected = ['a', 'b', 'c', 'd', 'e']
+        self.assertEqual(assess_recording_match(expected, expected, 1, False), (0, [], None))
+        ratio, warnings, issue = assess_recording_match(expected, ['a', 'b', 'z', 'z', 'z'], 1, False)
+        self.assertEqual(ratio, .6)
+        self.assertEqual(issue['code'], 'phoneme_mismatch')
+        self.assertEqual(issue['phonemeEditRatio'], .6)
+        self.assertEqual(len(warnings), 1)
+        _, warnings, issue = assess_recording_match(expected, expected, 1, True)
+        self.assertEqual(issue['code'], 'clipping')
+        self.assertTrue(issue['hasClipping'])
+        self.assertEqual(len(warnings), 1)
+        for decoded, code in (([], 'no_speech_tokens'), (['z'], 'phoneme_mismatch')):
+            with self.subTest(code=code), self.assertRaises(RecordingError) as error:
+                assess_recording_match(expected, decoded, 1, False)
+            self.assertEqual(error.exception.recording_issue['code'], code)
+            self.assertNotIn('transcript', error.exception.recording_issue)
+
     def test_stereo_48k_is_resampled_without_truncation(self):
         audio, duration, clipped_at, has_clipping = decode_audio(wav(rate=48000, stereo=True))
         self.assertEqual(len(audio), 16000)
@@ -136,6 +159,8 @@ class ServingTests(unittest.TestCase):
             self.assertEqual(response.headers['cache-control'], 'no-store')
             response = client.post('/score', data={'text': 'We call it bear'}, files={'file': ('x.wav', wav(silent=True), 'audio/wav')})
             self.assertEqual(response.status_code, 422)
+            self.assertEqual(response.json()['recordingIssue']['code'], 'too_quiet')
+            self.assertEqual(response.headers['cache-control'], 'no-store')
             before = engine.calls
             response = client.post('/score', data={'text': 'We'}, files={'file': ('x.wav', b'x' * (MAX_BYTES + 1), 'audio/wav')})
             self.assertIn(response.status_code, (400, 413))
@@ -179,6 +204,8 @@ class ServingTests(unittest.TestCase):
         sentence = 'Yesterday, I read a book.'
         words = reference_words('read a book')
         self.assertEqual(phonetic_spellings(words, sentence, 2), ['red', 'a', 'book'])
+        self.assertEqual(phonetic_spellings(['read'], sentence, 2), ['red'])
+        self.assertEqual(phonetic_spellings(['read'], 'I read every day.', 1), ['read'])
         with self.assertRaises(ValueError):
             phonetic_spellings(words, sentence, 0)
 

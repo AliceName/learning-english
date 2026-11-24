@@ -24,7 +24,9 @@ MAJORITY_LOG_POSTERIOR = math.log(.5)
 
 
 class RecordingError(ValueError):
-    pass
+    def __init__(self, message, recording_issue=None):
+        super().__init__(message)
+        self.recording_issue = recording_issue
 
 
 class EngineBusyError(RuntimeError):
@@ -49,7 +51,8 @@ def decode_audio(data):
         raise RecordingError('Bản ghi chứa giá trị âm thanh không hợp lệ.')
     rms = float(np.sqrt(np.mean(audio.astype(np.float64) ** 2)))
     if rms < 1e-4 or float(np.std(audio)) < 1e-5:
-        raise RecordingError('Bản ghi im lặng hoặc quá nhỏ. Hãy kiểm tra microphone và ghi lại.')
+        raise RecordingError('Bản ghi im lặng hoặc quá nhỏ. Hãy kiểm tra microphone và ghi lại.',
+                             {'code': 'too_quiet', 'durationSeconds': round(duration, 4)})
     clipped_at = np.flatnonzero(np.abs(audio) >= .999) / sample_rate
     has_clipping = len(clipped_at) > .01 * len(audio)
     if sample_rate != 16000:
@@ -75,6 +78,29 @@ def edit_ratio(expected, decoded):
             current.append(min(current[-1] + 1, previous[j] + 1, previous[j - 1] + (x != y)))
         previous = current
     return previous[-1] / max(1, len(expected), len(decoded))
+
+
+def assess_recording_match(expected, decoded, duration, has_clipping):
+    """Describe acoustic/phoneme evidence, never reconstruct a word transcript.
+
+    Thresholds preserve the serving heuristic; this distance is not a calibrated
+    probability that the learner said a different sentence.
+    """
+    ratio = edit_ratio(expected, decoded)
+    details = {'durationSeconds': round(duration, 4), 'hasClipping': has_clipping,
+               'phonemeEditRatio': round(ratio, 4)}
+    if not decoded:
+        raise RecordingError('Mô hình chưa nhận được chuỗi âm đủ rõ. Hãy nghe lại bản ghi, kiểm tra microphone và đọc lại.',
+                             {'code': 'no_speech_tokens', **details})
+    if ratio > .7:
+        raise RecordingError('Chuỗi âm nhận được khác nhiều so với âm mẫu; chưa đủ căn cứ kết luận bạn đọc sai câu. '
+                             'Hãy giảm tiếng ồn và thử đọc một cụm ngắn hơn.',
+                             {'code': 'phoneme_mismatch', **details})
+    warnings = ['Âm thanh có dấu hiệu quá lớn; nên đặt microphone xa hơn.'] if has_clipping else []
+    if ratio > .4:
+        warnings.append('Một số âm trong bản ghi chưa khớp rõ với câu mẫu; điểm chỉ mang tính tham khảo.')
+    issue = {'code': 'clipping' if has_clipping else 'phoneme_mismatch', **details} if has_clipping or ratio > .4 else None
+    return ratio, warnings, issue
 
 
 def mark_words_with_recording_evidence(words, aligned_phones, log_probs, clipped_at):
@@ -149,6 +175,11 @@ class SpeakingEngine:
         for field in ('id', 'revision'):
             if self.package['acoustic_model'][field] != cfg['acoustic_model'][field]:
                 raise RuntimeError('Scorer and acoustic checkpoint differ')
+        from phone_training_support import load_phone_support
+        self.training_support = load_phone_support(Path(__file__).parent / 'configs/phone-training-support.json',
+            scorer_sha256=file_digest(self.root / 'checkpoints/pronunciation_scorer.pt'),
+            mapping_sha256=self.package['mapping_sha256'], feature_signature=self.package['feature_signature'],
+            base_phones=BASE_PHONES)
         torch.set_num_threads(2)
 
         def load_acoustic_model():
@@ -172,6 +203,7 @@ class SpeakingEngine:
         self.model_version += '-' + self.calibration.document['calibration_id']
         self.model_version += '-readctx1-' + file_digest(Path(__file__).with_name('read_pronunciation.py'))[:12]
         self.model_version += '-word-evidence1'
+        self.model_version += '-' + self.training_support['support_id']
         self.lock = threading.Lock()
         self.stride, self.receptive = 1, 1
         for kernel, stride in zip(self.model.config.conv_kernel, self.model.config.conv_stride):
@@ -208,12 +240,15 @@ class SpeakingEngine:
         supervised, results, offset = [], [], 0
         for wi, (word, reference, pronunciations) in enumerate(zip(words, chunks, candidates)):
             matches = map_word_consensus(pronunciations, reference, self.mapping)
+            if getattr(self, 'training_support', None):
+                from phone_training_support import supported_matches
+                matches = supported_matches(matches, self.training_support['train_phone_counts'])
             word_result = {'index': wi, 'text': word, 'status': 'unsupported', 'score': None,
-                           'phones': [], 'reason': 'Chưa đối chiếu được âm vị của từ này.'}
+                'phones': [], 'reason': 'Chưa có âm đối chiếu có dữ liệu huấn luyện đủ để chấm từ này.'}
             if matches:
                 word_result['status'], word_result['reason'] = 'scored', None
                 if len(matches) < len(reference):
-                    word_result['reason'] = 'Từ này chỉ được chấm một phần; các âm gộp hoặc chưa đủ chắc chắn chưa được đánh giá.'
+                    word_result['reason'] = 'Từ này chỉ được chấm một phần; các âm gộp, chưa đủ chắc chắn hoặc chưa có mẫu huấn luyện chưa được đánh giá.'
                 for local_index, p in matches:
                     supervised.append({**p, 'teacher_score': 0.0, 'word_index': wi,
                                        'target_index': offset + local_index})
@@ -222,20 +257,22 @@ class SpeakingEngine:
             raise RecordingError('Câu này chưa có âm đối chiếu đủ chắc chắn để chấm điểm.')
         return raw, [vocab[t] for t in raw], supervised, results
 
-    def score(self, data, text, sentence_text=None, start_word_index=0):
+    def score(self, data, text, sentence_text=None, start_word_index=0, *, trace=None):
         if not self.lock.acquire(blocking=False):
             raise EngineBusyError('Bộ chấm đang xử lý một bản ghi khác. Vui lòng thử lại sau.')
         try:
-            return self._score(data, text, sentence_text, start_word_index)
+            if trace is None:
+                return self._score(data, text, sentence_text, start_word_index)
+            trace.clear()
+            trace['modelVersion'] = self.model_version
+            return self._score(data, text, sentence_text, start_word_index, trace=trace)
         finally:
             self.lock.release()
 
-    def _score(self, data, text, sentence_text=None, start_word_index=0):
+    def _score(self, data, text, sentence_text=None, start_word_index=0, *, trace=None):
         from gop_ctc import viterbi_align, phoneme_features
         from scorer_model import predict_package
         audio, duration, clipped_at, has_clipping = decode_audio(data)
-        warnings = ['Âm thanh có dấu hiệu quá lớn; nên đặt microphone xa hơn.'] if has_clipping else []
-        recording_issue = has_clipping
         tokens, targets, labelled, words = self.build_reference(text, sentence_text, start_word_index)
         inputs = self.processor(audio, sampling_rate=16000, return_tensors='pt')
         with self.torch.inference_mode():
@@ -245,16 +282,20 @@ class SpeakingEngine:
         greedy = logits.argmax(-1).cpu().tolist()
         decoded_ids = [t for i, t in enumerate(greedy) if t not in self.special and (i == 0 or greedy[i - 1] != t)]
         decoded = self.processor.tokenizer.convert_ids_to_tokens(decoded_ids)
-        ratio = edit_ratio(tokens, decoded)
-        if not decoded or ratio > .7:
-            raise RecordingError('Bản ghi chưa khớp rõ với câu mẫu hoặc có nhiều tiếng ồn. Hãy đọc lại toàn bộ câu.')
-        if ratio > .4:
-            recording_issue = True
-            warnings.append('Một số âm trong bản ghi chưa khớp rõ với câu mẫu; điểm chỉ mang tính tham khảo.')
+        if trace is not None:
+            trace.update({'durationSeconds': round(duration, 4), 'hasClipping': has_clipping,
+                'phonemeEditRatio': edit_ratio(tokens, decoded), 'decodedTokenCount': len(decoded),
+                'referenceTokens': tokens,
+                'supportedReferencePhones': [{key: phone[key] for key in
+                    ('word_index', 'target_index', 'source_phone', 'base_phone')} for phone in labelled]})
+        ratio, warnings, issue = assess_recording_match(tokens, decoded, duration, has_clipping)
+        recording_issue = issue is not None
         try:
             states, spans, _ = viterbi_align(lp, targets)
         except ValueError as exc:
-            raise RecordingError('Chưa căn chỉnh được bản ghi với câu mẫu. Hãy đọc lại toàn bộ câu.') from exc
+            raise RecordingError('Chưa căn chỉnh được thời điểm các âm với câu mẫu. Hãy đọc chậm hơn hoặc luyện một cụm ngắn.',
+                                 {'code': 'alignment_failed', 'durationSeconds': round(duration, 4),
+                                  'hasClipping': has_clipping, 'phonemeEditRatio': round(ratio, 4)}) from exc
         x, _, metadata = phoneme_features(lp, states, spans, labelled, self.canonical, self.special)
         raw_prediction = predict_package(self.package, x)
         prediction = self.calibration.apply(raw_prediction)
@@ -267,6 +308,10 @@ class SpeakingEngine:
         for word in words:
             if word['phones']:
                 word['score'] = round(float(np.mean([p['score'] for p in word['phones']])), 4)
+        if trace is not None:
+            trace['phonePredictions'] = [{'targetIndex': phone['target_index'], 'wordIndex': phone['word_index'],
+                'sourcePhone': phone['source_phone'], 'symbol': tokens[phone['target_index']],
+                'score': round(float(score), 4)} for phone, score in zip(metadata, prediction)]
         if recording_issue:
             mark_words_with_recording_evidence(words, metadata, lp, clipped_at)
         coverage = len(prediction) / len(targets)
@@ -274,7 +319,10 @@ class SpeakingEngine:
             warnings.append('Một số từ chưa được hỗ trợ; điểm tổng chỉ tính các âm đã được đánh giá.')
         from score_interpretation import build_feedback
         interpretation = self.calibration.interpretation(coverage, recording_issue)
-        return {'status': 'scored' if coverage == 1 else 'partial', 'modelVersion': self.model_version,
+        result = {'status': 'scored' if coverage == 1 else 'partial', 'modelVersion': self.model_version,
             'durationSeconds': round(duration, 4), 'overallScore': round(float(np.mean(prediction)) * 50, 2),
             'coverage': round(coverage, 6), 'referenceTokenCount': len(targets), 'words': words,
             'warnings': warnings, 'feedback': build_feedback(words, coverage, interpretation), 'interpretation': interpretation}
+        if issue is not None:
+            result['recordingIssue'] = issue
+        return result
