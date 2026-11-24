@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { backendUrl, isSameOrigin, SESSION_COOKIE } from "@/lib/server-auth";
 import { isWritingHistory } from "@/lib/writing-capabilities";
+import { isWritingRequestId } from "@/lib/writing";
 
 export async function GET(request: Request) {
   const headers = { "Cache-Control": "no-store" };
@@ -51,7 +52,8 @@ export async function POST(request: Request) {
       || (body.taskId != null && (typeof body.taskId !== "string" || !/^[a-f0-9-]{36}$/u.test(body.taskId)))
       || (body.taskVersion != null && (typeof body.taskVersion !== "string" || !/^[a-f0-9]{64}$/u.test(body.taskVersion)))
       || (body.parentSubmissionId != null && (!Number.isInteger(body.parentSubmissionId) || body.parentSubmissionId < 1 || body.parentSubmissionId > 2147483647))
-      || Object.keys(body).some(k => !["topic", "originalText", "corrections", "taskId", "taskVersion", "parentSubmissionId"].includes(k))) throw new Error("Invalid writing request");
+      || (body.requestId !== undefined && !isWritingRequestId(body.requestId))
+      || Object.keys(body).some(k => !["topic", "originalText", "corrections", "taskId", "taskVersion", "parentSubmissionId", "requestId"].includes(k))) throw new Error("Invalid writing request");
   } catch {
     return Response.json({ title: "Vui lòng kiểm tra đề bài và nội dung bài viết." }, { status: 400, headers });
   }
@@ -59,7 +61,8 @@ export async function POST(request: Request) {
     const upstream = await fetch(backendUrl("/api/v1/writing/submissions"), {
       method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ topic: body.topic, originalText: body.originalText, corrections: body.corrections,
-        taskId: body.taskId, taskVersion: body.taskVersion, parentSubmissionId: body.parentSubmissionId }),
+        taskId: body.taskId, taskVersion: body.taskVersion, parentSubmissionId: body.parentSubmissionId,
+        requestId: body.requestId }),
       cache: "no-store", signal: AbortSignal.any([request.signal, AbortSignal.timeout(100_000)]),
     });
     return new Response(upstream.body, { status: upstream.status, headers: { ...headers, "Content-Type": "application/json" } });

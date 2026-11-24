@@ -36,6 +36,14 @@ internal sealed class MemoryCloudTransport : ICloudinaryAssetTransport
         if (type == "raw" && LoseManifestReply) throw new CloudMediaException(504, "media_storage_timeout", true);
         return new CloudUpload(stored.Asset, created);
     }
+    internal int Deletes;
+    public Task DeleteAsync(string id, string type, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        new CloudMediaNames("els/test").EnsureDeletable(id, type);
+        Interlocked.Increment(ref Deletes); Items.TryRemove(id, out _);
+        return Task.CompletedTask;
+    }
     public Task<CloudAsset?> StatAsync(string id, string type, CancellationToken token)
     {
         token.ThrowIfCancellationRequested(); Interlocked.Increment(ref Stats);

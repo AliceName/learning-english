@@ -10,7 +10,7 @@ public sealed class SaveDeckRequest
     [StringLength(500)] public string? Description { get; init; }
     [Range(1, int.MaxValue)] public int? CourseId { get; init; }
 }
-public sealed class SaveCardRequest
+public class SaveCardRequest
 {
     private string front = "", back = "";
     [Required(ErrorMessage = "Nhập từ hoặc mặt trước."), StringLength(500)]
@@ -19,13 +19,26 @@ public sealed class SaveCardRequest
     public string BackText { get => back; init => back = value?.Trim() ?? ""; }
     [StringLength(1000)] public string? ExampleSentence { get; init; }
 }
+public sealed class SaveWritingCardRequest : SaveCardRequest
+{
+    [Required, StringLength(100)] public string SourceTerm { get; init; } = "";
+}
+
+/// <summary>Example is the corrected sentence for correction cards (the context keeps the learner's original).</summary>
+public sealed record WritingCardCandidate(string Term, string Context, string Source, string Reason, int? SimilarCardId = null, string? Example = null);
+public sealed record WritingCardSuggestions(int SubmissionId, int PracticeRootId, int? VersionNumber, string? TargetCefr,
+    WritingCardCandidate[] Items);
+// The source validated for this import request. Durable history requires an approved relation.
+public sealed record WritingCardImportSource(int SubmissionId, int? VersionNumber, string Term, string Context);
+public sealed record WritingCardSave(FlashcardResponse Card, bool AlreadySaved, WritingCardImportSource? ValidatedSource = null);
 public sealed class ReviewCardRequest
 {
     [Required, Range(0, 3)] public int? Rating { get; init; }
     [Required] public DateTime? ExpectedUpdatedAt { get; init; }
 }
 public sealed record DeckSummary(int DeckId, string Title, string? Description, int CardCount, int DueCount, bool CanEdit = true, bool IsAdminDeck = false,
-    int? CourseId = null, string? CourseTitle = null);
+    int? CourseId = null, string? CourseTitle = null, int RecallCount = 0);
 public sealed record FlashcardResponse(int CardId, int DeckId, string FrontText, string BackText, string? ExampleSentence,
     int IntervalDays, int Repetition, DateTime? NextReviewAt, DateTime UpdatedAt, bool IsDue);
 public sealed record DeckDetail(DeckSummary Deck, FlashcardResponse[] Cards);
+public sealed record DueFlashcard(FlashcardResponse Card, string DeckTitle);

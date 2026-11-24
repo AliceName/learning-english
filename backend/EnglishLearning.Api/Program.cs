@@ -1,10 +1,11 @@
 using System.Reflection;
 using System.Text;
 using EnglishLearning.Api.Authentication;
+using EnglishLearning.Api.Configuration;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
-using EnglishLearning.Api.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Threading.RateLimiting;
 using EnglishLearning.Api.Services;
 using EnglishLearning.Api.Services.AiCourses;
@@ -108,6 +109,7 @@ builder.Services.AddHttpClient("CloudinaryDelivery", client => client.Timeout = 
     { AllowAutoRedirect = false, UseCookies = false, AutomaticDecompression = System.Net.DecompressionMethods.None });
 builder.Services.AddSingleton<ICloudinaryAssetTransport, CloudinaryAssetTransport>();
 builder.Services.AddSingleton<ICloudMediaStore, CloudinaryMediaStore>();
+builder.Services.AddSingleton<MediaStorageSelection>();
 builder.Services.AddSingleton<MediaRuntimeState>();
 
 if (builder.Environment.IsDevelopment())
@@ -128,9 +130,18 @@ builder.Services.AddDbContext<EnglishLearningDbContext>(options =>
     options.UseSqlServer(connectionString, sql => sql.CommandTimeout(10)));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<LearningActivityService>();
 builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<CourseCatalogService>();
 builder.Services.AddScoped<CourseAuthoringService>();
+builder.Services.AddScoped<AdminUserService>();
+builder.Services.AddSingleton<AdminAuditLog>();
+builder.Services.AddSingleton<AdminLearnerFilter>();
+builder.Services.AddScoped<AdminOverviewService>();
+builder.Services.AddScoped<AdminContentStatsService>();
+builder.Services.AddSingleton<AdminServiceHealth>();
+builder.Services.AddHttpClient(AdminServiceHealth.SpeakingClient, client => client.Timeout = TimeSpan.FromSeconds(10))
+    .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
 builder.Services.AddSingleton<AiCourseStore>();
 builder.Services.AddSingleton<AiApiGateway>();
 builder.Services.AddHttpClient<GeminiCourseClient>(client =>
@@ -157,26 +168,33 @@ builder.Services.AddHttpClient<TranslationAiClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(30);
     client.MaxResponseContentBufferSize = 64 * 1024;
 }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false });
-builder.Services.AddSingleton<ListeningGradingService>();
-builder.Services.AddScoped<ListeningPracticeService>();
 builder.Services.AddScoped<GrammarPracticeService>();
 builder.Services.AddScoped<CourseReadingGrading>();
 builder.Services.AddScoped<CourseTextLessonService>();
 builder.Services.AddScoped<CourseVocabularyService>();
 builder.Services.AddScoped<SpeakingLessonService>();
-builder.Services.AddSingleton<SpeakingStorage>();
+builder.Services.AddSingleton(services => new SpeakingStorage(services.GetRequiredService<IConfiguration>(), services.GetRequiredService<IWebHostEnvironment>(),
+    services.GetRequiredService<IOptions<CloudinarySettings>>(), () => services.GetRequiredService<ICloudMediaStore>(), services.GetRequiredService<ILogger<SpeakingStorage>>()));
 builder.Services.AddHttpClient<ISpeakingScorer, SpeakingScorerClient>((services, client) =>
 {
     var configuration = services.GetRequiredService<IConfiguration>();
     client.BaseAddress = new Uri((configuration["SpeakingAi:BaseUrl"] ?? "http://127.0.0.1:8001").TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromSeconds(55);
     client.MaxResponseContentBufferSize = 2 * 1024 * 1024;
+    var apiToken = configuration["SpeakingAi:ApiToken"];
+    if (!string.IsNullOrWhiteSpace(apiToken))
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiToken);
 });
+builder.Services.AddDataProtection();
+builder.Services.AddSingleton<ListeningGradingService>();
+builder.Services.AddScoped<ListeningPracticeService>();
 builder.Services.AddSingleton<IpaTranscriber>();
 builder.Services.AddSingleton<MediaStorage>();
-builder.Services.AddSingleton<IMediaStorage>(services => new CloudinaryCourseMediaStorage(
-    () => services.GetRequiredService<ICloudMediaStore>(), () => services.GetRequiredService<ICloudinaryAssetTransport>(),
-    () => services.GetRequiredService<MediaStorage>(), services.GetRequiredService<IOptions<CloudinarySettings>>()));
+builder.Services.AddSingleton<IMediaStorage>(services => services.GetRequiredService<MediaStorageSelection>().Create(
+    () => services.GetRequiredService<MediaStorage>(),
+    () => new CloudinaryCourseMediaStorage(
+        () => services.GetRequiredService<ICloudMediaStore>(), () => services.GetRequiredService<ICloudinaryAssetTransport>(),
+        () => services.GetRequiredService<MediaStorage>(), services.GetRequiredService<IOptions<CloudinarySettings>>())));
 builder.Services.AddScoped<AdminBootstrapService>();
 builder.Services.Configure<BootstrapAdminOptions>(builder.Configuration.GetSection(BootstrapAdminOptions.SectionName));
 builder.Services.AddSingleton(TimeProvider.System);
@@ -198,14 +216,8 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         bearer.IncludeErrorDetails = false;
         bearer.Events = new JwtBearerEvents
         {
-            OnTokenValidated = context =>
-            {
-                var session = context.Principal?.FindFirst(RefreshSessions.SessionClaim);
-                if (session is not null && (!Guid.TryParseExact(session.Value, "N", out var id) ||
-                    !context.HttpContext.RequestServices.GetRequiredService<RefreshSessions>().Touch(id)))
-                    context.Fail("Session expired or revoked.");
-                return Task.CompletedTask;
-            }
+            OnTokenValidated = AccountTokenValidation.Validate,
+            OnChallenge = AccountTokenValidation.Challenge
         };
         bearer.TokenValidationParameters = new TokenValidationParameters
         {

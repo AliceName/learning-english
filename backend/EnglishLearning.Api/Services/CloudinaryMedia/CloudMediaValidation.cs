@@ -4,8 +4,8 @@ public static class CloudMediaValidation
 {
     public static string ValidateBytes(CloudMediaKind kind, string format, ReadOnlySpan<byte> bytes)
     {
-        if (bytes.Length < 12 || bytes.Length > (kind == CloudMediaKind.CourseAudio ? 25 : 5) * 1024 * 1024)
-            throw new CloudMediaException(400, "invalid_media_size");
+        if (bytes.Length < 12 || bytes.Length > MaxBytes(kind)) throw new CloudMediaException(400, "invalid_media_size");
+        if (kind == CloudMediaKind.SpeakingRecording && format != "wav") throw new CloudMediaException(400, "invalid_media_format");
         var type = kind == CloudMediaKind.CourseCover ? format switch
         {
             "jpg" or "jpeg" when bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff => "image/jpeg",
@@ -21,6 +21,13 @@ public static class CloudMediaValidation
         };
         return type ?? throw new CloudMediaException(400, "invalid_media_format");
     }
+
+    public static long MaxBytes(CloudMediaKind kind) => kind switch
+    {
+        CloudMediaKind.CourseAudio => 25L * 1024 * 1024,
+        CloudMediaKind.SpeakingRecording => SpeakingStorage.MaxBytes,
+        _ => 5L * 1024 * 1024
+    };
 
     public static bool MatchesMime(string expected, string? actual) => expected == actual || expected switch
     {

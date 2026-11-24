@@ -21,6 +21,8 @@ export type PublicUser = {
   createdAt: string;
   currentStreak?: number;
   avatarUrl?: string | null;
+  personalDetails?: { phoneNumber: string | null; dateOfBirth: string | null; address: string | null };
+  learningPreferences?: { learningPurpose: string | null; preferredSkill: string | null; dailyGoalMinutes: number | null };
 };
 
 export function isSameOrigin(request: Request) {

@@ -127,6 +127,7 @@
 .lessonSection { padding: 28px; background: white; border: 1px solid #eeedf6; border-radius: 16px; }
 .lessons { padding: 0; margin: 0; list-style: none; }
 .lessons li { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-top: 1px solid #eff0f7; }
+.lessons li:target { scroll-margin-top: 100px; background: #f4f8ff; }
 .lessonIndex { display: grid; place-items: center; width: 34px; height: 34px; flex-shrink: 0; border-radius: 9px; background: #eef3ff; color: #527ac0; font-size: 12px; font-weight: 700; }
 .lessons h3 { font-size: 14px; font-weight: 650; color: #42506c; margin: 0 0 5px; overflow-wrap: anywhere; }
 .lessons li > div { min-width: 0; }
@@ -138,6 +139,7 @@
 .lessonButton:hover { background: #0043c4; border-color: #0043c4; box-shadow: 0 3px 7px #0754e524; }
 .lessonRetry { border-color: #9db7ff; background: linear-gradient(180deg, #fff, #f1f5ff); color: #0754e5; box-shadow: none; }
 .lessonRetry:hover { border-color: #6f96ff; background: #eaf1ff; box-shadow: none; }
+@media (min-width: 601px) { .lessonAction { max-width: 55%; } }
 .listeningStatus { color: #64829b; font-size: 11px; margin: 7px 0 0; }
 @media(max-width:600px) { .lessons li { flex-wrap: wrap; } .lessonAction { width: 100%; padding-left: 46px; justify-content: space-between; } .lessonAction small { margin-left: 0; } }
 @media(min-width:1700px) { .grid { gap: 26px; } .cover { height: 210px; } .coverBadges { gap: 137px; } .levelBadge { top: 162px; } }
@@ -146,6 +148,7 @@
 @media(max-width:500px) { .grid { grid-template-columns: 1fr; } .cover { height: 190px; } .levelBadge { top: 142px; } .pageHeading h1 { font-size: 27px; } .pageHeading p { font-size: 13px; } .searchInput { gap: 8px; padding-left: 11px; } .searchInput input { font-size: 12px; } .searchInput button { font-size: 0; padding: 10px; } .searchInput button svg { width: 16px; height: 16px; } .resultsHeading > div { gap: 7px; } .resultsHeading h2 { font-size: 15px; } .empty h2 { font-size: 16px; } .paginationRow { flex-direction: column; } }
 @media(prefers-reduced-motion:reduce) { .card, .chips a { transition: none; } .card:hover { transform: none; } }
 
+.practiceLink{display:inline-flex;align-items:center;border-radius:9px;padding:10px 13px;background:#eeeaff;color:#6651c5;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap}.practiceLink:focus-visible{outline:3px solid #a99aef;outline-offset:3px}
 /* The catalog hero is independent of the existing filters and course cards. */
 .catalogHero { position: relative; isolation: isolate; overflow: clip; margin: -32px -32px 28px; padding: 24px 32px 28px; border-bottom: 1px solid #e1ecff; background: linear-gradient(115deg, #fcfdff 10%, #eef5ff 58%, #e5f0ff); }
 .catalogHero::before { content: ""; position: absolute; z-index: -1; left: -60px; right: -60px; bottom: -72px; height: 145px; pointer-events: none; background: radial-gradient(ellipse at 2% 75%, #cfe5ff 0 105px, transparent 107px), radial-gradient(ellipse at 19% 88%, #deedff 0 130px, transparent 132px), radial-gradient(ellipse at 58% 95%, #d5e8ff 0 130px, transparent 132px), radial-gradient(ellipse at 98% 80%, #cee4ff 0 180px, transparent 182px); }
@@ -181,5 +184,3 @@
 @media (max-width: 1000px) { .catalogHero { margin: -28px -24px 28px; padding: 24px; } }
 @media (max-width: 600px) { .catalogHero { margin: -24px -18px 24px; padding: 20px 18px 16px; } .catalogBreadcrumb { margin-bottom: 18px; } .catalogHeroGrid { grid-template-columns: minmax(0, 1fr) 100px; gap: 14px; } .catalogIntro { grid-column: 1 / -1; } .catalogIntro h1 { font-size: 26px; letter-spacing: -.8px; line-height: 1.35; } .catalogIntro > p { margin-top: 10px; font-size: 13px; } .catalogArtwork { grid-column: 2; grid-row: 2; height: 100px; align-self: center; } .catalogArtwork img { width: 125%; } .catalogHero .aiPromo { grid-column: 1; grid-row: 2; padding: 13px 11px; border-radius: 15px; gap: 8px; } .catalogHero .aiPromo div { display: block; } .catalogHero .aiPromo strong { font-size: 12px; } .catalogHero .aiPromo div > span { font-size: 10px; margin-top: 4px; } .heroSummary { margin-top: 16px; font-size: 11px; gap: 9px 0; } .heroSummary > span { padding-right: 8px; margin-right: 8px; gap: 4px; } .heroStatIcon { width: 25px; height: 25px; border-radius: 9px; } .heroSummary .heroStatIcon svg { width: 15px; height: 15px; } .titleDoodle { right: -9px; transform: rotate(27deg) scale(.8); } }
 @media (max-width: 350px) { .catalogHeroGrid { grid-template-columns: minmax(0, 1fr) 80px; gap: 10px; } .catalogIntro h1 { font-size: 24px; } .heroSummary > span { padding-right: 7px; margin-right: 7px; } }
-
-.practiceLink{display:inline-flex;align-items:center;border-radius:9px;padding:10px 13px;background:#eeeaff;color:#6651c5;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap}.practiceLink:focus-visible{outline:3px solid #a99aef;outline-offset:3px}

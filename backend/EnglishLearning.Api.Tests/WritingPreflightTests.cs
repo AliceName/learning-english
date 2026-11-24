@@ -72,6 +72,16 @@ public sealed class WritingPreflightTests
         Assert.Null(offline.CefrLimit);
     }
 
+    [Fact]
+    public async Task Capabilities_from_the_current_AI_service_with_relevance_are_accepted()
+    {
+        const string json = "{\"status\":\"ready\",\"busy\":false,\"cefrLimit\":512,\"gecInputLimit\":384,\"gecSentenceLimit\":20,"
+            + "\"correctionsEnabled\":true,\"feedbackEnabled\":false,\"relevanceEnabled\":true,\"feedbackStatus\":\"disabled\"}";
+        using var http = Client(_ => new(HttpStatusCode.OK) { Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json") });
+        var value = await new WritingAiClient(http).CapabilitiesAsync(default);
+        Assert.Equal(("ready", true, true), (value.Status, value.CorrectionsEnabled, value.RelevanceEnabled));
+    }
+
     [Theory]
     [InlineData("{\"status\":\"ready\",\"feedbackEnabled\":true}")]
     [InlineData("{\"status\":\"ready\",\"correctionsEnabled\":true,\"feedbackEnabled\":true,\"feedbackStatus\":\"disabled\",\"cefrLimit\":512,\"gecInputLimit\":384,\"gecSentenceLimit\":20,\"busy\":false}")]

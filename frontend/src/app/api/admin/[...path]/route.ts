@@ -29,11 +29,13 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
   const path = (await context.params).path.join("/");
   const method = request.method;
   const questionImport = /^courses\/[1-9]\d*\/question-import\/preview$/.test(path) && method === "POST";
-  const valid = path === "courses" && ["GET","POST"].includes(method) || /^courses\/[1-9]\d*$/.test(path) && ["GET","PUT"].includes(method)
+  const valid = path === "courses" && ["GET","POST"].includes(method) || /^courses\/[1-9]\d*$/.test(path) && ["GET","PUT","DELETE"].includes(method)
     || /^courses\/[1-9]\d*\/lessons$/.test(path) && method === "POST" || /^courses\/[1-9]\d*\/lessons\/[1-9]\d*$/.test(path) && method === "PUT"
     || /^courses\/[1-9]\d*\/(publish|hide)$/.test(path) && method === "POST" || path === "uploads" && method === "POST"
     || path === "pronunciation/ipa" && method === "POST" || questionImport
-    || path === "ai/overview" && method === "GET" || path === "ai/limits" && method === "PUT";
+    || path === "ai/overview" && method === "GET" || path === "ai/limits" && method === "PUT"
+    || (path === "users" || path === "users/audit" || /^users\/[1-9]\d*$/.test(path)) && method === "GET"
+    || /^users\/[1-9]\d*\/(lock|unlock)$/.test(path) && method === "POST" || /^users\/[1-9]\d*\/role$/.test(path) && method === "PUT";
   if (!valid) return Response.json({title:"Không tìm thấy API."},{status:404});
   if (method !== "GET" && !isSameOrigin(request)) return Response.json({title:"Nguồn yêu cầu không hợp lệ."},{status:403});
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
@@ -86,3 +88,4 @@ async function proxy(request: Request, context: {params: Promise<{path:string[]}
 export const GET = proxy;
 export const POST = proxy;
 export const PUT = proxy;
+export const DELETE = proxy;

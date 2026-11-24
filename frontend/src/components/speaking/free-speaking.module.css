@@ -16,7 +16,7 @@
   container-type: inline-size;
 }
 .dashboard svg { width: 19px; height: 19px; flex: none; }
-.dashboard :is(button, select, input, textarea, label:has(input)):focus-visible,
+.dashboard :is(a, button, select, input, textarea, label:has(input)):focus-visible,
 .dashboard label:has(input:focus-visible) { outline: 2px solid #1774ee; outline-offset: 3px; }
 .dashboard button { cursor: pointer; }
 .dashboard button:disabled { cursor: default; opacity: .52; }
@@ -68,6 +68,7 @@
 .legend { margin-bottom: 14px; padding: 10px 15px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .legend ul { margin: 0; font-size: .875rem; }
 .toolbar { display: grid; gap: 12px; margin: 0 0 14px; padding: 14px; }
+.historyHeading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .toolbar h2 { margin: 0; font-size: .98rem; font-weight: 800; }
 .searchRow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
 .search { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 12px; border-radius: 12px; background: #eaf0fc; color: var(--muted); }
@@ -99,6 +100,7 @@
 .priorityNote { display: flex; gap: 7px; margin: 0 0 10px; padding: 9px 11px; border-radius: 10px; color: #841734; background: #ffedf2; font-size: .8rem; }
 .priorityNote svg { width: 16px; height: 16px; }
 .entryActions > .bookmark { margin-left: auto; }
+.entryActions > .bookmark[aria-pressed="true"] { color: #942244; background: #fdebf2; }
 .entryActions > .bookmark[aria-pressed="true"] svg { color: #ac254c; fill: #f8b2c6; }
 .entryActions > .primary { min-height: 35px; padding: 6px 12px; font-size: .78rem; }
 .entry[data-band="priority"] .primary { background: linear-gradient(120deg, #d62a57, #a90934); }

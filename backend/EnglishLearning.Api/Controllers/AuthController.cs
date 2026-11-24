@@ -24,6 +24,7 @@ public sealed class AuthController(
     RefreshSessions refreshSessions,
     LoginAttemptLimiter loginAttemptLimiter,
     EnglishLearningDbContext dbContext,
+    LearningActivityService learningActivity,
     ILogger<AuthController> logger) : ControllerBase
 {
     [AllowAnonymous]
@@ -97,10 +98,15 @@ public sealed class AuthController(
                     title: "Đăng nhập không thành công.", detail: "Email hoặc mật khẩu không chính xác.");
             if (!request.UseRefreshSession) return Ok(tokenService.CreateToken(user));
 
-            var session = refreshSessions.Create(user.UserId);
+            var session = refreshSessions.Create(user.UserId, user.AuthVersion);
             if (session is null) return Problem(statusCode: 503, title: "Chưa thể mở phiên đăng nhập. Vui lòng thử lại sau.");
             if (request.PreviousRefreshToken is not null) refreshSessions.Revoke(request.PreviousRefreshToken);
             return Ok(tokenService.CreateToken(user, session));
+        }
+        catch (AccountLockedException)
+        {
+            return Problem(statusCode: StatusCodes.Status403Forbidden,
+                title: "Tài khoản đã bị khóa.", detail: "Vui lòng liên hệ quản trị viên để được hỗ trợ.");
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -135,7 +141,7 @@ public sealed class AuthController(
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            var session = refreshSessions.Rotate(request.RefreshToken, user.UserId);
+            var session = refreshSessions.Rotate(request.RefreshToken, user.UserId, user.AuthVersion);
             if (session is null) return Unauthorized();
             return Ok(tokenService.CreateToken(user, session));
         }
@@ -176,17 +182,33 @@ public sealed class AuthController(
         {
             var user = await dbContext.Users.SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, cancellationToken);
             if (user is null) return Unauthorized();
+            var streak = await learningActivity.SummaryAsync(userId, learningActivity.Today, cancellationToken);
             user.FullName = request.FullName;
             user.TargetLevel = request.TargetLevel;
             user.AvatarUrl = request.AvatarUrl;
+            if (request.PersonalDetails is { } details)
+            {
+                user.PhoneNumber = details.NormalizedPhone;
+                user.DateOfBirth = details.DateOfBirth;
+                user.Address = details.Address;
+            }
+            if (request.LearningPreferences is { } preferences)
+            {
+                user.LearningPurpose = preferences.LearningPurpose;
+                user.PreferredSkill = preferences.PreferredSkill;
+                user.DailyGoalMinutes = preferences.DailyGoalMinutes;
+            }
             user.UpdatedAt = DateTime.UtcNow;
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Ok(new CurrentUserResponse(user.UserId, user.Email, user.FullName, user.TargetLevel,
-                user.CreatedAt, user.CurrentStreak, user.AvatarUrl, user.Role));
+            return Ok(CurrentUserResponse.From(user) with { CurrentStreak = streak.CurrentStreak });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             return StatusCode(StatusCodes.Status499ClientClosedRequest);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Problem(statusCode: 409, title: "Tài khoản vừa được cập nhật ở phiên khác. Hãy tải lại hồ sơ.");
         }
         catch (Exception error) when (error is SqlException or DbUpdateException or OperationCanceledException)
         {
@@ -210,8 +232,8 @@ public sealed class AuthController(
         {
             var user = await dbContext.Users.AsNoTracking().SingleOrDefaultAsync(item => item.UserId == userId && item.IsActive, cancellationToken);
             if (user is null) return Unauthorized();
-            return Ok(new CurrentUserResponse(user.UserId, user.Email, user.FullName, user.TargetLevel,
-                user.CreatedAt, user.CurrentStreak, user.AvatarUrl, user.Role));
+            var streak = await learningActivity.SummaryAsync(userId, learningActivity.Today, cancellationToken);
+            return Ok(CurrentUserResponse.From(user) with { CurrentStreak = streak.CurrentStreak });
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

@@ -27,8 +27,13 @@ public sealed class CloudinaryAssetTransport(Cloudinary sdk, IHttpClientFactory 
             }
             catch (JsonException) { throw new CloudMediaException(400, "invalid_manifest_upload"); }
         }
-        else _ = CloudMediaValidation.ValidateBytes(resourceType == "image" ? CloudMediaKind.CourseCover :
-            publicId[(names.Prefix.Length + 1)..].StartsWith("dictionary/", StringComparison.Ordinal) ? CloudMediaKind.DictionaryAudio : CloudMediaKind.CourseAudio, format, bytes.Span);
+        else
+        {
+            var path = publicId[(names.Prefix.Length + 1)..];
+            _ = CloudMediaValidation.ValidateBytes(resourceType == "image" ? CloudMediaKind.CourseCover :
+                path.StartsWith("dictionary/", StringComparison.Ordinal) ? CloudMediaKind.DictionaryAudio :
+                path.StartsWith("speaking/", StringComparison.Ordinal) ? CloudMediaKind.SpeakingRecording : CloudMediaKind.CourseAudio, format, bytes.Span);
+        }
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token);
         deadline.CancelAfter(TimeSpan.FromSeconds(options.Value.UploadTimeoutSeconds));
         try
@@ -77,6 +82,23 @@ public sealed class CloudinaryAssetTransport(Cloudinary sdk, IHttpClientFactory 
             if (asset.PublicId != publicId || asset.ResourceType != resourceType) throw InvalidResponse();
             return asset;
         }
+        catch (Exception error) { throw CloudMediaErrors.Failure(error, token); }
+    }
+
+    public async Task DeleteAsync(string publicId, string resourceType, CancellationToken token)
+    {
+        names.EnsureDeletable(publicId, resourceType);
+        token.ThrowIfCancellationRequested();
+        try
+        {
+            // SDK 1.29.3 has no DestroyAsync cancellation overload: bound the wait instead.
+            var result = await sdk.DestroyAsync(new DeletionParams(publicId) { ResourceType = Resource(resourceType), Type = "authenticated", Invalidate = true })
+                .WaitAsync(TimeSpan.FromSeconds(options.Value.UploadTimeoutSeconds), token);
+            if (result.Error is not null || (int)result.StatusCode is < 200 or >= 300)
+                throw CloudMediaErrors.Response((int)result.StatusCode, result.Error?.Message);
+            if (result.Result is not ("ok" or "not found")) throw InvalidResponse();
+        }
+        catch (TimeoutException) { throw new CloudMediaException(504, "media_storage_timeout", true); }
         catch (Exception error) { throw CloudMediaErrors.Failure(error, token); }
     }
 

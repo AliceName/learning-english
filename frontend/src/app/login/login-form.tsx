@@ -49,7 +49,7 @@ export default function LoginForm({ returnTo = "/account", onReaction, onBusyCha
         const next = new URLSearchParams(window.location.search).get("next") ?? "";
         const returnToCourse = /^\/courses\/[1-9]\d{0,9}(?:\/lessons\/[1-9]\d{0,9}\/listening)?$/.test(next);
         const destination = writingDestination.startsWith("/writing") ? writingDestination
-          : returnToCourse ? next : result.user?.role === "admin" ? "/admin/courses" : "/account";
+          : returnToCourse ? next : result.user?.role === "admin" ? (/^\/admin(?:\/[a-z0-9-]+){0,3}$/.test(next) ? next : "/admin") : "/account";
         if (writingDestination.startsWith("/writing") && Number.isInteger(result.user?.userId)) {
           adoptAnonymousWritingDraft(writingDraftStorage(), result.user.userId, writingReturnSubmissionId(writingDestination), Date.now(), writingReturnTaskId(writingDestination));
         }

@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -13,6 +15,27 @@ namespace EnglishLearning.Api.Tests;
 
 public sealed class AiCourseContentRepairTests
 {
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("vi-VN")]
+    [InlineData("fr-FR")]
+    public void Reading_question_points_validate_with_the_same_limits_in_each_culture(string culture)
+    {
+        var previous = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(culture);
+            foreach (var points in new[] { 0.09m, 0.1m, 1m, 10m, 10.01m })
+            {
+                var question = new ReadingQuestion { Type = "short_answer", Prompt = "What is the topic?", Answer = "Travel", Points = points };
+                var errors = new List<ValidationResult>();
+                var valid = Validator.TryValidateObject(question, new ValidationContext(question), errors, true);
+                Assert.Equal(points >= 0.1m && points <= 10m, valid);
+            }
+        }
+        finally { CultureInfo.CurrentCulture = previous; }
+    }
+
     [Fact]
     public async Task Reading_repairs_the_same_unit_with_field_feedback_and_audits_both_calls()
     {

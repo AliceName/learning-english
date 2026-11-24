@@ -41,16 +41,40 @@ test('task and custom auth return paths retain strict redirect restrictions',()=
 test('new submissions BFF forwards references, rejects supplied snapshots before upstream',async()=>{
  const calls=[];
  const route=load('app/api/writing/submissions/route.ts',{'next/headers':{cookies:async()=>({get:()=>({value:'private-token'})})},
- '@/lib/server-auth':{SESSION_COOKIE:'session',backendUrl:p=>new URL(p,'http://localhost:5000'),isSameOrigin:()=>true},'@/lib/writing-capabilities':load('lib/writing-capabilities.ts')},
+ '@/lib/server-auth':{SESSION_COOKIE:'session',backendUrl:p=>new URL(p,'http://localhost:5000'),isSameOrigin:()=>true},'@/lib/writing-capabilities':load('lib/writing-capabilities.ts'),'@/lib/writing':writing},
  {fetch:async(url,options)=>{calls.push(JSON.parse(options.body));return Response.json({saved:true},{status:201});}});
  const body={taskId:task.id,taskVersion:task.version,originalText:'An English sentence.',corrections:false};
  assert.equal((await route.POST(new Request('http://localhost/api/writing/submissions',{method:'POST',body:JSON.stringify(body)}))).status,201);
  assert.equal(calls[0].taskId,task.id);assert.equal(Object.hasOwn(calls[0],'task'),false);
  assert.equal((await route.POST(new Request('http://localhost/api/writing/submissions',{method:'POST',body:JSON.stringify({...body,task})}))).status,400);assert.equal(calls.length,1);
+ const post=(patch)=>route.POST(new Request('http://localhost/api/writing/submissions',{method:'POST',body:JSON.stringify({...body,...patch})}));
+ const requestId='26a9eedc-3be4-4c01-8b2b-286965e4b62e';
+ assert.equal((await post({requestId})).status,201);
+ assert.equal(Object.hasOwn(calls[1],"targetCefr"),false);assert.equal(calls[1].requestId,requestId);
+ assert.equal((await post({targetCefr:'C1',requestId})).status,400);
+ assert.equal((await post({requestId:'bad'})).status,400);
 });
 test('new metadata cannot attach a future parent or mismatched root to a result',()=>{
  const r={submissionId:10,topic:task.title,originalText:'Text',cefrLevel:'B1',correctedText:null,errors:[],warnings:[],createdAt:new Date().toISOString(),task,practiceRootId:1,parentSubmissionId:9};
  assert.equal(writing.isWritingResult(r),true);assert.equal(writing.isWritingResult({...r,parentSubmissionId:11}),false);assert.equal(writing.isWritingResult({...r,practiceRootId:10}),false);
+ const version={...r,versionNumber:4,parentVersionNumber:1,targetCefr:'B2',targetRecorded:true};
+ assert.equal(writing.isWritingResult(version),true);
+ assert.equal(writing.isWritingResult({...version,parentVersionNumber:4}),false);
+ assert.equal(writing.isWritingResult({...version,targetRecorded:false}),false);
+ assert.equal(writing.isWritingResult({...version,cefrLevel:''}),true);
+});
+
+test('source drafts ignore old target overrides and keep retry key, text and review across reload', () => {
+ const s=storage();
+ const unchanged={topic:'Same topic',text:'First source draft.',corrections:true,baseSubmissionId:3,targetCefr:null,
+   continued:true,requestId:'26a9eedc-3be4-4c01-8b2b-286965e4b62e',review:[{id:'0:1',status:'accepted'}]};
+ assert.equal(drafts.saveWritingDraft(s,7,unchanged),true);
+ assert.equal(drafts.saveWritingDraft(s,7,{...unchanged,baseSubmissionId:9,text:'Other source draft.',targetCefr:'C1',requestId:undefined,review:[]}),true);
+ const reopened=drafts.loadWritingDraft(s,7,3);
+ assert.equal(reopened.targetCefr,undefined);assert.equal(reopened.requestId,unchanged.requestId);
+ assert.equal(reopened.text,unchanged.text);assert.equal(reopened.continued,true);assert.equal(reopened.review[0].id,'0:1');
+ assert.equal(drafts.loadWritingDraft(s,7,9).targetCefr,undefined);
+ assert.equal(drafts.loadWritingDraft(s,8,3),null);
 });
 
 test('login preserves the previous task version even when essay text is identical',()=>{

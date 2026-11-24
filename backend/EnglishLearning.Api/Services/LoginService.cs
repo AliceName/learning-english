@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EnglishLearning.Api.Services;
 
+/// <summary>Thrown only after the correct password, so a locked state is never revealed to someone guessing.</summary>
+public sealed class AccountLockedException() : Exception("Account locked.");
+
 public sealed class LoginService(EnglishLearningDbContext dbContext, IPasswordHasher<User> passwordHasher)
 {
     // Unknown and disabled users still perform password hashing to reduce account-enumeration timing differences.
@@ -15,7 +18,7 @@ public sealed class LoginService(EnglishLearningDbContext dbContext, IPasswordHa
     public async Task<User?> AuthenticateAsync(LoginRequest request, CancellationToken cancellationToken)
     {
         var user = await dbContext.Users.SingleOrDefaultAsync(item => item.Email == request.Email, cancellationToken);
-        if (user is null || !user.IsActive)
+        if (user is null)
         {
             passwordHasher.VerifyHashedPassword(DummyUser, DummyHash, request.Password);
             return null;
@@ -33,6 +36,7 @@ public sealed class LoginService(EnglishLearningDbContext dbContext, IPasswordHa
         }
 
         if (result == PasswordVerificationResult.Failed) return null;
+        if (!user.IsActive) throw new AccountLockedException();
         if (result == PasswordVerificationResult.SuccessRehashNeeded)
         {
             user.PasswordHash = passwordHasher.HashPassword(user, request.Password);

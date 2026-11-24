@@ -31,6 +31,8 @@
     <EmbeddedResource Include="Resources\Vocabulary\schema-en-vi.json" />
     <EmbeddedResource Include="Resources\Vocabulary\schema-vi-en.json" />
     <EmbeddedResource Include="Resources\Cloudinary\smoke-match.ogg" />
+    <EmbeddedResource Include="..\database\003_add_grammar_lesson_type.sql" LogicalName="Migrations.003.sql" />
+    <EmbeddedResource Include="..\database\004_profile_details_and_security.sql" LogicalName="Migrations.004.sql" />
     <Content Include="Resources\Pronunciation\*.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 

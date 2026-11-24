@@ -16,7 +16,7 @@ API bài học trả `segments` theo từng câu và `segmentationVersion=phrase
 
 Đã tách màu của toàn câu khỏi danh sách tối đa ba từ gợi ý. Mỗi từ được tô theo điểm âm thấp nhất và ngưỡng lưu cùng kết quả: xanh = điểm tốt (từ 1,50/2 ở cal1), vàng = nên nghe lại (1,10–<1,50), đỏ = ưu tiên luyện (<1,10), xám = chưa đủ dữ liệu. Màu xanh chỉ dùng khi toàn bộ từ được hỗ trợ; từ chỉ chấm được một phần có gạch dưới nét đứt, nếu điểm phần được chấm cao vẫn dùng màu xám thay vì khẳng định cả từ tốt. Các ngưỡng tùy biến/phiên bản cũ lấy từ metadata, có fallback hữu hạn và đúng thứ tự.
 
-Chế độ `record_again` tô xám mọi từ và giữ cảnh báo ghi âm lại: chưa có căn cứ kết luận đúng/sai từ bản ghi chưa ổn định. Độ phủ toàn câu thấp vẫn cho phép xem màu các từ được hỗ trợ cùng ghi chú phạm vi. Có chú thích màu, tooltip điểm và nhãn đọc màn hình; dấu câu, từ lặp, dấu nháy thẳng/cong được giữ nguyên và ghép theo vị trí từ.
+Chế độ `record_again` giữ cảnh báo ghi âm lại cả câu. Từ có đủ điểm âm vị, tín hiệu nhận dạng rõ và phần âm thanh tương ứng không bị méo do quá lớn vẫn hiện màu. Các từ còn lại hiện xám. Trong Luyện nói tự do, nút **Chấm lại bản ghi** cho phép gửi lại WAV đã lưu. Độ phủ toàn câu thấp vẫn cho phép xem màu các từ được hỗ trợ cùng ghi chú phạm vi. Có chú thích màu, tooltip điểm và nhãn đọc màn hình. Dấu câu, từ lặp và dấu nháy thẳng/cong được giữ nguyên và ghép theo vị trí từ.
 
 Đã kiểm tra 21 ca frontend đạt (một ca live tùy chọn bỏ qua), TypeScript/lint và build production đạt. Giao diện giả lập được kiểm tra cả normal, limited_coverage và record_again; ảnh/báo cáo tại `backend/reports/speaking-word-colors/`. Chạy xem thử bằng `node scripts/preview-speaking.mjs --word-colors` từ frontend; kết quả là dữ liệu giả lập, không lưu tài khoản.
 
@@ -38,7 +38,7 @@ Kiểm tra và ảnh bố cục: [báo cáo trải nghiệm luyện tập](backe
 
 Đã chọn ngưỡng ưu tiên luyện 1,10/2 từ validation SpeechOcean762 được hỗ trợ, chia fold theo người nói. Giữ nguyên điểm MLP vì affine/isotonic làm tăng MAE validation. Trên phần test được hỗ trợ, ngưỡng ưu tiên mới giảm gợi ý nhầm 402 → 174 và tăng precision 66,80% → 77,08%, đồng thời giảm recall 40,92% → 29,59%. Đây là đánh đổi của gợi ý luyện tập, không phải tăng độ chính xác điểm số; vùng 1,10–<1,50 vẫn được gợi ý “nên nghe lại”. Chưa kiểm chứng riêng cho người Việt và các âm mới được ref2 mở rộng.
 
-Kết quả hiển thị số âm đã chấm/tổng âm tham chiếu, nhắc rõ điểm /100 không phải phần trăm phát âm đúng. Coverage <80% có ghi chú phạm vi; bản ghi clipping hoặc chưa khớp rõ câu mẫu chuyển sang yêu cầu ghi âm lại và ẩn gợi ý lỗi cụ thể. Có nút ghi âm lại ngay trong phần phản hồi. Các quy tắc chất lượng bản ghi/coverage là kiểm tra kỹ thuật, chưa phải ngưỡng độ tin cậy đã hiệu chuẩn.
+Kết quả hiển thị số âm đã chấm/tổng âm tham chiếu, nhắc rõ điểm /100 không phải phần trăm phát âm đúng. Coverage <80% có ghi chú phạm vi. Bản ghi bị méo do quá lớn hoặc chưa khớp rõ câu mẫu có cảnh báo ghi âm lại. Phản hồi từng từ chỉ hiện khi âm thanh ở vị trí tương ứng có đủ tín hiệu. Có nút ghi âm lại ngay trong phần phản hồi. Các quy tắc chất lượng bản ghi/coverage là kiểm tra kỹ thuật, chưa phải ngưỡng độ tin cậy đã hiệu chuẩn.
 
 Artifact `backend/speaking-ai/configs/scoring-calibration.json` khóa theo checkpoint, mapping và feature signature; modelVersion hiện tại là `gop-ctc-mlp-68505cc756b1fbf8-ref2-470077d127db-cal1-f38fe9a705ac1e16`. Trường tùy chọn `rawScore`/`interpretation` lưu trong JSON hiện có, không thay đổi schema. Lịch sử cũ vẫn dùng ngưỡng hiển thị cũ có ghi chú. Chi tiết thí nghiệm, giới hạn và xác minh tại [báo cáo hiệu chỉnh](backend/reports/speaking-score-calibration/REPORT.md).
 
@@ -72,7 +72,9 @@ Luồng đã tích hợp: danh mục khóa học → bài Speaking → chọn c�
 
 ## Chạy trên máy hiện tại
 
-Frontend đã tự khởi động Speaking khi dùng `npm run dev` hoặc `npm start`; không cần mở terminal Python riêng trong luồng thông thường. Chỉ cần chạy API .NET trong Visual Studio và frontend bằng npm. Bước khởi động đợi mô hình ready tối đa 180 giây, dùng lại dịch vụ đang chạy và ghi log vào `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Python tiếp tục chạy nền khi đóng frontend. Ba terminal bên dưới là cách chạy thủ công tùy chọn.
+Frontend tự khởi động Speaking khi dùng `npm run dev` hoặc `npm start`. Chạy API .NET trong Visual Studio và frontend bằng npm. Bước khởi động đợi mô hình ready tối đa 180 giây, dùng lại dịch vụ đang chạy và ghi log vào `backend/EnglishLearning.Api/App_Data/speaking-service/service.log`. Python tiếp tục chạy nền khi đóng frontend. Nếu Speaking khởi động lỗi, npm vẫn mở frontend và in đường dẫn log để kiểm tra.
+
+Mặc định `SPEAKING_DEVICE=auto` dùng GPU khi có CUDA và chuyển sang CPU nếu hết VRAM lúc nạp model. Có thể chọn CPU ngay bằng `$env:SPEAKING_DEVICE='cpu'` trước khi chạy npm. Thay đổi này áp dụng ở lần khởi động mới của bộ chấm.
 
 Mở ba terminal từ thư mục `D:\learning-english`:
 
@@ -133,11 +135,22 @@ Nhập lại cùng tệp bằng `./backend/scripts/Import-SpeakingPractice.ps1 -
 Nhập trên môi trường được phê duyệt bằng `./backend/scripts/Import-SpeakingPractice.ps1 -CourseFile backend/speaking-ai/training-practice-courses.json -Apply`. Script bỏ qua tên khóa đã tồn tại. Nguồn: https://github.com/jimbozhang/speechocean762 và README cục bộ trong thư mục train.
 
 - .NET: `SpeakingAi:BaseUrl`, mặc định `http://127.0.0.1:8001`; có thể ghi đè bằng `SpeakingAi__BaseUrl`.
-- .NET: `SpeakingStorage:RootPath`, mặc định `backend/EnglishLearning.Api/App_Data/speaking`; không nằm trong wwwroot.
+- .NET: `SpeakingStorage:RootPath`, mặc định `backend/EnglishLearning.Api/App_Data/speaking`; không nằm trong wwwroot. Chỉ dùng khi `Cloudinary:Enabled=false` (máy dev chưa cấu hình Cloudinary).
 - Python: `SPEAKING_TRAINING_ROOT`, mặc định tìm thư mục train bên cạnh repository theo bố cục hiện tại.
 - Frontend: dùng `API_BASE_URL` server-only hiện có; JWT ở cookie HttpOnly. Trình duyệt không gọi trực tiếp dịch vụ mô hình.
 
 Kiểm tra dịch vụ: `GET http://127.0.0.1:8001/health`. Dịch vụ chỉ báo ready sau khi đã nạp model. Bản hiện tại chạy một worker và chấm tuần tự để phù hợp GPU 4 GB.
+
+### Deploy bộ chấm lên Vercel
+
+Tạo project FastAPI riêng với Root Directory `backend/speaking-ai`. Bật **Include source files outside of the Root Directory** và **Fluid Compute** để build đọc được `ai/EnglishPronunciationTraining` và đóng gói model bằng Large Functions. Với project cũ chưa bật Large Functions, đặt `VERCEL_SUPPORT_LARGE_FUNCTIONS=1` cho Preview.
+
+1. Đặt `SPEAKING_API_TOKEN` trong Environment Variables của project Speaking bằng một khóa ngẫu nhiên. Chọn Preview khi thử và Production khi đưa vào sử dụng.
+2. Deploy nhánh chứa cấu hình Vercel. Build dùng PyTorch CPU và eSpeak NG từ wheel Linux. `prepare_vercel.py` sao chép phần cần cho inference từ repo và tải snapshot Wav2Vec2 đúng revision vào gói Function.
+3. Kiểm tra `GET /health` trả `status: ready`. Gửi một WAV cùng câu tương ứng đến `POST /score` với header `Authorization: Bearer <token>`. Thử cả lượt đầu sau khi Function khởi động vì Somee chờ phản hồi tối đa 55 giây. Một yêu cầu thiếu hoặc sai token phải trả `401`.
+4. Khi kiểm tra đạt, publish lại API .NET có hỗ trợ token lên Somee. Trong `web.config`, đặt `SpeakingAi__BaseUrl` là URL HTTPS gốc của project Speaking và `SpeakingAi__ApiToken` là cùng khóa đã đặt trên Vercel. Sau đó thử ghi và chấm một bản thu qua trang LEWA.
+
+Preview có thể bật Vercel Authentication. Khi thử bằng HTTP client, dùng header `x-vercel-protection-bypass` với secret Automation Bypass của Vercel bên cạnh Bearer token của ứng dụng.
 
 ## API
 
@@ -152,6 +165,20 @@ Kiểm tra dịch vụ: `GET http://127.0.0.1:8001/health`. Dịch vụ chỉ b�
 Frontend proxy tương ứng qua `/api/speaking/...`, kiểm tra same-origin khi gửi bài, giới hạn dung lượng thực khi đọc request và giữ token ở server. Khóa học upload chỉ được học bởi chủ sở hữu theo cùng quy tắc catalog; khóa chưa xuất bản hoặc bài bị tắt không mở được để luyện.
 
 Sử dụng đúng bảng `SpeakingAttempts` và các cột đã có. `PhonemeScores` lưu JSON version 1 gồm câu mẫu snapshot, chỉ số câu, điểm, danh sách âm, coverage và phiên bản model; `Feedback`, `OverallScore`, `DurationSeconds`, `AudioUrl`, `CreatedAt` lưu theo schema hiện tại. Không có migration, bảng hoặc cột mới. Audio chỉ được ghi sau khi chấm thành công; nếu lưu database thất bại thì file mới được dọn.
+
+### Lưu bản ghi trên Cloudinary — 2026-11-21
+
+Khi `Cloudinary:Enabled=true`, bản ghi đã chấm được lưu tại `{EnvironmentPrefix}/speaking/recordings/{guid}` (resource `video`, chế độ `authenticated`), kèm manifest `{EnvironmentPrefix}/speaking/references/{guid}.json`. Tên trên Cloudinary không chứa UserId, email, bài học hay câu mẫu; chỉ SQL liên kết bản ghi với người học. Trình duyệt không nhận URL Cloudinary: `GET /api/v1/speaking/recordings/{guid}.wav` vẫn kiểm tra chủ sở hữu rồi stream qua API, có Range/206/416. `AudioUrl` giữ nguyên định dạng `/api/speaking/recordings/{guid}.wav`.
+
+- Chỉ nhận WAV tối đa 2 MB. Khi ghi không kiểm tra tồn tại trước (GUID luôn mới) để không tốn hạn mức Admin API.
+- Upload lỗi (quota, mạng, timeout): vẫn lưu kết quả chấm, `AudioUrl` để trống và giao diện báo không có bản ghi để nghe lại. Không ghi tạm xuống đĩa.
+- Lưu database lỗi: xóa bản ghi vừa upload. Xóa lỗi chỉ ghi log để đối soát.
+- Mỗi người học × bài giữ audio của 20 lần luyện gần nhất. Lần cũ hơn giữ điểm, audio bị xóa và `AudioUrl` để trống.
+- Xóa khóa học sẽ xóa audio của các lần luyện thuộc khóa đó.
+- Chỉ bản ghi Speaking được phép xóa qua adapter; audio khóa học và từ điển không bị đụng tới.
+- `Cloudinary:AllowLegacyReads=true` cho phép đọc file cũ trên đĩa khi cloud không có.
+
+Giao diện có thông báo bản ghi được lưu riêng tư trên dịch vụ đám mây. Khi deploy, audio đi tới hai bên ngoài: bộ chấm (Vercel) và Cloudinary.
 
 ## Ý nghĩa và giới hạn kết quả
 

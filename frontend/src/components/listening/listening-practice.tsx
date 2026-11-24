@@ -1,6 +1,9 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Link from "next/link";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
@@ -108,15 +111,25 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
     const updated = { ...previous, [questionId]: { ...(previous[questionId] ?? { questionId, matches: [] }), ...change } };
     currentAnswers.current = updated;
     setAnswers(updated);
+    void recordLearningInteraction("listening");
     const saved = writeListeningDraft(draftKey, { contentVersion: lesson.contentVersion, answers: updated, timeSpentSeconds: elapsed });
     setDraftStatus(saved ? "saved" : "unavailable");
   }
   const replay = useCallback((seconds: number | null) => { if (seconds !== null) setSeek(previous => ({ seconds, nonce: (previous?.nonce ?? 0) + 1 })); }, []);
   async function toggleTranscript() {
     if (!canShowTranscript || sessionInvalid || transcriptBusy) return;
-    if (transcript !== null) { setTranscriptOpen(value => !value); return; }
+    if (transcript !== null) {
+      if (!transcriptOpen) void recordLearningInteraction("listening");
+      setTranscriptOpen(value => !value);
+      return;
+    }
     setTranscriptBusy(true); setError("");
-    try { const response = await listeningRequest<{ transcript: string }>(`${path}/transcript`, { signal: controller.current?.signal }); controller.current?.signal.throwIfAborted(); setTranscript(response.transcript); setTranscriptOpen(true); }
+    try {
+      const response = await listeningRequest<{ transcript: string }>(`${path}/transcript`, { signal: controller.current?.signal });
+      controller.current?.signal.throwIfAborted();
+      setTranscript(response.transcript); setTranscriptOpen(true);
+      void recordLearningInteraction("listening");
+    }
     catch (reason) { showError(reason); }
     finally { setTranscriptBusy(false); }
   }
@@ -144,6 +157,7 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
       controller.current?.signal.throwIfAborted();
       clearListeningDraft(draftKey);
       setDraftStatus(null);
+      notifyLearningActivity();
       setResult(response); setProgress(response.progress); setHistory(null);
       requestAnimationFrame(() => { resultHeading.current?.focus(); resultHeading.current?.scrollIntoView({ behavior: "smooth", block: "center" }); });
     } catch (reason) { showError(reason); }
@@ -154,7 +168,9 @@ export default function ListeningPractice({ lesson, userId }: { lesson: Listenin
     <div className={styles.breadcrumb}><nav aria-label="Đường dẫn"><Link href="/courses"><Icon name="book" />Khóa học</Link><span>/</span><Link href={`/courses/${lesson.courseId}`}>{lesson.courseTitle}</Link><span>/</span><span>{lesson.title}</span></nav>
       <div className={styles.badges}>{lesson.difficultyLevel && <span>CEFR {lesson.difficultyLevel}</span>}<span><Icon name="headphones" />Listening Lab</span></div></div>
     <section className={`${styles.card} ${styles.hero}`}>
-      <div><h1>{lesson.title}</h1><p><Icon name="shield" />Nghe kỹ audio và hoàn thành {lesson.questions.length} câu hỏi{lesson.estimatedMinutes ? ` · Khoảng ${lesson.estimatedMinutes} phút` : ""}.</p></div>
+      <div><h1>{lesson.title}</h1><p><Icon name="shield" />Nghe kỹ audio và hoàn thành {lesson.questions.length} câu hỏi{lesson.estimatedMinutes ? ` · Khoảng ${lesson.estimatedMinutes} phút` : ""}.</p>
+        <BookmarkButton targetType="lesson" targetId={lesson.lessonId} title={lesson.title} />
+      </div>
       <div className={styles.answerProgress}><div><span>Đã trả lời</span><strong>{answered}/{lesson.questions.length}</strong></div><progress value={answered} max={lesson.questions.length} aria-label="Tiến độ trả lời" /></div>
     </section>
     {error && <div className={styles.error} role="alert">{error}{sessionInvalid ? <Link href={listeningLoginHref(lesson.courseId, lesson.lessonId)}>Đăng nhập</Link> : <button type="button" onClick={() => setError("")}>Đóng thông báo</button>}</div>}

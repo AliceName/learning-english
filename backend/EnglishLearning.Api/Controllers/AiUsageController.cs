@@ -27,6 +27,13 @@ public sealed class AiUsageController(EnglishLearningDbContext db, AiCourseStore
         var changes = Path.Combine(store.Root, "policy-changes.jsonl");
         var audit = System.IO.File.Exists(changes)
             ? System.IO.File.ReadLines(changes).TakeLast(10).Select(line => JsonSerializer.Deserialize<JsonElement>(line)).Reverse().ToArray() : [];
+        var userRows = calls.GroupBy(call => call.UserId).Select(group => new {
+            userId = group.Key, calls = group.Count(), tokens = group.Sum(call => call.TotalTokens ?? 0)
+        }).OrderByDescending(row => row.calls).Take(20).ToArray();
+        var ids = userRows.Where(row => row.userId is not null).Select(row => row.userId!.Value).ToArray();
+        // Admins see who used the quota by name, not just an id.
+        var names = await db.Users.AsNoTracking().Where(item => ids.Contains(item.UserId))
+            .ToDictionaryAsync(item => item.UserId, item => new { item.FullName, item.Email }, ct);
         return Ok(new {
             asOfUtc = now, fromUtc = from, days, storageMode = "single_host_pilot",
             counts = new {
@@ -45,9 +52,11 @@ public sealed class AiUsageController(EnglishLearningDbContext db, AiCourseStore
             },
             series = calls.GroupBy(call => call.StartedAt.UtcDateTime.ToString(days == 1 ? "yyyy-MM-ddTHH:00:00Z" : "yyyy-MM-dd"))
                 .OrderBy(group => group.Key).Select(group => new { at = group.Key, calls = group.Count(), errors = group.Count(call => call.Outcome != "success") }),
-            users = calls.GroupBy(call => call.UserId).Select(group => new {
-                userId = group.Key, calls = group.Count(), tokens = group.Sum(call => call.TotalTokens ?? 0)
-            }).OrderByDescending(row => row.calls).Take(20),
+            users = userRows.Select(row => new {
+                row.userId, row.calls, row.tokens,
+                fullName = row.userId is int id && names.TryGetValue(id, out var user) ? user.FullName : null,
+                email = row.userId is int key && names.TryGetValue(key, out var match) ? match.Email : null
+            }),
             calls = calls.Take(150), policyChanges = audit
         });
     }, ct);

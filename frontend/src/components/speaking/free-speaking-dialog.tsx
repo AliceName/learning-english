@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import { useEffect, useId, useRef, useState } from "react";
 import Image from "next/image";
 import Icon from "@/components/site-icon";
@@ -20,6 +22,7 @@ export function playSample(text: string, reportError: (message: string) => void)
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = "en-US";
   utterance.rate = .85;
+  utterance.onstart = () => { void recordLearningInteraction("speaking"); };
   utterance.onerror = event => {
     if (event.error !== "canceled" && event.error !== "interrupted") reportError("Chưa phát được giọng mẫu. Vui lòng thử lại.");
   };
@@ -160,8 +163,8 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
     setClip(file);
   }
 
-  async function score() {
-    if (!sentence || !clip || busy || scoreRequest.current) return;
+  async function score(audioToScore = clip) {
+    if (!sentence || !audioToScore || busy || scoreRequest.current) return;
     stopPlayback();
     setError(""); setMessage(""); setPhase("scoring");
     const controller = new AbortController();
@@ -169,12 +172,13 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
     try {
       const body = new FormData();
       body.append("text", sentence.text);
-      body.append("file", clip, "recording.wav");
+      body.append("file", audioToScore, "recording.wav");
       const response = await fetch("/api/speaking/free/score", { method: "POST", body, signal: controller.signal });
       const data = await response.json().catch(() => null);
       if (!response.ok || !data) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." :
         data?.title || "Chưa chấm được bản ghi. Hãy thử lại.");
-      const next = { assessment: data as SpeakingAssessment, recording: clip };
+      notifyLearningActivity();
+      const next = { assessment: data as SpeakingAssessment, recording: audioToScore };
       const saved = await onScore(sentence, next);
       if (!controller.signal.aborted) {
         setSentence(saved); setResult(next); setShowingResult(true); setClip(null);
@@ -290,10 +294,14 @@ export default function FreeSpeakingDialog({ initialSentence, showResult, onCrea
                 event.currentTarget.pause(); endOfWord.current = null;
               }
             }} onEnded={() => { endOfWord.current = null; }} />
+            {feedbackMode(result.assessment) === "record_again" && <button type="button" className={styles.secondary} disabled={busy}
+              aria-busy={phase === "scoring"} onClick={() => void score(result.recording)}>
+              <Icon name="replay" /> {phase === "scoring" ? "Đang chấm lại…" : "Chấm lại bản ghi"}
+            </button>}
           </section>
           <div className={styles.feedbackWrap}>
             <PronunciationFeedback attempt={{ attemptId: titleId, assessment: result.assessment, referenceText: sentence.text }}
-              disabled={false} canRetry rate={.85} onBeforePlay={stopPlayback} onListenRecording={word => void playWord(word)} onRetry={retry} />
+              disabled={busy} canRetry rate={.85} onBeforePlay={stopPlayback} onListenRecording={word => void playWord(word)} onRetry={retry} />
           </div>
         </div> : <div className={styles.recorder} data-recording={phase === "recording"}>
           <svg className={styles.recordingFrame} viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true">

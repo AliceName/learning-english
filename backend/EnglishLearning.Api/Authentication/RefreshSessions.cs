@@ -17,7 +17,7 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
     private readonly Dictionary<Guid, Session> sessions = new();
     private readonly byte[] rotationKey = RandomNumberGenerator.GetBytes(32);
 
-    public RefreshGrant? Create(int userId)
+    public RefreshGrant? Create(int userId, int authVersion = 0)
     {
         lock (gate)
         {
@@ -31,7 +31,7 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
 
             var sessionId = Guid.NewGuid();
             var secret = RandomNumberGenerator.GetBytes(32);
-            var session = new Session(userId, now.AddHours(options.Value.SessionHours), now, SHA256.HashData(secret));
+            var session = new Session(userId, authVersion, now.AddHours(options.Value.SessionHours), now, SHA256.HashData(secret));
             sessions.Add(sessionId, session);
             return Grant(sessionId, secret, session, now);
         }
@@ -49,7 +49,7 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
         }
     }
 
-    public RefreshGrant? Rotate(string token, int userId)
+    public RefreshGrant? Rotate(string token, int userId, int? authVersion = null)
     {
         if (!TryRead(token, out var id, out var secret)) return null;
         lock (gate)
@@ -57,7 +57,8 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
             var now = clock.GetUtcNow();
             var session = FindSession(id, now);
             var hash = SHA256.HashData(secret);
-            if (session is null || session.UserId != userId || !Verify(id, session, hash, now)) return null;
+            if (session is null || session.UserId != userId ||
+                authVersion is { } version && session.AuthVersion != version || !Verify(id, session, hash, now)) return null;
 
             session.LastActivity = now;
             // Requests from different tabs can arrive with the same cookie. Derive the same
@@ -88,6 +89,20 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
         }
     }
 
+    /// <summary>
+    /// Ends every session of a user (used when an admin locks the account). Access tokens carry the
+    /// session id and are checked on each request, so they stop working at once too.
+    /// </summary>
+    public int RevokeUser(int userId)
+    {
+        lock (gate)
+        {
+            var ids = sessions.Where(item => item.Value.UserId == userId).Select(item => item.Key).ToArray();
+            foreach (var id in ids) sessions.Remove(id);
+            return ids.Length;
+        }
+    }
+
     public void Revoke(string token)
     {
         if (!TryRead(token, out var id, out var secret)) return;
@@ -99,6 +114,15 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
             if (CryptographicOperations.FixedTimeEquals(session.CurrentHash, hash) ||
                 session.PreviousHash is { } previous && CryptographicOperations.FixedTimeEquals(previous, hash))
                 sessions.Remove(id);
+        }
+    }
+
+    public void RevokeUserSessions(int userId, Guid? except = null)
+    {
+        lock (gate)
+        {
+            foreach (var id in sessions.Where(item => item.Value.UserId == userId && item.Key != except)
+                         .Select(item => item.Key).ToArray()) sessions.Remove(id);
         }
     }
 
@@ -134,9 +158,10 @@ public sealed class RefreshSessions(TimeProvider clock, IOptions<JwtOptions> opt
         catch (FormatException) { return false; }
     }
 
-    private sealed class Session(int userId, DateTimeOffset expiresAt, DateTimeOffset now, byte[] hash)
+    private sealed class Session(int userId, int authVersion, DateTimeOffset expiresAt, DateTimeOffset now, byte[] hash)
     {
         public int UserId { get; } = userId;
+        public int AuthVersion { get; } = authVersion;
         public DateTimeOffset ExpiresAt { get; } = expiresAt;
         public DateTimeOffset LastActivity { get; set; } = now;
         public byte[] CurrentHash { get; set; } = hash;

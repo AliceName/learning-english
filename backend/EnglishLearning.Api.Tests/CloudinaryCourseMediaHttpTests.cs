@@ -55,7 +55,12 @@ public sealed partial class RegistrationSqlServerTests
             Assert.Equal($"bytes 4-15/{asset.Size}", response.Content.Headers.ContentRange?.ToString());
         }
         using var invalidRange = new HttpRequestMessage(HttpMethod.Get, BackendAsset(listening)); invalidRange.Headers.Range = new(999999, null);
-        Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, (await client.SendAsync(invalidRange)).StatusCode);
+        using (var unsatisfiable = await client.SendAsync(invalidRange))
+        {
+            Assert.Equal(HttpStatusCode.RequestedRangeNotSatisfiable, unsatisfiable.StatusCode);
+            Assert.Equal($"bytes */{listening.Size}", unsatisfiable.Content.Headers.ContentRange?.ToString());
+            Assert.Empty(await unsatisfiable.Content.ReadAsByteArrayAsync());
+        }
         Assert.Equal(HttpStatusCode.Forbidden, (await UploadCourseAsset(AudioFixture.Wave(), "a.wav", "audio")).StatusCode);
     }
 

@@ -17,7 +17,7 @@ namespace EnglishLearning.Api.Controllers;
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]
 public sealed class AdminCoursesController(CourseAuthoringService authoring, EnglishLearningDbContext db,
-    ILogger<AdminCoursesController> logger) : ControllerBase
+    SpeakingStorage recordings, ILogger<AdminCoursesController> logger) : ControllerBase
 {
     [HttpGet]
     public Task<ActionResult<AdminCourseListResponse>> List([FromQuery] AdminCourseQuery query, CancellationToken ct) =>
@@ -64,6 +64,23 @@ public sealed class AdminCoursesController(CourseAuthoringService authoring, Eng
     public Task<ActionResult<AdminCourseResponse>> Publish(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.PublishAsync(id, ct), true, ct);
     [HttpPost("{id:int:min(1)}/hide")]
     public Task<ActionResult<AdminCourseResponse>> Hide(int id, CancellationToken ct) => ExecuteAsync(_ => authoring.HideAsync(id, ct), true, ct);
+    /// <summary>Deletes a hidden course nobody but admins has used; otherwise 409 (hide it instead).</summary>
+    [HttpDelete("{id:int:min(1)}")]
+    public async Task<ActionResult<AdminCourseDeleted>> Delete(int id, CancellationToken ct)
+    {
+        IReadOnlyList<string> audio = [];
+        var result = await ExecuteAsync(async _ =>
+        {
+            var deletion = await authoring.DeleteAsync(id, ct);
+            audio = deletion.RecordingUrls;
+            return deletion.Course;
+        }, true, ct);
+        // Only after the transaction committed: a rolled-back delete keeps its recordings, and no cloud call holds the
+        // serializable locks. A failed delete is logged by SpeakingStorage for reconciliation.
+        if (result.Result is OkObjectResult)
+            foreach (var url in audio) await recordings.DeleteAsync(url, CancellationToken.None);
+        return result;
+    }
 
     private async Task<ActionResult<T>> ExecuteAsync<T>(Func<int, Task<T>> action, bool write, CancellationToken ct, bool created = false)
     {

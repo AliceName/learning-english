@@ -53,7 +53,8 @@ public sealed class CloudinaryMediaStore : ICloudMediaStore, IDisposable
         {
             await gate.WaitAsync(deadline.Token); locked = true;
             await operations.WaitAsync(deadline.Token); entered = true;
-            var existing = await FindAsync(kind, reference, deadline.Token);
+            // Learner recordings always use a fresh GUID: skip the lookup, whose miss costs a rate-limited Admin API call.
+            var existing = kind == CloudMediaKind.SpeakingRecording ? null : await FindAsync(kind, reference, deadline.Token);
             if (existing is not null)
             {
                 if (existing.Sha256 != hash || existing.ContentType != mime || existing.Asset.Format != format) throw Conflict();
@@ -145,6 +146,17 @@ public sealed class CloudinaryMediaStore : ICloudMediaStore, IDisposable
         }
     }
 
+    public async Task DeleteAsync(CloudMediaKind kind, string reference, CancellationToken token)
+    {
+        if (kind != CloudMediaKind.SpeakingRecording) throw new CloudMediaException(400, "media_delete_not_allowed");
+        var manifestId = names.Manifest(kind, reference);
+        cache.Remove(manifestId);
+        // Binary first: a manifest left behind only resolves to a missing asset (404), never to stale audio.
+        await remote.DeleteAsync(names.Binary(kind, reference, null), "video", token);
+        await remote.DeleteAsync(manifestId, "raw", token);
+        cache.Remove(manifestId);
+    }
+
     private async Task VerifyBinaryAsync(CloudAsset asset, string hash, string mime, CancellationToken token)
     {
         await using var read = await remote.OpenAsync(asset, null, token);
@@ -225,7 +237,7 @@ public sealed class CloudinaryMediaStore : ICloudMediaStore, IDisposable
         if (asset.PublicId != names.Binary(kind, reference, hash) || asset.ResourceType != (kind == CloudMediaKind.CourseCover ? "image" : "video") ||
             asset.DeliveryType != "authenticated" || string.IsNullOrWhiteSpace(asset.AssetId) || !ValidVersion(asset.Version) || asset.Format != format ||
             mime != expectedMime || !mime.StartsWith(kind == CloudMediaKind.CourseCover ? "image/" : "audio/", StringComparison.Ordinal) ||
-            length <= 0 || length > (kind == CloudMediaKind.CourseAudio ? 25L : 5L) * 1024 * 1024 || asset.Bytes != length)
+            length <= 0 || length > CloudMediaValidation.MaxBytes(kind) || asset.Bytes != length)
             throw new CloudMediaException(409, "media_asset_metadata_conflict");
     }
     private static bool ValidVersion(string version) => !string.IsNullOrEmpty(version) && version.Length <= 20 && version.All(char.IsAsciiDigit);

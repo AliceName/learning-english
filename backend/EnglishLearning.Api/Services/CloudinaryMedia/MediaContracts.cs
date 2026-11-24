@@ -8,7 +8,7 @@ using EnglishLearning.Api.Contracts;
 namespace EnglishLearning.Api.Services.CloudinaryMedia;
 
 [JsonConverter(typeof(JsonStringEnumConverter<CloudMediaKind>))]
-public enum CloudMediaKind { DictionaryAudio, CourseCover, CourseAudio }
+public enum CloudMediaKind { DictionaryAudio, CourseCover, CourseAudio, SpeakingRecording }
 public sealed record CloudAsset(string AssetId, string PublicId, string ResourceType, string DeliveryType,
     string Format, string Version, long Bytes);
 public sealed record CloudUpload(CloudAsset Asset, bool Created);
@@ -33,6 +33,8 @@ public interface ICloudinaryAssetTransport
     Task<CloudRemoteRead?> OpenManifestAsync(string publicId, CancellationToken token);
     Task<bool> ProbeAsync(CloudAsset asset, CancellationToken token);
     Task<CloudRemoteRead> OpenAsync(CloudAsset asset, RangeHeaderValue? range, CancellationToken token);
+    // Only learner recordings are deletable; course and dictionary assets can be shared.
+    Task DeleteAsync(string publicId, string resourceType, CancellationToken token) => throw new NotSupportedException();
 }
 
 public interface ICloudMediaStore
@@ -40,6 +42,7 @@ public interface ICloudMediaStore
     Task<CloudMediaManifest> StoreAsync(CloudMediaKind kind, string reference, ReadOnlyMemory<byte> bytes, string format, AudioAttribution? attribution, CancellationToken token);
     Task<CloudMediaManifest?> FindAsync(CloudMediaKind kind, string reference, CancellationToken token);
     Task<CloudMediaRead> OpenAsync(CloudMediaKind kind, string reference, string? range, CancellationToken token);
+    Task DeleteAsync(CloudMediaKind kind, string reference, CancellationToken token) => throw new NotSupportedException();
 }
 
 public sealed class CloudRemoteRead(HttpStatusCode status, string? contentType, long? length, ContentRangeHeaderValue? range, Stream body) : IAsyncDisposable
@@ -77,16 +80,23 @@ public sealed class CloudMediaNames(string prefix)
     public string Manifest(CloudMediaKind kind, string reference)
     {
         Reference(kind, reference);
-        return Prefix + (kind == CloudMediaKind.DictionaryAudio ? "/dictionary/references/" : "/courses/references/") + reference + ".json";
+        return Prefix + kind switch
+        {
+            CloudMediaKind.DictionaryAudio => "/dictionary/references/",
+            CloudMediaKind.SpeakingRecording => "/speaking/references/",
+            _ => "/courses/references/"
+        } + reference + ".json";
     }
-    public string Binary(CloudMediaKind kind, string reference, string hash)
+    public string Binary(CloudMediaKind kind, string reference, string? hash)
     {
         Reference(kind, reference);
-        if (!Hash(hash)) throw new CloudMediaException(400, "invalid_media_hash");
+        // Only dictionary audio is content-addressed; other kinds are named by their reference.
+        if (kind == CloudMediaKind.DictionaryAudio && !Hash(hash)) throw new CloudMediaException(400, "invalid_media_hash");
         return Prefix + (kind switch
         {
-            CloudMediaKind.DictionaryAudio => "/dictionary/audio/" + hash,
+            CloudMediaKind.DictionaryAudio => "/dictionary/audio/" + hash!,
             CloudMediaKind.CourseCover => "/courses/covers/" + reference,
+            CloudMediaKind.SpeakingRecording => "/speaking/recordings/" + reference,
             _ => "/courses/audio/" + reference
         });
     }
@@ -96,10 +106,15 @@ public sealed class CloudMediaNames(string prefix)
         var pattern = resourceType switch
         {
             "image" => @"\Acourses/covers/[a-f0-9]{32}\z",
-            "video" => @"\A(dictionary/audio/[a-f0-9]{64}|courses/audio/[a-f0-9]{32})\z",
-            "raw" => @"\A(dictionary/references/[a-f0-9]{64}|courses/references/[a-f0-9]{32})\.json\z",
+            "video" => @"\A(dictionary/audio/[a-f0-9]{64}|courses/audio/[a-f0-9]{32}|speaking/recordings/[a-f0-9]{32})\z",
+            "raw" => @"\A(dictionary/references/[a-f0-9]{64}|(courses|speaking)/references/[a-f0-9]{32})\.json\z",
             _ => "(?!)"
         };
         if (!Regex.IsMatch(suffix, pattern)) throw new CloudMediaException(400, "media_namespace_violation");
+    }
+    public void EnsureDeletable(string id, string resourceType)
+    {
+        EnsureOwned(id, resourceType);
+        if (!id.StartsWith(Prefix + "/speaking/", StringComparison.Ordinal)) throw new CloudMediaException(400, "media_delete_not_allowed");
     }
 }

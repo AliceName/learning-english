@@ -1,7 +1,10 @@
 "use client";
 
+import { recordLearningInteraction, notifyLearningActivity } from "@/lib/learning-activity";
+
 import Link from "next/link";
 import Image from "next/image";
+import BookmarkButton from "@/components/bookmarks/bookmark-button";
 import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/site-icon";
 import type { SpeakingAttempt, SpeakingLesson, SpeakingWord } from "@/lib/speaking";
@@ -179,6 +182,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(response.status === 401 ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại trước khi gửi." : data.title || "Chưa chấm được bản ghi. Vui lòng thử lại.");
       if (mounted.current) {
+        notifyLearningActivity();
         const attempt = data as SpeakingAttempt;
         saveClip(target.key, { ...clip, submitted: true });
         setResult(attempt); setHistory(old => mergeHistory([attempt], old));
@@ -207,6 +211,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
     stopPlayback();
     const utterance = new SpeechSynthesisUtterance(target.text);
     utterance.lang = "en-US"; utterance.rate = rate;
+    utterance.onstart = () => { void recordLearningInteraction("speaking"); };
     utterance.onerror = event => { if (mounted.current && event.error !== "canceled" && event.error !== "interrupted") setError("Chưa phát được giọng mẫu. Hãy kiểm tra giọng tiếng Anh của trình duyệt rồi thử lại."); };
     window.speechSynthesis.speak(utterance);
   }
@@ -260,6 +265,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
       <div className={styles.headerCopy}>
         <h1>Speaking<span className={styles.titleDoodle} aria-hidden="true"><i /><i /><i /></span></h1>
         <SpeakingAssignment goals={lesson.goals} />
+        <BookmarkButton targetType="lesson" targetId={lesson.lessonId} title={lesson.title} />
       </div>
       <Image className={styles.heroArt} src="/illustrations/translation-cat.svg" width={348} height={190}
         sizes="(max-width: 600px) 120px, (max-width: 1000px) 220px, 320px" alt="" priority />
@@ -301,7 +307,10 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           <summary>Giọng mẫu và chọn câu luyện</summary>
         <div className={styles.sampleControls}><label>Tốc độ mẫu <select value={rate} disabled={busy} onChange={event => { const next = Number(event.target.value); setRate(next); if (sampleAudio.current) sampleAudio.current.playbackRate = next; }}><option value={.75}>Chậm · 0,75×</option><option value={1}>Bình thường · 1×</option></select></label>
           <button className={styles.secondary} disabled={busy} onClick={() => stopPlayback()}>Dừng nghe</button></div>
-        {sampleUrl ? <audio ref={sampleAudio} key={sampleUrl} controls preload="metadata" src={sampleUrl} aria-label="Audio câu mẫu" onLoadedMetadata={event => { event.currentTarget.playbackRate = rate; }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onError={() => setError("Chưa tải được audio mẫu. Bạn vẫn có thể đọc câu và thử tải lại trang sau.")} /> : <p className={styles.hint}>Giọng mẫu do trình duyệt tổng hợp, có thể khác nhau giữa các thiết bị.</p>}
+        {sampleUrl ? <audio ref={sampleAudio} key={sampleUrl} controls preload="metadata" src={sampleUrl} aria-label="Audio câu mẫu" onLoadedMetadata={event => { event.currentTarget.playbackRate = rate; }}
+          onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }}
+          onPlaying={() => { if (!busy) void recordLearningInteraction("speaking"); }}
+          onError={() => setError("Chưa tải được audio mẫu. Bạn vẫn có thể đọc câu và thử tải lại trang sau.")} /> : <p className={styles.hint}>Giọng mẫu do trình duyệt tổng hợp, có thể khác nhau giữa các thiết bị.</p>}
         <div className={styles.sentenceNavigation}><button disabled={busy || index === 0} onClick={() => selectSentence(index - 1)}>← Câu trước</button><span>{index + 1} / {lesson.sentences.length}</span><button disabled={busy || index === lesson.sentences.length - 1} onClick={() => selectSentence(index + 1)}>Câu tiếp theo →</button></div>
           <nav className={styles.sentences} aria-label="Chọn câu luyện nói">{lesson.sentences.map((s, i) => <button key={i} disabled={busy}
             aria-current={i === index ? "step" : undefined} onClick={() => selectSentence(i)} title={s.text}>
@@ -331,6 +340,7 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
           {!clip.submitted && <button className={styles.primary} disabled={busy} onClick={() => void submit()}><Icon name="sparkles" />Gửi chấm điểm</button>}
           <button className={styles.secondary} disabled={busy} onClick={() => { stopPlayback(); saveClip(target.key, null); setNotice(`Đã bỏ bản ghi tạm của ${unit} này.`); }}>Bỏ bản ghi tạm</button>
         </div>}
+        <p className={styles.hint}>Bản ghi đã chấm được lưu riêng tư trên dịch vụ lưu trữ đám mây để bạn nghe lại; chỉ bạn nghe được và hệ thống giữ tối đa 20 lần luyện gần nhất của mỗi bài.</p>
         <details className={styles.recorderOptions}>
           <summary>Tùy chọn ghi âm</summary>
           <p className={styles.hint}>{isRecording ? "Bấm lần nữa khi bạn đọc xong." : `Đọc ${isSegment ? "cụm đang chọn" : "cả câu trong một bản ghi"}.`}</p>
@@ -364,11 +374,12 @@ export default function SpeakingPractice({ lesson, initialHistory, historyUnavai
         <PronunciationFeedback key={result.attemptId} attempt={result} disabled={busy} canRetry={canRetry} rate={rate} onBeforePlay={() => stopPlayback()} onListenRecording={word => void playWord(word)} onRetry={() => void start()} />
         {playingWord && <p className={styles.notice} role="status">Đang nghe đoạn ghi âm quanh từ “{playingWord}”… <button className={styles.secondary} onClick={() => stopPlayback()}>Dừng đoạn ghi âm</button></p>}
         {audioNotice && <p className={styles.error} role="status">{audioNotice}</p>}
-        <audio ref={wordAudio} hidden key={`segment-${result.attemptId}`} src={result.audioUrl} preload="metadata" onTimeUpdate={event => { if (segmentEnd.current !== null && event.currentTarget.currentTime >= segmentEnd.current) event.currentTarget.pause(); }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onPause={event => { if (event.currentTarget.paused) { segmentEnd.current = null; setPlayingWord(""); } }} onEnded={() => { segmentEnd.current = null; setPlayingWord(""); }} onError={() => setAudioNotice("Chưa tải được bản ghi đã lưu. Bạn có thể thử lại từ lịch sử.")} />
+        {result.audioUrl && <audio ref={wordAudio} hidden key={`segment-${result.attemptId}`} src={result.audioUrl} preload="metadata" onTimeUpdate={event => { if (segmentEnd.current !== null && event.currentTarget.currentTime >= segmentEnd.current) event.currentTarget.pause(); }} onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onPause={event => { if (event.currentTarget.paused) { segmentEnd.current = null; setPlayingWord(""); } }} onEnded={() => { segmentEnd.current = null; setPlayingWord(""); }} onError={() => setAudioNotice("Chưa tải được bản ghi đã lưu. Bạn có thể thử lại từ lịch sử.")} />}
         <details className={styles.details}><summary>Điểm chi tiết từng từ và âm · thang 0–2</summary><div className={styles.words}>{result.assessment.words.map(word => <article key={word.index} className={styles.word}><div><strong lang="en">{word.text}</strong><span>{word.score === null ? "Chưa đánh giá được" : `${word.score.toFixed(2)} / 2`}</span></div>{word.phones.length ? <><div className={styles.phones}>{word.phones.map((phone, i) => <span key={i} title={`${phone.sourcePhone}: ${phone.score.toFixed(2)} / 2`}><b lang="en">/{phone.symbol}/</b><small>{phone.score.toFixed(2)}</small></span>)}</div>{word.reason && <p>{word.reason}</p>}</> : <p>{word.reason}</p>}</article>)}</div></details>
         {result.assessment.warnings.length > 0 && <ul className={styles.notes}>{result.assessment.warnings.map((warning, i) => <li key={i}>{warning}</li>)}</ul>}
         <div className={styles.feedback}><h3><Icon name="sparkles" />Gợi ý cải thiện</h3><p>{result.assessment.feedback}</p></div>
-        <h3>Nghe lại toàn bộ bản ghi đã chấm</h3><audio key={result.audioUrl} src={result.audioUrl} controls preload="metadata" aria-label="Nghe lại bản ghi đã lưu" onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onError={() => setAudioNotice("Chưa phát được bản ghi đã lưu. Hãy tải lại lịch sử và thử lại.")} />
+        {result.audioUrl ? <><h3>Nghe lại toàn bộ bản ghi đã chấm</h3><audio key={result.audioUrl} src={result.audioUrl} controls preload="metadata" aria-label="Nghe lại bản ghi đã lưu" onPlay={event => { if (busy) event.currentTarget.pause(); else stopPlayback(event.currentTarget); }} onError={() => setAudioNotice("Chưa phát được bản ghi đã lưu. Hãy tải lại lịch sử và thử lại.")} /></>
+          : <p className={styles.hint} role="status">Kết quả đã được lưu, nhưng bản ghi này không có để nghe lại (chưa lưu được hoặc đã quá 20 lần luyện gần nhất).</p>}
         <p className={styles.hint}>Chưa đánh giá trọng âm, độ trôi chảy hoặc xác định lỗi thay âm cụ thể.</p>
         <div className={styles.resultActions}>{isSegment && <button className={styles.secondary} disabled={busy} onClick={() => selectTarget(index, null)}>Thử đọc cả câu</button>}
           {following ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(following.sentenceIndex, following.segmentIndex)}>{following.sentenceIndex === index ? "Luyện cụm tiếp theo →" : "Luyện câu tiếp theo →"}</button> : nextPending && nextPending.key !== target.key ? <button className={styles.primary} disabled={busy} onClick={() => selectTarget(nextPending.sentenceIndex, nextPending.segmentIndex)}>Luyện phần chưa hoàn tất →</button> : <Link className={styles.back} href={`/courses/${lesson.courseId}`}>Quay lại khóa học →</Link>}</div>

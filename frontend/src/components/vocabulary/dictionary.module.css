@@ -145,3 +145,8 @@
   .launcher:hover { transform: none; }
   .spinner, .audioSpinner { animation: none; }
 }
+/* The launcher is fixed over the page's bottom-right corner. Give pages room to scroll their last actions
+   (e.g. "Tiếp tục", "Lưu") above it instead of hiding them underneath. */
+:global(body):has(.launcherWrap) :global(#main-content)::after {
+  content: ""; display: block; grid-column: 1 / -1; flex: none; height: calc(96px + env(safe-area-inset-bottom, 0px) + var(--dictionary-bottom-offset, 0px));
+}

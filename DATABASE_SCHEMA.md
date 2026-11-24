@@ -4,11 +4,13 @@
 >
 > **BẮT BUỘC:** Đọc cùng `DATABASE_RULES.md`. Không tự thêm/xóa/đổi tên bảng hoặc cột. Khi tài liệu không nói rõ, báo `CHƯA XÁC ĐỊNH` và hỏi người dùng trước khi quyết định.
 
-## 1. Danh sách bảng được phép (16 bảng)
+## 1. Danh sách bảng được phép (17 bảng)
 
 `Users`, `Courses`, `UserCourses`, `Lessons`, `SpeakingAttempts`, `WritingSubmissions`, `ExerciseResults`, `ErrorLogs`, `FlashcardDecks`, `Flashcards`, `Bookmarks`, `LearningProgress`, `UploadedDocuments`.
 
 Phản xạ dịch bổ sung `TranslationPrompts`, `TranslationAcceptedAnswers` và `UserTranslationPromptExposures` theo yêu cầu triển khai kế hoạch ngày 10/11/2026.
+
+Chuỗi ngày học bổ sung `UserLearningDays` theo phê duyệt ngày 17/11/2026.
 
 **Cấm tự tạo thêm bảng**, kể cả `Roles`, `Permissions`, `Questions`, `Answers`, `Notifications`, `RefreshTokens`, `AuditLogs`, `Categories` hoặc bảng AI phụ trợ, nếu chưa được duyệt. Không suy luận từ chức năng, giao diện hay API rằng phải có bảng mới.
 
@@ -27,6 +29,13 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | Role | NVARCHAR(20) | NN, DEFAULT 'user', CHECK admin/user (phân biệt hoa thường) |
 | AvatarUrl | NVARCHAR(500) | NULL |
 | TargetLevel | NVARCHAR(10) | NULL, CHECK A1/A2/B1/B2/C1/C2 |
+| PhoneNumber | NVARCHAR(25) | NULL |
+| DateOfBirth | DATE | NULL |
+| Address | NVARCHAR(500) | NULL |
+| LearningPurpose | NVARCHAR(20) | NULL |
+| PreferredSkill | NVARCHAR(20) | NULL |
+| DailyGoalMinutes | INT | NULL |
+| AuthVersion | INT | NN, DEFAULT 0 |
 | CurrentStreak | INT | NN, DEFAULT 0 |
 | LongestStreak | INT | NN, DEFAULT 0 |
 | LastStudyDate | DATE | NULL |
@@ -35,6 +44,14 @@ Ký hiệu: `PK` khóa chính; `FK` khóa ngoại; `NN` NOT NULL; `NULL` cho ph�
 | UpdatedAt | DATETIME2 | NN, DEFAULT SYSDATETIME() |
 
 **Thay đổi được duyệt ngày 2026-10-21:** người dùng yêu cầu thêm role `admin`/`user` và tạo một admin mặc định. Migration `002_add_user_role.sql` thêm `Users.Role`, default `user` cho tài khoản hiện có và tài khoản mới; CHECK chỉ chấp nhận hai role chữ thường. PK/FK/UQ và các cột khác giữ nguyên. Admin được tạo bằng lệnh bootstrap riêng, mật khẩu băm PBKDF2; không lưu mật khẩu trong SQL hoặc repository.
+
+**Thay đổi được duyệt ngày 2026-11-10:** người dùng yêu cầu triển khai đề xuất hoàn thiện hồ sơ, thông tin cá nhân, mục tiêu học, avatar và bảo mật; hoãn thống kê đến khi Writing/Listening hoàn thành. Migration `004_profile_details_and_security.sql` chỉ thêm bảy cột trên vào `Users`, không thêm bảng/quan hệ/index hay dữ liệu mẫu. Sáu trường thông tin/mục tiêu không bắt buộc, mặc định NULL. `AuthVersion` mặc định 0, dùng thu hồi JWT cũ khi đổi mật khẩu/đăng xuất các phiên khác, không trả ra API. Ứng dụng kiểm tra điện thoại 8–15 chữ số (có thể có dấu +), ngày sinh từ 1900 đến hôm nay; mục đích communication/work/study/exam; kỹ năng speaking/listening/writing/reading/grammar; mục tiêu 5–180 phút/ngày. Các PK/FK/UQ/CHECK hiện tại giữ nguyên. Migration được áp dụng riêng, không chạy khi API khởi động.
+
+| Đối tượng | Hiện trạng | Thay đổi | Nguồn phê duyệt |
+|---|---|---|---|
+| Users.PhoneNumber / DateOfBirth / Address | Chưa có | Thêm NVARCHAR(25) / DATE / NVARCHAR(500), NULL | Yêu cầu thông tin cá nhân và chấp thuận triển khai hồ sơ ngày 2026-11-10 |
+| Users.LearningPurpose / PreferredSkill / DailyGoalMinutes | Chưa có | Thêm NVARCHAR(20) / NVARCHAR(20) / INT, NULL | Chấp thuận đề xuất mục tiêu học ngày 2026-11-10 |
+| Users.AuthVersion | Chưa có | Thêm INT NOT NULL DEFAULT 0, concurrency token EF | Chấp thuận đề xuất đổi mật khẩu/đăng xuất phiên khác ngày 2026-11-10 |
 
 ### 2.2. Courses (trang 16)
 
@@ -253,6 +270,16 @@ Mở rộng được người dùng phê duyệt ngày 14/11/2026: `CourseId INT
 | LastShownAtUtc | DATETIME2 | NN, ứng dụng ghi thời điểm UTC |
 
 `RotationKey` là mã chung của các bản đề. Một dòng lưu lần phát gần nhất của cặp tài khoản và mã đề. Các FK ở mục 2.14–2.16 dùng `NO ACTION`. Áp dụng [script 004](backend/database/004_add_translation_practice.sql) tường minh sau các script hiện có.
+
+### 2.17. UserLearningDays
+
+| Cột | SQL Server type | Ràng buộc |
+|---|---|---|
+| UserId | INT | PK ghép, NN, FK → Users.UserId, ON DELETE NO ACTION |
+| StudyDate | DATE | PK ghép, NN, tính theo giờ Việt Nam |
+| Kind | INT | PK ghép, NN, CHECK từ 1 đến 8 |
+
+Mỗi loại hoạt động được ghi một lần trên mỗi tài khoản và ngày. Giá trị `Kind` lần lượt là Nghe, Nói, Đọc, Viết, Ngữ pháp, Flashcards, Phiên dịch và Từ vựng. Áp dụng [script 006](backend/database/006_add_learning_activity.sql) tường minh. Script không nhập lại dữ liệu học cũ. API tính streak từ các ngày được ghi nhận trong bảng này.
 
 ## 3. Các ràng buộc Code First không được vi phạm
 

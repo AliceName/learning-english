@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using EnglishLearning.Api.Authentication;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
@@ -17,6 +18,179 @@ namespace EnglishLearning.Api.Tests;
 
 public sealed class FlashcardTests
 {
+    [Fact]
+    public void Writing_candidates_require_evidence_and_prioritize_distinct_corrections()
+    {
+        const string source = "I wrote freind in my journal. I keep a journal and take notes. I take notes again.";
+        const string sentence = "I wrote freind in my journal.";
+        var edits = new[]
+        {
+            new WritingSuggestion(sentence, "I wrote friend in my journal.",
+                [new("SPELL", "freind", "friend", "Spelling", "vi-edit-templates-v1")], 0, sentence.Length),
+            new WritingSuggestion(sentence, "I wrote partner in my journal.",
+                [new("OTHER", "freind", "partner", "Other", "vi-edit-templates-v1")], 0, sentence.Length),
+            new WritingSuggestion(sentence, "I wrote friend and make progress in my journal.", null, 1, sentence.Length)
+        };
+        var candidates = WritingCardCandidates.Find(source, edits);
+        Assert.Equal(new[] { "friend", "keep a journal", "take notes" }, candidates.Select(c => c.Term));
+        Assert.Equal("correction", candidates[0].Source);
+        Assert.Equal(sentence, candidates[0].Context);
+        Assert.Empty(WritingCardCandidates.Find("A complete sentence with no listed expressions.", []));
+        Assert.Empty(WritingCardCandidates.Find("I take notes-worthy examples.", []));
+    }
+
+    [Fact]
+    public void Writing_candidates_find_phrases_in_a_clean_essay_with_verb_forms_and_one_inserted_word()
+    {
+        const string text = "Last year, I made good progress in English. I feel nervous in front of my classmates.\n"
+            + "I want to improve my time management and manage my time better. I took notes. As a result of this, I passed.";
+        var candidates = WritingCardCandidates.Find(text, []);
+        Assert.Equal(new[] { "make progress", "in front of", "time management", "manage time", "take notes", "as a result of" },
+            candidates.Select(c => c.Term));
+        Assert.Contains("made good progress", candidates[0].Reason);
+        Assert.Equal("Last year, I made good progress in English.", candidates[0].Context);
+        Assert.Empty(WritingCardCandidates.Find("I made a cake and took the bus. The progress bar moved.", []));
+    }
+
+    [Fact]
+    public void Writing_candidates_use_typed_v2_corrections_for_spelling_word_choice_and_prepositions()
+    {
+        const string v2 = "vi-edit-templates-v2";
+        const string text = "It is a beautifull day. It was a big house. I listen music. She go home. We discussed about it. I listen english songs. At weddings, we dance.";
+        WritingSuggestion Edit(string original, string suggestion, WritingExplanation explanation) =>
+            new(original, suggestion, [explanation], text.IndexOf(original, StringComparison.Ordinal), text.IndexOf(original, StringComparison.Ordinal) + original.Length);
+        var edits = new[]
+        {
+            Edit("It is a beautifull day.", "It is a beautiful day.", new("SPELL", "beautifull", "beautiful", "m", v2)),
+            Edit("It was a big house.", "It was a large house.", new("ADJ", "big", "large", "m", v2)),
+            Edit("I listen music.", "I listen to music.", new("PREP", "", "to", "m", v2)),
+            Edit("She go home.", "She goes home.", new("VERB:SVA", "go", "goes", "m", v2)),
+            Edit("We discussed about it.", "We discussed it.", new("PREP", "about", "", "m", v2)),
+            // Real outputs from the 50-essay run: the span carries the next word, or no preposition at all.
+            Edit("I listen english songs.", "I listen to English songs.", new("PREP", "english", "to English", "m", v2)),
+            Edit("At weddings, we dance.", "Weddings, we dance.", new("PREP", "At weddings", "Weddings,", "m", v2)),
+        };
+        var candidates = WritingCardCandidates.Find(text, edits);
+        Assert.Equal(new[] { "beautiful", "large", "listen to" }, candidates.Select(c => c.Term));
+        Assert.All(candidates, c => Assert.Equal("correction", c.Source));
+        Assert.Equal("I listen music.", candidates[2].Context);
+        Assert.Equal("I listen to music.", candidates[2].Example); // the corrected sentence becomes the example
+    }
+
+    [Fact]
+    public void Writing_candidates_ignore_malformed_spans_no_op_edits_and_unsubstantiated_explanations()
+    {
+        const string original = "😀 I wrote freind.";
+        const string proposal = "😀 I wrote friend.";
+        var explanation = new WritingExplanation("SPELL", "freind", "friend", "Spelling", "vi-edit-templates-v1");
+        var valid = new WritingSuggestion(original, proposal, [explanation], 0, original.Length);
+        Assert.Equal("friend", Assert.Single(WritingCardCandidates.Find(original, [valid])).Term);
+        var brokenSurrogate = valid with { Original = original[1..], SourceStart = 1 };
+        var noOp = valid with { Suggestion = original, Explanations = [explanation with { Suggestion = "freind" }] };
+        var noChange = valid with { Suggestion = "😀 I wrote freind yesterday.", Explanations = noOp.Explanations };
+        var invalidExplanation = valid with { Explanations = [explanation with { Original = "frie" }] };
+        Assert.Empty(WritingCardCandidates.Find(original, [brokenSurrogate, noOp, noChange, invalidExplanation]));
+    }
+
+    [Fact]
+    public async Task Writing_import_requires_owned_source_and_deck_and_deduplicates_without_merging_senses()
+    {
+        var database = Guid.NewGuid().ToString();
+        await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder.UseEnvironment("Development")
+            .ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?> {
+                ["Jwt:SigningKey"] = TestJwt.SigningKey, ["ConnectionStrings:DefaultConnection"] = "test-only" }))
+            .ConfigureServices(services => {
+                services.RemoveAll<EnglishLearningDbContext>();
+                services.AddScoped(_ => new EnglishLearningDbContext(new DbContextOptionsBuilder<EnglishLearningDbContext>().UseInMemoryDatabase(database).Options));
+            }));
+        await VerifyWritingImport(factory, "owner@example.test", "other@example.test");
+    }
+
+    internal static async Task VerifyWritingImport(WebApplicationFactory<Program> factory, string ownerEmail, string otherEmail)
+    {
+        using var client = factory.CreateClient();
+        User owner, other;
+        WritingSubmission source, later, separateEssay;
+        FlashcardDeck deck, otherDeck;
+        int legacyCardId;
+        const string text = "I take notes in class, and I keep a journal.";
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
+            owner = new User { Email = ownerEmail, FullName = "Owner", PasswordHash = "test-only", IsActive = true };
+            other = new User { Email = otherEmail, FullName = "Other", PasswordHash = "test-only", IsActive = true };
+            db.Users.AddRange(owner, other); await db.SaveChangesAsync();
+            source = new WritingSubmission { UserId = owner.UserId, OriginalText = text, CefrLevel = "B1",
+                ErrorsJson = """{"cefr":"B1","errors":[],"warnings":[],"practice":{"versionNumber":1,"targetCefr":"B2"}}""" };
+            deck = new FlashcardDeck { UserId = owner.UserId, Title = "Mine" };
+            otherDeck = new FlashcardDeck { UserId = other.UserId, Title = "Other" };
+            db.WritingSubmissions.Add(source); db.FlashcardDecks.AddRange(deck, otherDeck); await db.SaveChangesAsync();
+            later = new WritingSubmission { UserId = owner.UserId, OriginalText = text, CefrLevel = "B1",
+                ErrorsJson = JsonSerializer.Serialize(new { cefr = "B1", practice = new
+                { rootSubmissionId = source.SubmissionId, parentSubmissionId = source.SubmissionId, versionNumber = 2, targetCefr = "C1" } }) };
+            separateEssay = new WritingSubmission { UserId = owner.UserId, OriginalText = "At work, I take notes during every meeting.", CefrLevel = "A2" };
+            db.WritingSubmissions.AddRange(later, separateEssay);
+            var legacy = new Flashcard { DeckId = deck.DeckId, FrontText = "before Writing", BackText = "thẻ cũ" };
+            db.Flashcards.Add(legacy); await db.SaveChangesAsync();
+            legacyCardId = legacy.CardId;
+        }
+        void SignIn(User user) => client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+            factory.Services.GetRequiredService<JwtTokenService>().CreateToken(user).AccessToken);
+        const string api = "/api/v1/flashcards";
+        var suggested = $"{api}/writing/{source.SubmissionId}";
+        var import = $"{api}/decks/{deck.DeckId}/writing/{source.SubmissionId}";
+        var body = new { sourceTerm = "take notes", frontText = "take notes in class", backText = "ghi chép trên lớp", exampleSentence = text };
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync(suggested)).StatusCode);
+        SignIn(other);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync(suggested)).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsJsonAsync(import, body)).StatusCode);
+        SignIn(owner);
+        var suggestions = (await client.GetFromJsonAsync<WritingCardSuggestions>(suggested))!;
+        Assert.Equal(source.SubmissionId, suggestions.SubmissionId);
+        Assert.Equal(1, suggestions.VersionNumber);
+        Assert.Equal("B2", suggestions.TargetCefr);
+        Assert.Equal(2, suggestions.Items.Length);
+        Assert.All(suggestions.Items, candidate => Assert.Equal(text, candidate.Context));
+        var nextSuggestions = (await client.GetFromJsonAsync<WritingCardSuggestions>($"{api}/writing/{later.SubmissionId}"))!;
+        Assert.Equal("C1", nextSuggestions.TargetCefr);
+        Assert.Equal(source.SubmissionId, nextSuggestions.PracticeRootId);
+        Assert.Equal(suggestions.Items, nextSuggestions.Items);
+        Assert.Equal(legacyCardId, Assert.Single((await client.GetFromJsonAsync<DeckDetail>($"{api}/decks/{deck.DeckId}"))!.Cards).CardId);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.PostAsJsonAsync($"{api}/decks/{otherDeck.DeckId}/writing/{source.SubmissionId}", body)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync(import, body with { sourceTerm = "invented" })).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync(import, body with { backText = "" })).StatusCode);
+        var results = await Task.WhenAll(client.PostAsJsonAsync(import, body), client.PostAsJsonAsync(import, body));
+        Assert.Contains(results, result => result.StatusCode == HttpStatusCode.Created);
+        Assert.Contains(results, result => result.StatusCode == HttpStatusCode.OK);
+        var firstSave = (await results[0].Content.ReadFromJsonAsync<WritingCardSave>())!;
+        var saved = firstSave.Card;
+        Assert.Equal(new WritingCardImportSource(source.SubmissionId, 1, "take notes", text), firstSave.ValidatedSource);
+        Assert.Equal(saved.CardId, (await results[1].Content.ReadFromJsonAsync<WritingCardSave>())!.Card.CardId);
+        var otherVersion = await client.PostAsJsonAsync($"{api}/decks/{deck.DeckId}/writing/{later.SubmissionId}", body);
+        var repeated = (await otherVersion.Content.ReadFromJsonAsync<WritingCardSave>())!;
+        Assert.True(repeated.AlreadySaved);
+        Assert.Equal(saved.CardId, repeated.Card.CardId);
+        Assert.Equal(later.SubmissionId, repeated.ValidatedSource!.SubmissionId);
+        Assert.Equal(2, repeated.ValidatedSource.VersionNumber);
+        var fromSeparateEssay = await client.PostAsJsonAsync($"{api}/decks/{deck.DeckId}/writing/{separateEssay.SubmissionId}", body);
+        var separate = (await fromSeparateEssay.Content.ReadFromJsonAsync<WritingCardSave>())!;
+        Assert.True(separate.AlreadySaved);
+        Assert.Equal(saved.CardId, separate.Card.CardId);
+        Assert.Equal(new WritingCardImportSource(separateEssay.SubmissionId, null, "take notes", separateEssay.OriginalText), separate.ValidatedSource);
+        Assert.Equal(HttpStatusCode.Created, (await client.PostAsJsonAsync(import, body with { backText = "ghi biên bản" })).StatusCode);
+        var commonDeck = (await client.GetFromJsonAsync<DeckDetail>($"{api}/decks/{deck.DeckId}"))!;
+        Assert.Equal(3, commonDeck.Cards.Length);
+        Assert.All(commonDeck.Cards, card => Assert.True(card.IsDue));
+        Assert.Equal(HttpStatusCode.OK, (await client.PostAsJsonAsync($"{api}/cards/{saved.CardId}/review",
+            new { rating = 2, expectedUpdatedAt = saved.UpdatedAt })).StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, (await client.DeleteAsync($"{api}/cards/{saved.CardId}")).StatusCode);
+        using var finalScope = factory.Services.CreateScope();
+        var persisted = finalScope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
+        Assert.Equal(text, (await persisted.WritingSubmissions.FindAsync(source.SubmissionId))!.OriginalText);
+        Assert.Null(await persisted.Flashcards.FindAsync(saved.CardId));
+        Assert.NotNull(await persisted.Flashcards.FindAsync(legacyCardId));
+    }
+
     [Fact]
     public void Recall_schedule_advances_resets_and_keeps_ease_bounded()
     {
@@ -98,6 +272,70 @@ public sealed class FlashcardTests
         using (var scope = factory.Services.CreateScope()) { var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>(); (await db.Users.SingleAsync(u => u.UserId == owner.UserId)).IsActive = false; await db.SaveChangesAsync(); }
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/v1/flashcards/decks")).StatusCode);
     }
+    [Fact]
+    public async Task Daily_review_limits_owned_cards_and_serves_overdue_before_new_cards_across_decks()
+    {
+        var database = Guid.NewGuid().ToString();
+        var clock = new StudyClock();
+        await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder.UseEnvironment("Development")
+            .ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?> {
+                ["Jwt:SigningKey"] = TestJwt.SigningKey, ["ConnectionStrings:DefaultConnection"] = "test-only" }))
+            .ConfigureServices(services => {
+                services.RemoveAll<EnglishLearningDbContext>();
+                services.AddScoped(_ => new EnglishLearningDbContext(new DbContextOptionsBuilder<EnglishLearningDbContext>().UseInMemoryDatabase(database).Options));
+                services.RemoveAll<TimeProvider>(); services.AddSingleton<TimeProvider>(clock);
+            }));
+        using var client = factory.CreateClient();
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<EnglishLearningDbContext>();
+        var learner = new User { Email = "learner@example.com", FullName = "Learner", PasswordHash = "test" };
+        var admin = new User { Email = "admin@example.com", FullName = "Admin", PasswordHash = "test", Role = "admin" };
+        var other = new User { Email = "owner@example.com", FullName = "Other", PasswordHash = "test" };
+        db.Users.AddRange(learner, admin, other);
+        await db.SaveChangesAsync();
+
+        var now = clock.GetUtcNow().UtcDateTime;
+        var basic = new FlashcardDeck { UserId = learner.UserId, Title = "Basic", CreatedAt = now, UpdatedAt = now };
+        var travel = new FlashcardDeck { UserId = learner.UserId, Title = "Travel", CreatedAt = now, UpdatedAt = now };
+        var shared = new FlashcardDeck { UserId = admin.UserId, Title = "Shared", CreatedAt = now, UpdatedAt = now };
+        var privateDeck = new FlashcardDeck { UserId = other.UserId, Title = "Private", CreatedAt = now, UpdatedAt = now };
+        db.FlashcardDecks.AddRange(basic, travel, shared, privateDeck);
+        await db.SaveChangesAsync();
+
+        Flashcard AddCard(FlashcardDeck deck, string word, DateTime? nextReviewAt = null, int repetition = 0)
+        {
+            var card = new Flashcard { DeckId = deck.DeckId, FrontText = word, BackText = "Nghĩa", CreatedAt = now,
+                UpdatedAt = now, NextReviewAt = nextReviewAt, Repetition = repetition };
+            db.Flashcards.Add(card);
+            return card;
+        }
+
+        var newCards = Enumerable.Range(1, 10).Select(index => AddCard(basic, $"new {index}")).ToArray();
+        var dueNow = AddCard(basic, "due now", now, 1);
+        var oldest = AddCard(travel, "overdue", now.AddDays(-2), 2);
+        var latest = AddCard(travel, "future", now.AddHours(1), 3);
+        AddCard(shared, "shared due", now.AddDays(-3), 4);
+        AddCard(privateDeck, "private due", now.AddDays(-4), 5);
+        await db.SaveChangesAsync();
+
+        const string dueUrl = "/api/v1/flashcards/review/due";
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync(dueUrl)).StatusCode);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+            factory.Services.GetRequiredService<JwtTokenService>().CreateToken(learner).AccessToken);
+        var batch = (await client.GetFromJsonAsync<DueFlashcard[]>(dueUrl))!;
+        Assert.Equal(new[] { oldest.CardId, dueNow.CardId }.Concat(newCards.Take(8).Select(card => card.CardId)),
+            batch.Select(item => item.Card.CardId));
+        Assert.Equal(travel.Title, batch[0].DeckTitle);
+        Assert.Equal(basic.Title, batch[1].DeckTitle);
+        Assert.All(batch, item => Assert.True(item.Card.IsDue));
+        Assert.DoesNotContain(batch, item => item.Card.CardId == latest.CardId);
+
+        var decks = (await client.GetFromJsonAsync<DeckSummary[]>("/api/v1/flashcards/decks"))!;
+        Assert.Equal(11, decks.Single(deck => deck.DeckId == basic.DeckId).DueCount);
+        Assert.Equal(2, decks.Single(deck => deck.DeckId == travel.DeckId).RecallCount);
+        Assert.Equal(0, decks.Single(deck => deck.DeckId == shared.DeckId).RecallCount);
+    }
+
     private sealed class StudyClock : TimeProvider
     {
         private DateTimeOffset now = DateTimeOffset.UtcNow;

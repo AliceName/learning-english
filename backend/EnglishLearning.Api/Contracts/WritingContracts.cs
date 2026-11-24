@@ -9,6 +9,7 @@ public sealed class SubmitWritingRequest
     [StringLength(100)] public string? TaskId { get; init; }
     [StringLength(64)] public string? TaskVersion { get; init; }
     [Range(1, int.MaxValue)] public int? ParentSubmissionId { get; init; }
+    public Guid? RequestId { get; init; }
     [StringLength(500)]
     public string? Topic { get; init; }
 
@@ -38,24 +39,33 @@ public sealed record WritingFeedbackItem(string Criterion, string Quote, string 
     int? SuggestionIndex = null);
 public sealed record WritingFeedback(string Status, WritingFeedbackItem[] Items, string Message,
     string? ModelId = null, string? ModelSha256 = null, string? PromptVersion = null);
+/// <summary>Prompt relevance (0-5) from the local embedding model; only for library tasks.</summary>
+public sealed record WritingRelevancePoint(string Point, bool Covered, string? Evidence);
+public sealed record WritingRelevance(int Score, bool OffTopic, double TopicSimilarity, int? PointsCovered, int? PointsTotal,
+    WritingRelevancePoint[] Points, string[] Keywords, string ThresholdsVersion, string Model);
 public sealed record WritingAnalysis(string Cefr, string? CorrectedText,
     WritingSuggestion[] Errors, string[] Warnings, WritingProvenance? Provenance = null,
     WritingFeedback? Feedback = null, WritingGecCoverage? GecCoverage = null,
-    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null);
+    WritingTaskSnapshot? Task = null, WritingPractice? Practice = null, WritingRelevance? Relevance = null);
 public sealed record WritingSubmissionResponse(int SubmissionId, string? Topic, string OriginalText,
     string CefrLevel, string? CorrectedText, WritingSuggestion[] Errors, string[] Warnings, DateTime CreatedAt,
     WritingProvenance? Provenance = null, WritingFeedback? Feedback = null,
     WritingGecCoverage? GecCoverage = null, WritingTaskSnapshot? Task = null,
-    int? PracticeRootId = null, int? ParentSubmissionId = null);
+    int? PracticeRootId = null, int? ParentSubmissionId = null, int? VersionNumber = null,
+    int? ParentVersionNumber = null, string? TargetCefr = null, bool TargetRecorded = false,
+    WritingRelevance? Relevance = null);
 
 public sealed record WritingTaskSnapshot(string Id, string Version, string Title, string Prompt,
     string Level, string Genre, string Topic, int MinWords, int MaxWords, string WordMode,
     string[] Requirements, string SourceSha256, string SourcePromptSha256, string ReviewStatus);
 public sealed record WritingTaskCatalogue(WritingTaskSnapshot[] Items, string Version, int SourceCount);
-public sealed record WritingPractice(int? RootSubmissionId, int? ParentSubmissionId);
+public sealed record WritingPractice(int? RootSubmissionId, int? ParentSubmissionId,
+    int? VersionNumber = null, int? ParentVersionNumber = null, string? TargetCefr = null,
+    string? RequestId = null, string? RequestHash = null);
 public sealed record WritingPracticeItem(int PracticeRootId, int LatestSubmissionId, int SubmissionCount,
     string? Topic, string CefrLevel, DateTime CreatedAt);
 public sealed record WritingPractices(WritingPracticeItem[] Items, int? NextBeforeId);
+public sealed record WritingPracticeDeleted(int PracticeRootId, int DeletedSubmissions);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed class WritingPreflightRequest
@@ -74,7 +84,9 @@ public sealed record WritingCapabilities(
     [property: JsonRequired] int? CefrLimit,
     [property: JsonRequired] int? GecInputLimit,
     [property: JsonRequired] int? GecSentenceLimit,
-    [property: JsonRequired] bool Busy);
+    [property: JsonRequired] bool Busy,
+    // Sent by AI services that load the relevance model; older services omit it.
+    bool? RelevanceEnabled = null);
 public sealed record WritingPreflightSentence(
     [property: JsonRequired] int Index, [property: JsonRequired] int Start,
     [property: JsonRequired] int End, [property: JsonRequired] int Tokens, [property: JsonRequired] string Status);
@@ -86,5 +98,6 @@ public sealed record WritingPreflight(
     WritingInputAssessment? InputAssessment = null);
 public sealed record WritingInputAssessment(string Status, string[] Reasons, string[] Warnings, string PolicyVersion);
 public sealed record WritingHistoryItem(int SubmissionId, string? Topic, string CefrLevel,
-    DateTime CreatedAt, string Preview);
+    DateTime CreatedAt, string Preview, int? VersionNumber = null, int? ParentSubmissionId = null,
+    int? ParentVersionNumber = null, string? TargetCefr = null, bool TargetRecorded = false);
 public sealed record WritingHistory(WritingHistoryItem[] Items, int? NextBeforeId);

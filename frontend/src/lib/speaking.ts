@@ -1,5 +1,5 @@
 export type SpeakingPhone = { sourcePhone: string; symbol: string; score: number; startSeconds: number; endSeconds: number; rawScore?: number | null };
-export type SpeakingWord = { index: number; text: string; status: "scored" | "unsupported"; score: number | null; phones: SpeakingPhone[]; reason: string | null };
+export type SpeakingWord = { index: number; text: string; status: "scored" | "unsupported"; score: number | null; phones: SpeakingPhone[]; reason: string | null; feedbackEligible?: boolean | null };
 export type SpeakingInterpretation = { calibrationVersion: string; calibrationMethod: "identity" | "affine" | "isotonic"; practiceThreshold: number; reviewThreshold: number; thresholdFitted: boolean; minimumCoverage: number; feedbackMode: "normal" | "limited_coverage" | "record_again"; evidenceScope: string };
 export type SpeakingAssessment = { status: "scored" | "partial"; modelVersion: string; durationSeconds: number; overallScore: number; coverage: number; referenceTokenCount: number; words: SpeakingWord[]; warnings: string[]; feedback: string; interpretation?: SpeakingInterpretation | null };
 export type SpeakingSegment = { index: number; text: string; startWordIndex: number; wordCount: number };

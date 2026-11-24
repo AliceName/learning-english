@@ -26,7 +26,7 @@ public sealed class SpeakingFlowTests
             builder.UseEnvironment("Development").ConfigureAppConfiguration((_, configuration) =>
                 configuration.AddInMemoryCollection(new Dictionary<string, string?> {
                     ["Jwt:SigningKey"] = TestJwt.SigningKey, ["ConnectionStrings:DefaultConnection"] = "test-only",
-                    ["SpeakingStorage:RootPath"] = root }))
+                    ["SpeakingStorage:RootPath"] = root, ["Cloudinary:Enabled"] = "false" }))
             .ConfigureServices(services => {
                 services.RemoveAll<EnglishLearningDbContext>();
                 services.AddScoped(_ => new EnglishLearningDbContext(new DbContextOptionsBuilder<EnglishLearningDbContext>().UseInMemoryDatabase(databaseName).Options));

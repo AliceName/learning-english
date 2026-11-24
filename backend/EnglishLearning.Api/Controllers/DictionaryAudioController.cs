@@ -47,7 +47,8 @@ public sealed class DictionaryAudioController(DictionaryAudioService audio, IDic
             Response.StatusCode = read.Status;
             Response.ContentLength = read.Length;
             if (read.ContentRange is not null) Response.Headers.ContentRange = read.ContentRange;
-            if (read.Status == 416) { await read.DisposeAsync(); return StatusCode(416); }
+            // EmptyResult: StatusCode(416) would add a ProblemDetails body that breaks the declared Content-Length: 0.
+            if (read.Status == 416) { await read.DisposeAsync(); return new EmptyResult(); }
             return File(read.Body, read.ContentType, enableRangeProcessing: false);
         }
         catch (CloudMediaException error)

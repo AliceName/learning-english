@@ -27,9 +27,11 @@ async function Workspace({ searchParams }: { searchParams: SearchParams }) {
   }
   const form = <WritingForm key={`${session.status === "authenticated" ? session.user.userId : session.status}:${initialResult?.submissionId ?? query.submissionId ?? taskId ?? query.custom ?? "library"}`}
     authenticated={session.status === "authenticated"} unavailable={session.status === "unavailable"}
-    userId={session.status === "authenticated" ? session.user.userId : null} draftBaseId={writingSubmissionId(query.submissionId)}
-    initialResult={initialResult} initialNotice={initialNotice} initialTask={initialTask} draftTaskId={taskId} custom={query.custom === "1"} />;
-  return session.status === "authenticated" ? <MemberShell user={session.user}>{form}</MemberShell>
+    userId={session.status === "authenticated" ? session.user.userId : null}
+    targetLevel={session.status === "authenticated" ? session.user.targetLevel : null}
+    draftBaseId={writingSubmissionId(query.submissionId)} initialResult={initialResult} initialNotice={initialNotice}
+    initialTask={initialTask} draftTaskId={taskId} custom={query.custom === "1"} />;
+  return session.status === "authenticated" ? <MemberShell user={session.user} bookmarks>{form}</MemberShell>
     : <><PublicNavbar />{form}</>;
 }
 

@@ -1,11 +1,11 @@
 using EnglishLearning.Api.Contracts;
+using EnglishLearning.Api.Configuration;
 using EnglishLearning.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using EnglishLearning.Api.Configuration;
-using Microsoft.Extensions.Options;
 using EnglishLearning.Api.Services;
 
 namespace EnglishLearning.Api.Controllers;

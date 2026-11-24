@@ -8,6 +8,7 @@ public sealed class EnglishLearningDbContext(
     DbContextOptions<EnglishLearningDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserLearningDay> UserLearningDays => Set<UserLearningDay>();
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<UserCourse> UserCourses => Set<UserCourse>();
     public DbSet<Lesson> Lessons => Set<Lesson>();
@@ -34,5 +35,10 @@ public sealed class EnglishLearningDbContext(
     {
         EnglishLearningModel.Configure(modelBuilder);
         TranslationPracticeModel.Configure(modelBuilder);
+        var activity = modelBuilder.Entity<UserLearningDay>();
+        activity.ToTable("UserLearningDays", "dbo", table =>
+            table.HasCheckConstraint("CK_UserLearningDays_Kind", "[Kind] BETWEEN 1 AND 8"));
+        activity.HasKey(item => new { item.UserId, item.StudyDate, item.Kind });
+        activity.HasOne<User>().WithMany().HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.NoAction);
     }
 }

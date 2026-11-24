@@ -78,6 +78,18 @@ test("record-again overrides every score with neutral uncertainty instead of rig
   }
 });
 
+test("record-again shows colors for individually supported words and keeps the rest gray", () => {
+  const words = [
+    { ...word(0, 1.9), feedbackEligible: true },
+    { ...word(1, 1.9), feedbackEligible: false },
+    { ...word(2, .9), feedbackEligible: true },
+    { ...word(3, 1.9), feedbackEligible: true, reason: "Chỉ chấm được một phần." },
+  ];
+  const value = assessment(words, { interpretation: { practiceThreshold: 1.1, reviewThreshold: 1.5, feedbackMode: "record_again" } });
+  const colors = sentenceFeedback("playing playing playing playing", value).filter(part => part.feedback);
+  assert.deepEqual(Array.from(colors, part => part.feedback.tone), ["good", "unassessed", "practice", "unassessed"]);
+});
+
 test("missing, unsupported, non-finite or out-of-range scores remain neutral", () => {
   const value = assessment();
   const invalid = [undefined, word(0, 0, "unsupported"), { ...word(0, 1.9), phones: [] }, { ...word(0, 1.9), score: null }];

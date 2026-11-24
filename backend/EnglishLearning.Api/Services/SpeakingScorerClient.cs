@@ -77,6 +77,8 @@ public sealed class SpeakingScorerClient(HttpClient client) : ISpeakingScorer
             var word = result.Words[i];
             if (word is null || word.Index != i || !string.Equals(word.Text, words[i], StringComparison.OrdinalIgnoreCase)
                 || word.Status is not ("scored" or "unsupported") || word.Phones is null || word.Phones.Length > 50) return false;
+            if (word.FeedbackEligible is true && (result.Interpretation?.FeedbackMode != "record_again" ||
+                word.Status != "scored" || !string.IsNullOrWhiteSpace(word.Reason))) return false;
             foreach (var p in word.Phones)
             {
                 if (p is null || string.IsNullOrWhiteSpace(p.Symbol) || p.Symbol.Length > 12 || string.IsNullOrWhiteSpace(p.SourcePhone) || p.SourcePhone.Length > 8

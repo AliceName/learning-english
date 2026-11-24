@@ -17,8 +17,8 @@ public sealed class SchemaModelTests
                 .UseSqlServer("Server=localhost;Database=ModelValidation;Integrated Security=True").Options);
         var schema = ApprovedSchema.Read();
         var entities = context.Model.GetEntityTypes().ToDictionary(entity => entity.GetTableName()!);
-        Assert.Equal(16, schema.Count);
-        Assert.Equal(140, schema.Values.Sum(columns => columns.Count));
+        Assert.Equal(17, schema.Count);
+        Assert.Equal(150, schema.Values.Sum(columns => columns.Count));
         Assert.Equal(schema.Keys.Order(), entities.Keys.Order());
 
         foreach (var (table, columns) in schema)
@@ -49,11 +49,11 @@ public sealed class SchemaModelTests
             }
         }
 
-        Assert.Equal(23, entities.Values.Sum(entity => entity.GetForeignKeys().Count()));
+        Assert.Equal(24, entities.Values.Sum(entity => entity.GetForeignKeys().Count()));
         Assert.Equal(2, entities.Values.Sum(entity => entity.GetForeignKeys().Count(foreignKey => foreignKey.DeleteBehavior == DeleteBehavior.Cascade)));
         Assert.All(entities.Values.SelectMany(entity => entity.GetForeignKeys()), foreignKey =>
             Assert.Contains(foreignKey.DeleteBehavior, new[] { DeleteBehavior.NoAction, DeleteBehavior.Cascade }));
-        Assert.Equal(19, context.GetService<IDesignTimeModel>().Model.GetEntityTypes().Sum(entity => entity.GetCheckConstraints().Count()));
+        Assert.Equal(20, context.GetService<IDesignTimeModel>().Model.GetEntityTypes().Sum(entity => entity.GetCheckConstraints().Count()));
         Assert.Equal(4, entities.Values.Sum(entity => entity.GetKeys().Count(key => !key.IsPrimaryKey())));
     }
 }

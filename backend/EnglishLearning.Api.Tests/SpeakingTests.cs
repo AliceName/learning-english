@@ -48,6 +48,18 @@ public sealed class SpeakingContractTests
     }
 
     [Fact]
+    public void Recording_warning_accepts_word_feedback_only_for_fully_scored_words()
+    {
+        var original = Result();
+        var info = new SpeakingInterpretation("cal1-test", "identity", 1.1, 1.5, true, .8, "record_again", "speechocean762-supported-subset");
+        var supported = original.Words[0] with { FeedbackEligible = true };
+        var result = original with { Words = [supported], Interpretation = info };
+        Assert.True(SpeakingScorerClient.IsValid(result, "We"));
+        Assert.False(SpeakingScorerClient.IsValid(result with { Interpretation = info with { FeedbackMode = "normal" } }, "We"));
+        Assert.False(SpeakingScorerClient.IsValid(result with { Words = [supported with { Reason = "partial" }] }, "We"));
+    }
+
+    [Fact]
     public void Legacy_or_invalid_lesson_content_is_not_exposed_as_practice()
     {
         Assert.Null(SpeakingLessonService.ReadContent("not-json"));

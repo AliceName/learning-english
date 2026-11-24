@@ -2,7 +2,7 @@
 
 Backend ASP.NET Core Web API dùng .NET 9, Controllers và Entity Framework Core cho SQL Server.
 
-Máy mới nên làm theo [quy trình clone và cài đặt ở README gốc](../README.md), trên nhánh **`nga`**. Cần SQL Server của chính bạn, đủ script **001–005**, khóa JWT local và frontend; cấu hình thêm MongoDB, Cloudinary, Gemini hoặc mô hình Python theo tính năng cần dùng. Không có tài khoản, database hay checkpoint riêng của máy phát triển được tải theo Git.
+Máy mới nên làm theo [quy trình clone và cài đặt ở README gốc](../README.md), trên nhánh **`nga`**. Cần SQL Server của chính bạn, đủ script **001–006**, khóa JWT local và frontend; cấu hình thêm MongoDB, Cloudinary, Gemini hoặc mô hình Python theo tính năng cần dùng. Không có tài khoản, database hay checkpoint riêng của máy phát triển được tải theo Git.
 
 ## Chạy ứng dụng
 
@@ -33,8 +33,23 @@ Khóa được lưu ngoài repository tại `%APPDATA%\Microsoft\UserSecrets\464
 - OpenAPI JSON: http://localhost:5000/openapi/v1.json
 - Kiểm tra ứng dụng: `GET http://localhost:5000/api/v1/health`
 - Kiểm tra SQL Server: `GET http://localhost:5000/api/v1/health/database`
+- Kiểm tra MongoDB: `GET http://localhost:5000/api/v1/health/mongodb`
 
 API kiểm tra SQL Server trả `200` khi kết nối thành công và `503` khi thất bại. API ứng dụng không truy vấn CSDL.
+
+## Kết nối MongoDB local trên Dat
+
+API sử dụng `MongoDB.Driver` 3.13.0 và cấu hình `MongoDbSettings`. Giá trị mặc định trong `EnglishLearning.Api/appsettings.json` là `mongodb://localhost:27017`, database `EnglishLearningDB`, collection từ điển `VocabularyEntries`. Máy hiện tại ghi đè URI thành `mongodb://127.0.0.1:27017` trong cấu hình Development local. Có thể ghi đè bằng User Secrets hoặc biến môi trường `MongoDbSettings__ConnectionString`, `MongoDbSettings__DatabaseName`.
+
+`GET /api/v1/health/mongodb` chạy lệnh `ping: 1`, trả `200` khi kết nối được, `503` khi không kết nối được và không trả URI hoặc chi tiết credentials. Client dùng lại qua DI, có giới hạn thời gian và tắt retry writes để tương thích MongoDB standalone local.
+
+Phần từ điển/cache của nhánh `nga` đã được tích hợp cùng Speaking, hồ sơ và Flashcards của Dat. Khởi động API và gọi health không tạo database, collection, validator, index hoặc dữ liệu. Việc cấp phát collection từ điển theo `MONGODB_SCHEMA.md` vẫn là lệnh riêng, không tự chạy khi khởi động. MongoDB local hiện chưa có database ứng dụng có dữ liệu.
+
+### Media khi phát triển trên máy local
+
+`appsettings.Development.json` bật rõ `MediaStorage:EnableDevelopmentLocalStorage=true` để giữ chức năng đọc/tải ảnh và audio khóa học trên máy chưa cấu hình Cloudinary. Chế độ này chỉ hoạt động trong Development và khi `Cloudinary:Enabled=false`; health media báo `local-development`. Nếu bật Cloudinary, media luôn dùng Cloudinary và không tự quay về local khi cloud lỗi. Mặc định ngoài Development vẫn dùng kho Cloudinary theo cấu hình của nhánh nga.
+
+Chế độ local này áp dụng cho media khóa học. Audio từ điển giữ cơ chế Cloudinary của nga; bản ghi Speaking tiếp tục dùng kho riêng có kiểm tra chủ sở hữu. Không chạy migration hoặc di chuyển/xóa media khi gộp code.
 
 ## Cấu hình CSDL
 
@@ -75,7 +90,7 @@ Lệnh tạo collection/validator nếu thiếu; khi collection đã có dữ li
 
 ### Audio từ điển: Wikimedia và cache file
 
-Audio từ điển đã tích hợp Cloudinary qua `IDictionaryAudioStorage`/`CloudinaryDictionaryAudioStorage`. Runtime mặc định chỉ đọc Cloudinary; cache local cũ chỉ được đọc khi chủ động bật `Cloudinary:AllowLegacyReads=true` để rollback. Media khóa học cũng dùng chính sách này qua `IMediaStorage`. Kế hoạch: `../reports/Ke_hoach_Cloudinary_media_2026-10-27.md`.
+Audio từ điển đã tích hợp Cloudinary qua `IDictionaryAudioStorage`/`CloudinaryDictionaryAudioStorage`. Runtime mặc định chỉ đọc Cloudinary; cache local cũ chỉ được đọc khi chủ động bật `Cloudinary:AllowLegacyReads=true` để rollback. Media khóa học trong chế độ cloud cũng dùng chính sách này qua `IMediaStorage`; chế độ Development local được mô tả ở trên. Kế hoạch: `../reports/Ke_hoach_Cloudinary_media_2026-10-27.md`.
 
 Sau khi hiển thị nghĩa, frontend tự gọi `POST /api/v1/vocabulary/audio/prepare` với `{ "word": "match", "entry": 0, "phonetic": 1 }`. Backend đọc nguồn từ mục từ đã lưu, ưu tiên **cache → file gốc Wikimedia qua imageinfo → URL audio nguồn trong allowlist**. Request chỉ nhận từ/chỉ số, không nhận URL tùy ý. Các từ cũ trong MongoDB cũng dùng luồng này, không cần tải lại nghĩa hoặc sửa schema.
 
@@ -118,7 +133,7 @@ Smoke test gọi nguồn thật chỉ chạy khi bật `ENGLISHLEARNING_RUN_LIVE
 
 ## Cloudinary — bước 1: cấu hình môi trường và smoke test
 
-Đã có SDK `CloudinaryDotNet` **1.29.3**, options/validation và smoke command riêng. `Cloudinary:Enabled=false` mặc định trong cấu hình mẫu; bật bằng User Secrets để cache audio từ điển và upload media khóa học trên Cloudinary. Khi tắt, chỉ đọc file legacy nếu chủ động bật `AllowLegacyReads=true`; không tạo file local mới. Không cần sửa schema SQL/MongoDB hoặc khởi động thêm backend để chạy smoke.
+Đã có SDK `CloudinaryDotNet` **1.29.3**, options/validation và smoke command riêng. `Cloudinary:Enabled=false` mặc định trong cấu hình mẫu; bật bằng User Secrets để cache audio từ điển và upload media khóa học trên Cloudinary. Trong chế độ cloud, khi tắt chỉ đọc file legacy nếu chủ động bật `AllowLegacyReads=true`; không tạo file local mới. Media khóa học có chế độ Development local riêng được chọn rõ khi khởi động. Không cần sửa schema SQL/MongoDB hoặc khởi động thêm backend để chạy smoke.
 
 ### Tạo tài khoản và lấy credentials
 
@@ -236,7 +251,7 @@ Hỗ trợ `-PlanPath` và `-BackupRoot`; dùng cùng backup root khi Apply/Veri
 
 ## Cloudinary — bước 6: cloud-only và retention
 
-Runtime mặc định `Cloudinary:AllowLegacyReads=false`: không resolve legacy reader hoặc đọc local khi cloud miss/lỗi. `Enabled=false` không tự quay về disk. Option legacy chỉ bật có chủ đích cho rollback; new writes vẫn lên cloud hoặc báo unavailable. Không cần tạo `App_Data` cho đường cloud-only.
+Trong chế độ cloud, runtime mặc định `Cloudinary:AllowLegacyReads=false`: không resolve legacy reader hoặc đọc local khi cloud miss/lỗi. `Enabled=false` không tự quay về disk. Option legacy chỉ bật có chủ đích cho rollback; new writes vẫn lên cloud hoặc báo unavailable. Không cần tạo `App_Data` cho đường cloud-only. Chế độ Development local được chọn riêng lúc khởi động, không phải fallback khi cloud lỗi.
 
 Khởi động lại backend hiện tại bằng mã mới rồi chạy `.\backend\scripts\Test-CloudinaryCutover.ps1`. GET `/api/v1/health/media` no-store chỉ trả revision/mode/target hash/instance ID/start time, không secret. Tool xác nhận API đã restart sau migration, hai process đọc đồng thời và một process mới sau restart; không listener mới. Chrome kiểm tra decode/Blob/offline bằng backup khớp hash, native workers đọc cloud thật. Report mô tả rõ fixture harness, không giả logged-in end-to-end.
 
@@ -288,7 +303,7 @@ sqlcmd -S 'MSI\MSSQLSERVER01' -d master -E -C -b -f 65001 -i backend/database/00
 
 Thay server bằng instance SQL Server của bạn. Baseline này có đúng 13 bảng nghiệp vụ, 121 cột, 20 FK, 14 CHECK và 4 UNIQUE; chỉ `Lessons.CourseId` và `Flashcards.DeckId` có xóa cascade. Chưa dùng EF migrations history; không chạy `database update` hoặc `EnsureCreated` để khởi tạo lại CSDL này.
 
-**Baseline 001 chưa phải toàn bộ schema của bản hiện tại.** Khi tạo database mới, chạy tiếp lần lượt 002 → 003 → 004 → 005 theo [README gốc](../README.md#4-tạo-database-và-áp-dụng-schema-sql). Bản đã có 001–004 cần chạy bổ sung `database/005_link_flashcard_decks_to_courses.sql` để dùng bộ thẻ khóa học. Script 005 thêm `FlashcardDecks.CourseId INT NULL` cùng FK, giữ dữ liệu cũ; API không chạy script này khi khởi động.
+Khi tạo database mới, chạy tiếp lần lượt 002 → 003 → 004 → 005 → 006 theo [README gốc](../README.md#4-tạo-database-và-áp-dụng-schema-sql). Với database hiện có, áp dụng các script còn thiếu trước khi khởi động API. Script 006 tạo `UserLearningDays` để ghi theo ngày Việt Nam và loại hoạt động. Dữ liệu học cũ không được hồi tố. API yêu cầu bảng này khi tải hồ sơ và không tự chạy script lúc khởi động.
 
 ### Role và tài khoản admin mặc định
 
@@ -370,14 +385,20 @@ Frontend chờ backend tối đa 120 giây trong Development để có thời gi
 
 ## Kiểm thử
 
-Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Để chạy thêm kiểm thử API và đối chiếu schema trên SQL Server, tạo CSDL ở trên trước rồi đặt biến môi trường:
+Kiểm thử unit/model có thể chạy bằng `dotnet test EnglishLearningSystem.sln --configuration Release`. Các test SQL cần một catalog **riêng, dùng dữ liệu giả và đã được phê duyệt cho phép ghi**. Catalog ứng dụng `EnglishLearningDB` và các database hệ thống bị chặn ở test harness. Danh tính chạy test chỉ nên có quyền trong catalog kiểm thử. Tên catalog xác nhận và catalog trong chuỗi kết nối phải khớp.
+
+1. Nhờ người quản trị xác nhận instance, catalog, tài khoản và quyền ghi trước khi chuẩn bị. Dùng danh tính triển khai riêng để chuẩn bị schema từ các SQL script đã duyệt `001` đến `004`. `001` chứa `USE master`, `CREATE DATABASE` và `USE EnglishLearningDB`, nên `sqlcmd -d` một mình không đổi được đích của script. Với catalog riêng, dùng bản sao để review phần định tuyến sang catalog kiểm thử đã tạo, hoặc nhờ DBA áp dụng phần DDL vào đúng catalog. Không sửa script gốc, nạp dữ liệu thật hay chạy EF `database update` lên database đã khởi tạo bằng SQL scripts.
+2. Cấp danh tính test quyền kết nối, đọc metadata và `SELECT`, `INSERT`, `UPDATE`, `DELETE` trên các bảng mà suite dùng, cùng quyền lấy `sp_getapplock` trong catalog đó. Nhóm Writing/Flashcards không cần quyền tạo database hay DDL. Một số nhóm khác có bài test DDL, ví dụ Grammar, nên dùng riêng một database dùng một lần và duyệt quyền tương ứng nếu chạy toàn bộ suite SQL.
+3. Kiểm tra instance và `DB_NAME()` bằng đúng danh tính test rồi chạy trong một phiên PowerShell riêng. Ví dụ dưới đây dùng Windows Authentication, tên database minh họa và chỉ chạy nhóm trong phạm vi Writing/Flashcards.
 
 ```powershell
-$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=MSI\MSSQLSERVER01;Database=EnglishLearningDB;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;Connect Timeout=5'
-dotnet test EnglishLearningSystem.sln --configuration Release
+$env:ENGLISHLEARNING_TEST_DATABASE = 'LinguaAI_Writing_Scratch'
+$env:ENGLISHLEARNING_TEST_CONNECTION_STRING = 'Server=<approved-test-instance>;Database=LinguaAI_Writing_Scratch;Integrated Security=True;Encrypt=True;Connect Timeout=5'
+dotnet test backend/EnglishLearning.Api.Tests/EnglishLearning.Api.Tests.csproj --configuration Release --filter 'FullyQualifiedName~Writing|FullyQualifiedName~Flashcard'
+Remove-Item Env:ENGLISHLEARNING_TEST_CONNECTION_STRING, Env:ENGLISHLEARNING_TEST_DATABASE
 ```
 
-Các kiểm thử tích hợp chạy trong transaction riêng và rollback sau mỗi test. Nếu không đặt biến môi trường, chúng được báo skipped; các kiểm thử còn lại vẫn chạy bình thường.
+Nhóm SQL cũ dùng transaction ngoài và rollback khi kết thúc. `WritingStudioSqlTests` dùng connection riêng theo request để kiểm transaction, khóa, lưu metadata `practice`, tạo nhánh từ phiên bản cũ, retry, phân quyền và trùng thẻ. Nhóm này dùng kết quả AI synthetic, ghi thật vào database kiểm thử và dọn theo hai email ngẫu nhiên của lượt chạy sau khi các request kết thúc. Nếu tiến trình bị dừng giữa chừng, đối chiếu email fixture hoặc để DBA loại bỏ catalog dùng một lần đã xác nhận. Khi thiếu biến chuỗi kết nối, SQL tests báo skipped. Nếu đã đặt chuỗi kết nối nhưng thiếu xác nhận catalog hoặc catalog sai, fixture dừng trước khi kết nối.
 
 ## Admin tạo và biên soạn khóa học
 
@@ -403,7 +424,7 @@ Tạo khóa học luôn đặt SourceType=system, CreatedBy từ JWT, IsPublishe
 
 IPA được sinh offline từ 125.927 mục từ Mỹ của ipa-dict/CMUdict, đóng gói trong assembly (không cần Python/API key hoặc kết nối Internet). API trả `ipa`, `accent: en-US`, `unknownWords`, `alternatives`. Mặc định chọn cách đọc đầu tiên; đây là phiên âm theo từ, chưa phân biệt nghĩa/ngữ cảnh hoặc nối âm cả câu. Từ chưa biết, số và ký hiệu không hỗ trợ trả `ipa: null` và danh sách cần kiểm tra, không trả câu phiên âm bị thiếu. Khi lưu Speaking, backend tự điền IPA còn trống nếu tra được toàn bộ câu; giữ nguyên bản sửa thủ công. IPA tối đa 8000 ký tự trong JSON hiện có, không thay đổi schema. Nguồn dữ liệu, checksum và giấy phép ở `EnglishLearning.Api/Resources/Pronunciation/README.md`. Tests bao gồm câu thường, contractions, từ ghép, nhiều cách đọc, input bounds, unknown words, quyền admin bị thu hồi và lưu/tải lại IPA.
 
-Upload ảnh tối đa 5 MB (JPG/PNG/WebP), audio tối đa 25 MB (MP3/WAV/AAC/M4A). Server kiểm tra extension/MIME/magic và số byte thực tế, đổi tên GUID, ghi Cloudinary `authenticated` cùng manifest; không dùng tên tệp client làm đường dẫn. `App_Data/uploads` và `MediaStorage:RootPath` chỉ còn cho đường đọc legacy; giữ dữ liệu cũ tới bước migrate/verify và khoảng rollback. Tệp nháp chỉ admin đọc; học viên chỉ đọc tham chiếu media thực của khóa học đã publish mà họ có quyền xem. Chưa tự xóa asset runtime không còn được dùng; orphan phải đối soát theo kế hoạch.
+Upload ảnh tối đa 5 MB (JPG/PNG/WebP), audio tối đa 25 MB (MP3/WAV/AAC/M4A). Trong chế độ cloud, server kiểm tra extension/MIME/magic và số byte thực tế, đổi tên GUID, ghi Cloudinary `authenticated` cùng manifest; không dùng tên tệp client làm đường dẫn. `App_Data/uploads` và `MediaStorage:RootPath` dùng cho đường đọc legacy trong chế độ cloud, hoặc kho local khi chọn rõ chế độ Development local. Giữ dữ liệu cũ tới bước migrate/verify và khoảng rollback. Tệp nháp chỉ admin đọc; học viên chỉ đọc tham chiếu media thực của khóa học đã publish mà họ có quyền xem. Chưa tự xóa asset runtime không còn được dùng; orphan phải đối soát theo kế hoạch.
 
 Kiểm thử `CourseAuthoringTests.cs` bao gồm quyền Admin, role bị thu hồi, nháp → Speaking/Listening → xuất bản, validation, truy cập bài thuộc khóa khác, định dạng upload và HTTP Range. Tất cả dữ liệu SQL dùng transaction rollback; tệp kiểm thử nằm trong thư mục temp riêng và được dọn sau test.
 
@@ -498,6 +519,12 @@ dotnet build EnglishLearningSystem.sln
 
 Câu trắc nghiệm Reading/Listening/Grammar (và chọn phần sai của Grammar) có 2–4 lựa chọn không trống, mỗi lựa chọn tối đa 500 ký tự và một correctOptionIndex hợp lệ. API từ chối ít hơn 2 hoặc nhiều hơn 4 lựa chọn. Không thay đổi schema database.
 
+## Speaking cho học viên
+
+Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
+
+Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.
+
 ## Học viên luyện nghe và nộp bài
 
 Tiền tố: `/api/v1/courses/{courseId}/lessons/{lessonId}/listening`. Các endpoint yêu cầu JWT và tài khoản còn hoạt động, khóa học đã xuất bản, bài Listening active thuộc đúng khóa. Khóa cá nhân chỉ chủ sở hữu được truy cập, cùng quy tắc catalog/media. Kết quả luôn lọc theo user trong JWT.
@@ -534,12 +561,19 @@ Khóa ẩn vắng khỏi catalog/summary, chi tiết và luồng luyện nghe tr
 
 `PublishedCourseManagementTests.cs` kiểm tra sửa đủ năm loại bài, cập nhật ứng viên bị từ chối không ghi dở, thêm bài, tắt bài cuối cùng, ẩn/hiện, quyền admin/user và phạm vi system, catalog/practice/media, giữ bài nộp/đăng ký học và phiên bản bài nghe. Các dữ liệu SQL trong kiểm thử được rollback.
 
-## Speaking cho học viên
+## Phiên đăng nhập tự gia hạn
 
-Đã bổ sung `/api/v1/speaking` để đọc bài luyện, nhận WAV và chỉ số câu, gọi dịch vụ Python, lưu `SpeakingAttempts` và xem lịch sử/audio riêng. Câu mẫu được lấy ở server từ nội dung bài đã xuất bản. Dùng schema hiện có; JSON chi tiết nằm trong `PhonemeScores`. Không chạy migration khi khởi động.
+Frontend sử dụng refresh cookie HttpOnly để gia hạn access token trong phiên làm việc. Backend cung cấp POST `/api/v1/auth/refresh` và `/api/v1/auth/logout`; logout thu hồi cả access token gắn cùng session. Phiên có hạn tuyệt đối theo `Jwt:SessionHours` (mặc định 8 giờ) và hết hạn khi không có hoạt động quá 3 giờ. Refresh có cửa sổ ngắn để các tab đồng thời nhận cùng token thay thế.
+
+Session hiện được giữ trong bộ nhớ của tiến trình API, không tạo bảng hoặc collection mới. Khởi động lại API sẽ yêu cầu các phiên refresh cũ đăng nhập lại. Các test HTTP in-memory và test proxy kiểm tra gia hạn, cookie HttpOnly, từ chối token không hợp lệ, thu hồi khi logout và xử lý mất kết nối.
+
+## Luyện nói tự do
+
+Luyện nói tự do có endpoint POST `/api/v1/speaking/free/score`; không tạo SpeakingAttempts cho các câu tự tạo. Chấm theo bài học vẫn giữ lịch sử SQL và quyền sở hữu bản ghi như trước. Model Python nhận thêm ngữ cảnh câu để chọn cách đọc của từ read, có hậu tố modelVersion readctx1 riêng.
 
 Dịch vụ mô hình mặc định ở `http://127.0.0.1:8001`, cấu hình bằng `SpeakingAi:BaseUrl`. Hướng dẫn chi tiết và giới hạn đánh giá ở `../SPEAKING.md`.
-# Từ điển song ngữ và đọc nghĩa tiếng Việt
+
+## Từ điển song ngữ và đọc nghĩa tiếng Việt
 
 Endpoint `GET /api/v1/vocabulary?word=book&direction=en-vi` hỗ trợ ba giá trị direction `en-en`, `en-vi`, `vi-en`. Khi thiếu direction, mặc định `en-en`. Request cần tài khoản đang hoạt động. Dữ liệu cache song ngữ được lưu vào hai collection riêng, nguồn từ `https://dict.minhqnd.com/` và giữ metadata nguồn ở từng nghĩa.
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction } from "@/lib/learning-activity";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Icon from "@/components/site-icon";
 import { audioTime } from "@/lib/listening";
@@ -49,6 +51,7 @@ export default function ListeningPlayer({ url, title, enabled, position, seek, o
       const node = event.currentTarget;
       if (Number.isFinite(node.duration)) { setDuration(node.duration); onDuration(node.duration); node.currentTime = Math.min(initialPosition.current, Math.max(0, node.duration - 0.1)); }
     }} onCanPlay={() => { setReady(true); setError(""); }} onTimeUpdate={event => { const value = event.currentTarget.currentTime; setCurrent(value); save(value); }}
+      onPlaying={() => { if (enabled) void recordLearningInteraction("listening"); }}
       onPlay={event => {
         document.querySelectorAll<HTMLMediaElement>("audio,video").forEach(other => { if (other !== event.currentTarget) other.pause(); });
         setPlaying(true);

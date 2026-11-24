@@ -67,7 +67,7 @@ export default function CourseFlashcards({ data, account, isAdmin, initialLesson
     setIndex(value => Math.max(0, Math.min(preview.cards.length - 1, value + change))); setFlipped(false);
   }
   if (invalid) return <main id="main-content" className={styles.page}><p role="alert">Phiên đăng nhập đã thay đổi. Hãy đăng nhập lại để tiếp tục.</p><Link href="/login">Đăng nhập</Link></main>;
-  if (opened) return <FlashcardsWorkspace initialDecks={decks} account={account} isAdmin={isAdmin}
+  if (opened) return <FlashcardsWorkspace initialDecks={decks} initialDetail={null} linkedCardId={null} account={account} isAdmin={isAdmin}
     course={{ courseId: vocabulary.courseId, title: vocabulary.courseTitle }} initialDeckId={opened.deckId} createOnOpen={opened.create}
     onReturn={() => { setOpened(null); void refresh(); }} />;
 
@@ -81,7 +81,7 @@ export default function CourseFlashcards({ data, account, isAdmin, initialLesson
     {error && <p className={styles.error} role="alert">{error}</p>}
     {preview && <section className={`${styles.preview} ${studyStyles.page}`} aria-label="Xem trước bộ thẻ Reading">
       <div className={styles.previewHeader}><div><span className={styles.badge}>TỪ BÀI READING</span><h2 ref={previewHeading} tabIndex={-1}>{preview.title}</h2></div><button type="button" className={styles.secondary} aria-label="Đóng xem trước bộ thẻ" onClick={() => { setPreview(null); window.speechSynthesis?.cancel(); }}><Icon name="close" /></button></div>
-      <StudyCard key={`${preview.lessonId}:${index}`} card={preview.cards[index]} difficultyLevel={preview.difficultyLevel} flipped={flipped} onFlip={setFlipped} busy={busy} flipRef={flipRef}
+      <StudyCard key={`${preview.lessonId}:${index}`} card={preview.cards[index]} difficultyLevel={preview.difficultyLevel} flipOnDoubleClick flipped={flipped} onFlip={setFlipped} busy={busy} flipRef={flipRef}
         onPrevious={index > 0 ? () => nextCard(-1) : undefined} onNext={index < preview.cards.length - 1 ? () => nextCard(1) : undefined} />
       <div className={styles.previewFooter}><div className={styles.actions}><button type="button" className={styles.secondary} disabled={index === 0 || busy} onClick={() => nextCard(-1)}>← Thẻ trước</button><span>{index + 1}/{preview.cards.length}</span><button type="button" className={styles.secondary} disabled={index === preview.cards.length - 1 || busy} onClick={() => nextCard(1)}>Thẻ tiếp →</button></div><button type="button" disabled={busy || savedUnavailable} className={styles.primary} onClick={() => void copyReading(preview)}><Icon name="plus" />{busy ? "Đang tạo bộ thẻ…" : isAdmin ? "Tạo bộ thẻ từ Reading" : "Lưu bộ thẻ để ôn"}</button></div>
       <p className={styles.hint}>Thẻ hiển thị từ vựng đã biên soạn trong bài đọc. Lưu thành bộ riêng để thêm thẻ và dùng lịch ôn.</p>

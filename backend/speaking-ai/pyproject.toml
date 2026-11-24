@@ -1,0 +1,33 @@
+[project]
+name = "lewa-speaking"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "accelerate==1.10.1",
+    "cmudict==1.1.1",
+    "espeakng-loader==0.2.4",
+    "fastapi==0.148.0",
+    "huggingface-hub==0.36.2",
+    "numpy==2.2.6",
+    "phonemizer==3.3.0",
+    "python-multipart==0.0.32",
+    "PyYAML==6.0.3",
+    "scipy==1.16.3",
+    "soundfile==0.13.1",
+    "torch==2.8.0+cpu",
+    "transformers==4.57.1",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.vercel]
+entrypoint = "vercel_app:app"
+
+[tool.vercel.scripts]
+build = "python prepare_vercel.py"

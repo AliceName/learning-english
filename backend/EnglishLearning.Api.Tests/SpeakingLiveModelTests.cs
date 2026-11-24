@@ -33,7 +33,7 @@ public sealed class SpeakingLiveModelTests
         await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
             builder.UseEnvironment("Development").ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?> {
                 ["Jwt:SigningKey"] = TestJwt.SigningKey, ["ConnectionStrings:DefaultConnection"] = "test-only",
-                ["SpeakingStorage:RootPath"] = root, ["SpeakingAi:BaseUrl"] = "http://127.0.0.1:8001" }))
+                ["SpeakingStorage:RootPath"] = root, ["Cloudinary:Enabled"] = "false", ["SpeakingAi:BaseUrl"] = "http://127.0.0.1:8001" }))
             .ConfigureServices(services => {
                 services.RemoveAll<EnglishLearningDbContext>();
                 services.AddScoped(_ => new EnglishLearningDbContext(new DbContextOptionsBuilder<EnglishLearningDbContext>().UseInMemoryDatabase(database).Options));

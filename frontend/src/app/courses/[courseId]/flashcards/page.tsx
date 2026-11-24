@@ -20,7 +20,7 @@ async function Content({ params, searchParams }: Props) {
   if (results?.some(result => result.status === "not_found")) notFound();
   const [vocabulary, decks] = results ?? [];
   const { lesson } = await searchParams;
-  return <MemberShell user={session.status === "authenticated" ? session.user : undefined}>
+  return <MemberShell user={session.status === "authenticated" ? session.user : undefined} bookmarks>
     {session.status === "authenticated" && vocabulary?.status === "ok"
       ? <CourseFlashcards key={`${session.user.userId}:${courseId}`} data={{ vocabulary: vocabulary.data, decks: decks?.status === "ok" ? decks.data : null }} account={`${session.user.userId}:${session.user.createdAt}`} isAdmin={false} initialLessonId={lesson && /^[1-9]\d*$/.test(lesson) ? Number(lesson) : undefined} />
       : <main id="main-content"><h1>Chưa tải được bộ thẻ khóa học</h1><p>Vui lòng thử lại sau.</p><Link href={href}>Thử lại</Link></main>}

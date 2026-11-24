@@ -1,5 +1,7 @@
 "use client";
 
+import { recordLearningInteraction } from "@/lib/learning-activity";
+
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -105,6 +107,7 @@ export default function DictionaryPanel({ open, opening, onClose }: { open: bool
       if (!response.ok) { setError(body?.title ?? "Chưa thể tra từ. Vui lòng thử lại."); return; }
       if (!Array.isArray(body?.entries) || !body.entries.length) throw new Error("Invalid dictionary response");
       setResult(body as VocabularyResponse);
+      void recordLearningInteraction("vocabulary");
     } catch {
       if (!controller.signal.aborted && id === requestId.current) setError("Kết nối bị gián đoạn hoặc quá thời gian chờ. Vui lòng thử lại.");
     } finally { if (id === requestId.current) setPending(false); }

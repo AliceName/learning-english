@@ -11,7 +11,7 @@ export function feedbackThresholds(assessment: SpeakingAssessment) {
 }
 
 export function wordFeedback(word: SpeakingWord | undefined, assessment: SpeakingAssessment): WordFeedback {
-  if (feedbackMode(assessment) === "record_again")
+  if (feedbackMode(assessment) === "record_again" && (word?.feedbackEligible !== true || word.reason?.trim()))
     return { tone: "unassessed", label: "Cần ghi âm lại", description: "Bản ghi chưa ổn định; chưa kết luận từ này đọc đúng hay sai.", partial: false };
   if (!word || word.status !== "scored" || word.score === null || !Number.isFinite(word.score) || word.score < 0 || word.score > 2 ||
     !word.phones.length || word.phones.some(phone => !Number.isFinite(phone.score) || phone.score < 0 || phone.score > 2))

@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import Icon, { type SiteIconName } from "@/components/site-icon";
-import { loadSentences, saveSentence, sentenceKey, type PracticeResult, type PracticeSentence } from "@/lib/free-speaking-history";
+import { linkedPracticeSentence, loadSentences, saveSentence, sentenceKey, type PracticeResult, type PracticeSentence } from "@/lib/free-speaking-history";
 import { feedbackMode, sentenceFeedback, wordFeedback } from "@/lib/pronunciation-feedback";
 import FreeSpeakingDialog, { playSample } from "./free-speaking-dialog";
 import { PronunciationLegend, pronunciationToneClasses } from "./pronunciation-feedback";
@@ -22,7 +23,7 @@ const filters = [
   { id: "review", label: "Nên nghe lại", icon: "wave" },
   { id: "good", label: "Đạt chuẩn", icon: "check" },
   { id: "excellent", label: "Xuất sắc", icon: "star" },
-  { id: "saved", label: "Đã lưu sổ tay", icon: "bookmark" },
+  { id: "saved", label: "Đã đánh dấu", icon: "bookmark" },
 ] as const;
 type Filter = typeof filters[number]["id"];
 type Sort = "newest" | "lowest" | "highest";
@@ -67,7 +68,15 @@ export default function FreeSpeaking({ account }: { account: string }) {
 
   useEffect(() => {
     let active = true;
-    loadSentences(account).then(data => { if (active) setHistory(data); }, () => {
+    const linkedId = linkedPracticeSentence(window.location.hash);
+    loadSentences(account).then(data => {
+      if (!active) return;
+      setHistory(data);
+      if (!linkedId) return;
+      const sentence = data.find(item => item.id === linkedId);
+      if (sentence) setDialog({ sentence, showResult: Boolean(sentence.result) });
+      else setNotice("Chưa tìm thấy câu luyện nói này của bạn trên trình duyệt hiện tại.");
+    }, () => {
       if (!active) return;
       setHistory([]);
       setNotice("Chưa mở được lịch sử trên trình duyệt. Bạn vẫn có thể luyện nói trong phiên này.");
@@ -151,8 +160,12 @@ export default function FreeSpeaking({ account }: { account: string }) {
       setNotice("Chưa lưu được vào trình duyệt. Thay đổi này chỉ có trong phiên hiện tại.");
       updated = { ...sentence, ...changes };
     }
-    setHistory(previous => [updated, ...(previous ?? []).filter(item => item.id !== updated.id)]);
+    updateHistory(updated);
     return updated;
+  }
+
+  function updateHistory(updated: PracticeSentence) {
+    setHistory(previous => [updated, ...(previous ?? []).filter(item => item.id !== updated.id)]);
   }
 
   function create(text: string) {
@@ -170,7 +183,9 @@ export default function FreeSpeaking({ account }: { account: string }) {
   async function toggleSaved(sentence: PracticeSentence) {
     if (saving !== null) return;
     setSaving(sentence.id);
-    try { await persist(sentence, { saved: !sentence.saved }); }
+    setNotice("");
+    try { updateHistory(await saveSentence(sentence, { saved: !sentence.saved, bookmarkNote: null })); }
+    catch { setNotice("Chưa lưu được thay đổi dấu trang trên trình duyệt. Vui lòng thử lại."); }
     finally { setSaving(null); }
   }
 
@@ -216,7 +231,10 @@ export default function FreeSpeaking({ account }: { account: string }) {
 
     <section aria-labelledby="speaking-history">
       <div className={styles.toolbar}>
-        <h2 id="speaking-history" ref={listTitle} tabIndex={-1}>Lịch sử câu luyện nói</h2>
+        <div className={styles.historyHeading}>
+          <h2 id="speaking-history" ref={listTitle} tabIndex={-1}>Lịch sử câu luyện nói</h2>
+          <Link href="/bookmarks" prefetch={false} className={styles.secondary}><Icon name="bookmark" /> Xem dấu trang</Link>
+        </div>
         <div className={styles.searchRow}>
           <label className={styles.search}><Icon name="search" /><input type="search" value={query} aria-label="Tìm trong các câu luyện nói" placeholder="Tìm từ vựng hoặc câu đã luyện…"
             onChange={event => { stopAudio(); setQuery(event.target.value); setPage(1); }} /></label>
@@ -261,9 +279,9 @@ export default function FreeSpeaking({ account }: { account: string }) {
               </button>}
               <button onClick={() => { stopAudio(); playSample(sentence.text, setNotice); }}><Icon name="wave" /> Nghe giọng mẫu</button>
               {assessment && <button onClick={() => openDialog({ sentence, showResult: true })}><Icon name="sparkles" /> Xem chi tiết</button>}
-              <button className={styles.bookmark} aria-label={sentence.saved ? "Bỏ lưu sổ tay" : "Lưu vào sổ tay"} aria-pressed={sentence.saved}
-                title={sentence.saved ? "Bỏ lưu sổ tay" : "Lưu vào sổ tay"} disabled={saving !== null} onClick={() => void toggleSaved(sentence)}>
-                <Icon name="bookmark" />
+              <button type="button" className={styles.bookmark} aria-label={"Đánh dấu câu " + sentence.text} aria-pressed={sentence.saved}
+                title={sentence.saved ? "Bỏ dấu trang" : "Đánh dấu"} disabled={saving !== null} onClick={() => void toggleSaved(sentence)}>
+                <Icon name="bookmark" /> {sentence.saved ? "Đã đánh dấu" : "Đánh dấu"}
               </button>
               <button className={styles.primary} onClick={() => openDialog({ sentence })}><Icon name="mic" />
                 {band === "priority" ? "Luyện lại ngay" : assessment ? "Luyện lại" : "Bắt đầu luyện"}
@@ -279,7 +297,7 @@ export default function FreeSpeaking({ account }: { account: string }) {
           <button disabled={currentPage >= totalPages} aria-label="Trang sau" onClick={() => { stopAudio(); setPage(currentPage + 1); }}>›</button>
         </nav>
       </div>}
-      <p className={styles.storageNote}>Lịch sử trên trình duyệt này lưu lần chấm gần nhất của mỗi câu.</p>
+      <p className={styles.storageNote}>Mỗi câu lưu lần chấm gần nhất. Bạn có thể mở các câu đã đánh dấu trong Dấu trang trên trình duyệt này.</p>
     </section>
     {dialog && <FreeSpeakingDialog initialSentence={dialog.sentence} showResult={dialog.showResult} onCreate={create}
       onScore={saveResult} onClose={() => setDialog(null)} />}

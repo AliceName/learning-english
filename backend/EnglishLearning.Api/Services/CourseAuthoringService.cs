@@ -1,4 +1,5 @@
 using System.Text.Json;
+using EnglishLearning.Api.Authentication;
 using EnglishLearning.Api.Contracts;
 using EnglishLearning.Api.Data;
 using EnglishLearning.Api.Entities;
@@ -10,6 +11,9 @@ public sealed class AuthoringException(int status, string message) : Exception(m
 {
     public int Status { get; } = status;
 }
+
+/// <summary>A deleted course and the Speaking recordings the caller removes once the transaction has committed.</summary>
+public sealed record CourseDeletion(AdminCourseDeleted Course, IReadOnlyList<string> RecordingUrls);
 
 public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, IMediaStorage media, IpaTranscriber transcriber)
 {
@@ -109,6 +113,42 @@ public sealed class CourseAuthoringService(EnglishLearningDbContext dbContext, I
             await dbContext.SaveChangesAsync(ct);
         }
         return await GetAsync(id, ct);
+    }
+
+    /// <summary>
+    /// Deletes a hidden system course that no learner has used. Admin test data on it (results, attempts,
+    /// course decks) goes with it; any learner data blocks deletion, so the course can only be hidden.
+    /// Foreign keys to courses and lessons are NO ACTION, so dependents are removed before the course;
+    /// lessons are removed explicitly with the course, and flashcards by the deck cascade.
+    /// </summary>
+    public async Task<CourseDeletion> DeleteAsync(int id, CancellationToken ct)
+    {
+        var course = await CourseAsync(id, ct);
+        if (course.IsPublished) throw new AuthoringException(409, "Hãy ẩn khóa học trước khi xóa.");
+        var lessonRows = await dbContext.Lessons.Where(item => item.CourseId == id).ToListAsync(ct);
+        var lessons = lessonRows.Select(item => item.LessonId).ToList();
+        var admins = await dbContext.Users.Where(item => item.Role == UserRoles.Admin).Select(item => item.UserId).ToListAsync(ct);
+        var enrolments = await dbContext.UserCourses.Where(item => item.CourseId == id).ToListAsync(ct);
+        var progress = await dbContext.Set<LearningProgress>().Where(item => item.CourseId == id).ToListAsync(ct);
+        var results = await dbContext.ExerciseResults.Where(item => lessons.Contains(item.LessonId)).ToListAsync(ct);
+        var attempts = await dbContext.SpeakingAttempts.Where(item => lessons.Contains(item.LessonId)).ToListAsync(ct);
+        var essays = await dbContext.WritingSubmissions.Where(item => item.LessonId != null && lessons.Contains(item.LessonId.Value)).ToListAsync(ct);
+        var errors = await dbContext.ErrorLogs.Where(item => item.LessonId != null && lessons.Contains(item.LessonId.Value)).ToListAsync(ct);
+        var decks = await dbContext.FlashcardDecks.Where(item => item.CourseId == id).ToListAsync(ct);
+        var owners = enrolments.Select(item => item.UserId).Concat(progress.Select(item => item.UserId)).Concat(results.Select(item => item.UserId))
+            .Concat(attempts.Select(item => item.UserId)).Concat(essays.Select(item => item.UserId)).Concat(errors.Select(item => item.UserId))
+            .Concat(decks.Select(item => item.UserId));
+        if (owners.Any(owner => !admins.Contains(owner)))
+            throw new AuthoringException(409, "Khóa học đã có học viên học hoặc lưu bộ thẻ nên không thể xóa. Bạn vẫn có thể ẩn khóa học.");
+        dbContext.RemoveRange(enrolments); dbContext.RemoveRange(progress); dbContext.RemoveRange(results);
+        dbContext.RemoveRange(attempts); dbContext.RemoveRange(essays); dbContext.RemoveRange(errors); dbContext.RemoveRange(decks);
+        await dbContext.SaveChangesAsync(ct);
+        dbContext.RemoveRange(lessonRows);
+        dbContext.Courses.Remove(course);
+        await dbContext.SaveChangesAsync(ct);
+        // Audio is not deleted here: the caller's transaction may still roll back.
+        return new CourseDeletion(new AdminCourseDeleted(id, course.Title),
+            attempts.Select(item => item.AudioUrl).Where(url => url != "").ToList());
     }
 
     public async Task<AdminCourseResponse> PublishAsync(int id, CancellationToken ct)

@@ -21,7 +21,7 @@ async function LessonPage({ params }: PageProps<"/courses/[courseId]/lessons/[le
   const response = session.status === "authenticated" ? await getListeningLesson(Number(courseId), Number(lessonId)) : null;
   if (response?.status === "anonymous") redirect(login);
   if (response?.status === "not_found") notFound();
-  return <MemberShell user={session.status === "authenticated" ? session.user : undefined}>
+  return <MemberShell user={session.status === "authenticated" ? session.user : undefined} bookmarks={response?.status === "ok"}>
     {session.status === "authenticated" && response?.status === "ok" ? <ListeningPractice
       key={`${session.user.userId}:${courseId}:${lessonId}:${response.data.contentVersion}`} userId={session.user.userId} lesson={response.data} />
       : <main id="main-content" tabIndex={-1} className={styles.page}><section className={styles.card}>

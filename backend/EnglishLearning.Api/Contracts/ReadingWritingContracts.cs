@@ -46,7 +46,7 @@ public sealed class ReadingQuestion : IValidatableObject
     [StringLength(2000)] public string? Explanation { get; init; }
     [StringLength(1000)] public string? Reference { get; init; }
     [Required, RegularExpression("^(skimming|scanning|inference|vocabulary)$")] public string Focus { get; init; } = "scanning";
-    [Range(typeof(decimal), "0.1", "10")] public decimal Points { get; init; } = 1;
+    [Range(typeof(decimal), "0.1", "10", ParseLimitsInInvariantCulture = true)] public decimal Points { get; init; } = 1;
     [Required, MaxLength(8)] public MatchingPair[] Pairs { get; init; } = [];
     public IEnumerable<ValidationResult> Validate(ValidationContext context)
     {

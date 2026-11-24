@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace EnglishLearning.Api.Contracts;
 
@@ -16,7 +17,8 @@ public sealed class ScoreFreeSpeakingRequest
     [Required] public IFormFile File { get; init; } = null!;
 }
 public sealed record SpeakingPhoneResult(string SourcePhone, string Symbol, double Score, double StartSeconds, double EndSeconds, double? RawScore = null);
-public sealed record SpeakingWordResult(int Index, string Text, string Status, double? Score, SpeakingPhoneResult[] Phones, string? Reason);
+public sealed record SpeakingWordResult(int Index, string Text, string Status, double? Score, SpeakingPhoneResult[] Phones, string? Reason,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] bool? FeedbackEligible = null);
 public sealed record SpeakingAssessment(string Status, string ModelVersion, double DurationSeconds, double OverallScore,
     double Coverage, int ReferenceTokenCount, SpeakingWordResult[] Words, string[] Warnings, string Feedback, SpeakingInterpretation? Interpretation = null);
 public sealed record SpeakingInterpretation(string CalibrationVersion, string CalibrationMethod, double PracticeThreshold,

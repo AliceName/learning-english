@@ -7,10 +7,6 @@ namespace EnglishLearning.Api.Services;
 
 public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
 {
-    // Uploaded courses belong to their creator, even when published.
-    private IQueryable<Course> VisibleCourses(int userId) => dbContext.Courses.AsNoTracking()
-        .Where(course => course.IsPublished && (course.SourceType == "system" || course.CreatedBy == userId));
-
     public async Task<IReadOnlyList<FeaturedCourse>> FeaturedAsync(CancellationToken cancellationToken)
     {
         var courses = await dbContext.Courses.AsNoTracking()
@@ -38,7 +34,7 @@ public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
 
     public async Task<CourseListResponse> ListAsync(int userId, CourseListQuery query, CancellationToken cancellationToken)
     {
-        var visible = VisibleCourses(userId);
+        var visible = dbContext.VisibleCourses(userId);
         var membership = dbContext.UserCourses.AsNoTracking().Where(item => item.UserId == userId);
         var summary = await visible.GroupBy(_ => 1).Select(group => new CourseSummary(
             group.Count(),
@@ -96,7 +92,7 @@ public sealed class CourseCatalogService(EnglishLearningDbContext dbContext)
 
     public async Task<CourseDetailResponse?> GetAsync(int userId, int courseId, CancellationToken cancellationToken)
     {
-        var course = await VisibleCourses(userId).SingleOrDefaultAsync(item => item.CourseId == courseId, cancellationToken);
+        var course = await dbContext.VisibleCourses(userId).SingleOrDefaultAsync(item => item.CourseId == courseId, cancellationToken);
         if (course is null) return null;
         var lessons = await dbContext.Lessons.AsNoTracking().Where(item => item.CourseId == courseId && item.IsActive)
             .OrderBy(item => item.OrderIndex).ThenBy(item => item.LessonId)

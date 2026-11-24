@@ -83,10 +83,12 @@ public sealed class MediaController(IMediaStorage storage, EnglishLearningDbCont
             if (read.EnableRangeProcessing) return File(read.Body, read.ContentType, enableRangeProcessing: true);
             Response.StatusCode = read.Status; Response.ContentLength = read.Length;
             if (read.ContentRange is not null) Response.Headers.ContentRange = read.ContentRange;
-            if (read.Status == 416) { await read.DisposeAsync(); return StatusCode(416); }
+            // EmptyResult: StatusCode(416) would add a ProblemDetails body that breaks the declared Content-Length: 0.
+            if (read.Status == 416) { await read.DisposeAsync(); return new EmptyResult(); }
             return File(read.Body, read.ContentType, enableRangeProcessing: false);
         }
         catch (CloudMediaException error) { return CloudProblem(error); }
+        catch (AuthoringException error) { return Problem(statusCode: error.Status, title: error.Message); }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { return StatusCode(499); }
         catch (Exception error) when (error is SqlException or IOException or OperationCanceledException)
         {

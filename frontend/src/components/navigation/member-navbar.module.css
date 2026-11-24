@@ -27,7 +27,7 @@
 .target { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #426c55; background: #e9f2ed; padding: 9px 12px; border-radius: 10px; white-space: nowrap; text-decoration: none; }
 .target svg { width: 16px; height: 16px; }
 .target strong { margin-left: 5px; }
-.streak { display: flex; align-items: center; gap: 5px; background: #fff0d7; padding: 7px 11px; border-radius: 20px; color: #a86b18; font-size: 12px; white-space: nowrap; }
+.streak { display: flex; align-items: center; gap: 5px; background: #fff0d7; padding: 7px 11px; border-radius: 20px; color: #865207; font-size: 12px; white-space: nowrap; text-decoration: none; }
 .streak svg { width: 18px; height: 18px; }
 .divider { height: 28px; width: 1px; background: #e2e4ee; }
 .profile { display: flex; align-items: center; gap: 12px; text-decoration: none; min-width: 0; color: #171e31; }
